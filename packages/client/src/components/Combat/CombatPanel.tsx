@@ -1,5 +1,6 @@
 import React from 'react'
 import { DiceDisplay } from './DiceDisplay'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import type { CombatScenario, GameState } from '@engine/types.js'
 import { getWoundThresholdV2 } from '@engine/turn-machine-v2.js'
 
@@ -9,6 +10,8 @@ interface CombatPanelProps {
 }
 
 export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) => {
+  const { isMobile } = useIsMobile()
+
   if (!combat || !gameState) return null
 
   const attacker = gameState.figures.find(f => f.id === combat.attackerId)
@@ -24,12 +27,14 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: '500px',
+    width: isMobile ? 'calc(100vw - 32px)' : '500px',
+    maxWidth: isMobile ? '500px' : undefined,
     maxHeight: '80vh',
     backgroundColor: 'rgba(19, 19, 32, 0.98)',
     border: '3px solid #4a9eff',
     borderRadius: '12px',
-    padding: '24px',
+    padding: isMobile ? '16px' : '24px',
+    paddingBottom: isMobile ? 'calc(16px + var(--safe-bottom))' : '24px',
     zIndex: 200,
     color: '#ffffff',
     backdropFilter: 'blur(8px)',
@@ -38,8 +43,8 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
   }
 
   const sectionStyle: React.CSSProperties = {
-    marginBottom: '20px',
-    paddingBottom: '20px',
+    marginBottom: isMobile ? '12px' : '20px',
+    paddingBottom: isMobile ? '12px' : '20px',
     borderBottom: '1px solid #333355',
   }
 
@@ -85,7 +90,7 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
 
   return (
     <div style={containerStyle}>
-      <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px', color: '#ffd700' }}>
+      <div style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 'bold', marginBottom: isMobile ? '12px' : '16px', color: '#ffd700' }}>
         COMBAT RESOLUTION
       </div>
 
@@ -231,7 +236,7 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
       )}
 
       <button
-        style={{ ...buttonStyle('primary'), marginTop: '0' }}
+        style={{ ...buttonStyle('primary'), marginTop: '0', ...(isMobile ? { width: '100%' } : {}) }}
         onClick={() => {}}
       >
         Continue
