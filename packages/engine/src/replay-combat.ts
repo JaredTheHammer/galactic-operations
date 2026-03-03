@@ -69,6 +69,12 @@ export interface ReplayFigureSnapshot {
   isWounded: boolean;
   isDefeated: boolean;
   conditions: string[];
+  /** Resolved portrait ID (figure override -> hero/NPC default). */
+  portraitId?: string;
+  /** Physical base size for token sizing. */
+  baseSize?: string;
+  /** Silhouette hint inferred from NPC keywords (e.g. 'droid', 'vehicle'). */
+  silhouetteHint?: string;
 }
 
 /** A single frame in the replay timeline */
@@ -124,22 +130,46 @@ class ReplayRecorder {
   }
 
   private snapshotFigures(): ReplayFigureSnapshot[] {
-    return this.gs.figures.map(f => ({
-      id: f.id,
-      entityId: f.entityId,
-      entityType: f.entityType,
-      name: getFigureName(f, this.gs),
-      position: { x: f.position.x, y: f.position.y },
-      playerId: f.playerId,
-      side: this.figureSideMap.get(f.id) ?? 'A',
-      woundsCurrent: f.woundsCurrent,
-      woundThreshold: f.entityType === 'npc'
-        ? (this.gameData.npcProfiles[f.entityId]?.woundThreshold ?? 4)
-        : 10, // heroes have variable thresholds, we'll compute later
-      isWounded: f.isWounded,
-      isDefeated: f.isDefeated,
-      conditions: [...f.conditions],
-    }));
+    return this.gs.figures.map(f => {
+      // Resolve portrait ID: figure override -> hero/NPC default
+      let portraitId = f.portraitId;
+      let baseSize = f.baseSize;
+      let silhouetteHint: string | undefined;
+
+      if (f.entityType === 'hero') {
+        const hero = this.gs.heroes?.[f.entityId];
+        if (!portraitId && hero?.portraitId) portraitId = hero.portraitId;
+        if (!baseSize && hero?.baseSize) baseSize = hero.baseSize;
+      } else {
+        const npc = this.gameData.npcProfiles[f.entityId];
+        if (!portraitId && npc?.defaultPortraitId) portraitId = npc.defaultPortraitId;
+        if (!baseSize && npc?.baseSize) baseSize = npc.baseSize;
+        // Infer silhouette hint from NPC keywords
+        if (npc?.keywords && npc.keywords.length > 0) {
+          silhouetteHint = npc.keywords[0]; // primary keyword as hint
+        }
+      }
+
+      return {
+        id: f.id,
+        entityId: f.entityId,
+        entityType: f.entityType,
+        name: getFigureName(f, this.gs),
+        position: { x: f.position.x, y: f.position.y },
+        playerId: f.playerId,
+        side: this.figureSideMap.get(f.id) ?? 'A',
+        woundsCurrent: f.woundsCurrent,
+        woundThreshold: f.entityType === 'npc'
+          ? (this.gameData.npcProfiles[f.entityId]?.woundThreshold ?? 4)
+          : 10,
+        isWounded: f.isWounded,
+        isDefeated: f.isDefeated,
+        conditions: [...f.conditions],
+        portraitId,
+        baseSize,
+        silhouetteHint,
+      };
+    });
   }
 
   recordPhase(phaseLabel: string): void {

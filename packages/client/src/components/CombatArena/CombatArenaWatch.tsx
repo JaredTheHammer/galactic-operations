@@ -12,6 +12,10 @@ import type { CombatReplay, ReplayFigureSnapshot, ReplayFrame } from '../../../.
 import type { GridCoordinate, Tile } from '../../../../engine/src/types.js'
 import { useReplayPlayer, type ReplaySpeed } from './useReplayPlayer'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { usePortraitStore } from '../../store/portrait-store'
+import { getThumbnail } from '../../services'
+import type { SilhouetteType } from '../../types/portrait'
+import { drawSilhouetteOnContext, inferSilhouetteType } from '../../canvas/silhouettes'
 
 // ============================================================================
 // CONSTANTS
@@ -43,12 +47,25 @@ const SIDE_COLORS = {
 // CANVAS RENDERER
 // ============================================================================
 
+/** Infer a silhouette type from a replay figure's hint and entity type. */
+function inferReplaySilhouette(fig: ReplayFigureSnapshot): SilhouetteType {
+  // Use the baked silhouette hint keyword if available
+  if (fig.silhouetteHint) {
+    const inferred = inferSilhouetteType([fig.silhouetteHint])
+    if (inferred !== 'infantry') return inferred
+  }
+  // Heroes default to officer
+  if (fig.entityType === 'hero') return 'officer'
+  return 'infantry'
+}
+
 function renderFrame(
   ctx: CanvasRenderingContext2D,
   frame: ReplayFrame,
   tiles: Tile[][],
   arenaWidth: number,
   arenaHeight: number,
+  portraitBitmaps?: Map<string, ImageBitmap>,
 ) {
   const w = arenaWidth * TILE_SIZE
   const h = arenaHeight * TILE_SIZE
@@ -112,26 +129,47 @@ function renderFrame(
 
     const cx = fig.position.x * TILE_SIZE + TILE_SIZE / 2
     const cy = fig.position.y * TILE_SIZE + TILE_SIZE / 2
-    const r = TILE_SIZE * 0.35
+    const r = TILE_SIZE * 0.38
     const colors = SIDE_COLORS[fig.side]
     const isActive = fig.id === frame.executingFigureId
+    const tokenDiam = r * 2
 
-    // Figure circle
+    // Check for portrait bitmap
+    const bitmap = fig.portraitId ? portraitBitmaps?.get(fig.portraitId) : undefined
+
+    if (bitmap) {
+      // Draw portrait clipped to circle
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(cx, cy, r, 0, Math.PI * 2)
+      ctx.clip()
+      ctx.drawImage(bitmap, cx - r, cy - r, tokenDiam, tokenDiam)
+      ctx.restore()
+    } else {
+      // Silhouette fallback at this small size (32px tiles)
+      const silType = inferReplaySilhouette(fig)
+      const silFill = fig.side === 'A' ? '#aa3333' : '#33aa33'
+      const silBg = '#1a1a2e'
+      drawSilhouetteOnContext(ctx, silType, cx, cy, tokenDiam, silFill, silBg)
+    }
+
+    // Side-colored border ring
     ctx.beginPath()
     ctx.arc(cx, cy, r, 0, Math.PI * 2)
-    ctx.fillStyle = isActive ? '#ffd700' : colors.fill
-    ctx.fill()
-    ctx.strokeStyle = isActive ? '#fff' : colors.stroke
-    ctx.lineWidth = isActive ? 2 : 1
+    ctx.strokeStyle = isActive ? '#ffd700' : colors.stroke
+    ctx.lineWidth = isActive ? 2.5 : 1.5
     ctx.stroke()
 
-    // Entity type indicator: H for hero, letter for NPC
-    const label = fig.entityType === 'hero' ? 'H' : fig.name.charAt(0).toUpperCase()
-    ctx.fillStyle = '#000'
-    ctx.font = 'bold 10px monospace'
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(label, cx, cy)
+    // Active glow
+    if (isActive) {
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(cx, cy, r + 2, 0, Math.PI * 2)
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)'
+      ctx.lineWidth = 2
+      ctx.stroke()
+      ctx.restore()
+    }
 
     // Health bar
     const barW = TILE_SIZE * 0.7
@@ -186,14 +224,52 @@ export function CombatArenaWatch({ replay, onBack, onRunAgain }: CombatArenaWatc
   const canvasWidth = replay.arenaWidth * TILE_SIZE
   const canvasHeight = replay.arenaHeight * TILE_SIZE
 
+  // Hydrate portrait store on mount (lazy, idempotent)
+  useEffect(() => {
+    usePortraitStore.getState().hydrate()
+  }, [])
+
+  // Collect all unique portrait IDs from the replay and warm the cache
+  useEffect(() => {
+    const store = usePortraitStore.getState()
+    const portraitIds = new Set<string>()
+
+    for (const frame of replay.frames) {
+      for (const fig of frame.figures) {
+        if (fig.portraitId) portraitIds.add(fig.portraitId)
+      }
+    }
+
+    // Fire-and-forget: load missing thumbnails from IndexedDB into LRU cache
+    for (const pid of portraitIds) {
+      if (!getThumbnail(pid)) {
+        store.ensureThumbnail(pid).catch(() => {
+          // Silently ignore -- portrait not in library
+        })
+      }
+    }
+  }, [replay])
+
+  // Collect portrait bitmaps synchronously from cache for current frame
+  const portraitBitmaps = useMemo(() => {
+    const bitmaps = new Map<string, ImageBitmap>()
+    for (const fig of state.currentFrame.figures) {
+      if (fig.portraitId && !fig.isDefeated) {
+        const cached = getThumbnail(fig.portraitId)
+        if (cached) bitmaps.set(fig.portraitId, cached)
+      }
+    }
+    return bitmaps
+  }, [state.currentFrame])
+
   // Draw frame
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    renderFrame(ctx, state.currentFrame, replay.tiles, replay.arenaWidth, replay.arenaHeight)
-  }, [state.currentFrame, replay])
+    renderFrame(ctx, state.currentFrame, replay.tiles, replay.arenaWidth, replay.arenaHeight, portraitBitmaps)
+  }, [state.currentFrame, replay, portraitBitmaps])
 
   // Auto-scroll combat log
   useEffect(() => {
