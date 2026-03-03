@@ -9,6 +9,7 @@
 import React, { useState, useCallback } from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useAITurn, type AISpeed } from '../../hooks/useAITurn'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import { TacticalGrid } from '../../canvas/TacticalGrid'
 import { TurnIndicator } from '../HUD/TurnIndicator'
 import { MoraleTracker } from '../HUD/MoraleTracker'
@@ -42,6 +43,7 @@ function getTimestamp(): string {
 // ============================================================================
 
 export const AIBattle: React.FC = () => {
+  const { isMobile } = useIsMobile()
   const { gameState, combatLog } = useGameStore()
   const {
     aiState,
@@ -55,8 +57,9 @@ export const AIBattle: React.FC = () => {
     getBattleLogSummary,
   } = useAITurn()
 
-  const [showReasoningPanel, setShowReasoningPanel] = useState(true)
+  const [showReasoningPanel, setShowReasoningPanel] = useState(!isMobile)
   const [showStats, setShowStats] = useState(false)
+  const [showCombatLog, setShowCombatLog] = useState(false)
 
   const handleExportJSON = useCallback(() => {
     const json = getBattleLogJSON()
@@ -87,6 +90,205 @@ export const AIBattle: React.FC = () => {
   const isGameOver = gameState.turnPhase === 'GameOver'
   const hasLog = battleLog !== null
 
+  // ── Mobile layout ──────────────────────────────────────────────────
+  if (isMobile) {
+    return (
+      <div style={containerStyle}>
+        {/* Compact top bar */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 12px',
+          paddingTop: 'calc(8px + var(--safe-top))',
+          backgroundColor: '#131320',
+          borderBottom: '1px solid #333355',
+          gap: '8px',
+          flexShrink: 0,
+          zIndex: 100,
+        }}>
+          <TurnIndicator gameState={gameState} compact hideControls />
+          <MoraleTracker gameState={gameState} compact />
+          <ThreatTracker gameState={gameState} compact />
+          <ObjectiveProgress gameState={gameState} compact />
+          <button
+            onClick={() => setShowCombatLog(true)}
+            style={{
+              background: 'none',
+              border: '1px solid #333355',
+              color: '#ffd700',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '10px',
+              cursor: 'pointer',
+              minWidth: '32px',
+              minHeight: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            LOG
+          </button>
+        </div>
+
+        {/* Tactical Grid fills remaining space */}
+        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          <TacticalGrid gameState={gameState} />
+        </div>
+
+        {/* AI Control Bar - full-width bottom strip */}
+        <div style={{
+          ...controlBarStyle,
+          position: 'fixed' as const,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          minWidth: 'auto',
+          borderRadius: 0,
+          borderTop: '1px solid #333355',
+          borderLeft: 'none',
+          borderRight: 'none',
+          borderBottom: 'none',
+          padding: '8px 12px',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <div style={{ ...controlBarTitleStyle, marginBottom: 0, fontSize: '9px' }}>AI BATTLE</div>
+            <div style={stateIndicatorStyle}>
+              <span style={stateDotStyle(aiState.phase)} />
+              {aiState.phase === 'thinking' && 'Thinking...'}
+              {aiState.phase === 'executing' && 'Executing...'}
+              {aiState.phase === 'phase-advance' && 'Advancing...'}
+              {aiState.phase === 'idle' && (isGameOver ? 'Over' : 'Idle')}
+            </div>
+          </div>
+          <div style={controlRowStyle}>
+            <button
+              style={controlBtnStyle(isPaused)}
+              onClick={togglePause}
+            >
+              {isPaused ? '▶ PLAY' : '⏸ PAUSE'}
+            </button>
+            {(['slow', 'normal', 'fast', 'instant'] as AISpeed[]).map(s => (
+              <button
+                key={s}
+                style={speedBtnStyle(speed === s)}
+                onClick={() => setSpeed(s)}
+              >
+                {s.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <div style={{ ...controlRowStyle, marginTop: '4px' }}>
+            <button
+              style={toggleBtnStyle(showReasoningPanel)}
+              onClick={() => setShowReasoningPanel(p => !p)}
+            >
+              {showReasoningPanel ? 'HIDE' : 'SHOW'} AI
+            </button>
+            <button
+              style={toggleBtnStyle(showStats)}
+              onClick={() => setShowStats(p => !p)}
+            >
+              {showStats ? 'HIDE' : 'SHOW'} STATS
+            </button>
+          </div>
+        </div>
+
+        {/* AI Reasoning Panel - full-width overlay on mobile */}
+        {showReasoningPanel && (
+          <div style={{
+            ...reasoningPanelStyle,
+            position: 'fixed' as const,
+            top: 'auto',
+            bottom: '110px',
+            right: '8px',
+            left: '8px',
+            width: 'auto',
+            maxHeight: '40vh',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <div style={reasoningTitleStyle}>AI REASONING</div>
+              <button
+                onClick={() => setShowReasoningPanel(false)}
+                style={{ background: 'none', border: '1px solid #555', color: '#ccc', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', cursor: 'pointer' }}
+              >
+                X
+              </button>
+            </div>
+            {aiState.activeFigure && (
+              <div style={currentDecisionStyle}>
+                <div style={figureNameStyle}>
+                  {aiState.activeFigure.entityId.replace(/-/g, ' ').toUpperCase()}
+                  <span style={archetypeTagStyle}>{aiState.archetypeName}</span>
+                </div>
+                <div style={reasoningTextStyle}>{aiState.reasoning}</div>
+                {aiState.decision?.matchedRule && (
+                  <div style={ruleStyle}>
+                    Rule #{aiState.decision.matchedRule.rank}: {aiState.decision.matchedRule.cardText}
+                  </div>
+                )}
+              </div>
+            )}
+            <div style={decisionLogStyle}>
+              {aiState.decisionLog.slice(0, 8).map((entry, i) => (
+                <div key={`${entry.figureId}-${entry.timestamp}`} style={logEntryStyle(i === 0)}>
+                  <div style={logFigureStyle}>{entry.entityId.replace(/-/g, ' ')}</div>
+                  <div style={logReasoningStyle}>{entry.reasoning}</div>
+                  <div style={logActionsStyle}>
+                    {entry.actions.map((a, j) => (
+                      <span key={j} style={logActionTagStyle}>{a}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {aiState.decisionLog.length === 0 && (
+                <div style={{ color: '#666', fontStyle: 'italic', fontSize: '11px' }}>
+                  No decisions yet. Game is starting...
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Stats Panel - full-width overlay on mobile */}
+        {showStats && (
+          <div style={{
+            position: 'fixed' as const,
+            bottom: '110px',
+            left: '8px',
+            right: '8px',
+            backgroundColor: 'rgba(10, 10, 20, 0.95)',
+            border: '1px solid #333355',
+            borderRadius: '8px',
+            padding: '12px',
+            zIndex: 200,
+          }}>
+            <StatsPanel gameState={gameState} inline />
+          </div>
+        )}
+
+        {/* Combat Log overlay */}
+        <CombatLog messages={combatLog} compact visible={showCombatLog} onClose={() => setShowCombatLog(false)} />
+
+        <NotificationCenter />
+
+        {/* Game Over Overlay */}
+        {isGameOver && (
+          <GameOverOverlay
+            gameState={gameState}
+            hasLog={hasLog}
+            onExportJSON={handleExportJSON}
+            onExportSummary={handleExportSummary}
+            onCopyJSON={handleCopyJSON}
+            isMobile
+          />
+        )}
+      </div>
+    )
+  }
+
+  // ── Desktop layout (unchanged) ─────────────────────────────────────
   return (
     <div style={containerStyle}>
       {/* Tactical Grid (main canvas) */}
@@ -221,7 +423,7 @@ export const AIBattle: React.FC = () => {
 // SUB-COMPONENTS
 // ============================================================================
 
-const StatsPanel: React.FC<{ gameState: any }> = ({ gameState }) => {
+const StatsPanel: React.FC<{ gameState: any; inline?: boolean }> = ({ gameState, inline }) => {
   const imperials = gameState.figures.filter((f: any) => {
     const p = gameState.players.find((p: any) => p.id === f.playerId)
     return p?.role === 'Imperial'
@@ -248,7 +450,7 @@ const StatsPanel: React.FC<{ gameState: any }> = ({ gameState }) => {
   const opWoundsMax = opAlive.reduce((sum: number, f: any) => sum + getWT(f), 0)
 
   return (
-    <div style={statsPanelStyle}>
+    <div style={inline ? {} : statsPanelStyle}>
       <div style={statsTitleStyle}>BATTLE STATS</div>
       <div style={statsRowStyle}>
         <span style={{ color: '#ff4444' }}>IMPERIAL</span>
@@ -290,6 +492,7 @@ interface GameOverProps {
   onExportJSON: () => void
   onExportSummary: () => void
   onCopyJSON: () => void
+  isMobile?: boolean
 }
 
 const GameOverOverlay: React.FC<GameOverProps> = ({
@@ -298,6 +501,7 @@ const GameOverOverlay: React.FC<GameOverProps> = ({
   onExportJSON,
   onExportSummary,
   onCopyJSON,
+  isMobile = false,
 }) => {
   const [copied, setCopied] = useState(false)
 
@@ -314,14 +518,23 @@ const GameOverOverlay: React.FC<GameOverProps> = ({
   return (
     <>
       <div style={gameOverBackdropStyle} />
-      <div style={gameOverPanelStyle}>
-        <div style={{ fontSize: '14px', color: '#999', textTransform: 'uppercase', marginBottom: '8px' }}>
+      <div style={{
+        ...gameOverPanelStyle,
+        ...(isMobile ? {
+          padding: '24px 20px',
+          left: '16px',
+          right: '16px',
+          width: 'auto',
+          transform: 'translateY(-50%)',
+        } : {}),
+      }}>
+        <div style={{ fontSize: isMobile ? '12px' : '14px', color: '#999', textTransform: 'uppercase', marginBottom: '8px' }}>
           Game Over
         </div>
-        <div style={{ fontSize: '36px', fontWeight: 'bold', color: winnerColor, marginBottom: '12px' }}>
+        <div style={{ fontSize: isMobile ? '24px' : '36px', fontWeight: 'bold', color: winnerColor, marginBottom: '12px' }}>
           {gameState.winner === 'Draw' ? 'DRAW' : `${gameState.winner?.toUpperCase()} WINS`}
         </div>
-        <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '24px' }}>
+        <div style={{ fontSize: isMobile ? '12px' : '13px', color: '#ccc', marginBottom: isMobile ? '16px' : '24px' }}>
           {gameState.victoryCondition ?? 'Game concluded'}
         </div>
         <div style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>
@@ -332,14 +545,26 @@ const GameOverOverlay: React.FC<GameOverProps> = ({
         {hasLog && (
           <div style={exportContainerStyle}>
             <div style={exportLabelStyle}>BATTLE LOG</div>
-            <div style={exportRowStyle}>
-              <button style={exportBtnStyle('#4a9eff')} onClick={onExportJSON}>
+            <div style={{
+              ...exportRowStyle,
+              ...(isMobile ? { flexDirection: 'column' as const, gap: '6px' } : {}),
+            }}>
+              <button style={{
+                ...exportBtnStyle('#4a9eff'),
+                ...(isMobile ? { width: '100%' } : {}),
+              }} onClick={onExportJSON}>
                 SAVE JSON
               </button>
-              <button style={exportBtnStyle('#44ff44')} onClick={onExportSummary}>
+              <button style={{
+                ...exportBtnStyle('#44ff44'),
+                ...(isMobile ? { width: '100%' } : {}),
+              }} onClick={onExportSummary}>
                 SAVE SUMMARY
               </button>
-              <button style={exportBtnStyle(copied ? '#ffd700' : '#ff8844')} onClick={handleCopy}>
+              <button style={{
+                ...exportBtnStyle(copied ? '#ffd700' : '#ff8844'),
+                ...(isMobile ? { width: '100%' } : {}),
+              }} onClick={handleCopy}>
                 {copied ? 'COPIED!' : 'COPY JSON'}
               </button>
             </div>
@@ -347,7 +572,7 @@ const GameOverOverlay: React.FC<GameOverProps> = ({
         )}
 
         <button
-          style={newGameBtnStyle}
+          style={{ ...newGameBtnStyle, ...(isMobile ? { width: '100%' } : {}) }}
           onClick={() => useGameStore.setState({ showSetup: true, isInitialized: false, gameState: null })}
         >
           NEW GAME

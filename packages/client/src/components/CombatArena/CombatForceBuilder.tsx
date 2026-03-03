@@ -13,6 +13,7 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import type { CombatScenarioConfig } from '../../../../engine/src/ai/combat-simulator.js'
 import type { NPCProfile, GameData } from '../../../../engine/src/types.js'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 // ============================================================================
 // TYPES
@@ -91,6 +92,8 @@ export interface CombatForceBuilderProps {
 }
 
 export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatForceBuilderProps) {
+  const { isMobile } = useIsMobile()
+
   // Arena config
   const [arenaPreset, setArenaPreset] = useState<ArenaPreset>('small')
   const [coverDensity, setCoverDensity] = useState<CoverDensity>('light')
@@ -368,7 +371,11 @@ export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatFo
     const setSideLabel = (label: string) => updateSide(which, prev => ({ ...prev, label }))
 
     return (
-      <div style={{ ...styles.sidePanel, borderColor: color }}>
+      <div style={{
+        ...styles.sidePanel,
+        borderColor: color,
+        ...(isMobile ? { minHeight: 'auto' } : {}),
+      }}>
         <input
           style={{ ...styles.sideLabelInput, color }}
           value={side.label}
@@ -392,20 +399,28 @@ export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatFo
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.mainPanel}>
+    <div style={{ ...styles.container, ...(isMobile ? { padding: '12px' } : {}) }}>
+      <div style={{ ...styles.mainPanel, ...(isMobile ? { padding: '12px' } : {}) }}>
         {/* Header */}
         <div style={styles.header}>
-          <button style={styles.backBtn} onClick={onBack}>Back</button>
-          <div style={styles.title}>COMBAT ARENA</div>
+          <button
+            style={{
+              ...styles.backBtn,
+              ...(isMobile ? { position: 'relative' as const, marginBottom: '8px' } : {}),
+            }}
+            onClick={onBack}
+          >
+            Back
+          </button>
+          <div style={{ ...styles.title, ...(isMobile ? { fontSize: '16px' } : {}) }}>COMBAT ARENA</div>
           <div style={styles.subtitle}>Build your forces and watch them fight</div>
         </div>
 
         {/* Arena Config */}
         <div style={styles.arenaConfig}>
-          <div style={styles.configRow}>
+          <div style={{ ...styles.configRow, ...(isMobile ? { flexWrap: 'wrap' as const } : {}) }}>
             <span style={styles.configLabel}>Arena Size</span>
-            <div style={styles.configButtons}>
+            <div style={{ ...styles.configButtons, ...(isMobile ? { flexWrap: 'wrap' as const } : {}) }}>
               {ARENA_PRESETS.map(p => (
                 <button
                   key={p.value}
@@ -418,9 +433,9 @@ export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatFo
               ))}
             </div>
           </div>
-          <div style={styles.configRow}>
+          <div style={{ ...styles.configRow, ...(isMobile ? { flexWrap: 'wrap' as const } : {}) }}>
             <span style={styles.configLabel}>Cover</span>
-            <div style={styles.configButtons}>
+            <div style={{ ...styles.configButtons, ...(isMobile ? { flexWrap: 'wrap' as const } : {}) }}>
               {COVER_OPTIONS.map(c => (
                 <button
                   key={c.value}
@@ -432,7 +447,7 @@ export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatFo
               ))}
             </div>
           </div>
-          <div style={styles.configRow}>
+          <div style={{ ...styles.configRow, ...(isMobile ? { flexWrap: 'wrap' as const } : {}) }}>
             <span style={styles.configLabel}>Seed</span>
             <input
               type="number"
@@ -447,15 +462,27 @@ export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatFo
         </div>
 
         {/* Force Panels */}
-        <div style={styles.forcePanels}>
+        <div style={{
+          ...styles.forcePanels,
+          ...(isMobile ? { flexDirection: 'column' as const } : {}),
+        }}>
           {renderSidePanel(sideA, 'A', '#ff4444')}
-          <div style={styles.vsLabel}>VS</div>
+          <div style={{
+            ...styles.vsLabel,
+            ...(isMobile ? { alignSelf: 'center', padding: '4px 0' } : {}),
+          }}>VS</div>
           {renderSidePanel(sideB, 'B', '#44ff44')}
         </div>
 
         {/* Action Buttons */}
-        <div style={styles.actions}>
-          <button style={styles.randomizeBtn} onClick={handleRandomize}>
+        <div style={{
+          ...styles.actions,
+          ...(isMobile ? { flexDirection: 'column' as const, alignItems: 'stretch' } : {}),
+        }}>
+          <button style={{
+            ...styles.randomizeBtn,
+            ...(isMobile ? { width: '100%' } : {}),
+          }} onClick={handleRandomize}>
             Randomize Forces
           </button>
           <button
@@ -463,6 +490,7 @@ export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatFo
               ...styles.startBtn,
               opacity: canStart ? 1 : 0.4,
               cursor: canStart ? 'pointer' : 'not-allowed',
+              ...(isMobile ? { width: '100%' } : {}),
             }}
             onClick={handleStart}
             disabled={!canStart}

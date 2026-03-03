@@ -7,10 +7,11 @@
  * scrolling combat log and transport controls.
  */
 
-import React, { useRef, useEffect, useMemo, useCallback } from 'react'
+import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react'
 import type { CombatReplay, ReplayFigureSnapshot, ReplayFrame } from '../../../../engine/src/replay-combat.js'
 import type { GridCoordinate, Tile } from '../../../../engine/src/types.js'
 import { useReplayPlayer, type ReplaySpeed } from './useReplayPlayer'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 // ============================================================================
 // CONSTANTS
@@ -176,7 +177,9 @@ export interface CombatArenaWatchProps {
 }
 
 export function CombatArenaWatch({ replay, onBack, onRunAgain }: CombatArenaWatchProps) {
+  const { isMobile } = useIsMobile()
   const [state, controls] = useReplayPlayer(replay)
+  const [showLog, setShowLog] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const logRef = useRef<HTMLDivElement>(null)
 
@@ -242,27 +245,52 @@ export function CombatArenaWatch({ replay, onBack, onRunAgain }: CombatArenaWatc
   return (
     <div style={styles.container}>
       {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.headerLeft}>
+      <div style={{
+        ...styles.header,
+        ...(isMobile ? { padding: '6px 10px' } : {}),
+      }}>
+        <div style={{ ...styles.headerLeft, ...(isMobile ? { fontSize: '11px' } : {}) }}>
           <span style={{ color: '#ff4444', fontWeight: 'bold' }}>
             {replay.sideALabel} ({sideAAlive}/{sideACounts.length})
           </span>
         </div>
         <div style={styles.headerCenter}>
-          <div style={styles.scenarioName}>{replay.scenarioName}</div>
+          <div style={{ ...styles.scenarioName, ...(isMobile ? { fontSize: '12px' } : {}) }}>
+            {replay.scenarioName}
+          </div>
           <div style={styles.roundLabel}>
             Round {frame.roundNumber} / {replay.totalRounds}
           </div>
         </div>
-        <div style={styles.headerRight}>
+        <div style={{ ...styles.headerRight, ...(isMobile ? { fontSize: '11px' } : {}) }}>
           <span style={{ color: '#44ff44', fontWeight: 'bold' }}>
             {replay.sideBLabel} ({sideBAlive}/{sideBCounts.length})
           </span>
         </div>
+        {isMobile && (
+          <button
+            style={{
+              background: 'none',
+              border: '1px solid #333355',
+              color: showLog ? '#4a9eff' : '#ffd700',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '10px',
+              cursor: 'pointer',
+              marginLeft: '6px',
+            }}
+            onClick={() => setShowLog(p => !p)}
+          >
+            LOG
+          </button>
+        )}
       </div>
 
       {/* Main area: canvas + log */}
-      <div style={styles.mainArea}>
+      <div style={{
+        ...styles.mainArea,
+        ...(isMobile ? { flexDirection: 'column' as const } : {}),
+      }}>
         {/* Canvas */}
         <div style={styles.canvasContainer}>
           <canvas
@@ -272,56 +300,145 @@ export function CombatArenaWatch({ replay, onBack, onRunAgain }: CombatArenaWatc
             style={{
               ...styles.canvas,
               maxWidth: '100%',
-              maxHeight: '60vh',
+              maxHeight: isMobile ? '50vh' : '60vh',
             }}
           />
           {/* Action text overlay */}
-          <div style={styles.actionOverlay}>
+          <div style={{
+            ...styles.actionOverlay,
+            ...(isMobile ? {
+              whiteSpace: 'normal' as const,
+              maxWidth: '90%',
+              textAlign: 'center' as const,
+              fontSize: '11px',
+            } : {}),
+          }}>
             {frame.actionText}
           </div>
         </div>
 
-        {/* Combat Log */}
-        <div style={styles.logPanel}>
-          <div style={styles.logTitle}>Combat Log</div>
-          <div ref={logRef} style={styles.logScroll}>
-            {logEntries.map((entry, i) => (
-              <div
-                key={i}
-                style={{
-                  ...styles.logEntry,
-                  color: entry.isDefeat ? '#ff4444'
-                    : entry.isAttack ? '#ffaa00'
-                    : entry.isPhase ? '#4a9eff'
-                    : '#ccc',
-                  fontWeight: entry.isPhase ? 'bold' : 'normal',
-                  fontSize: entry.isPhase ? '11px' : '10px',
-                }}
-              >
-                {entry.text}
+        {/* Combat Log - desktop: side panel; mobile: overlay toggled by LOG button */}
+        {isMobile ? (
+          showLog && (
+            <div style={{
+              position: 'fixed' as const,
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.7)',
+              zIndex: 400,
+              display: 'flex',
+              flexDirection: 'column' as const,
+            }}>
+              <div style={{
+                flex: 1,
+                margin: '40px 16px 16px',
+                backgroundColor: '#111827',
+                borderRadius: '8px',
+                border: '1px solid #333',
+                display: 'flex',
+                flexDirection: 'column' as const,
+                overflow: 'hidden',
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '8px 12px',
+                  borderBottom: '1px solid #333',
+                }}>
+                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#888', textTransform: 'uppercase' as const, letterSpacing: '1px' }}>
+                    Combat Log
+                  </span>
+                  <button
+                    onClick={() => setShowLog(false)}
+                    style={{
+                      background: 'none',
+                      border: '1px solid #555',
+                      color: '#ccc',
+                      padding: '4px 10px',
+                      borderRadius: '4px',
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Close
+                  </button>
+                </div>
+                <div ref={logRef} style={styles.logScroll}>
+                  {logEntries.map((entry, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        ...styles.logEntry,
+                        color: entry.isDefeat ? '#ff4444'
+                          : entry.isAttack ? '#ffaa00'
+                          : entry.isPhase ? '#4a9eff'
+                          : '#ccc',
+                        fontWeight: entry.isPhase ? 'bold' : 'normal',
+                        fontSize: entry.isPhase ? '11px' : '10px',
+                      }}
+                    >
+                      {entry.text}
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
+          )
+        ) : (
+          <div style={styles.logPanel}>
+            <div style={styles.logTitle}>Combat Log</div>
+            <div ref={logRef} style={styles.logScroll}>
+              {logEntries.map((entry, i) => (
+                <div
+                  key={i}
+                  style={{
+                    ...styles.logEntry,
+                    color: entry.isDefeat ? '#ff4444'
+                      : entry.isAttack ? '#ffaa00'
+                      : entry.isPhase ? '#4a9eff'
+                      : '#ccc',
+                    fontWeight: entry.isPhase ? 'bold' : 'normal',
+                    fontSize: entry.isPhase ? '11px' : '10px',
+                  }}
+                >
+                  {entry.text}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Transport Controls */}
-      <div style={styles.controls}>
+      <div style={{
+        ...styles.controls,
+        ...(isMobile ? { padding: '6px 10px', gap: '4px' } : {}),
+      }}>
         <div style={styles.controlRow}>
-          <button style={styles.transportBtn} onClick={controls.stepBack}>Prev</button>
+          <button style={{
+            ...styles.transportBtn,
+            ...(isMobile ? { padding: '5px 10px', fontSize: '11px' } : {}),
+          }} onClick={controls.stepBack}>Prev</button>
           <button
             style={{
               ...styles.transportBtn,
               backgroundColor: state.isPaused ? '#00cc66' : '#ffd700',
               color: '#000',
               fontWeight: 'bold',
-              minWidth: '80px',
+              minWidth: isMobile ? '60px' : '80px',
+              ...(isMobile ? { padding: '5px 10px', fontSize: '11px' } : {}),
             }}
             onClick={controls.togglePause}
           >
             {state.isFinished ? 'Replay' : state.isPaused ? 'Play' : 'Pause'}
           </button>
-          <button style={styles.transportBtn} onClick={controls.stepForward}>Next</button>
+          <button style={{
+            ...styles.transportBtn,
+            ...(isMobile ? { padding: '5px 10px', fontSize: '11px' } : {}),
+          }} onClick={controls.stepForward}>Next</button>
         </div>
 
         {/* Speed buttons */}
@@ -342,7 +459,7 @@ export function CombatArenaWatch({ replay, onBack, onRunAgain }: CombatArenaWatc
         </div>
 
         {/* Seek slider */}
-        <div style={styles.controlRow}>
+        <div style={{ ...styles.controlRow, ...(isMobile ? { width: '100%' } : {}) }}>
           <span style={styles.frameLabel}>Frame</span>
           <input
             type="range"
@@ -350,7 +467,7 @@ export function CombatArenaWatch({ replay, onBack, onRunAgain }: CombatArenaWatc
             max={state.totalFrames - 1}
             value={state.currentFrameIndex}
             onChange={e => controls.seekTo(parseInt(e.target.value))}
-            style={styles.slider}
+            style={{ ...styles.slider, ...(isMobile ? { flex: 1, width: 'auto' } : {}) }}
           />
           <span style={styles.frameCounter}>
             {state.currentFrameIndex + 1}/{state.totalFrames}
@@ -359,15 +476,28 @@ export function CombatArenaWatch({ replay, onBack, onRunAgain }: CombatArenaWatc
 
         {/* Winner banner */}
         {state.isFinished && (
-          <div style={styles.winnerBanner}>
+          <div style={{
+            ...styles.winnerBanner,
+            ...(isMobile ? { fontSize: '12px' } : {}),
+          }}>
             {replay.winnerLabel} wins in {replay.totalRounds} rounds!
           </div>
         )}
 
         {/* Nav buttons */}
-        <div style={styles.controlRow}>
-          <button style={styles.navBtn} onClick={onBack}>Back to Setup</button>
-          <button style={{ ...styles.navBtn, backgroundColor: '#333' }} onClick={onRunAgain}>
+        <div style={{
+          ...styles.controlRow,
+          ...(isMobile ? { flexWrap: 'wrap' as const, justifyContent: 'center' } : {}),
+        }}>
+          <button style={{
+            ...styles.navBtn,
+            ...(isMobile ? { flex: 1 } : {}),
+          }} onClick={onBack}>Back to Setup</button>
+          <button style={{
+            ...styles.navBtn,
+            backgroundColor: '#333',
+            ...(isMobile ? { flex: 1 } : {}),
+          }} onClick={onRunAgain}>
             Run Again (New Seed)
           </button>
         </div>
