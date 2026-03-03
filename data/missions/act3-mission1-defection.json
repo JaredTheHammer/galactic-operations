@@ -1,0 +1,165 @@
+{
+  "id": "act3-m1-defection",
+  "name": "The Defection",
+  "description": "A rogue Imperial warlord has broken from the Empire and seized a forward outpost. The rebel cell must investigate this new threat.",
+  "narrativeIntro": "The Empire's grip on the sector has weakened, and the Shadow Syndicate has been dismantled. But peace is fragile. Reports have surfaced of an Imperial splinter faction operating from a captured relay station on the sector's edge. Their leader, a former Imperial commander named Kael Drayen, has declared independence from both the Empire and the New Republic. Commander Vane wants eyes on the ground. Your mission: infiltrate the relay station, assess the warlord's strength, and recover any intelligence on his plans.",
+  "narrativeSuccess": "The relay station's databanks paint a terrifying picture. Drayen isn't just another warlord hoarding weapons -- he's building something. Prototype war droids, conscript armies, and worst of all, former rebel operatives who've defected to his cause. The intelligence you've recovered will be critical. Drayen must be stopped before his army is complete.",
+  "narrativeFailure": "Drayen's defector troops push you back from the relay station before you can extract the critical data. You catch only fragments: something about 'prototype weapons' and a 'new order.' Whatever Drayen is planning, you'll have to find another way to learn the truth.",
+
+  "mapId": "relay-station",
+  "mapPreset": "skirmish",
+  "boardsWide": 3,
+  "boardsTall": 3,
+
+  "difficulty": "moderate",
+  "roundLimit": 8,
+  "recommendedHeroCount": 2,
+
+  "imperialThreat": 8,
+  "threatPerRound": 2,
+
+  "operativeDeployZone": [
+    {"x": 0, "y": 16}, {"x": 1, "y": 16}, {"x": 2, "y": 16},
+    {"x": 0, "y": 17}, {"x": 1, "y": 17}, {"x": 2, "y": 17}
+  ],
+  "initialEnemies": [
+    {
+      "npcProfileId": "conscript-militia",
+      "count": 4,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 14, "y": 10}, {"x": 15, "y": 10}, {"x": 16, "y": 10}, {"x": 17, "y": 10}
+      ]
+    },
+    {
+      "npcProfileId": "defector-trooper",
+      "count": 3,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 20, "y": 14}, {"x": 21, "y": 14}, {"x": 22, "y": 14}
+      ]
+    },
+    {
+      "npcProfileId": "rebel-turncoat",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 18, "y": 8}]
+    }
+  ],
+  "reinforcements": [
+    {
+      "id": "wave-1",
+      "triggerRound": 3,
+      "groups": [
+        {
+          "npcProfileId": "conscript-militia",
+          "count": 3,
+          "asMinGroup": true,
+          "deployZone": [
+            {"x": 34, "y": 0}, {"x": 35, "y": 0}, {"x": 34, "y": 1}
+          ]
+        }
+      ],
+      "threatCost": 2,
+      "narrativeText": "Conscript reinforcements pour in from the north corridor!"
+    },
+    {
+      "id": "wave-2",
+      "triggerRound": 5,
+      "groups": [
+        {
+          "npcProfileId": "defector-trooper",
+          "count": 3,
+          "asMinGroup": true,
+          "deployZone": [
+            {"x": 35, "y": 16}, {"x": 35, "y": 17}, {"x": 35, "y": 18}
+          ]
+        }
+      ],
+      "threatCost": 3,
+      "narrativeText": "Imperial defectors in mismatched armor rush in from the eastern access!"
+    }
+  ],
+
+  "objectives": [
+    {
+      "id": "obj-eliminate",
+      "type": "eliminate_all",
+      "side": "Operative",
+      "description": "Eliminate all warlord forces at the relay station.",
+      "priority": "primary",
+      "xpReward": 0
+    },
+    {
+      "id": "obj-terminal",
+      "type": "interact_terminal",
+      "side": "Operative",
+      "description": "Download intelligence from 2 data terminals.",
+      "targetCount": 2,
+      "priority": "secondary",
+      "xpReward": 5
+    }
+  ],
+  "victoryConditions": [
+    {
+      "side": "Operative",
+      "description": "Eliminate all warlord forces.",
+      "requiredObjectiveIds": ["obj-eliminate"]
+    },
+    {
+      "side": "Imperial",
+      "description": "Incapacitate all Operative heroes.",
+      "requiredObjectiveIds": []
+    }
+  ],
+
+  "objectivePoints": [
+    {
+      "id": "objpt-terminal-1",
+      "position": {"x": 16, "y": 6},
+      "type": "terminal",
+      "skillRequired": "computers",
+      "alternateSkill": "mechanics",
+      "difficulty": 1,
+      "description": "Relay station communications terminal -- slice for intel."
+    },
+    {
+      "id": "objpt-terminal-2",
+      "position": {"x": 22, "y": 12},
+      "type": "terminal",
+      "skillRequired": "computers",
+      "alternateSkill": "vigilance",
+      "difficulty": 2,
+      "description": "Encrypted command console -- contains Drayen's orders."
+    }
+  ],
+
+  "lootTokens": [
+    {
+      "id": "loot-armory-1",
+      "position": {"x": 14, "y": 8},
+      "reward": {"type": "credits", "value": 100}
+    },
+    {
+      "id": "loot-intel",
+      "position": {"x": 22, "y": 12},
+      "reward": {"type": "xp", "value": 3}
+    },
+    {
+      "id": "loot-turncoat-gear",
+      "position": {"x": 18, "y": 8},
+      "reward": {"type": "equipment", "itemId": "westar-35"}
+    }
+  ],
+
+  "campaignAct": 3,
+  "missionIndex": 1,
+  "prerequisites": ["act2-m4-throne"],
+  "unlocksNext": ["act3-m2-prototype"],
+
+  "baseXP": 14,
+  "bonusXPPerLoot": 2,
+  "bonusXPPerKill": 1,
+  "maxKillXP": 6,
+  "leaderKillXP": 0
+}

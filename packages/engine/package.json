@@ -1,0 +1,15 @@
+{
+  "name": "@galactic-ops/engine",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "vitest": "^4.0.18"
+  }
+}

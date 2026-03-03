@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "d6 die type definitions for Galactic Operations v2. Four die types distinguished by color."
+  },
+  "dieTypes": {
+    "ability": {
+      "color": "green",
+      "role": "positive",
+      "label": "Ability Die",
+      "faces": [
+        { "face": 1, "successes": 0, "advantages": 0, "triumphs": 0 },
+        { "face": 2, "successes": 0, "advantages": 0, "triumphs": 0 },
+        { "face": 3, "successes": 0, "advantages": 0, "triumphs": 0 },
+        { "face": 4, "successes": 1, "advantages": 0, "triumphs": 0 },
+        { "face": 5, "successes": 1, "advantages": 0, "triumphs": 0 },
+        { "face": 6, "successes": 1, "advantages": 1, "triumphs": 0 }
+      ],
+      "expectedValues": {
+        "successes": 0.500,
+        "advantages": 0.167,
+        "triumphs": 0.000
+      }
+    },
+    "proficiency": {
+      "color": "yellow",
+      "role": "positive",
+      "label": "Proficiency Die",
+      "faces": [
+        { "face": 1, "successes": 0, "advantages": 0, "triumphs": 0 },
+        { "face": 2, "successes": 0, "advantages": 0, "triumphs": 0 },
+        { "face": 3, "successes": 1, "advantages": 0, "triumphs": 0 },
+        { "face": 4, "successes": 1, "advantages": 0, "triumphs": 0 },
+        { "face": 5, "successes": 1, "advantages": 0, "triumphs": 0 },
+        { "face": 6, "successes": 2, "advantages": 0, "triumphs": 1 }
+      ],
+      "expectedValues": {
+        "successes": 0.833,
+        "advantages": 0.000,
+        "triumphs": 0.167
+      }
+    },
+    "difficulty": {
+      "color": "purple",
+      "role": "negative",
+      "label": "Difficulty Die",
+      "faces": [
+        { "face": 1, "failures": 0, "threats": 0, "despairs": 0 },
+        { "face": 2, "failures": 0, "threats": 0, "despairs": 0 },
+        { "face": 3, "failures": 0, "threats": 0, "despairs": 0 },
+        { "face": 4, "failures": 1, "threats": 0, "despairs": 0 },
+        { "face": 5, "failures": 1, "threats": 0, "despairs": 0 },
+        { "face": 6, "failures": 1, "threats": 1, "despairs": 0 }
+      ],
+      "expectedValues": {
+        "failures": 0.500,
+        "threats": 0.167,
+        "despairs": 0.000
+      }
+    },
+    "challenge": {
+      "color": "red",
+      "role": "negative",
+      "label": "Challenge Die",
+      "faces": [
+        { "face": 1, "failures": 0, "threats": 0, "despairs": 0 },
+        { "face": 2, "failures": 0, "threats": 0, "despairs": 0 },
+        { "face": 3, "failures": 1, "threats": 0, "despairs": 0 },
+        { "face": 4, "failures": 1, "threats": 0, "despairs": 0 },
+        { "face": 5, "failures": 1, "threats": 0, "despairs": 0 },
+        { "face": 6, "failures": 2, "threats": 0, "despairs": 1 }
+      ],
+      "expectedValues": {
+        "failures": 0.833,
+        "threats": 0.000,
+        "despairs": 0.167
+      }
+    }
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "id": "act2-m3-warehouse",
+  "name": "Shadow Syndicate Warehouse",
+  "description": "Raid a heavily guarded warehouse where the Syndicate stockpiles weapons and spice. Destroy the contraband.",
+  "narrativeIntro": "The bounty board data led you here: a sprawling warehouse complex in Nexus Station's lower levels where the Syndicate stockpiles contraband. Weapons, spice, and stolen military tech fill the corridors floor to ceiling. If you destroy the caches, you cripple The Broker's operation and cut off his supply line. The warehouse is a maze of tight corridors and stacked crates -- perfect terrain for Gamorrean ambushes. Move fast, plant charges, and get out.",
+  "narrativeSuccess": "The last contraband cache detonates in a shower of sparks and shrapnel. Crates of illegal weapons and barrels of refined spice go up in a chain reaction that rattles the entire lower level. The Syndicate's supply line is severed. Among the wreckage, you recover a manifest listing shipments to 'The Broker's penthouse, Spire Level 99.' Now you know exactly where to find him.",
+  "narrativeFailure": "The Syndicate reinforcements prove overwhelming, and you're forced to withdraw before the charges are set. The contraband remains intact, and The Broker's supply chain keeps flowing. The Syndicate will be better armed than ever for the confrontation ahead.",
+
+  "mapId": "warehouse-interior",
+  "mapPreset": "skirmish",
+  "boardsWide": 3,
+  "boardsTall": 3,
+
+  "difficulty": "hard",
+  "roundLimit": 10,
+  "recommendedHeroCount": 2,
+
+  "imperialThreat": 14,
+  "threatPerRound": 2,
+
+  "operativeDeployZone": [
+    {"x": 0, "y": 16}, {"x": 1, "y": 16}, {"x": 2, "y": 16},
+    {"x": 0, "y": 17}, {"x": 1, "y": 17}, {"x": 2, "y": 17}
+  ],
+  "initialEnemies": [
+    {
+      "npcProfileId": "nikto-gunner",
+      "count": 4,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 14, "y": 8}, {"x": 15, "y": 8}, {"x": 16, "y": 8}, {"x": 17, "y": 8}
+      ]
+    },
+    {
+      "npcProfileId": "gamorrean-brute",
+      "count": 3,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 24, "y": 16}, {"x": 25, "y": 16}, {"x": 26, "y": 16}
+      ]
+    },
+    {
+      "npcProfileId": "ig-assassin-droid",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 30, "y": 4}]
+    },
+    {
+      "npcProfileId": "syndicate-lieutenant",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 18, "y": 12}]
+    }
+  ],
+  "reinforcements": [
+    {
+      "id": "wave-1",
+      "triggerRound": 3,
+      "groups": [
+        {
+          "npcProfileId": "trandoshan-hunter",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 35, "y": 17}]
+        }
+      ],
+      "threatCost": 4,
+      "narrativeText": "A Trandoshan Hunter emerges from the cargo tunnels, blocking the exit."
+    },
+    {
+      "id": "wave-2",
+      "triggerRound": 6,
+      "groups": [
+        {
+          "npcProfileId": "gamorrean-brute",
+          "count": 2,
+          "asMinGroup": true,
+          "deployZone": [
+            {"x": 0, "y": 0}, {"x": 1, "y": 0}
+          ]
+        },
+        {
+          "npcProfileId": "ig-assassin-droid",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 34, "y": 0}]
+        }
+      ],
+      "threatCost": 5,
+      "narrativeText": "Warehouse security activates a backup IG droid, and Gamorrean guards charge in from the loading bay!"
+    }
+  ],
+
+  "objectives": [
+    {
+      "id": "obj-destroy-caches",
+      "type": "interact_terminal",
+      "side": "Operative",
+      "description": "Plant charges on 3 contraband caches to destroy them.",
+      "targetCount": 3,
+      "priority": "primary",
+      "xpReward": 0
+    },
+    {
+      "id": "obj-loot-crates",
+      "type": "interact_terminal",
+      "side": "Operative",
+      "description": "Recover salvageable weapons from 2 loot crates.",
+      "targetCount": 2,
+      "priority": "secondary",
+      "xpReward": 3
+    }
+  ],
+  "victoryConditions": [
+    {
+      "side": "Operative",
+      "description": "Destroy all 3 contraband caches.",
+      "requiredObjectiveIds": ["obj-destroy-caches"]
+    },
+    {
+      "side": "Imperial",
+      "description": "Incapacitate all Operative heroes or survive 10 rounds with caches intact.",
+      "requiredObjectiveIds": []
+    }
+  ],
+
+  "objectivePoints": [
+    {
+      "id": "objpt-cache-1",
+      "position": {"x": 8, "y": 8},
+      "type": "crate",
+      "skillRequired": "mechanics",
+      "alternateSkill": "skulduggery",
+      "difficulty": 2,
+      "description": "Spice barrels stacked along the north wall. Plant a timed charge."
+    },
+    {
+      "id": "objpt-cache-2",
+      "position": {"x": 20, "y": 14},
+      "type": "crate",
+      "skillRequired": "mechanics",
+      "alternateSkill": "athletics",
+      "difficulty": 2,
+      "description": "Weapons crates marked with black market stamps. Set the detonator."
+    },
+    {
+      "id": "objpt-cache-3",
+      "position": {"x": 32, "y": 8},
+      "type": "crate",
+      "skillRequired": "mechanics",
+      "alternateSkill": "skulduggery",
+      "difficulty": 3,
+      "description": "Military-grade hardware in locked containers. Requires careful charge placement."
+    }
+  ],
+
+  "lootTokens": [
+    {
+      "id": "loot-weapon-crate-1",
+      "position": {"x": 14, "y": 16},
+      "reward": {"type": "equipment", "itemId": "frag-grenade"}
+    },
+    {
+      "id": "loot-weapon-crate-2",
+      "position": {"x": 28, "y": 4},
+      "reward": {"type": "equipment", "itemId": "heavy-blaster-pistol"}
+    },
+    {
+      "id": "loot-credits",
+      "position": {"x": 18, "y": 12},
+      "reward": {"type": "credits", "value": 150}
+    }
+  ],
+
+  "campaignAct": 2,
+  "missionIndex": 3,
+  "prerequisites": ["act2-m2-bounty"],
+  "unlocksNext": ["act2-m4-throne"],
+
+  "baseXP": 14,
+  "bonusXPPerLoot": 2,
+  "bonusXPPerKill": 1,
+  "maxKillXP": 6,
+  "leaderKillXP": 0
+}

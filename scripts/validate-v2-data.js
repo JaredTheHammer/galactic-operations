@@ -1,0 +1,223 @@
+#!/usr/bin/env node
+/**
+ * Validates all v2 JSON data files for structural correctness and cross-references.
+ */
+const fs = require('fs');
+const path = require('path');
+
+const coreFiles = [
+  'data/dice-d6.json',
+  'data/species.json',
+  'data/careers.json',
+  'data/weapons-v2.json',
+  'data/armor.json',
+  'data/ai-profiles.json',
+  'data/specializations/mercenary.json',
+];
+
+const npcFiles = [
+  'data/npcs/imperials.json',
+  'data/npcs/bounty-hunters.json',
+  'data/npcs/warlord-forces.json',
+];
+
+const missionFiles = [
+  'data/missions/act1-mission1-arrival.json',
+  'data/missions/act1-mission2-intel.json',
+  'data/missions/act1-mission3a-cache.json',
+  'data/missions/act1-mission3b-ambush.json',
+  'data/missions/act1-mission4-finale.json',
+  'data/missions/act2-mission1-crossroads.json',
+  'data/missions/act2-mission2-bounty.json',
+  'data/missions/act2-mission3a-warehouse.json',
+  'data/missions/act2-mission3b-hunting-grounds.json',
+  'data/missions/act2-mission4-throne.json',
+  'data/missions/act3-mission1-defection.json',
+  'data/missions/act3-mission2-prototype.json',
+  'data/missions/act3-mission3a-stronghold.json',
+  'data/missions/act3-mission3b-betrayal.json',
+  'data/missions/act3-mission4-endgame.json',
+];
+
+const socialFiles = [
+  'data/social/act1-hub.json',
+  'data/social/act2-hub.json',
+  'data/social/act3-hub.json',
+];
+
+const campaignFiles = [
+  'data/campaigns/tangrene-liberation.json',
+];
+
+const allFiles = [...coreFiles, ...npcFiles, ...missionFiles, ...socialFiles, ...campaignFiles];
+
+let allOk = true;
+function fail(msg) { console.error('FAIL: ' + msg); allOk = false; }
+
+// 1. Parse all JSON files
+for (const f of allFiles) {
+  try {
+    JSON.parse(fs.readFileSync(f, 'utf8'));
+    console.log('OK: ' + f);
+  } catch (e) {
+    fail(f + ' -- ' + e.message);
+  }
+}
+
+// 2. Load core data
+const species = JSON.parse(fs.readFileSync('data/species.json', 'utf8')).species;
+const careers = JSON.parse(fs.readFileSync('data/careers.json', 'utf8')).careers;
+const weapons = JSON.parse(fs.readFileSync('data/weapons-v2.json', 'utf8')).weapons;
+const armor = JSON.parse(fs.readFileSync('data/armor.json', 'utf8')).armor;
+const merc = JSON.parse(fs.readFileSync('data/specializations/mercenary.json', 'utf8'));
+const dice = JSON.parse(fs.readFileSync('data/dice-d6.json', 'utf8')).dieTypes;
+const aiProfiles = JSON.parse(fs.readFileSync('data/ai-profiles.json', 'utf8'));
+
+// Merge all NPC data
+const allNpcs = {};
+for (const npcFile of npcFiles) {
+  const npcs = JSON.parse(fs.readFileSync(npcFile, 'utf8')).npcs;
+  Object.assign(allNpcs, npcs);
+}
+
+// 3. Dice: 4 types, each with 6 faces
+for (const [id, die] of Object.entries(dice)) {
+  if (die.faces.length !== 6) fail('Die ' + id + ' has ' + die.faces.length + ' faces (expected 6)');
+}
+console.log('OK: All 4 dice have 6 faces');
+
+// 4. Species: characteristic totals = 12 (droids are exception: 10 points + extra XP)
+for (const [id, sp] of Object.entries(species)) {
+  const c = sp.characteristics;
+  const total = c.brawn + c.agility + c.intellect + c.cunning + c.willpower + c.presence;
+  const expectedTotal = sp.specialAbility === 'droid_chassis' ? 10 : 12;
+  if (total !== expectedTotal) fail('Species ' + id + ' total=' + total + ' (expected ' + expectedTotal + ')');
+}
+console.log('OK: All species have correct characteristic point totals');
+
+// 5. Careers: 3 specializations each
+for (const [id, career] of Object.entries(careers)) {
+  if (career.specializations.length !== 3) fail('Career ' + id + ' has ' + career.specializations.length + ' specializations (expected 3)');
+  if (career.careerSkills.length !== 8) fail('Career ' + id + ' has ' + career.careerSkills.length + ' career skills (expected 8)');
+}
+console.log('OK: All careers have 3 specializations and 8 career skills');
+
+// 6. Mercenary talent pool: 30 cards with 10/8/6/4/2 distribution
+const tiers = [0, 0, 0, 0, 0, 0];
+for (const t of merc.talents) { tiers[t.tier]++; }
+const expected = [0, 10, 8, 6, 4, 2];
+for (let i = 1; i <= 5; i++) {
+  if (tiers[i] !== expected[i]) fail('Merc Tier ' + i + ': got ' + tiers[i] + ', expected ' + expected[i]);
+}
+console.log('OK: Merc talent pool is 30 cards (10/8/6/4/2): total=' + merc.talents.length);
+
+// 7. NPC stat blocks: valid pools, strain rules
+for (const [id, npc] of Object.entries(allNpcs)) {
+  // Attack pool
+  if (typeof npc.attackPool.ability !== 'number') fail('NPC ' + id + ' missing attackPool.ability');
+  if (typeof npc.attackPool.proficiency !== 'number') fail('NPC ' + id + ' missing attackPool.proficiency');
+  // Strain track (droids get null strainThreshold regardless of tier)
+  const isDroid = (npc.keywords || []).some(k => k === 'Droid');
+  if (npc.tier === 'Minion' && npc.strainThreshold !== null) fail('Minion ' + id + ' should have null strainThreshold');
+  if (npc.tier === 'Rival' && npc.strainThreshold === null && !isDroid) fail('Rival ' + id + ' should have non-null strainThreshold');
+  if (npc.tier === 'Nemesis' && npc.strainThreshold === null && !isDroid) fail('Nemesis ' + id + ' should have non-null strainThreshold');
+  // Weapons
+  for (const w of npc.weapons) {
+    if (!w.baseDamage || !w.range) fail('NPC ' + id + ' weapon ' + w.name + ' missing fields');
+  }
+  // Courage override (optional, must be positive integer if present)
+  if (npc.courage !== undefined) {
+    if (typeof npc.courage !== 'number' || npc.courage < 1) fail('NPC ' + id + ' courage must be a positive number');
+  }
+  // Mechanical keywords (optional array, validate names)
+  const validKeywords = ['Armor', 'Agile', 'Relentless', 'Cumbersome', 'Disciplined', 'Dauntless', 'Guardian'];
+  if (npc.mechanicalKeywords) {
+    if (!Array.isArray(npc.mechanicalKeywords)) fail('NPC ' + id + ' mechanicalKeywords must be an array');
+    for (const kw of npc.mechanicalKeywords) {
+      if (!validKeywords.includes(kw.name)) fail('NPC ' + id + ' has unknown keyword: ' + kw.name);
+      if (['Armor', 'Guardian', 'Disciplined'].includes(kw.name) && typeof kw.value !== 'number') {
+        fail('NPC ' + id + ' keyword ' + kw.name + ' requires a numeric value');
+      }
+    }
+  }
+}
+console.log('OK: All ' + Object.keys(allNpcs).length + ' NPC stat blocks valid (pools, strain, weapons, courage, keywords)');
+
+// 8. AI profile mappings: every NPC has an archetype
+const unitMapping = aiProfiles.unitMapping;
+for (const npcId of Object.keys(allNpcs)) {
+  if (!unitMapping[npcId]) fail('NPC ' + npcId + ' missing AI archetype mapping');
+}
+console.log('OK: All NPCs have AI archetype mappings');
+
+// 9. Weapons: all melee add brawn, all ranged don't
+for (const [id, w] of Object.entries(weapons)) {
+  if ((w.type === 'Melee' || w.type === 'Brawl') && !w.damageAddBrawn) {
+    fail('Weapon ' + id + ' is ' + w.type + ' but damageAddBrawn=false');
+  }
+  if ((w.type === 'Ranged (Heavy)' || w.type === 'Ranged (Light)' || w.type === 'Gunnery') && w.damageAddBrawn) {
+    fail('Weapon ' + id + ' is ' + w.type + ' but damageAddBrawn=true');
+  }
+}
+console.log('OK: Weapon Brawn rules consistent');
+
+// 10. Armor: defense and soak are non-negative
+for (const [id, a] of Object.entries(armor)) {
+  if (a.soak < 0 || a.defense < 0) fail('Armor ' + id + ' has negative soak or defense');
+}
+console.log('OK: All armor stats non-negative');
+
+// 11. Mission structure validation
+const allMissions = {};
+for (const mf of missionFiles) {
+  const mission = JSON.parse(fs.readFileSync(mf, 'utf8'));
+  allMissions[mission.id] = mission;
+  // Required fields
+  if (!mission.id) fail(mf + ' missing id');
+  if (!mission.name) fail(mf + ' missing name');
+  if (typeof mission.roundLimit !== 'number') fail(mf + ' missing roundLimit');
+  if (!mission.objectives || mission.objectives.length === 0) fail(mf + ' has no objectives');
+  if (!mission.victoryConditions || mission.victoryConditions.length === 0) fail(mf + ' has no victoryConditions');
+  // Initial enemies reference valid NPCs
+  for (const enemy of (mission.initialEnemies || [])) {
+    if (!allNpcs[enemy.npcProfileId]) fail(mf + ' references unknown NPC: ' + enemy.npcProfileId);
+  }
+  // Reinforcements reference valid NPCs
+  for (const wave of (mission.reinforcements || [])) {
+    for (const group of wave.groups) {
+      if (!allNpcs[group.npcProfileId]) fail(mf + ' reinforcement references unknown NPC: ' + group.npcProfileId);
+    }
+  }
+}
+console.log('OK: All ' + Object.keys(allMissions).length + ' missions structurally valid');
+
+// 12. Campaign graph: all referenced missions exist
+const campaign = JSON.parse(fs.readFileSync('data/campaigns/tangrene-liberation.json', 'utf8'));
+for (const act of campaign.acts) {
+  for (const mId of act.missionIds) {
+    if (!allMissions[mId]) fail('Campaign act ' + act.act + ' references unknown mission: ' + mId);
+  }
+}
+for (const [from, toList] of Object.entries(campaign.missionGraph)) {
+  if (!allMissions[from]) fail('Campaign graph node "' + from + '" is not a known mission');
+  for (const to of toList) {
+    if (!allMissions[to]) fail('Campaign graph edge "' + from + '" -> "' + to + '" references unknown mission');
+  }
+}
+console.log('OK: Campaign graph references valid (' + Object.keys(campaign.missionGraph).length + ' nodes)');
+
+// 13. Social hub validation
+for (const sf of socialFiles) {
+  const hub = JSON.parse(fs.readFileSync(sf, 'utf8'));
+  if (!hub.location || !hub.location.id) fail(sf + ' missing location.id');
+  if (!hub.npcs || Object.keys(hub.npcs).length === 0) fail(sf + ' has no NPCs');
+  if (!hub.location.shops || hub.location.shops.length === 0) fail(sf + ' has no shops');
+  // Encounters reference valid NPCs
+  for (const enc of (hub.location.encounters || [])) {
+    if (!hub.npcs[enc.npcId]) fail(sf + ' encounter "' + enc.id + '" references unknown NPC: ' + enc.npcId);
+  }
+}
+console.log('OK: All social hubs structurally valid');
+
+console.log(allOk ? '\n=== ALL CHECKS PASSED ===' : '\n=== SOME CHECKS FAILED ===');
+process.exit(allOk ? 0 : 1);

@@ -1,0 +1,427 @@
+[
+  {
+    "id": "focused-shot",
+    "name": "Focused Shot",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 1
+      }
+    ],
+    "text": "Add 1 Hit to your attack roll.",
+    "cost": 0
+  },
+  {
+    "id": "brace-for-impact",
+    "name": "Brace for Impact",
+    "timing": "Defense",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddBlock",
+        "value": 1
+      }
+    ],
+    "text": "Add 1 Block to your defense roll.",
+    "cost": 0
+  },
+  {
+    "id": "lucky-break",
+    "name": "Lucky Break",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "ConvertMiss",
+        "value": 1
+      }
+    ],
+    "text": "Convert 1 Miss result to 1 Hit.",
+    "cost": 2
+  },
+  {
+    "id": "dodge-roll",
+    "name": "Dodge Roll",
+    "timing": "Defense",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "Reroll",
+        "value": 1
+      }
+    ],
+    "text": "Reroll 1 of your defense dice.",
+    "cost": 1
+  },
+  {
+    "id": "adrenaline-rush",
+    "name": "Adrenaline Rush",
+    "timing": "Any",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "Recover",
+        "value": 2
+      }
+    ],
+    "text": "The active figure recovers 2 health.",
+    "cost": 2
+  },
+  {
+    "id": "suppressive-fire",
+    "name": "Suppressive Fire",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "Suppress",
+        "value": 1,
+        "condition": "If you roll at least 1 Hit"
+      }
+    ],
+    "text": "If you roll at least 1 Hit, the target gains the Suppressed status.",
+    "cost": 1
+  },
+  {
+    "id": "counterstrike",
+    "name": "Counterstrike",
+    "timing": "Defense",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "Counter",
+        "value": 1
+      }
+    ],
+    "text": "Cancel 1 Tactic Card played by your opponent this combat.",
+    "cost": 1
+  },
+  {
+    "id": "precision-strike",
+    "name": "Precision Strike",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "Pierce",
+        "value": 1
+      }
+    ],
+    "text": "Add Pierce 1 to your attack (ignores 1 Block).",
+    "cost": 1
+  },
+  {
+    "id": "quick-reflexes",
+    "name": "Quick Reflexes",
+    "timing": "Defense",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddBlock",
+        "value": 1
+      }
+    ],
+    "text": "Add 1 Evade to your defense roll.",
+    "cost": 0
+  },
+  {
+    "id": "second-wind",
+    "name": "Second Wind",
+    "timing": "Any",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 1
+      }
+    ],
+    "text": "The active figure gains 1 bonus action point this round.",
+    "cost": 3
+  },
+  {
+    "id": "for-the-alliance",
+    "name": "For the Alliance",
+    "timing": "Attack",
+    "side": "Operative",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 2
+      }
+    ],
+    "text": "Add 2 Hits to your attack roll.",
+    "cost": 2
+  },
+  {
+    "id": "inspiring-presence",
+    "name": "Inspiring Presence",
+    "timing": "Any",
+    "side": "Operative",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 1
+      }
+    ],
+    "text": "Recover 1 Morale point for the Operative side.",
+    "cost": 1
+  },
+  {
+    "id": "guerrilla-tactics",
+    "name": "Guerrilla Tactics",
+    "timing": "Attack",
+    "side": "Operative",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 2
+      }
+    ],
+    "text": "Ignore the target's cover bonus for this attack.",
+    "cost": 2
+  },
+  {
+    "id": "last-stand",
+    "name": "Last Stand",
+    "timing": "Defense",
+    "side": "Operative",
+    "effects": [
+      {
+        "type": "AddBlock",
+        "value": 3,
+        "condition": "If defender has 3 or fewer health"
+      }
+    ],
+    "text": "If the defender has 3 or fewer health remaining, add 3 Blocks to the defense roll.",
+    "cost": 0
+  },
+  {
+    "id": "rebel-ingenuity",
+    "name": "Rebel Ingenuity",
+    "timing": "Any",
+    "side": "Operative",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 2
+      }
+    ],
+    "text": "Draw 2 additional Tactic Cards from the deck.",
+    "cost": 1
+  },
+  {
+    "id": "imperial-discipline",
+    "name": "Imperial Discipline",
+    "timing": "Defense",
+    "side": "Imperial",
+    "effects": [
+      {
+        "type": "AddBlock",
+        "value": 2
+      }
+    ],
+    "text": "Add 2 Blocks to your defense roll.",
+    "cost": 2
+  },
+  {
+    "id": "overwhelming-numbers",
+    "name": "Overwhelming Numbers",
+    "timing": "Attack",
+    "side": "Imperial",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 2,
+        "condition": "If 2+ friendly figures are adjacent to the target"
+      }
+    ],
+    "text": "If you have 2 or more friendly figures adjacent to the target, add 2 Hits to your attack.",
+    "cost": 1
+  },
+  {
+    "id": "fear-and-dead-men",
+    "name": "Fear and Dead Men",
+    "timing": "Attack",
+    "side": "Imperial",
+    "effects": [
+      {
+        "type": "Suppress",
+        "value": 1
+      }
+    ],
+    "text": "The target must make a Morale check or become Panicked.",
+    "cost": 2
+  },
+  {
+    "id": "tactical-withdrawal",
+    "name": "Tactical Withdrawal",
+    "timing": "Any",
+    "side": "Imperial",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 1
+      }
+    ],
+    "text": "Move 1 friendly figure up to 2 spaces.",
+    "cost": 1
+  },
+  {
+    "id": "reinforcement-order",
+    "name": "Reinforcement Order",
+    "timing": "Any",
+    "side": "Imperial",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 1
+      }
+    ],
+    "text": "Immediately deploy 1 Regular unit to an Imperial deployment zone.",
+    "cost": 3
+  },
+  {
+    "id": "pinning-fire",
+    "name": "Pinning Fire",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "Suppress",
+        "value": 1
+      }
+    ],
+    "text": "Add Suppressed status to the target.",
+    "cost": 1
+  },
+  {
+    "id": "armor-piercing",
+    "name": "Armor Piercing",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "Pierce",
+        "value": 2
+      }
+    ],
+    "text": "Add Pierce 2 to your attack.",
+    "cost": 2
+  },
+  {
+    "id": "shield-wall",
+    "name": "Shield Wall",
+    "timing": "Defense",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddBlock",
+        "value": 2
+      }
+    ],
+    "text": "Add 2 Blocks. Friendly figures adjacent to the defender also gain +1 Block.",
+    "cost": 2
+  },
+  {
+    "id": "flanking-maneuver",
+    "name": "Flanking Maneuver",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 1,
+        "condition": "If you have an ally adjacent to the target"
+      }
+    ],
+    "text": "If you have an ally adjacent to the target, add 1 Hit to your attack.",
+    "cost": 0
+  },
+  {
+    "id": "combat-medic",
+    "name": "Combat Medic",
+    "timing": "Any",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "Recover",
+        "value": 3
+      }
+    ],
+    "text": "Heal an adjacent friendly figure 3 health.",
+    "cost": 2
+  },
+  {
+    "id": "frag-grenade",
+    "name": "Frag Grenade",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 1
+      }
+    ],
+    "text": "Deal 1 damage to all figures in a 2-space radius of the target.",
+    "cost": 3
+  },
+  {
+    "id": "smoke-screen",
+    "name": "Smoke Screen",
+    "timing": "Defense",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddBlock",
+        "value": 1
+      }
+    ],
+    "text": "All attacks against friendly figures in an area gain -1 Hit this round.",
+    "cost": 2
+  },
+  {
+    "id": "overcharge",
+    "name": "Overcharge",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 1
+      }
+    ],
+    "text": "Add 1 Red die to your attack pool for this attack.",
+    "cost": 3
+  },
+  {
+    "id": "evasive-maneuvers",
+    "name": "Evasive Maneuvers",
+    "timing": "Defense",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddBlock",
+        "value": 1
+      }
+    ],
+    "text": "Move the defender 1 space after combat resolves.",
+    "cost": 0
+  },
+  {
+    "id": "point-blank",
+    "name": "Point Blank",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 2,
+        "condition": "If range 1"
+      }
+    ],
+    "text": "If the target is at range 1, add 2 Hits to your attack.",
+    "cost": 1
+  }
+]

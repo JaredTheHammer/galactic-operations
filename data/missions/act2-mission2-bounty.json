@@ -1,0 +1,179 @@
+{
+  "id": "act2-m2-bounty",
+  "name": "The Bounty Board",
+  "description": "Infiltrate a Syndicate bounty posting station to gather intel on The Broker's operation.",
+  "narrativeIntro": "The datapad recovered from the Crossroads shakedown led you here: a dingy relay station where the Shadow Syndicate posts bounties and coordinates jobs. If you can access the encrypted data terminals inside, you'll uncover the full scope of The Broker's network. Problem is, the station is crawling with guards, and an IG-series assassin droid is running security. You'll need to fight your way through and slice those terminals before they can purge the data.",
+  "narrativeSuccess": "The last terminal flickers green as the data dump completes. Three locations light up on the holomap: a weapons warehouse packed with contraband, Trandoshan-run hunting grounds where prisoners are used as prey, and a heavily fortified penthouse at the top of Nexus Station's central spire. You have two leads to follow. The Broker's days are numbered.",
+  "narrativeFailure": "Alarms blare as the terminals wipe their databanks. The Syndicate enforcers push you out of the relay station with nothing to show for the assault. Worse, the IG droid has recorded your biometrics. Every bounty hunter in the sector will have your faces by morning.",
+
+  "mapId": "relay-station",
+  "mapPreset": "skirmish",
+  "boardsWide": 3,
+  "boardsTall": 3,
+
+  "difficulty": "moderate",
+  "roundLimit": 10,
+  "recommendedHeroCount": 2,
+
+  "imperialThreat": 10,
+  "threatPerRound": 2,
+
+  "operativeDeployZone": [
+    {"x": 0, "y": 16}, {"x": 1, "y": 16}, {"x": 2, "y": 16},
+    {"x": 0, "y": 17}, {"x": 1, "y": 17}, {"x": 2, "y": 17}
+  ],
+  "initialEnemies": [
+    {
+      "npcProfileId": "nikto-gunner",
+      "count": 3,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 12, "y": 12}, {"x": 13, "y": 12}, {"x": 14, "y": 12}
+      ]
+    },
+    {
+      "npcProfileId": "gamorrean-brute",
+      "count": 2,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 22, "y": 14}, {"x": 23, "y": 14}
+      ]
+    },
+    {
+      "npcProfileId": "ig-assassin-droid",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 30, "y": 6}]
+    }
+  ],
+  "reinforcements": [
+    {
+      "id": "wave-1",
+      "triggerRound": 4,
+      "groups": [
+        {
+          "npcProfileId": "syndicate-lieutenant",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 35, "y": 10}]
+        },
+        {
+          "npcProfileId": "nikto-gunner",
+          "count": 2,
+          "asMinGroup": true,
+          "deployZone": [
+            {"x": 34, "y": 0}, {"x": 35, "y": 0}
+          ]
+        }
+      ],
+      "threatCost": 3,
+      "narrativeText": "A Syndicate Lieutenant arrives with backup, barking orders to lock down the data!"
+    },
+    {
+      "id": "wave-2",
+      "triggerRound": 7,
+      "groups": [
+        {
+          "npcProfileId": "trandoshan-hunter",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 0, "y": 0}]
+        }
+      ],
+      "threatCost": 4,
+      "narrativeText": "A Trandoshan Hunter smashes through the back entrance, drawn by the sound of blasterfire."
+    }
+  ],
+
+  "objectives": [
+    {
+      "id": "obj-terminals",
+      "type": "interact_terminal",
+      "side": "Operative",
+      "description": "Access 3 encrypted data terminals before the Syndicate can purge them.",
+      "targetCount": 3,
+      "priority": "primary",
+      "xpReward": 0
+    },
+    {
+      "id": "obj-droid",
+      "type": "eliminate_target",
+      "side": "Operative",
+      "description": "Destroy the IG Assassin Droid running station security.",
+      "targetNpcId": "ig-assassin-droid",
+      "priority": "secondary",
+      "xpReward": 5
+    }
+  ],
+  "victoryConditions": [
+    {
+      "side": "Operative",
+      "description": "Access all 3 data terminals.",
+      "requiredObjectiveIds": ["obj-terminals"]
+    },
+    {
+      "side": "Imperial",
+      "description": "Incapacitate all Operative heroes or survive 10 rounds with data intact.",
+      "requiredObjectiveIds": []
+    }
+  ],
+
+  "objectivePoints": [
+    {
+      "id": "objpt-terminal-1",
+      "position": {"x": 10, "y": 8},
+      "type": "terminal",
+      "skillRequired": "computers",
+      "alternateSkill": "skulduggery",
+      "difficulty": 2,
+      "description": "Bounty posting terminal. Encrypted with Syndicate protocols."
+    },
+    {
+      "id": "objpt-terminal-2",
+      "position": {"x": 20, "y": 4},
+      "type": "terminal",
+      "skillRequired": "computers",
+      "alternateSkill": "mechanics",
+      "difficulty": 2,
+      "description": "Communications relay. Routing data for The Broker's network."
+    },
+    {
+      "id": "objpt-terminal-3",
+      "position": {"x": 30, "y": 10},
+      "type": "terminal",
+      "skillRequired": "computers",
+      "alternateSkill": "skulduggery",
+      "difficulty": 3,
+      "description": "Central data core. Heavily encrypted. Contains location intelligence."
+    }
+  ],
+
+  "lootTokens": [
+    {
+      "id": "loot-relay-1",
+      "position": {"x": 10, "y": 8},
+      "reward": {"type": "credits", "value": 100}
+    },
+    {
+      "id": "loot-relay-2",
+      "position": {"x": 30, "y": 6},
+      "reward": {"type": "equipment", "itemId": "frag-grenade"}
+    },
+    {
+      "id": "loot-relay-3",
+      "position": {"x": 20, "y": 4},
+      "reward": {"type": "xp", "value": 3}
+    }
+  ],
+
+  "campaignAct": 2,
+  "missionIndex": 2,
+  "prerequisites": ["act2-m1-crossroads"],
+  "unlocksNext": ["act2-m3-warehouse", "act2-m3-hunting-grounds"],
+
+  "baseXP": 12,
+  "bonusXPPerLoot": 2,
+  "bonusXPPerKill": 1,
+  "maxKillXP": 5,
+  "leaderKillXP": 0
+}

@@ -1,0 +1,317 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Droid Tech specialization (Technician career). 30 talent cards: 10 Tier 1, 8 Tier 2, 6 Tier 3, 4 Tier 4, 2 Tier 5. Players draft 15 into a pyramid (5/4/3/2/1)."
+  },
+  "specialization": {
+    "id": "droid-tech",
+    "name": "Droid Tech",
+    "career": "technician",
+    "description": "A specialist in droid repair, modification, and command. The Droid Tech turns mechanical companions into lethal assets and can patch up allies under fire.",
+    "bonusCareerSkills": ["mechanics", "computers", "vigilance", "ranged-light"],
+    "capstoneCharacteristics": ["intellect", "cunning"]
+  },
+  "talents": [
+    {
+      "id": "drdt-t1-01",
+      "name": "Grit",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Strain Threshold by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "strainThreshold", "value": 1, "perRank": true }
+    },
+    {
+      "id": "drdt-t1-02",
+      "name": "Toughened",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Wound Threshold by 2 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "woundThreshold", "value": 2, "perRank": true }
+    },
+    {
+      "id": "drdt-t1-03",
+      "name": "Technical Aptitude",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 setback die per rank from Mechanics and Computers checks.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["mechanics", "computers"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "drdt-t1-04",
+      "name": "Second Wind",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Once per encounter per rank, recover 2 strain as an incidental.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 2, "perEncounter": true, "perRank": true }
+    },
+    {
+      "id": "drdt-t1-05",
+      "name": "Redundant Systems",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Subtract 10 per rank from critical injury rolls against you (minimum 11).",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "drdt-t1-06",
+      "name": "Quick Draw",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Draw or holster a weapon or tool as an incidental instead of a maneuver.",
+      "mechanicalEffect": { "type": "free_maneuver", "action": "draw_weapon" }
+    },
+    {
+      "id": "drdt-t1-07",
+      "name": "Defensive Stance",
+      "tier": 1,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, upgrade the difficulty of all melee attacks targeting you by 1 per rank until start of next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "attackType": "melee", "value": 1, "perRank": true, "duration": "until_next_turn" }
+    },
+    {
+      "id": "drdt-t1-08",
+      "name": "Tinkerer",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 additional hard point to one item per rank of Tinkerer.",
+      "mechanicalEffect": { "type": "modify_weapon_quality", "quality": "hard_points", "modifier": 1 }
+    },
+    {
+      "id": "drdt-t1-09",
+      "name": "Resolve",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 setback die per rank from Discipline and Cool checks.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["discipline", "cool"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "drdt-t1-10",
+      "name": "Inventor",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Remove 1 setback die from Mechanics checks when crafting or modifying equipment.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["mechanics"], "value": 1 }
+    },
+    {
+      "id": "drdt-t2-01",
+      "name": "Enduring",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Gain +1 Soak per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "perRank": true }
+    },
+    {
+      "id": "drdt-t2-02",
+      "name": "Bought Time",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Suffer 2 strain to perform an additional maneuver on your turn.",
+      "mechanicalEffect": { "type": "extra_maneuver", "strainCost": 2 }
+    },
+    {
+      "id": "drdt-t2-03",
+      "name": "Repair Patch",
+      "tier": 2,
+      "type": "active",
+      "activation": "action",
+      "ranked": true,
+      "description": "As an action, heal 3 wounds per rank on an adjacent droid or vehicle. Once per encounter.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 3, "perRank": true, "perEncounter": true }
+    },
+    {
+      "id": "drdt-t2-04",
+      "name": "Point Blank",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to ranged attacks at Short range or closer.",
+      "mechanicalEffect": { "type": "bonus_damage", "condition": "range_short_or_closer", "value": 1, "perRank": true }
+    },
+    {
+      "id": "drdt-t2-05",
+      "name": "Side Step",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, upgrade the difficulty of ranged attacks targeting you by 1 per rank until start of next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "attackType": "ranged", "value": 1, "perRank": true, "duration": "until_next_turn" }
+    },
+    {
+      "id": "drdt-t2-06",
+      "name": "Jury Rigged",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Choose one weapon or armor. Permanently reduce a quality's Advantage cost by 1 (min 1) or increase Limited Ammo by 1.",
+      "mechanicalEffect": { "type": "modify_weapon_quality", "permanent": true, "description": "Player chooses specific modification" }
+    },
+    {
+      "id": "drdt-t2-07",
+      "name": "Lethal Blows",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add +10 per rank to critical injury rolls inflicted on opponents.",
+      "mechanicalEffect": { "type": "increase_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "drdt-t2-08",
+      "name": "Energy Transfer",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "When an ally within Short range would suffer a critical injury, suffer 3 strain to reduce the critical roll by 30.",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 30, "perRank": false }
+    },
+    {
+      "id": "drdt-t3-01",
+      "name": "Armor Master",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor, increase total Soak by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "condition": "wearing_armor" }
+    },
+    {
+      "id": "drdt-t3-02",
+      "name": "Overcharge",
+      "tier": 3,
+      "type": "active",
+      "activation": "action",
+      "ranked": false,
+      "description": "Perform a ranged attack against all targets within Short range of a point within weapon range. Each target is hit separately.",
+      "mechanicalEffect": { "type": "area_attack", "areaRange": "Short", "attackType": "ranged" }
+    },
+    {
+      "id": "drdt-t3-03",
+      "name": "Heroic Resilience",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, when you would be incapacitated by wounds, immediately heal 5 wounds and continue acting.",
+      "mechanicalEffect": { "type": "prevent_incapacitation", "healValue": 5, "perSession": true }
+    },
+    {
+      "id": "drdt-t3-04",
+      "name": "Deft Maker",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Remove 1 setback die from all Mechanics, Computers, and Medicine checks.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["mechanics", "computers", "medicine"], "value": 1 }
+    },
+    {
+      "id": "drdt-t3-05",
+      "name": "Crippling Blow",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Increase Critical rating of next attack by 1 difficulty, but add +20 to the Critical Injury result.",
+      "mechanicalEffect": { "type": "empowered_critical", "criticalBonus": 20, "criticalCostIncrease": 1 }
+    },
+    {
+      "id": "drdt-t3-06",
+      "name": "Feral Strength",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one hit of Brawl or Melee attacks.",
+      "mechanicalEffect": { "type": "bonus_damage", "skills": ["brawl", "melee"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "drdt-t4-01",
+      "name": "Deadly Accuracy",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Choose one combat skill when purchased. Add ranks in that skill as bonus damage to one hit per round.",
+      "mechanicalEffect": { "type": "skill_damage_bonus", "perRank": true, "description": "Player selects combat skill at purchase" }
+    },
+    {
+      "id": "drdt-t4-02",
+      "name": "Unstoppable",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Suffer 3 strain to perform a second Action this turn (once per encounter).",
+      "mechanicalEffect": { "type": "extra_action", "strainCost": 3, "perEncounter": true }
+    },
+    {
+      "id": "drdt-t4-03",
+      "name": "Armor Master (Improved)",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor with defense rating 1+, increase defense pool upgrades by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "defenseUpgrades", "value": 1, "condition": "armor_defense_1_plus" },
+      "prerequisite": "drdt-t3-01"
+    },
+    {
+      "id": "drdt-t4-04",
+      "name": "Iron Body",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Reduce all strain suffered (from any source) by 1, to a minimum of 1.",
+      "mechanicalEffect": { "type": "reduce_strain_suffered", "value": 1, "minimum": 1 }
+    },
+    {
+      "id": "drdt-t5-01",
+      "name": "Dedication (Intellect)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Intellect by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "intellect", "value": 1 }
+    },
+    {
+      "id": "drdt-t5-02",
+      "name": "Dedication (Cunning)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Cunning by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "cunning", "value": 1 }
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "id": "act1-m3-ambush",
+  "name": "Ambush at Xylo Pass",
+  "description": "An alternative path: an Imperial convoy carrying prisoners passes through a narrow mountain pass. Free the prisoners before the escort reaches the garrison.",
+  "narrativeIntro": "Intelligence reports an Imperial prison transport moving through Xylo Pass on Ryloth. Among the prisoners is Hera Syndulla's contact, a Twi'lek operative with knowledge of every rebel safe house in the sector. Your team must ambush the convoy, disable the transport, and free the prisoners before the escort calls for backup.",
+  "narrativeSuccess": "The transport grinds to a halt as its repulsor coils fail. Your team pries open the prisoner hold and finds the Twi'lek operative alive, if battered. She clasps your hand and whispers coordinates: a secret meeting point where the rebellion's next big push will be planned.",
+  "narrativeFailure": "The convoy escort proves too strong. As you fall back into the rocks, the transport accelerates through the pass and disappears. The prisoners will reach the garrison by nightfall. The Twi'lek operative and her intelligence are lost to the Empire.",
+
+  "mapId": "mountain-pass",
+  "mapPreset": "skirmish",
+  "boardsWide": 3,
+  "boardsTall": 3,
+
+  "difficulty": "hard",
+  "roundLimit": 8,
+  "recommendedHeroCount": 2,
+
+  "imperialThreat": 14,
+  "threatPerRound": 2,
+
+  "operativeDeployZone": [
+    {"x": 8, "y": 0}, {"x": 9, "y": 0}, {"x": 10, "y": 0},
+    {"x": 8, "y": 1}, {"x": 9, "y": 1}
+  ],
+  "initialEnemies": [
+    {
+      "npcProfileId": "stormtrooper",
+      "count": 4,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 16, "y": 12}, {"x": 17, "y": 12}, {"x": 18, "y": 12}, {"x": 19, "y": 12}
+      ]
+    },
+    {
+      "npcProfileId": "stormtrooper-elite",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 20, "y": 14}]
+    },
+    {
+      "npcProfileId": "stormtrooper",
+      "count": 3,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 24, "y": 16}, {"x": 25, "y": 16}, {"x": 26, "y": 16}
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "id": "wave-backup",
+      "triggerRound": 5,
+      "groups": [
+        {
+          "npcProfileId": "stormtrooper",
+          "count": 4,
+          "asMinGroup": true,
+          "deployZone": [
+            {"x": 35, "y": 16}, {"x": 35, "y": 17}, {"x": 34, "y": 16}, {"x": 34, "y": 17}
+          ]
+        },
+        {
+          "npcProfileId": "e-web-engineer",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 35, "y": 14}]
+        }
+      ],
+      "threatCost": 8,
+      "narrativeText": "Imperial backup arrives! An E-Web heavy repeater team sets up at the pass exit!"
+    }
+  ],
+
+  "objectives": [
+    {
+      "id": "obj-transport",
+      "type": "interact_terminal",
+      "side": "Operative",
+      "description": "Disable the prison transport (interact with the transport terminal).",
+      "targetCount": 1,
+      "priority": "primary",
+      "xpReward": 3
+    },
+    {
+      "id": "obj-rescue",
+      "type": "interact_terminal",
+      "side": "Operative",
+      "description": "Free the prisoners from the transport hold.",
+      "targetCount": 1,
+      "priority": "primary",
+      "xpReward": 5
+    },
+    {
+      "id": "obj-survive",
+      "type": "survive_rounds",
+      "side": "Operative",
+      "description": "Survive until the prisoners can escape (survive 8 rounds with at least 1 hero standing).",
+      "roundCount": 8,
+      "priority": "primary",
+      "xpReward": 0
+    },
+    {
+      "id": "obj-eliminate-elite",
+      "type": "eliminate_target",
+      "side": "Operative",
+      "description": "Eliminate the escort commander.",
+      "targetId": "stormtrooper-elite",
+      "priority": "secondary",
+      "xpReward": 5
+    }
+  ],
+  "victoryConditions": [
+    {
+      "side": "Operative",
+      "description": "Disable the transport and free the prisoners.",
+      "requiredObjectiveIds": ["obj-transport", "obj-rescue"]
+    },
+    {
+      "side": "Imperial",
+      "description": "Incapacitate all Operative heroes or reach round 8 with transport intact.",
+      "requiredObjectiveIds": []
+    }
+  ],
+
+  "objectivePoints": [
+    {
+      "id": "objpt-transport-engine",
+      "position": {"x": 20, "y": 10},
+      "type": "console",
+      "skillRequired": "mechanics",
+      "alternateSkill": "computers",
+      "difficulty": 2,
+      "description": "Transport engine control -- disable the repulsorlift drive.",
+      "objectiveId": "obj-transport"
+    },
+    {
+      "id": "objpt-prisoner-lock",
+      "position": {"x": 22, "y": 10},
+      "type": "lock",
+      "skillRequired": "skulduggery",
+      "alternateSkill": "athletics",
+      "difficulty": 2,
+      "description": "Prisoner hold lock -- release the cell door mechanism.",
+      "objectiveId": "obj-rescue"
+    }
+  ],
+
+  "lootTokens": [
+    {
+      "id": "loot-comlink",
+      "position": {"x": 18, "y": 14},
+      "reward": {"type": "narrative", "itemId": "encrypted-comlink", "description": "An encrypted comlink with rebel frequencies"}
+    },
+    {
+      "id": "loot-medpac",
+      "position": {"x": 12, "y": 8},
+      "reward": {"type": "xp", "value": 2}
+    }
+  ],
+
+  "campaignAct": 1,
+  "missionIndex": 3,
+  "prerequisites": ["act1-m2-intel"],
+  "unlocksNext": ["act1-m4-finale"],
+
+  "baseXP": 10,
+  "bonusXPPerLoot": 2,
+  "bonusXPPerKill": 1,
+  "maxKillXP": 5,
+  "leaderKillXP": 5
+}

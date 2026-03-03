@@ -1,0 +1,32 @@
+========================================================
+  COMBAT SIMULATOR - BALANCE REPORT
+========================================================
+  Scenario:       Weapon A/B: A280 vs E-11 (Korrga)
+  Games played:   100
+  Side A:         3x Stormtrooper
+  Side B:         Korrga (E-11)
+
+--------------------------------------------------------
+  WIN RATES
+--------------------------------------------------------
+  3x Stormtrooper      33.0%  (33 wins)
+  Korrga (E-11)        67.0%  (67 wins)
+  Draw                 0.0%  (0 draws)
+
+--------------------------------------------------------
+  AVERAGES PER GAME
+--------------------------------------------------------
+  Rounds played:       10.5
+  Side A damage taken: 8.4
+  Side B damage taken: 10.3
+  Side A defeated:     2.1
+  Side B defeated:     0.1
+
+--------------------------------------------------------
+  FIGURE PERFORMANCE
+--------------------------------------------------------
+  Figure                 Side  Survival  AvgDmgTkn  AvgRounds
+  Stormtrooper           A         30%        2.8        8.3
+  Korrga                 B         88%        6.5       10.5
+
+========================================================

@@ -1,0 +1,25 @@
+{
+  "name": "galactic-operations",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @galactic-ops/client dev",
+    "dev:all": "concurrently \"pnpm --filter @galactic-ops/client dev\" \"pnpm --filter @galactic-ops/server dev\"",
+    "build": "pnpm --filter @galactic-ops/engine build && pnpm --filter @galactic-ops/client build",
+    "test": "pnpm --filter @galactic-ops/engine test:run",
+    "validate-data": "tsx scripts/validate-data.ts",
+    "simulate": "tsx scripts/run-simulations.ts",
+    "simulate:quick": "tsx scripts/run-simulations.ts --count 10 --seed 42",
+    "combat-sim": "tsx scripts/run-combat-sim.ts",
+    "export:cards": "tsx scripts/generate-card-pdf.ts",
+    "build-arena": "node scripts/build-combat-arena.mjs"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "concurrently": "^9.2.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

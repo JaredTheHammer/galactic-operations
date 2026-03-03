@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Career definitions. Each career defines 8 career skills (cheaper to advance) and 3 specialization deck IDs."
+  },
+  "careers": {
+    "hired-gun": {
+      "id": "hired-gun",
+      "name": "Hired Gun",
+      "description": "Soldiers, brawlers, and mercenaries. The Hired Gun excels at direct combat and physical feats.",
+      "careerSkills": [
+        "athletics",
+        "brawl",
+        "discipline",
+        "melee",
+        "ranged-heavy",
+        "ranged-light",
+        "resilience",
+        "vigilance"
+      ],
+      "specializations": ["mercenary", "bodyguard", "demolitionist"]
+    },
+    "scoundrel": {
+      "id": "scoundrel",
+      "name": "Scoundrel",
+      "description": "Smugglers, gamblers, and silver-tongued rogues. The Scoundrel thrives on cunning and quick reflexes.",
+      "careerSkills": [
+        "coordination",
+        "cool",
+        "deception",
+        "perception",
+        "ranged-light",
+        "skulduggery",
+        "stealth",
+        "streetwise"
+      ],
+      "specializations": ["smuggler", "gunslinger", "charmer"]
+    },
+    "technician": {
+      "id": "technician",
+      "name": "Technician",
+      "description": "Mechanics, slicers, and inventors. The Technician turns technology into tactical advantage.",
+      "careerSkills": [
+        "computers",
+        "coordination",
+        "discipline",
+        "mechanics",
+        "medicine",
+        "perception",
+        "ranged-light",
+        "vigilance"
+      ],
+      "specializations": ["droid-tech", "outlaw-tech", "slicer"]
+    },
+    "mystic": {
+      "id": "mystic",
+      "name": "Mystic",
+      "description": "Force sensitives, healers, and seers. The Mystic channels the Force to alter the battlefield.",
+      "careerSkills": [
+        "cool",
+        "discipline",
+        "medicine",
+        "melee",
+        "perception",
+        "vigilance",
+        "willpower-check",
+        "coordination"
+      ],
+      "specializations": ["force-adept", "healer", "niman-disciple"]
+    },
+    "commander": {
+      "id": "commander",
+      "name": "Commander",
+      "description": "Leaders, tacticians, and inspirational figures. The Commander empowers allies and controls the flow of battle.",
+      "careerSkills": [
+        "cool",
+        "discipline",
+        "leadership",
+        "perception",
+        "ranged-heavy",
+        "ranged-light",
+        "resilience",
+        "vigilance"
+      ],
+      "specializations": ["tactician", "figurehead", "strategist"]
+    },
+    "bounty-hunter": {
+      "id": "bounty-hunter",
+      "name": "Bounty Hunter",
+      "description": "Trackers, assassins, and survivalists. The Bounty Hunter is a versatile combatant who always gets the target.",
+      "careerSkills": [
+        "athletics",
+        "brawl",
+        "perception",
+        "ranged-heavy",
+        "stealth",
+        "streetwise",
+        "survival",
+        "vigilance"
+      ],
+      "specializations": ["assassin", "gadgeteer", "survivalist"]
+    }
+  }
+}

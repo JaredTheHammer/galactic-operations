@@ -1,0 +1,316 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Assassin specialization (Bounty Hunter career). 30 talent cards: 10 Tier 1, 8 Tier 2, 6 Tier 3, 4 Tier 4, 2 Tier 5. Players draft 15 into a pyramid (5/4/3/2/1)."
+  },
+  "specialization": {
+    "id": "assassin",
+    "name": "Assassin",
+    "career": "bounty-hunter",
+    "description": "A lethal precision striker who eliminates high-value targets with deadly efficiency. The Assassin combines stealth, marksmanship, and critical strike expertise.",
+    "bonusCareerSkills": ["ranged-heavy", "stealth", "perception", "melee"],
+    "capstoneCharacteristics": ["agility", "cunning"]
+  },
+  "talents": [
+    {
+      "id": "assn-t1-01",
+      "name": "Grit",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Strain Threshold by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "strainThreshold", "value": 1, "perRank": true }
+    },
+    {
+      "id": "assn-t1-02",
+      "name": "Lethal Blows",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add +10 per rank to critical injury rolls inflicted on opponents.",
+      "mechanicalEffect": { "type": "increase_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "assn-t1-03",
+      "name": "Quick Strike",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 Ability die per rank to combat checks against targets that have not yet acted this encounter.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "condition": "target_not_acted" }
+    },
+    {
+      "id": "assn-t1-04",
+      "name": "Second Wind",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Once per encounter per rank, recover 2 strain as an incidental.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 2, "perEncounter": true, "perRank": true }
+    },
+    {
+      "id": "assn-t1-05",
+      "name": "Quick Draw",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Draw or holster a weapon as an incidental instead of a maneuver.",
+      "mechanicalEffect": { "type": "free_maneuver", "action": "draw_weapon" }
+    },
+    {
+      "id": "assn-t1-06",
+      "name": "Stalker",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 setback die per rank from Stealth and Coordination checks.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["stealth", "coordination"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "assn-t1-07",
+      "name": "Toughened",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Wound Threshold by 2 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "woundThreshold", "value": 2, "perRank": true }
+    },
+    {
+      "id": "assn-t1-08",
+      "name": "Dodge",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "When targeted by a combat check, suffer strain up to ranks in Dodge to upgrade the difficulty by an equal amount.",
+      "mechanicalEffect": { "type": "upgrade_defense", "attackType": "all", "value": 1, "perRank": true }
+    },
+    {
+      "id": "assn-t1-09",
+      "name": "Precise Aim",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 setback die per rank from Ranged (Heavy) and Ranged (Light) combat checks.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["ranged-heavy", "ranged-light"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "assn-t1-10",
+      "name": "Shortcut",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 setback die per rank from Athletics and Coordination checks when navigating terrain.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["athletics", "coordination"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "assn-t2-01",
+      "name": "Point Blank",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to ranged attacks at Short range or closer.",
+      "mechanicalEffect": { "type": "bonus_damage", "condition": "range_short_or_closer", "value": 1, "perRank": true }
+    },
+    {
+      "id": "assn-t2-02",
+      "name": "Barrage",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one hit of a Ranged (Heavy) attack at Long range or farther.",
+      "mechanicalEffect": { "type": "bonus_damage", "condition": "range_long_or_farther", "skills": ["ranged-heavy"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "assn-t2-03",
+      "name": "Durable",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Subtract 10 per rank from critical injury rolls against you (minimum 11).",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "assn-t2-04",
+      "name": "Bought Time",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Suffer 2 strain to perform an additional maneuver on your turn.",
+      "mechanicalEffect": { "type": "extra_maneuver", "strainCost": 2 }
+    },
+    {
+      "id": "assn-t2-05",
+      "name": "Side Step",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, upgrade the difficulty of ranged attacks targeting you by 1 per rank until start of next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "attackType": "ranged", "value": 1, "perRank": true, "duration": "until_next_turn" }
+    },
+    {
+      "id": "assn-t2-06",
+      "name": "Targeted Blow",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "After a successful combat check, suffer 2 strain to add Agility to one hit's damage.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 3, "condition": "spend_strain_2", "description": "Adds Agility characteristic to damage" }
+    },
+    {
+      "id": "assn-t2-07",
+      "name": "Enduring",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Gain +1 Soak per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "perRank": true }
+    },
+    {
+      "id": "assn-t2-08",
+      "name": "Sniper Shot",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, increase the maximum range of next ranged attack by 1 range band per rank.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "condition": "extend_range" }
+    },
+    {
+      "id": "assn-t3-01",
+      "name": "True Aim",
+      "tier": 3,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, upgrade attack pool by 1 per rank for next combat check this turn.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "duration": "this_turn" }
+    },
+    {
+      "id": "assn-t3-02",
+      "name": "Crippling Blow",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Increase Critical rating of next attack by 1 difficulty, but add +20 to the Critical Injury result.",
+      "mechanicalEffect": { "type": "empowered_critical", "criticalBonus": 20, "criticalCostIncrease": 1 }
+    },
+    {
+      "id": "assn-t3-03",
+      "name": "Heroic Resilience",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, when you would be incapacitated by wounds, immediately heal 5 wounds and continue acting.",
+      "mechanicalEffect": { "type": "prevent_incapacitation", "healValue": 5, "perSession": true }
+    },
+    {
+      "id": "assn-t3-04",
+      "name": "Natural Marksman",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Add 1 Proficiency die (yellow) to all Ranged (Heavy) checks.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "skill_ranged_heavy" }
+    },
+    {
+      "id": "assn-t3-05",
+      "name": "Feral Strength",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one hit of Brawl or Melee attacks.",
+      "mechanicalEffect": { "type": "bonus_damage", "skills": ["brawl", "melee"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "assn-t3-06",
+      "name": "Armor Master",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor, increase total Soak by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "condition": "wearing_armor" }
+    },
+    {
+      "id": "assn-t4-01",
+      "name": "Deadly Accuracy",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Choose one combat skill when purchased. Add ranks in that skill as bonus damage to one hit per round.",
+      "mechanicalEffect": { "type": "skill_damage_bonus", "perRank": true, "description": "Player selects combat skill at purchase" }
+    },
+    {
+      "id": "assn-t4-02",
+      "name": "Unstoppable",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Suffer 3 strain to perform a second Action this turn (once per encounter).",
+      "mechanicalEffect": { "type": "extra_action", "strainCost": 3, "perEncounter": true }
+    },
+    {
+      "id": "assn-t4-03",
+      "name": "Iron Body",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Reduce all strain suffered (from any source) by 1, to a minimum of 1.",
+      "mechanicalEffect": { "type": "reduce_strain_suffered", "value": 1, "minimum": 1 }
+    },
+    {
+      "id": "assn-t4-04",
+      "name": "Master Assassin",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Add 1 Proficiency die (yellow) to all combat checks when target is unaware or Suppressed.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "target_unaware_or_suppressed" }
+    },
+    {
+      "id": "assn-t5-01",
+      "name": "Dedication (Agility)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Agility by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "agility", "value": 1 }
+    },
+    {
+      "id": "assn-t5-02",
+      "name": "Dedication (Cunning)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Cunning by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "cunning", "value": 1 }
+    }
+  ]
+}

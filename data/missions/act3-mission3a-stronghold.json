@@ -1,0 +1,175 @@
+{
+  "id": "act3-m3-stronghold",
+  "name": "Assault on the Stronghold",
+  "description": "A direct assault on Warlord Drayen's mountain fortress to destroy his war droid reserves before they can be deployed.",
+  "narrativeIntro": "The shipping manifests revealed that Drayen's completed war droids are being stockpiled at a fortified mountain compound. If those droids deploy across the sector, they'll be nearly impossible to stop. Commander Vane has authorized a direct assault. This is a high-risk operation -- the stronghold is defended by Drayen's best troops and his most advanced prototypes. But if you can destroy the droid reserves, you'll cripple his military capability before the final confrontation.",
+  "narrativeSuccess": "The last war droid topples as the mountain stronghold burns behind you. Drayen's reserves are destroyed. In the command bunker, you find tactical maps showing Drayen's planned invasion routes across the entire sector. One map is circled in red: 'Final Rally Point -- Fortress Drayen.' It's time to end this. The warlord is running out of resources, running out of allies, and running out of time.",
+  "narrativeFailure": "The stronghold's defenses are too well-prepared. Your assault falters at the inner perimeter as the Siege Droid's suppressive fire pins your team. You destroy a handful of war droids, but the bulk of Drayen's reserve army remains intact. The warlord will deploy them soon. You'll have to face his full strength at the final confrontation.",
+
+  "mapId": "mountain-stronghold",
+  "mapPreset": "skirmish",
+  "boardsWide": 3,
+  "boardsTall": 3,
+
+  "difficulty": "hard",
+  "roundLimit": 9,
+  "recommendedHeroCount": 2,
+
+  "imperialThreat": 12,
+  "threatPerRound": 3,
+
+  "operativeDeployZone": [
+    {"x": 0, "y": 14}, {"x": 1, "y": 14}, {"x": 2, "y": 14},
+    {"x": 0, "y": 15}, {"x": 1, "y": 15}, {"x": 2, "y": 15}
+  ],
+  "initialEnemies": [
+    {
+      "npcProfileId": "defector-trooper",
+      "count": 4,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 14, "y": 10}, {"x": 15, "y": 10}, {"x": 16, "y": 10}, {"x": 17, "y": 10}
+      ]
+    },
+    {
+      "npcProfileId": "war-droid-mk1",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 20, "y": 8}]
+    },
+    {
+      "npcProfileId": "siege-droid-mk2",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 26, "y": 4}]
+    },
+    {
+      "npcProfileId": "conscript-militia",
+      "count": 3,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 22, "y": 14}, {"x": 23, "y": 14}, {"x": 24, "y": 14}
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "id": "wave-1",
+      "triggerRound": 3,
+      "groups": [
+        {
+          "npcProfileId": "shock-commando",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 34, "y": 6}]
+        },
+        {
+          "npcProfileId": "defector-trooper",
+          "count": 3,
+          "asMinGroup": true,
+          "deployZone": [
+            {"x": 33, "y": 7}, {"x": 34, "y": 7}, {"x": 35, "y": 7}
+          ]
+        }
+      ],
+      "threatCost": 4,
+      "narrativeText": "A Shock Commando leads reinforcements from the stronghold's secondary entrance!"
+    },
+    {
+      "id": "wave-2",
+      "triggerRound": 6,
+      "groups": [
+        {
+          "npcProfileId": "war-droid-mk1",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 30, "y": 12}]
+        }
+      ],
+      "threatCost": 5,
+      "narrativeText": "Another War Droid lumbers out of the storage bunker!"
+    }
+  ],
+
+  "objectives": [
+    {
+      "id": "obj-eliminate",
+      "type": "eliminate_all",
+      "side": "Operative",
+      "description": "Destroy all warlord forces defending the stronghold.",
+      "priority": "primary",
+      "xpReward": 0
+    },
+    {
+      "id": "obj-destroy-reserves",
+      "type": "interact_terminal",
+      "side": "Operative",
+      "description": "Plant demolition charges on the droid storage vault (interact with 2 charge points).",
+      "targetCount": 2,
+      "priority": "secondary",
+      "xpReward": 5
+    }
+  ],
+  "victoryConditions": [
+    {
+      "side": "Operative",
+      "description": "Destroy all warlord forces.",
+      "requiredObjectiveIds": ["obj-eliminate"]
+    },
+    {
+      "side": "Imperial",
+      "description": "Incapacitate all Operative heroes.",
+      "requiredObjectiveIds": []
+    }
+  ],
+
+  "objectivePoints": [
+    {
+      "id": "objpt-charge-1",
+      "position": {"x": 24, "y": 4},
+      "type": "terminal",
+      "skillRequired": "mechanics",
+      "alternateSkill": "athletics",
+      "difficulty": 2,
+      "description": "Droid storage vault -- plant demolition charges on support pillar."
+    },
+    {
+      "id": "objpt-charge-2",
+      "position": {"x": 30, "y": 8},
+      "type": "terminal",
+      "skillRequired": "mechanics",
+      "alternateSkill": "athletics",
+      "difficulty": 2,
+      "description": "Power conduit junction -- overload to trigger chain reaction."
+    }
+  ],
+
+  "lootTokens": [
+    {
+      "id": "loot-armory",
+      "position": {"x": 16, "y": 6},
+      "reward": {"type": "credits", "value": 200}
+    },
+    {
+      "id": "loot-war-plans",
+      "position": {"x": 28, "y": 4},
+      "reward": {"type": "xp", "value": 5}
+    },
+    {
+      "id": "loot-prototype-weapon",
+      "position": {"x": 20, "y": 8},
+      "reward": {"type": "equipment", "itemId": "dc-15a"}
+    }
+  ],
+
+  "campaignAct": 3,
+  "missionIndex": 3,
+  "prerequisites": ["act3-m2-prototype"],
+  "unlocksNext": ["act3-m4-endgame"],
+
+  "baseXP": 16,
+  "bonusXPPerLoot": 2,
+  "bonusXPPerKill": 1,
+  "maxKillXP": 7,
+  "leaderKillXP": 0
+}

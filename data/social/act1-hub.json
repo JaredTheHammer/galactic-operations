@@ -1,0 +1,476 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Act 1 social phase hub: Docking Bay 7, a seedy cantina and market on the fringe world of Ord Varee."
+  },
+  "npcs": {
+    "sabacc-dealer": {
+      "id": "sabacc-dealer",
+      "name": "Kell Tavari",
+      "description": "A smooth-talking Twi'lek sabacc dealer who knows everyone's business. Information is his real currency.",
+      "disposition": "neutral",
+      "characteristics": { "willpower": 2, "presence": 3, "cunning": 3 },
+      "skills": { "deception": 2, "cool": 2, "negotiation": 1, "charm": 1 },
+      "keywords": ["informant", "gambler", "underworld"],
+      "portrait": "kell-tavari"
+    },
+    "mechanic": {
+      "id": "mechanic",
+      "name": "Greeska",
+      "description": "A grizzled Ugnaught mechanic who can repair anything, but drives a hard bargain for parts.",
+      "disposition": "unfriendly",
+      "characteristics": { "willpower": 3, "presence": 1, "cunning": 2 },
+      "skills": { "negotiation": 2, "discipline": 3, "cool": 1 },
+      "keywords": ["mechanic", "vendor", "grumpy"],
+      "portrait": "greeska"
+    },
+    "rebel-contact": {
+      "id": "rebel-contact",
+      "name": "Vera Solaris",
+      "description": "A cautious human woman running rebel logistics in the sector. She offers missions and supplies, but only to those she trusts.",
+      "disposition": "neutral",
+      "characteristics": { "willpower": 3, "presence": 2, "cunning": 2 },
+      "skills": { "leadership": 2, "discipline": 2, "vigilance": 2, "cool": 1 },
+      "keywords": ["rebel", "contact", "logistics"],
+      "portrait": "vera-solaris"
+    },
+    "bounty-hunter": {
+      "id": "bounty-hunter",
+      "name": "Drez Venn",
+      "description": "A Mandalorian bounty hunter between jobs. Might be convinced to lend a hand, for the right price or the right cause.",
+      "disposition": "unfriendly",
+      "characteristics": { "willpower": 3, "presence": 2, "cunning": 3 },
+      "skills": { "coercion": 2, "discipline": 3, "cool": 2, "vigilance": 2 },
+      "keywords": ["bounty-hunter", "mandalorian", "companion-candidate"],
+      "portrait": "drez-venn"
+    },
+    "medic": {
+      "id": "medic",
+      "name": "Doc Hessen",
+      "description": "A former Imperial field medic who deserted after witnessing one too many atrocities. He runs a back-alley clinic.",
+      "disposition": "friendly",
+      "characteristics": { "willpower": 2, "presence": 2, "cunning": 1 },
+      "skills": { "negotiation": 1, "discipline": 2, "cool": 2 },
+      "keywords": ["medic", "healer", "ex-imperial"],
+      "portrait": "doc-hessen"
+    }
+  },
+  "location": {
+    "id": "docking-bay-7",
+    "name": "Docking Bay 7 Cantina",
+    "description": "A dimly lit cantina adjacent to a run-down docking bay on Ord Varee. Smoke curls from hookah pipes, a jukebox plays jizz-wailer tunes, and every corner holds a deal waiting to happen.",
+    "narrativeIntro": "Your team files into the cantina, blasters still warm from the last job. The barkeep nods -- regulars now. Between the clatter of sabacc cards and the hum of conversation, several faces catch your eye. Time to gather intel, restock, and maybe make some new friends.",
+    "campaignAct": 1,
+    "encounters": [
+      {
+        "id": "enc-kell-intel",
+        "name": "Kell's Information Network",
+        "description": "Kell Tavari shuffles his sabacc deck and raises an eyebrow as you approach. He always knows more than he lets on.",
+        "narrativeIntro": "\"Pull up a chair. Cards? Or are you here for something more... valuable?\" Kell's lekku twitch with amusement.",
+        "npcId": "sabacc-dealer",
+        "repeatable": false,
+        "dialogueOptions": [
+          {
+            "id": "kell-charm",
+            "text": "\"We're looking for Imperial patrol routes. Help an old friend out?\"",
+            "skillId": "charm",
+            "difficulty": 2,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act1-m2-intel",
+                "hintText": "Imperial patrols rotate every 6 hours. The gap between shifts at the northern corridor is your best window.",
+                "description": "Kell reveals Imperial patrol schedules."
+              },
+              {
+                "type": "credits",
+                "credits": 50,
+                "description": "Kell throws in some credits from a recent sabacc win."
+              }
+            ],
+            "triumphOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "kells-favor",
+                "description": "Kell is genuinely impressed. He owes you one."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "credits",
+                "credits": -25,
+                "description": "Kell swindles you into buying a round of drinks before refusing to help."
+              }
+            ],
+            "advantageSpend": [
+              {
+                "cost": 2,
+                "outcome": {
+                  "type": "discount",
+                  "discountPercent": 10,
+                  "description": "Kell puts in a good word with the local vendors."
+                }
+              }
+            ],
+            "threatConsequence": [
+              {
+                "cost": 3,
+                "outcome": {
+                  "type": "reputation",
+                  "factionId": "underworld",
+                  "reputationDelta": -1,
+                  "description": "Word spreads that you're asking too many questions."
+                }
+              }
+            ]
+          },
+          {
+            "id": "kell-deception",
+            "text": "\"I heard the Empire's offering a bounty on rebel cells. Figured I'd cash in...\"",
+            "skillId": "deception",
+            "difficulty": 2,
+            "isOpposed": true,
+            "opposedSkillId": "cool",
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act1-m3a-cache",
+                "hintText": "Kell lets slip the location of a hidden weapons cache. He thinks you're going to sell the rebels out, but the info works both ways.",
+                "description": "Kell accidentally reveals the weapons cache location."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "reputation",
+                "factionId": "underworld",
+                "reputationDelta": -2,
+                "description": "Kell sees through the lie and is not amused."
+              }
+            ],
+            "despairOutcomes": [
+              {
+                "type": "credits",
+                "credits": -100,
+                "description": "Kell 'accidentally' bumps into you, lifting your credit chip."
+              }
+            ]
+          },
+          {
+            "id": "kell-negotiate",
+            "text": "\"Name your price for the patrol routes. Credits talk.\"",
+            "skillId": "negotiation",
+            "difficulty": 2,
+            "isOpposed": true,
+            "opposedSkillId": "negotiation",
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act1-m2-intel",
+                "hintText": "Clean transaction. Kell hands over a datapad with Imperial patrol routes and shift changes.",
+                "description": "Purchased Imperial patrol data from Kell."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "credits",
+                "credits": -75,
+                "description": "Kell takes your credits but the data turns out to be outdated."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enc-vera-mission",
+        "name": "Vera's Next Assignment",
+        "description": "Vera Solaris sits in a quiet booth, sipping caf. She gestures for you to join her.",
+        "narrativeIntro": "\"Good work at the outpost. The cell needs more from you. Interested?\" She slides a holoprojector across the table.",
+        "npcId": "rebel-contact",
+        "repeatable": false,
+        "requiresMissions": ["act1-m1-arrival"],
+        "dialogueOptions": [
+          {
+            "id": "vera-leadership",
+            "text": "\"We're ready. What does the rebellion need?\"",
+            "skillId": "leadership",
+            "difficulty": 1,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act1-m2-intel",
+                "hintText": "Vera briefs you on the intel operation. An Imperial communications array needs to be tapped.",
+                "description": "Vera shares the details of the next rebel operation."
+              },
+              {
+                "type": "xp",
+                "xpAmount": 3,
+                "description": "Your confident leadership impresses Vera. Gain 3 XP."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act1-m2-intel",
+                "hintText": "Vera shares the briefing, but seems uncertain about your readiness.",
+                "description": "Vera reluctantly shares mission details."
+              }
+            ],
+            "advantageSpend": [
+              {
+                "cost": 2,
+                "outcome": {
+                  "type": "credits",
+                  "credits": 100,
+                  "description": "Vera secures an operational budget for your team."
+                }
+              }
+            ]
+          },
+          {
+            "id": "vera-negotiate",
+            "text": "\"We'll do it, but we need better gear. Can the cell help?\"",
+            "skillId": "negotiation",
+            "difficulty": 2,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "credits",
+                "credits": 200,
+                "description": "Vera authorizes an equipment stipend from rebel funds."
+              },
+              {
+                "type": "information",
+                "missionId": "act1-m2-intel",
+                "hintText": "You'll get the mission briefing along with the credits.",
+                "description": "Mission briefing included with the equipment stipend."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "credits",
+                "credits": 50,
+                "description": "Vera can only spare a small amount. The rebellion is stretched thin."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enc-drez-recruit",
+        "name": "The Mandalorian's Price",
+        "description": "Drez Venn sits alone, methodically cleaning a blaster. His beskar catches the low cantina light.",
+        "narrativeIntro": "The bounty hunter looks up with expressionless visor. \"I know who you are. And I know who's hunting you. Question is: do you want me on your side or theirs?\"",
+        "npcId": "bounty-hunter",
+        "repeatable": false,
+        "requiresMissions": ["act1-m1-arrival"],
+        "dialogueOptions": [
+          {
+            "id": "drez-negotiate",
+            "text": "\"What's your rate?\"",
+            "skillId": "negotiation",
+            "difficulty": 3,
+            "isOpposed": true,
+            "opposedSkillId": "cool",
+            "successOutcomes": [
+              {
+                "type": "companion",
+                "companionId": "drez-venn",
+                "description": "Drez agrees to join your crew for a reasonable fee."
+              },
+              {
+                "type": "credits",
+                "credits": -150,
+                "description": "His retainer fee is 150 credits."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "credits",
+                "credits": -50,
+                "description": "Drez takes 50 credits for 'listening to your pitch' and walks away."
+              }
+            ]
+          },
+          {
+            "id": "drez-coerce",
+            "text": "\"I know about the bounty on your head from Jabba. Work with us, or we turn you in.\"",
+            "skillId": "coercion",
+            "difficulty": 3,
+            "isOpposed": true,
+            "opposedSkillId": "discipline",
+            "requiresNarrativeItem": "kells-favor",
+            "successOutcomes": [
+              {
+                "type": "companion",
+                "companionId": "drez-venn",
+                "description": "Drez grudgingly agrees to work with you. He won't forget this."
+              },
+              {
+                "type": "reputation",
+                "factionId": "mandalorian",
+                "reputationDelta": -2,
+                "description": "Coercing a Mandalorian has consequences."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "reputation",
+                "factionId": "mandalorian",
+                "reputationDelta": -3,
+                "description": "Drez is furious. He won't forget this slight."
+              }
+            ],
+            "despairOutcomes": [
+              {
+                "type": "credits",
+                "credits": -200,
+                "description": "Drez draws his blaster and demands compensation for the insult."
+              }
+            ]
+          },
+          {
+            "id": "drez-charm",
+            "text": "\"We're fighting the Empire. Mandalore remembers Imperial occupation. Fight for something that matters.\"",
+            "skillId": "charm",
+            "difficulty": 3,
+            "isOpposed": true,
+            "opposedSkillId": "discipline",
+            "successOutcomes": [
+              {
+                "type": "companion",
+                "companionId": "drez-venn",
+                "description": "Something shifts behind the visor. \"For Mandalore, then. Not for you.\""
+              }
+            ],
+            "triumphOutcomes": [
+              {
+                "type": "reputation",
+                "factionId": "mandalorian",
+                "reputationDelta": 2,
+                "description": "Drez respects your appeal to Mandalorian honor."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "reputation",
+                "factionId": "mandalorian",
+                "reputationDelta": -1,
+                "description": "\"Pretty words. But pretty words don't stop blaster bolts.\" He turns away."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enc-doc-healing",
+        "name": "Doc's Clinic",
+        "description": "Doc Hessen's clinic is a converted storage closet with surprisingly clean equipment.",
+        "narrativeIntro": "\"Another rough job, eh? Let me take a look.\" Doc adjusts his spectacles and gestures to the exam table.",
+        "npcId": "medic",
+        "repeatable": true,
+        "dialogueOptions": [
+          {
+            "id": "doc-charm",
+            "text": "\"Doc, we could use your help. The rebellion needs people like you.\"",
+            "skillId": "charm",
+            "difficulty": 1,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "healing",
+                "healTargetId": "any",
+                "description": "Doc patches up your wounded team member free of charge."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "credits",
+                "credits": -25,
+                "description": "Doc helps but charges for the supplies."
+              },
+              {
+                "type": "healing",
+                "healTargetId": "any",
+                "description": "Healing provided, but at cost."
+              }
+            ],
+            "advantageSpend": [
+              {
+                "cost": 3,
+                "outcome": {
+                  "type": "item",
+                  "itemId": "medkit",
+                  "description": "Doc gives you a spare medkit."
+                }
+              }
+            ]
+          },
+          {
+            "id": "doc-negotiate",
+            "text": "\"What's the going rate for a full patch-up?\"",
+            "skillId": "negotiation",
+            "difficulty": 1,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "healing",
+                "healTargetId": "any",
+                "description": "Doc offers a fair rate. Healing provided."
+              },
+              {
+                "type": "credits",
+                "credits": -25,
+                "description": "Discounted medical treatment."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "healing",
+                "healTargetId": "any",
+                "description": "Doc charges full price but does good work."
+              },
+              {
+                "type": "credits",
+                "credits": -50,
+                "description": "Full-price medical treatment."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "shops": [
+      {
+        "id": "shop-greeska",
+        "name": "Greeska's Parts & Armory",
+        "description": "Greeska's workshop is cluttered with parts from a dozen different starships. Somewhere in the mess, there's military-grade equipment.",
+        "inventory": [
+          { "itemId": "blast-vest", "category": "armor", "basePrice": 250, "stock": 2 },
+          { "itemId": "padded-armor", "category": "armor", "basePrice": 500, "stock": 1 },
+          { "itemId": "dl-44", "category": "weapon", "basePrice": 750, "stock": 1 },
+          { "itemId": "westar-35", "category": "weapon", "basePrice": 600, "stock": 2 },
+          { "itemId": "vibro-knife", "category": "weapon", "basePrice": 250, "stock": 3 },
+          { "itemId": "medkit", "category": "gear", "basePrice": 75, "stock": 4 },
+          { "itemId": "thermal-detonator", "category": "consumable", "basePrice": 2000, "stock": 1 }
+        ],
+        "buyCategories": ["weapon", "armor", "gear"],
+        "sellRate": 0.4
+      },
+      {
+        "id": "shop-rebel-supply",
+        "name": "Rebel Supply Cache",
+        "description": "Vera maintains a small stockpile of equipment for rebel operatives.",
+        "inventory": [
+          { "itemId": "a280", "category": "weapon", "basePrice": 1000, "stock": 1 },
+          { "itemId": "e-11", "category": "weapon", "basePrice": 900, "stock": 2, "requiresNarrativeItems": ["intel:act1-m2-intel"] },
+          { "itemId": "scattergun", "category": "weapon", "basePrice": 750, "stock": 1 },
+          { "itemId": "padded-armor", "category": "armor", "basePrice": 450, "stock": 2 }
+        ],
+        "buyCategories": [],
+        "sellRate": 0
+      }
+    ]
+  }
+}

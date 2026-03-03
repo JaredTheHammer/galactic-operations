@@ -1,0 +1,126 @@
+[
+  {
+    "id": "rebel-trooper",
+    "name": "Rebel Trooper",
+    "side": "Operative",
+    "tier": "Regular",
+    "health": 5,
+    "speed": 4,
+    "defense": {
+      "white": 1
+    },
+    "attackDice": {
+      "green": 1
+    },
+    "surgeAbilities": [
+      {
+        "cost": 1,
+        "effect": "+1 damage",
+        "type": "damage"
+      }
+    ],
+    "cost": 5,
+    "abilities": [],
+    "keywords": []
+  },
+  {
+    "id": "jyn-odan",
+    "name": "Jyn Odan",
+    "side": "Operative",
+    "tier": "Hero",
+    "health": 8,
+    "speed": 5,
+    "defense": {
+      "white": 1
+    },
+    "attackDice": {
+      "red": 1,
+      "green": 1
+    },
+    "surgeAbilities": [
+      {
+        "cost": 1,
+        "effect": "+1 damage, +2 accuracy, recover 1 strain",
+        "type": "special"
+      }
+    ],
+    "cost": 0,
+    "abilities": [],
+    "keywords": ["Quick Draw", "Smuggler"]
+  },
+  {
+    "id": "gaarkhan",
+    "name": "Gaarkhan",
+    "side": "Operative",
+    "tier": "Hero",
+    "health": 12,
+    "speed": 4,
+    "defense": {
+      "black": 1
+    },
+    "attackDice": {
+      "red": 1,
+      "green": 1
+    },
+    "surgeAbilities": [
+      {
+        "cost": 1,
+        "effect": "+1 damage, Cleave 1",
+        "type": "damage"
+      }
+    ],
+    "cost": 0,
+    "abilities": [],
+    "keywords": ["Wookiee", "Berserker"]
+  },
+  {
+    "id": "fenn-signis",
+    "name": "Fenn Signis",
+    "side": "Operative",
+    "tier": "Hero",
+    "health": 10,
+    "speed": 4,
+    "defense": {
+      "black": 1
+    },
+    "attackDice": {
+      "red": 1,
+      "blue": 1
+    },
+    "surgeAbilities": [
+      {
+        "cost": 1,
+        "effect": "+2 damage, Blast 1",
+        "type": "damage"
+      }
+    ],
+    "cost": 0,
+    "abilities": [],
+    "keywords": ["Havoc", "Heavy Hitter"]
+  },
+  {
+    "id": "diala-passil",
+    "name": "Diala Passil",
+    "side": "Operative",
+    "tier": "Hero",
+    "health": 8,
+    "speed": 5,
+    "defense": {
+      "white": 1
+    },
+    "attackDice": {
+      "green": 1,
+      "blue": 1
+    },
+    "surgeAbilities": [
+      {
+        "cost": 1,
+        "effect": "+1 damage, +1 block",
+        "type": "special"
+      }
+    ],
+    "cost": 0,
+    "abilities": [],
+    "keywords": ["Force Sensitive", "Jedi"]
+  }
+]

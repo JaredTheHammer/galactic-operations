@@ -1,0 +1,317 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Mercenary specialization (Hired Gun career). 30 talent cards: 10 Tier 1, 8 Tier 2, 6 Tier 3, 4 Tier 4, 2 Tier 5. Players draft 15 into a pyramid (5/4/3/2/1)."
+  },
+  "specialization": {
+    "id": "mercenary",
+    "name": "Mercenary",
+    "career": "hired-gun",
+    "description": "A professional soldier-for-hire. The Mercenary excels at sustained firefights, weapon versatility, and raw combat endurance.",
+    "bonusCareerSkills": ["ranged-heavy", "athletics", "resilience", "vigilance"],
+    "capstoneCharacteristics": ["brawn", "agility"]
+  },
+  "talents": [
+    {
+      "id": "merc-t1-01",
+      "name": "Toughened",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Wound Threshold by 2 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "woundThreshold", "value": 2, "perRank": true }
+    },
+    {
+      "id": "merc-t1-02",
+      "name": "Grit",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Strain Threshold by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "strainThreshold", "value": 1, "perRank": true }
+    },
+    {
+      "id": "merc-t1-03",
+      "name": "Second Wind",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Once per encounter per rank, recover 2 strain as an incidental.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 2, "perEncounter": true, "perRank": true }
+    },
+    {
+      "id": "merc-t1-04",
+      "name": "Quick Draw",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Draw or holster a weapon as an incidental instead of a maneuver.",
+      "mechanicalEffect": { "type": "free_maneuver", "action": "draw_weapon" }
+    },
+    {
+      "id": "merc-t1-05",
+      "name": "Brace",
+      "tier": 1,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, remove 1 setback die (per rank) from next Ranged (Heavy) or Gunnery check.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["ranged-heavy", "gunnery"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "merc-t1-06",
+      "name": "Point Blank",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to ranged attacks at Short range or closer.",
+      "mechanicalEffect": { "type": "bonus_damage", "condition": "range_short_or_closer", "value": 1, "perRank": true }
+    },
+    {
+      "id": "merc-t1-07",
+      "name": "Durable",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Subtract 10 per rank from critical injury rolls against you (minimum 11).",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "merc-t1-08",
+      "name": "Spare Clip",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Weapons with Limited Ammo gain +1 use per encounter.",
+      "mechanicalEffect": { "type": "modify_weapon_quality", "quality": "Limited Ammo", "modifier": 1 }
+    },
+    {
+      "id": "merc-t1-09",
+      "name": "Heroic Fortitude",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "May spend 1 Destiny Point to ignore effects of Critical Injuries on checks until end of encounter.",
+      "mechanicalEffect": { "type": "ignore_critical_penalties", "cost": "destiny_point", "duration": "encounter" }
+    },
+    {
+      "id": "merc-t1-10",
+      "name": "Conditioning",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Remove 1 setback die from Athletics and Coordination checks. Reduce damage from falling by 1 per rank of Coordination.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["athletics", "coordination"], "value": 1 }
+    },
+    {
+      "id": "merc-t2-01",
+      "name": "Barrage",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one hit of a Ranged (Heavy) or Gunnery attack at Long range or farther.",
+      "mechanicalEffect": { "type": "bonus_damage", "condition": "range_long_or_farther", "skills": ["ranged-heavy", "gunnery"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "merc-t2-02",
+      "name": "Lethal Blows",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add +10 per rank to critical injury rolls inflicted on opponents.",
+      "mechanicalEffect": { "type": "increase_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "merc-t2-03",
+      "name": "Enduring",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Gain +1 Soak per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "perRank": true }
+    },
+    {
+      "id": "merc-t2-04",
+      "name": "Side Step",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, upgrade the difficulty of ranged attacks targeting you by 1 per rank until the start of your next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "attackType": "ranged", "value": 1, "perRank": true, "duration": "until_next_turn" }
+    },
+    {
+      "id": "merc-t2-05",
+      "name": "Jury Rigged",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Choose one weapon or armor. Permanently reduce a quality's Advantage cost by 1 (min 1) or increase Limited Ammo by 1.",
+      "mechanicalEffect": { "type": "modify_weapon_quality", "permanent": true, "description": "Player chooses specific modification" }
+    },
+    {
+      "id": "merc-t2-06",
+      "name": "Rain of Fire",
+      "tier": 2,
+      "type": "active",
+      "activation": "action",
+      "ranked": false,
+      "description": "Perform a ranged attack against all targets within Short range of a point within weapon range. Each target is hit separately.",
+      "mechanicalEffect": { "type": "area_attack", "areaRange": "Short", "attackType": "ranged" }
+    },
+    {
+      "id": "merc-t2-07",
+      "name": "Suppressing Fire",
+      "tier": 2,
+      "type": "active",
+      "activation": "action",
+      "ranked": false,
+      "description": "Make a Ranged (Heavy) check. Instead of dealing damage, all targets in a Short range zone must make a Discipline check or suffer the Suppressed condition.",
+      "mechanicalEffect": { "type": "impose_condition", "condition": "Suppressed", "areaRange": "Short", "resistCheck": "discipline" }
+    },
+    {
+      "id": "merc-t2-08",
+      "name": "Bought Time",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Suffer 2 strain to perform an additional maneuver on your turn (total 3 maneuvers maximum including strain-for-maneuver).",
+      "mechanicalEffect": { "type": "extra_maneuver", "strainCost": 2 }
+    },
+    {
+      "id": "merc-t3-01",
+      "name": "Armor Master",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor, increase total Soak by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "condition": "wearing_armor" }
+    },
+    {
+      "id": "merc-t3-02",
+      "name": "True Aim",
+      "tier": 3,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, upgrade attack pool by 1 per rank for next combat check this turn.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "duration": "this_turn" }
+    },
+    {
+      "id": "merc-t3-03",
+      "name": "Heroic Resilience",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, when you would be incapacitated by wounds, immediately heal 5 wounds and continue acting.",
+      "mechanicalEffect": { "type": "prevent_incapacitation", "healValue": 5, "perSession": true }
+    },
+    {
+      "id": "merc-t3-04",
+      "name": "Crippling Blow",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Increase Critical rating of next attack by 1 difficulty, but add +20 to the Critical Injury result.",
+      "mechanicalEffect": { "type": "empowered_critical", "criticalBonus": 20, "criticalCostIncrease": 1 }
+    },
+    {
+      "id": "merc-t3-05",
+      "name": "Feral Strength",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one hit of Brawl or Melee attacks.",
+      "mechanicalEffect": { "type": "bonus_damage", "skills": ["brawl", "melee"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "merc-t3-06",
+      "name": "Last One Standing",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Add 1 Proficiency die (yellow) to all combat checks for each ally who has been incapacitated this encounter.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "per_incapacitated_ally" }
+    },
+    {
+      "id": "merc-t4-01",
+      "name": "Armor Master (Improved)",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor with defense rating 1+, increase defense pool upgrades by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "defenseUpgrades", "value": 1, "condition": "armor_defense_1_plus" },
+      "prerequisite": "merc-t3-01"
+    },
+    {
+      "id": "merc-t4-02",
+      "name": "Deadly Accuracy",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Choose one combat skill when purchased. Add ranks in that skill as bonus damage to one hit per round.",
+      "mechanicalEffect": { "type": "skill_damage_bonus", "perRank": true, "description": "Player selects combat skill at purchase" }
+    },
+    {
+      "id": "merc-t4-03",
+      "name": "Unstoppable",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Suffer 3 strain to perform a second Action this turn (once per encounter).",
+      "mechanicalEffect": { "type": "extra_action", "strainCost": 3, "perEncounter": true }
+    },
+    {
+      "id": "merc-t4-04",
+      "name": "Iron Body",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Reduce all strain suffered (from any source) by 1, to a minimum of 1.",
+      "mechanicalEffect": { "type": "reduce_strain_suffered", "value": 1, "minimum": 1 }
+    },
+    {
+      "id": "merc-t5-01",
+      "name": "Dedication (Brawn)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Brawn by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "brawn", "value": 1 }
+    },
+    {
+      "id": "merc-t5-02",
+      "name": "Dedication (Agility)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Agility by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "agility", "value": 1 }
+    }
+  ]
+}

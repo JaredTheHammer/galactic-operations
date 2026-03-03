@@ -1,0 +1,225 @@
+{
+  "id": "act1-m4-finale",
+  "name": "Siege of Garrison Vektor",
+  "description": "Act 1 finale. The rebellion launches a coordinated assault on the Imperial garrison that has been terrorizing the sector. Take out the garrison commander to break Imperial control.",
+  "narrativeIntro": "Everything has been building to this. Garrison Vektor is the Imperial nerve center for the entire Tangrene Sector. With the intel and supplies gathered from your previous missions, rebel command has authorized a direct assault. Your team will lead the strike, fighting through the garrison's defenses to reach the command center. The garrison commander, an Imperial Inquisitor, must be eliminated to shatter the Empire's grip on this region.",
+  "narrativeSuccess": "The Inquisitor's crimson blade clatters to the floor as they fall. Without their commander, the garrison's remaining forces scatter. Within hours, rebel cells across the sector emerge from hiding and begin reclaiming territory. The Tangrene Sector is free, for now. But the Empire will not forget this defeat.",
+  "narrativeFailure": "The Inquisitor proves too powerful, and the garrison's defenses hold. As your battered team retreats through the blast doors, the Inquisitor's cold laughter echoes behind you. The rebellion's assault has failed, and the Empire's hold on the sector tightens. Dark days lie ahead.",
+
+  "mapId": "imperial-garrison",
+  "mapPreset": "epic",
+  "boardsWide": 6,
+  "boardsTall": 3,
+
+  "difficulty": "deadly",
+  "roundLimit": 12,
+  "recommendedHeroCount": 3,
+
+  "imperialThreat": 20,
+  "threatPerRound": 3,
+
+  "operativeDeployZone": [
+    {"x": 0, "y": 14}, {"x": 1, "y": 14}, {"x": 2, "y": 14}, {"x": 3, "y": 14},
+    {"x": 0, "y": 15}, {"x": 1, "y": 15}, {"x": 2, "y": 15}, {"x": 3, "y": 15}
+  ],
+  "initialEnemies": [
+    {
+      "npcProfileId": "stormtrooper",
+      "count": 4,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 12, "y": 14}, {"x": 13, "y": 14}, {"x": 14, "y": 14}, {"x": 15, "y": 14}
+      ]
+    },
+    {
+      "npcProfileId": "stormtrooper",
+      "count": 4,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 12, "y": 20}, {"x": 13, "y": 20}, {"x": 14, "y": 20}, {"x": 15, "y": 20}
+      ]
+    },
+    {
+      "npcProfileId": "stormtrooper-elite",
+      "count": 2,
+      "asMinGroup": false,
+      "deployZone": [{"x": 30, "y": 16}, {"x": 30, "y": 18}]
+    },
+    {
+      "npcProfileId": "e-web-engineer",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 36, "y": 10}]
+    },
+    {
+      "npcProfileId": "imperial-officer",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 60, "y": 18}]
+    },
+    {
+      "npcProfileId": "inquisitor",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 64, "y": 16}]
+    }
+  ],
+  "reinforcements": [
+    {
+      "id": "wave-1",
+      "triggerRound": 3,
+      "groups": [
+        {
+          "npcProfileId": "stormtrooper",
+          "count": 4,
+          "asMinGroup": true,
+          "deployZone": [
+            {"x": 24, "y": 0}, {"x": 25, "y": 0}, {"x": 26, "y": 0}, {"x": 27, "y": 0}
+          ]
+        }
+      ],
+      "threatCost": 4,
+      "narrativeText": "A fresh squad emerges from the northern barracks!"
+    },
+    {
+      "id": "wave-2",
+      "triggerRound": 6,
+      "groups": [
+        {
+          "npcProfileId": "stormtrooper-elite",
+          "count": 2,
+          "asMinGroup": false,
+          "deployZone": [{"x": 48, "y": 0}, {"x": 48, "y": 1}]
+        },
+        {
+          "npcProfileId": "stormtrooper",
+          "count": 3,
+          "asMinGroup": true,
+          "deployZone": [{"x": 50, "y": 0}, {"x": 51, "y": 0}, {"x": 52, "y": 0}]
+        }
+      ],
+      "threatCost": 8,
+      "narrativeText": "The garrison's reserve forces pour out of the command wing!"
+    },
+    {
+      "id": "wave-3",
+      "triggerRound": 9,
+      "groups": [
+        {
+          "npcProfileId": "probe-droid",
+          "count": 3,
+          "asMinGroup": true,
+          "deployZone": [{"x": 70, "y": 10}, {"x": 70, "y": 12}, {"x": 70, "y": 14}]
+        }
+      ],
+      "threatCost": 3,
+      "narrativeText": "Probe droids deploy from the command center's automated defenses!"
+    }
+  ],
+
+  "objectives": [
+    {
+      "id": "obj-inquisitor",
+      "type": "eliminate_target",
+      "side": "Operative",
+      "description": "Eliminate the Inquisitor commanding Garrison Vektor.",
+      "targetId": "inquisitor",
+      "priority": "primary",
+      "xpReward": 10
+    },
+    {
+      "id": "obj-officer",
+      "type": "eliminate_target",
+      "side": "Operative",
+      "description": "Eliminate the Imperial Officer to disrupt command structure.",
+      "targetId": "imperial-officer",
+      "priority": "secondary",
+      "xpReward": 5
+    },
+    {
+      "id": "obj-terminal",
+      "type": "interact_terminal",
+      "side": "Operative",
+      "description": "Slice the garrison's communications array to prevent calling for reinforcements.",
+      "targetCount": 1,
+      "priority": "secondary",
+      "xpReward": 5
+    }
+  ],
+  "victoryConditions": [
+    {
+      "side": "Operative",
+      "description": "Eliminate the Inquisitor.",
+      "requiredObjectiveIds": ["obj-inquisitor"]
+    },
+    {
+      "side": "Imperial",
+      "description": "Incapacitate all Operative heroes or protect the Inquisitor for 12 rounds.",
+      "requiredObjectiveIds": []
+    }
+  ],
+
+  "objectivePoints": [
+    {
+      "id": "objpt-comms-array",
+      "position": {"x": 36, "y": 8},
+      "type": "terminal",
+      "skillRequired": "computers",
+      "alternateSkill": "mechanics",
+      "difficulty": 3,
+      "description": "Garrison communications array -- slice to prevent calling for Star Destroyer support.",
+      "objectiveId": "obj-terminal"
+    },
+    {
+      "id": "objpt-blast-door-inner",
+      "position": {"x": 48, "y": 16},
+      "type": "lock",
+      "skillRequired": "skulduggery",
+      "alternateSkill": "athletics",
+      "difficulty": 2,
+      "description": "Inner garrison blast door -- bypass to reach the command center."
+    },
+    {
+      "id": "objpt-power-relay",
+      "position": {"x": 56, "y": 12},
+      "type": "console",
+      "skillRequired": "mechanics",
+      "difficulty": 2,
+      "description": "Power relay station -- overload to disable garrison shield generators."
+    }
+  ],
+
+  "lootTokens": [
+    {
+      "id": "loot-armory-1",
+      "position": {"x": 24, "y": 16},
+      "reward": {"type": "equipment", "itemId": "a280-blaster-rifle"}
+    },
+    {
+      "id": "loot-armory-2",
+      "position": {"x": 40, "y": 12},
+      "reward": {"type": "credits", "value": 200}
+    },
+    {
+      "id": "loot-holocron",
+      "position": {"x": 62, "y": 16},
+      "reward": {"type": "narrative", "itemId": "sith-holocron", "description": "A Sith Holocron pulsing with dark energy"}
+    },
+    {
+      "id": "loot-medstation",
+      "position": {"x": 48, "y": 20},
+      "reward": {"type": "xp", "value": 3}
+    }
+  ],
+
+  "campaignAct": 1,
+  "missionIndex": 4,
+  "prerequisites": ["act1-m3-cache", "act1-m3-ambush"],
+  "unlocksNext": [],
+
+  "baseXP": 15,
+  "bonusXPPerLoot": 2,
+  "bonusXPPerKill": 1,
+  "maxKillXP": 5,
+  "leaderKillXP": 5
+}

@@ -1,0 +1,157 @@
+{
+  "id": "act1-m1-arrival",
+  "name": "Arrival at Outpost Dorn",
+  "description": "A routine supply run to a remote outpost goes sideways when Imperial patrols lock down the sector.",
+  "narrativeIntro": "Your team's light freighter drops out of hyperspace near the dusty world of Ord Varee. Outpost Dorn, a rebel supply cache hidden in an abandoned mining complex, should be a simple pickup. But your sensors light up with Imperial signatures. A patrol has found the outpost. You need to get in, secure the supplies, and get out before reinforcements arrive.",
+  "narrativeSuccess": "With the last Stormtrooper down, your team secures the supply crates and loads them aboard the freighter. As the engines spool up, you catch a glimpse of a Star Destroyer emerging from hyperspace. You made it out just in time. The supplies will keep the cell running for another month.",
+  "narrativeFailure": "The Imperials overwhelm your position. As you fall back to the ship empty-handed, you see the troopers torching the outpost. The supplies are lost, and the Empire now knows someone was interested in this location. This setback will cost the rebellion dearly.",
+
+  "mapId": "mining-complex",
+  "mapPreset": "skirmish",
+  "boardsWide": 3,
+  "boardsTall": 3,
+
+  "difficulty": "easy",
+  "roundLimit": 8,
+  "recommendedHeroCount": 2,
+
+  "imperialThreat": 8,
+  "threatPerRound": 1,
+
+  "operativeDeployZone": [
+    {"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 2, "y": 0},
+    {"x": 0, "y": 1}, {"x": 1, "y": 1}, {"x": 2, "y": 1}
+  ],
+  "initialEnemies": [
+    {
+      "npcProfileId": "stormtrooper",
+      "count": 4,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 16, "y": 16}, {"x": 17, "y": 16}, {"x": 18, "y": 16}, {"x": 16, "y": 17}
+      ]
+    },
+    {
+      "npcProfileId": "stormtrooper",
+      "count": 3,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 30, "y": 10}, {"x": 31, "y": 10}, {"x": 32, "y": 10}
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "id": "wave-1",
+      "triggerRound": 4,
+      "groups": [
+        {
+          "npcProfileId": "stormtrooper",
+          "count": 3,
+          "asMinGroup": true,
+          "deployZone": [
+            {"x": 34, "y": 0}, {"x": 35, "y": 0}, {"x": 34, "y": 1}
+          ]
+        }
+      ],
+      "threatCost": 3,
+      "narrativeText": "A fresh squad of Stormtroopers arrives from the eastern corridor!"
+    },
+    {
+      "id": "wave-2",
+      "triggerRound": 6,
+      "groups": [
+        {
+          "npcProfileId": "stormtrooper-elite",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 35, "y": 17}]
+        }
+      ],
+      "threatCost": 4,
+      "narrativeText": "An Elite Stormtrooper sergeant enters through the blast doors!"
+    }
+  ],
+
+  "objectives": [
+    {
+      "id": "obj-eliminate",
+      "type": "eliminate_all",
+      "side": "Operative",
+      "description": "Eliminate all Imperial forces in the outpost.",
+      "priority": "primary",
+      "xpReward": 0
+    },
+    {
+      "id": "obj-loot-1",
+      "type": "collect_loot",
+      "side": "Operative",
+      "description": "Secure the rebel supply crates (collect 2 loot tokens).",
+      "targetCount": 2,
+      "priority": "secondary",
+      "xpReward": 4
+    }
+  ],
+  "victoryConditions": [
+    {
+      "side": "Operative",
+      "description": "Eliminate all Imperial forces.",
+      "requiredObjectiveIds": ["obj-eliminate"]
+    },
+    {
+      "side": "Imperial",
+      "description": "Incapacitate all Operative heroes.",
+      "requiredObjectiveIds": []
+    }
+  ],
+
+  "objectivePoints": [
+    {
+      "id": "objpt-supply-lock-1",
+      "position": {"x": 18, "y": 18},
+      "type": "crate",
+      "skillRequired": "athletics",
+      "alternateSkill": "mechanics",
+      "difficulty": 1,
+      "description": "Sealed supply crate -- pry open or unbolt the locking mechanism."
+    },
+    {
+      "id": "objpt-supply-lock-2",
+      "position": {"x": 28, "y": 12},
+      "type": "crate",
+      "skillRequired": "athletics",
+      "alternateSkill": "mechanics",
+      "difficulty": 1,
+      "description": "Sealed supply crate -- pry open or unbolt the locking mechanism."
+    }
+  ],
+
+  "lootTokens": [
+    {
+      "id": "loot-supply-1",
+      "position": {"x": 18, "y": 18},
+      "reward": {"type": "xp", "value": 2}
+    },
+    {
+      "id": "loot-supply-2",
+      "position": {"x": 28, "y": 12},
+      "reward": {"type": "xp", "value": 2}
+    },
+    {
+      "id": "loot-credits",
+      "position": {"x": 10, "y": 20},
+      "reward": {"type": "credits", "value": 100}
+    }
+  ],
+
+  "campaignAct": 1,
+  "missionIndex": 1,
+  "prerequisites": [],
+  "unlocksNext": ["act1-m2-intel"],
+
+  "baseXP": 10,
+  "bonusXPPerLoot": 2,
+  "bonusXPPerKill": 1,
+  "maxKillXP": 5,
+  "leaderKillXP": 0
+}

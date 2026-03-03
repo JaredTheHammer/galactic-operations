@@ -1,0 +1,51 @@
+gameId,seed,winner,victoryCondition,roundsPlayed,imperialDamage,operativeDamage,imperialDefeated,operativeDefeated,objectivesCompleted,totalCombats
+1,42,Operative,Objectives completed (2/3),4,8,12,3,0,2,5
+2,43,Imperial,Round limit reached - mission failed,16,53,65,16,3,0,71
+3,44,Operative,Objectives completed (2/3),6,8,41,10,0,2,15
+4,45,Imperial,All heroes wounded,15,92,57,14,3,1,75
+5,46,Imperial,Round limit reached - mission failed,16,56,71,16,3,1,78
+6,47,Operative,Objectives completed (2/3),3,0,4,1,0,2,4
+7,48,Imperial,Round limit reached - mission failed,16,74,61,15,2,1,86
+8,49,Imperial,All heroes wounded,14,84,73,18,2,0,55
+9,50,Operative,Objectives completed (2/3),4,9,17,4,0,2,6
+10,51,Imperial,All heroes wounded,13,68,65,16,3,1,51
+11,52,Operative,Objectives completed (2/3),8,26,53,13,1,2,32
+12,53,Imperial,Round limit reached - mission failed,16,67,41,10,3,1,72
+13,54,Imperial,Round limit reached - mission failed,16,62,85,20,2,1,66
+14,55,Imperial,All heroes wounded,13,88,57,14,3,1,75
+15,56,Imperial,All heroes wounded,13,82,61,15,2,1,62
+16,57,Imperial,Round limit reached - mission failed,16,42,77,19,2,1,63
+17,58,Operative,Objectives completed (2/3),3,4,9,2,0,2,5
+18,59,Imperial,All heroes wounded,13,86,53,13,3,0,64
+19,60,Operative,Objectives completed (2/3),8,18,45,11,0,2,29
+20,61,Operative,Objectives completed (2/3),2,0,0,0,0,2,1
+21,62,Imperial,All heroes wounded,14,86,73,17,3,1,64
+22,63,Operative,Objectives completed (2/3),3,5,12,3,0,2,5
+23,64,Operative,Objectives completed (2/3),7,20,41,10,0,2,33
+24,65,Imperial,All heroes wounded,12,78,81,20,2,0,52
+25,66,Operative,Objectives completed (2/3),5,14,28,7,1,2,17
+26,67,Imperial,All heroes wounded,14,90,61,15,3,0,59
+27,68,Imperial,All heroes wounded,12,92,70,16,2,1,58
+28,69,Imperial,All heroes wounded,15,92,77,19,3,0,63
+29,70,Imperial,All heroes wounded,15,70,49,12,3,0,74
+30,71,Imperial,Round limit reached - mission failed,16,46,94,20,1,1,64
+31,72,Imperial,Round limit reached - mission failed,16,57,73,18,2,1,61
+32,73,Operative,Objectives completed (2/3),5,12,25,6,0,2,20
+33,74,Imperial,Round limit reached - mission failed,16,65,49,12,3,1,81
+34,75,Imperial,Round limit reached - mission failed,16,42,65,15,1,1,56
+35,76,Imperial,All heroes wounded,13,90,80,19,2,1,72
+36,77,Operative,Objectives completed (2/3),13,33,69,16,1,2,49
+37,78,Operative,Objectives completed (2/3),5,18,29,7,0,2,11
+38,79,Operative,Objectives completed (2/3),4,20,13,3,0,2,14
+39,80,Imperial,Round limit reached - mission failed,16,85,69,17,3,1,72
+40,81,Imperial,All heroes wounded,11,84,21,5,2,0,64
+41,82,Operative,Objectives completed (2/3),2,0,0,0,0,2,1
+42,83,Imperial,All heroes wounded,15,76,49,12,3,0,75
+43,84,Operative,Objectives completed (2/3),2,0,8,2,0,2,0
+44,85,Operative,Objectives completed (2/3),7,22,33,8,0,2,28
+45,86,Operative,Objectives completed (2/3),4,7,17,4,0,2,13
+46,87,Operative,Objectives completed (2/3),13,42,89,21,2,2,48
+47,88,Imperial,All heroes wounded,15,74,66,15,2,1,72
+48,89,Operative,Objectives completed (2/3),5,33,20,5,1,2,17
+49,90,Imperial,Round limit reached - mission failed,16,59,89,22,2,1,60
+50,91,Operative,Objectives completed (2/3),5,7,21,5,0,2,22

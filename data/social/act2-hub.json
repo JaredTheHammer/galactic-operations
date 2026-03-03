@@ -1,0 +1,447 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Act 2 social phase hub: The Rusty Rancor, a cantina in Nexus Station's upper market ring. Criminal underworld contacts, black market vendors, and intel opportunities."
+  },
+  "npcs": {
+    "fixer": {
+      "id": "fixer",
+      "name": "Maz Kallo",
+      "description": "A sharp-eyed Sullustan information broker who knows every back alley and secret passage on Nexus Station. She trades in secrets, not loyalty.",
+      "disposition": "neutral",
+      "characteristics": { "willpower": 2, "presence": 2, "cunning": 3 },
+      "skills": { "streetwise": 3, "deception": 2, "negotiation": 2 },
+      "keywords": ["informant", "fixer", "underworld"],
+      "portrait": "maz-kallo"
+    },
+    "arms-dealer": {
+      "id": "arms-dealer",
+      "name": "Torga Shen",
+      "description": "A hulking Weequay arms dealer with a network of smuggling contacts. He doesn't care who you are as long as your credits are real.",
+      "disposition": "unfriendly",
+      "characteristics": { "willpower": 2, "presence": 2, "cunning": 3 },
+      "skills": { "negotiation": 3, "coercion": 2, "cool": 1 },
+      "keywords": ["vendor", "weapons", "shady"],
+      "portrait": "torga-shen"
+    },
+    "slicer": {
+      "id": "slicer",
+      "name": "Pixel",
+      "description": "A teenage human slicer with a talent for cracking Syndicate encryption. She's a rebel sympathizer who hides behind a wall of sarcasm and holographic displays.",
+      "disposition": "friendly",
+      "characteristics": { "willpower": 1, "presence": 2, "cunning": 3 },
+      "skills": { "computers": 3, "mechanics": 2, "skulduggery": 1 },
+      "keywords": ["slicer", "tech", "rebel-sympathizer"],
+      "portrait": "pixel"
+    },
+    "ex-gladiator": {
+      "id": "ex-gladiator",
+      "name": "Krrssk",
+      "description": "An escaped Trandoshan gladiator, scarred and bitter. He was forced to fight in the Syndicate's hunting grounds and now wants revenge. He respects strength above all.",
+      "disposition": "unfriendly",
+      "characteristics": { "willpower": 3, "presence": 1, "cunning": 2 },
+      "skills": { "brawl": 3, "discipline": 2, "resilience": 2 },
+      "keywords": ["companion-candidate", "trandoshan", "fighter"],
+      "portrait": "krrssk"
+    },
+    "doctor": {
+      "id": "doctor",
+      "name": "Syll Nareen",
+      "description": "A soft-spoken Mirialan medic who runs a free clinic out of a storage closet behind the cantina. She patches up anyone in need, from refugees to rogues.",
+      "disposition": "friendly",
+      "characteristics": { "willpower": 2, "presence": 3, "cunning": 1 },
+      "skills": { "medicine": 3, "charm": 2, "cool": 1 },
+      "keywords": ["medic", "healer", "kind"],
+      "portrait": "syll-nareen"
+    }
+  },
+  "location": {
+    "id": "rusty-rancor",
+    "name": "The Rusty Rancor",
+    "description": "A dimly lit cantina in Nexus Station's upper market ring. Engine grease and cheap caf. Freelancers, smugglers, and fixers do business away from Syndicate eyes.",
+    "narrativeIntro": "You push through the blast doors into The Rusty Rancor. The air is thick with the smell of cheap caf and recycled atmosphere. Holoprojectors flicker behind the bar, cycling through outdated bounty postings and smashball scores. The cantina is a haven for those who want to stay off the Syndicate's radar -- for now. Your contacts are already here, scattered across booths and dark corners. Time to gather intel, gear up, and plan your next move.",
+    "campaignAct": 2,
+    "encounters": [
+      {
+        "id": "enc-kallo-leads",
+        "name": "Kallo's Leads",
+        "description": "Maz Kallo sits in a corner booth, scrolling through data on a battered datapad. Her Sullustan jowls twitch as she spots you.",
+        "narrativeIntro": "\"You want to hurt the Syndicate?\" Maz leans forward, her dark eyes gleaming. \"I can point you in the right direction. I know their patrol routes, their drop points, their weak links. Question is, what's that worth to you?\"",
+        "npcId": "fixer",
+        "repeatable": false,
+        "dialogueOptions": [
+          {
+            "id": "kallo-charm",
+            "text": "\"We're trying to liberate this station, Maz. Help us and everyone benefits.\"",
+            "skillId": "charm",
+            "difficulty": 2,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act2-m2-bounty",
+                "hintText": "Maz reveals that the Syndicate's bounty board operation runs out of a relay station in the station's mid-levels. Security is tight but they cycle guards on a predictable schedule.",
+                "description": "Maz shares Syndicate patrol schedules and bounty board location."
+              },
+              {
+                "type": "xp",
+                "xpAmount": 3,
+                "description": "Valuable tactical intelligence from Maz's network."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act2-m2-bounty",
+                "hintText": "Maz gives you vague directions but charges 100 credits for anything specific.",
+                "description": "Partial intel. Maz isn't convinced you're worth investing in for free."
+              },
+              {
+                "type": "credits",
+                "credits": -100,
+                "description": "Maz charges for her information."
+              }
+            ],
+            "triumphOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "kallo-network-access",
+                "description": "Maz is so impressed she gives you access to her informant network across the station."
+              }
+            ]
+          },
+          {
+            "id": "kallo-streetwise",
+            "text": "\"Word on the street is you know every back channel on this station. I need the real picture.\"",
+            "skillId": "streetwise",
+            "difficulty": 2,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act2-m3-warehouse",
+                "hintText": "Maz describes a warehouse in the lower levels where the Syndicate stockpiles contraband. Heavy guard rotation but a maintenance tunnel provides a back entrance.",
+                "description": "Warehouse location and infiltration route."
+              },
+              {
+                "type": "credits",
+                "credits": 50,
+                "description": "Maz throws in a tip about an unclaimed Syndicate stash."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act2-m2-bounty",
+                "hintText": "Maz gives you general directions but nothing actionable.",
+                "description": "Vague intel. Not enough to plan around."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enc-torga-arsenal",
+        "name": "Torga's Arsenal",
+        "description": "Torga Shen leans against a stack of sealed crates in the back room, thick arms crossed over his chest. A blaster hangs openly on his hip.",
+        "narrativeIntro": "\"You want firepower? I got firepower.\" Torga's voice is a low growl. \"But I don't give discounts to idealists. Credits talk. Everything else walks.\"",
+        "npcId": "arms-dealer",
+        "repeatable": false,
+        "dialogueOptions": [
+          {
+            "id": "torga-negotiate",
+            "text": "\"I'm buying in bulk. Let's talk wholesale rates.\"",
+            "skillId": "negotiation",
+            "difficulty": 3,
+            "isOpposed": true,
+            "opposedSkillId": "negotiation",
+            "successOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "torga-discount",
+                "description": "Torga grudgingly agrees to a 20% discount on his inventory."
+              },
+              {
+                "type": "xp",
+                "xpAmount": 2,
+                "description": "You out-haggled a veteran arms dealer."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "torga-markup",
+                "description": "Torga smirks and adds a 10% markup for wasting his time."
+              }
+            ],
+            "advantageSpend": [
+              {
+                "cost": 3,
+                "outcome": {
+                  "type": "item",
+                  "itemId": "frag-grenade",
+                  "description": "Torga throws in a frag grenade as a show of good faith."
+                }
+              }
+            ],
+            "triumphOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "torga-special-stock",
+                "description": "Torga is so impressed he unlocks his 'special stock' -- rare weapons at base price."
+              }
+            ],
+            "despairOutcomes": [
+              {
+                "type": "credits",
+                "credits": -100,
+                "description": "You accidentally insult Torga's merchandise. He demands compensation."
+              }
+            ]
+          },
+          {
+            "id": "torga-coercion",
+            "text": "\"The Syndicate pays you protection money. We can make that arrangement... uncomfortable for you.\"",
+            "skillId": "coercion",
+            "difficulty": 3,
+            "isOpposed": true,
+            "opposedSkillId": "cool",
+            "successOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "torga-discount",
+                "description": "Torga's eyes narrow but he nods. Discount granted -- out of fear, not respect."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "torga-hostile",
+                "description": "Torga's hand moves to his blaster. 'Get out. Come back when you have credits, not threats.'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enc-pixel-hack",
+        "name": "Pixel's Hack",
+        "description": "Pixel is hunched over three holoscreens in a corner alcove, fingers flying across a projected keyboard. A half-eaten ration bar sits forgotten beside her.",
+        "narrativeIntro": "\"Oh hey, you're the rebels everyone's talking about.\" Pixel doesn't look up from her screens. \"I've been slicing Syndicate comms for fun. Want to see what I've got? I could use a second pair of eyes on this encryption.\"",
+        "npcId": "slicer",
+        "repeatable": true,
+        "dialogueOptions": [
+          {
+            "id": "pixel-computers",
+            "text": "\"Let's crack it together. Show me the encryption layer.\"",
+            "skillId": "computers",
+            "difficulty": 2,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act2-m2-bounty",
+                "hintText": "You and Pixel crack a Syndicate communication channel. The next bounty board data refresh is scheduled, giving you a window to infiltrate.",
+                "description": "Decrypted Syndicate comms reveal tactical opportunities."
+              },
+              {
+                "type": "xp",
+                "xpAmount": 2,
+                "description": "Successful collaborative slicing."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "pixel-trace",
+                "description": "The encryption fights back and nearly traces your location. Pixel kills the connection."
+              }
+            ],
+            "advantageSpend": [
+              {
+                "cost": 2,
+                "outcome": {
+                  "type": "information",
+                  "missionId": "act2-m3-warehouse",
+                  "hintText": "Pixel pulls a warehouse manifest from the data stream. Guard schedules included.",
+                  "description": "Bonus intel from the slicing session."
+                }
+              }
+            ],
+            "triumphOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "syndicate-backdoor",
+                "description": "You plant a permanent backdoor in the Syndicate network. Future slicing checks gain a bonus die."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enc-krrssk-challenge",
+        "name": "Krrssk's Challenge",
+        "description": "Krrssk sits alone at the bar, his scarred scales catching the neon light. He watches you with predatory interest.",
+        "narrativeIntro": "The Trandoshan's clawed hand wraps around his drink. \"I know what you did at the hunting grounds.\" His voice is a low rumble. \"You freed prisoners. You killed hunters.\" He stands, towering over you. \"But are you strong enough to deserve my help? Prove it.\"",
+        "npcId": "ex-gladiator",
+        "repeatable": false,
+        "dialogueOptions": [
+          {
+            "id": "krrssk-brawl",
+            "text": "\"You want a fight? Let's go. Right here.\"",
+            "skillId": "brawl",
+            "difficulty": 3,
+            "isOpposed": true,
+            "opposedSkillId": "brawl",
+            "successOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "krrssk-recruited",
+                "description": "Krrssk hits the floor, then laughs -- a deep, rumbling sound. 'You fight well. I will follow you.' Companion recruited."
+              },
+              {
+                "type": "xp",
+                "xpAmount": 5,
+                "description": "You earned a Trandoshan gladiator's respect in single combat."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "krrssk-unimpressed",
+                "description": "Krrssk pins you in seconds. 'Weak. Come back when you have scars worth showing.'"
+              }
+            ],
+            "triumphOutcomes": [
+              {
+                "type": "item",
+                "itemId": "vibro-axe",
+                "description": "Krrssk is so impressed he gives you his prized vibro-axe from the arena."
+              }
+            ],
+            "despairOutcomes": [
+              {
+                "type": "credits",
+                "credits": -50,
+                "description": "You crash through a table during the fight. The bartender charges for damages."
+              }
+            ]
+          },
+          {
+            "id": "krrssk-discipline",
+            "text": "\"I don't need to prove anything. I freed your people. That should be enough.\"",
+            "skillId": "discipline",
+            "difficulty": 3,
+            "isOpposed": true,
+            "opposedSkillId": "discipline",
+            "requiresMissions": ["act2-m3-hunting-grounds"],
+            "successOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "krrssk-recruited",
+                "description": "Krrssk stares you down for a long moment, then nods slowly. 'You have iron in you. That is enough.' Companion recruited."
+              },
+              {
+                "type": "xp",
+                "xpAmount": 3,
+                "description": "You earned respect through resolve, not violence."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "krrssk-doubtful",
+                "description": "Krrssk turns away. 'Words are easy. Come back with proof.' He is not yet convinced."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enc-syll-clinic",
+        "name": "Syll's Clinic",
+        "description": "A surprisingly clean alcove behind the cantina, screened off with repurposed cargo netting. Bacta patches and surgical tools are neatly arranged on shelving.",
+        "narrativeIntro": "Syll Nareen looks up from bandaging a Twi'lek dock worker's arm. Her green-skinned face creases into a gentle smile. \"You look like you've had a rough day. Sit down. Let me help.\"",
+        "npcId": "doctor",
+        "repeatable": true,
+        "dialogueOptions": [
+          {
+            "id": "syll-charm",
+            "text": "\"We're fighting the Syndicate, Syll. Any help you can give means a lot.\"",
+            "skillId": "charm",
+            "difficulty": 1,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "healing",
+                "healTargetId": "all",
+                "description": "Syll provides free treatment for the entire team."
+              },
+              {
+                "type": "item",
+                "itemId": "stim-pack",
+                "description": "Syll hands you a stimpak from her personal supply."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "healing",
+                "healTargetId": "any",
+                "description": "Syll patches up one team member but is too busy for the full squad."
+              }
+            ],
+            "advantageSpend": [
+              {
+                "cost": 2,
+                "outcome": {
+                  "type": "item",
+                  "itemId": "stim-pack",
+                  "description": "Syll gives you an extra stimpak from the clinic stores."
+                }
+              }
+            ],
+            "triumphOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "syll-medkit-upgrade",
+                "description": "Syll teaches you an advanced field medicine technique. Future Medicine checks gain a bonus die."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "shops": [
+      {
+        "id": "shop-torga-black-market",
+        "name": "Torga's Black Market",
+        "description": "Torga Shen's hidden arms cache, accessed through a coded panel behind the cantina bar. Military-grade weapons and restricted gear.",
+        "inventory": [
+          { "itemId": "disruptor-pistol", "category": "weapon", "basePrice": 1500, "stock": 1 },
+          { "itemId": "trandoshan-scattergun", "category": "weapon", "basePrice": 900, "stock": 1 },
+          { "itemId": "frag-grenade", "category": "weapon", "basePrice": 100, "stock": 2 },
+          { "itemId": "heavy-blaster-pistol", "category": "weapon", "basePrice": 700, "stock": 1 },
+          { "itemId": "padded-armor", "category": "armor", "basePrice": 500, "stock": 2 },
+          { "itemId": "vibro-knife", "category": "weapon", "basePrice": 250, "stock": 2 },
+          { "itemId": "thermal-detonator", "category": "consumable", "basePrice": 2000, "stock": 1 }
+        ],
+        "buyCategories": ["weapon", "armor", "gear", "consumable"],
+        "sellRate": 0.4
+      },
+      {
+        "id": "shop-rebel-supply-drop",
+        "name": "Rebel Supply Drop",
+        "description": "A supply cache maintained by rebel logistics. Consumables and tactical utility gear for field operations.",
+        "inventory": [
+          { "itemId": "stim-pack", "category": "consumable", "basePrice": 100, "stock": 3 },
+          { "itemId": "bacta-infusion", "category": "consumable", "basePrice": 400, "stock": 1 },
+          { "itemId": "comm-jammer", "category": "gear", "basePrice": 300, "stock": 1 },
+          { "itemId": "tactical-scanner", "category": "gear", "basePrice": 350, "stock": 1 },
+          { "itemId": "medkit", "category": "gear", "basePrice": 70, "stock": 4 }
+        ],
+        "buyCategories": [],
+        "sellRate": 0
+      }
+    ]
+  }
+}

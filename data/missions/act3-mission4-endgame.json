@@ -1,0 +1,190 @@
+{
+  "id": "act3-m4-endgame",
+  "name": "Fortress Drayen",
+  "description": "The final confrontation with Warlord Kael Drayen in his fortified command center. End the splinter faction once and for all.",
+  "narrativeIntro": "This is it. Fortress Drayen -- a repurposed Imperial garrison built into the cliffs above the Tangrene badlands. Warlord Kael Drayen has gathered his remaining forces for a last stand. His war droids patrol the perimeter, his shock commandos guard the inner compound, and the warlord himself waits in the command tower with his custom blaster and his infamous vibrosword. Commander Vane's orders are simple: 'Take him down. Whatever it takes.' The sector's future depends on what happens in the next hour.",
+  "narrativeSuccess": "Drayen staggers back as his vibrosword clatters to the floor. 'You think this changes anything?' he snarls, blood streaming from a gash above his eye. 'The Empire is coming back. The Republic will fall. I was trying to build something that could survive what's coming.' As rebel troops secure the fortress, you find Drayen's private files. They contain Imperial intelligence suggesting a massive fleet buildup in the Unknown Regions. Whether Drayen was a visionary or a madman, the Tangrene Sector is finally at peace. For now.",
+  "narrativeFailure": "Drayen's forces prove overwhelming. His tactical genius and prototype war machines push you back through the fortress corridors. As you retreat to the extraction point, Drayen's voice echoes over the compound speakers: 'Tell your commanders that Tangrene has a new master. The Fractured Alliance is just the beginning.' The sector teeters on the edge of a new conflict.",
+
+  "mapId": "fortress-drayen",
+  "mapPreset": "skirmish",
+  "boardsWide": 3,
+  "boardsTall": 3,
+
+  "difficulty": "hard",
+  "roundLimit": 10,
+  "recommendedHeroCount": 2,
+
+  "imperialThreat": 14,
+  "threatPerRound": 3,
+
+  "operativeDeployZone": [
+    {"x": 0, "y": 16}, {"x": 1, "y": 16}, {"x": 2, "y": 16},
+    {"x": 0, "y": 17}, {"x": 1, "y": 17}, {"x": 2, "y": 17}
+  ],
+  "initialEnemies": [
+    {
+      "npcProfileId": "defector-trooper",
+      "count": 4,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 12, "y": 12}, {"x": 13, "y": 12}, {"x": 14, "y": 12}, {"x": 15, "y": 12}
+      ]
+    },
+    {
+      "npcProfileId": "war-droid-mk1",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 18, "y": 8}]
+    },
+    {
+      "npcProfileId": "shock-commando",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 22, "y": 6}]
+    },
+    {
+      "npcProfileId": "conscript-militia",
+      "count": 4,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 20, "y": 14}, {"x": 21, "y": 14}, {"x": 22, "y": 14}, {"x": 23, "y": 14}
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "id": "wave-1",
+      "triggerRound": 3,
+      "groups": [
+        {
+          "npcProfileId": "siege-droid-mk2",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 30, "y": 4}]
+        }
+      ],
+      "threatCost": 7,
+      "narrativeText": "A Siege Droid powers up in the fortress courtyard, its cannon tracking your position!"
+    },
+    {
+      "id": "wave-2",
+      "triggerRound": 5,
+      "groups": [
+        {
+          "npcProfileId": "rebel-turncoat",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 34, "y": 10}]
+        },
+        {
+          "npcProfileId": "defector-trooper",
+          "count": 3,
+          "asMinGroup": true,
+          "deployZone": [
+            {"x": 33, "y": 10}, {"x": 35, "y": 10}, {"x": 34, "y": 11}
+          ]
+        }
+      ],
+      "threatCost": 4,
+      "narrativeText": "A rebel turncoat leads Drayen's personal guard into the fray!"
+    },
+    {
+      "id": "wave-boss",
+      "triggerRound": 7,
+      "groups": [
+        {
+          "npcProfileId": "warlord-drayen",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 28, "y": 2}]
+        }
+      ],
+      "threatCost": 10,
+      "narrativeText": "The fortress doors slam open. Warlord Kael Drayen strides onto the battlefield, customized blaster in one hand, vibrosword in the other. 'You should have stayed in the jungle, rebels.'"
+    }
+  ],
+
+  "objectives": [
+    {
+      "id": "obj-drayen",
+      "type": "eliminate_target",
+      "side": "Operative",
+      "targetNpcId": "warlord-drayen",
+      "description": "Defeat Warlord Kael Drayen.",
+      "priority": "primary",
+      "xpReward": 10
+    },
+    {
+      "id": "obj-survive",
+      "type": "survive_rounds",
+      "side": "Operative",
+      "targetRound": 7,
+      "description": "Survive until Drayen reveals himself (Round 7).",
+      "priority": "primary",
+      "xpReward": 0
+    },
+    {
+      "id": "obj-data",
+      "type": "interact_terminal",
+      "side": "Operative",
+      "description": "Access Drayen's command terminal for intelligence on the Imperial remnant.",
+      "targetCount": 1,
+      "priority": "secondary",
+      "xpReward": 5
+    }
+  ],
+  "victoryConditions": [
+    {
+      "side": "Operative",
+      "description": "Defeat Warlord Kael Drayen.",
+      "requiredObjectiveIds": ["obj-drayen"]
+    },
+    {
+      "side": "Imperial",
+      "description": "Incapacitate all Operative heroes.",
+      "requiredObjectiveIds": []
+    }
+  ],
+
+  "objectivePoints": [
+    {
+      "id": "objpt-command-terminal",
+      "position": {"x": 28, "y": 2},
+      "type": "terminal",
+      "skillRequired": "computers",
+      "alternateSkill": "mechanics",
+      "difficulty": 3,
+      "description": "Drayen's command terminal -- contains Imperial remnant intelligence."
+    }
+  ],
+
+  "lootTokens": [
+    {
+      "id": "loot-fortress-vault",
+      "position": {"x": 26, "y": 4},
+      "reward": {"type": "credits", "value": 300}
+    },
+    {
+      "id": "loot-war-plans",
+      "position": {"x": 30, "y": 8},
+      "reward": {"type": "xp", "value": 5}
+    },
+    {
+      "id": "loot-drayen-weapon",
+      "position": {"x": 28, "y": 2},
+      "reward": {"type": "equipment", "itemId": "vibro-blade"}
+    }
+  ],
+
+  "campaignAct": 3,
+  "missionIndex": 4,
+  "prerequisites": ["act3-m3-stronghold", "act3-m3-betrayal"],
+  "unlocksNext": [],
+
+  "baseXP": 20,
+  "bonusXPPerLoot": 3,
+  "bonusXPPerKill": 1,
+  "maxKillXP": 8,
+  "leaderKillXP": 5
+}

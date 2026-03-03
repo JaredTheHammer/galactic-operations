@@ -1,0 +1,317 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Tactician specialization (Commander career). 30 talent cards: 10 Tier 1, 8 Tier 2, 6 Tier 3, 4 Tier 4, 2 Tier 5. Players draft 15 into a pyramid (5/4/3/2/1)."
+  },
+  "specialization": {
+    "id": "tactician",
+    "name": "Tactician",
+    "career": "commander",
+    "description": "A battlefield commander who reads the flow of combat and positions allies for maximum effectiveness. The Tactician excels at ranged fire support and controlling engagement zones.",
+    "bonusCareerSkills": ["ranged-heavy", "leadership", "discipline", "vigilance"],
+    "capstoneCharacteristics": ["intellect", "willpower"]
+  },
+  "talents": [
+    {
+      "id": "tact-t1-01",
+      "name": "Grit",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Strain Threshold by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "strainThreshold", "value": 1, "perRank": true }
+    },
+    {
+      "id": "tact-t1-02",
+      "name": "Toughened",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Wound Threshold by 2 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "woundThreshold", "value": 2, "perRank": true }
+    },
+    {
+      "id": "tact-t1-03",
+      "name": "Second Wind",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Once per encounter per rank, recover 2 strain as an incidental.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 2, "perEncounter": true, "perRank": true }
+    },
+    {
+      "id": "tact-t1-04",
+      "name": "Commanding Presence",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 setback die per rank from Leadership and Cool checks.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["leadership", "cool"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "tact-t1-05",
+      "name": "Quick Draw",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Draw or holster a weapon as an incidental instead of a maneuver.",
+      "mechanicalEffect": { "type": "free_maneuver", "action": "draw_weapon" }
+    },
+    {
+      "id": "tact-t1-06",
+      "name": "Point Blank",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to ranged attacks at Short range or closer.",
+      "mechanicalEffect": { "type": "bonus_damage", "condition": "range_short_or_closer", "value": 1, "perRank": true }
+    },
+    {
+      "id": "tact-t1-07",
+      "name": "Side Step",
+      "tier": 1,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, upgrade the difficulty of ranged attacks targeting you by 1 per rank until start of next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "attackType": "ranged", "value": 1, "perRank": true, "duration": "until_next_turn" }
+    },
+    {
+      "id": "tact-t1-08",
+      "name": "Durable",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Subtract 10 per rank from critical injury rolls against you (minimum 11).",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "tact-t1-09",
+      "name": "Confidence",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Remove 1 setback die from Discipline and Vigilance checks.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["discipline", "vigilance"], "value": 1 }
+    },
+    {
+      "id": "tact-t1-10",
+      "name": "Brace",
+      "tier": 1,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, remove 1 setback die (per rank) from next Ranged (Heavy) or Gunnery check.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["ranged-heavy", "gunnery"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "tact-t2-01",
+      "name": "Barrage",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one hit of a Ranged (Heavy) or Gunnery attack at Long range or farther.",
+      "mechanicalEffect": { "type": "bonus_damage", "condition": "range_long_or_farther", "skills": ["ranged-heavy", "gunnery"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "tact-t2-02",
+      "name": "Lethal Blows",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add +10 per rank to critical injury rolls inflicted on opponents.",
+      "mechanicalEffect": { "type": "increase_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "tact-t2-03",
+      "name": "Enduring",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Gain +1 Soak per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "perRank": true }
+    },
+    {
+      "id": "tact-t2-04",
+      "name": "Bought Time",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Suffer 2 strain to perform an additional maneuver on your turn.",
+      "mechanicalEffect": { "type": "extra_maneuver", "strainCost": 2 }
+    },
+    {
+      "id": "tact-t2-05",
+      "name": "Suppressing Fire",
+      "tier": 2,
+      "type": "active",
+      "activation": "action",
+      "ranked": false,
+      "description": "Make a Ranged (Heavy) check. Instead of dealing damage, all targets in Short range zone become Suppressed if check succeeds.",
+      "mechanicalEffect": { "type": "impose_condition", "condition": "Suppressed", "areaRange": "Short", "resistCheck": "discipline" }
+    },
+    {
+      "id": "tact-t2-06",
+      "name": "Field Commander",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Remove 1 setback die from all Perception and Leadership checks.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["perception", "leadership"], "value": 1 }
+    },
+    {
+      "id": "tact-t2-07",
+      "name": "Covering Fire",
+      "tier": 2,
+      "type": "active",
+      "activation": "action",
+      "ranked": false,
+      "description": "Perform a ranged attack against all targets within Short range of a point within weapon range.",
+      "mechanicalEffect": { "type": "area_attack", "areaRange": "Short", "attackType": "ranged" }
+    },
+    {
+      "id": "tact-t2-08",
+      "name": "Spare Clip",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Weapons with Limited Ammo gain +1 use per encounter.",
+      "mechanicalEffect": { "type": "modify_weapon_quality", "quality": "Limited Ammo", "modifier": 1 }
+    },
+    {
+      "id": "tact-t3-01",
+      "name": "True Aim",
+      "tier": 3,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, upgrade attack pool by 1 per rank for next combat check this turn.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "duration": "this_turn" }
+    },
+    {
+      "id": "tact-t3-02",
+      "name": "Heroic Resilience",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, when you would be incapacitated by wounds, immediately heal 5 wounds and continue acting.",
+      "mechanicalEffect": { "type": "prevent_incapacitation", "healValue": 5, "perSession": true }
+    },
+    {
+      "id": "tact-t3-03",
+      "name": "Armor Master",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor, increase total Soak by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "condition": "wearing_armor" }
+    },
+    {
+      "id": "tact-t3-04",
+      "name": "Crippling Blow",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Increase Critical rating of next attack by 1 difficulty, but add +20 to the Critical Injury result.",
+      "mechanicalEffect": { "type": "empowered_critical", "criticalBonus": 20, "criticalCostIncrease": 1 }
+    },
+    {
+      "id": "tact-t3-05",
+      "name": "Last One Standing",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Add 1 Proficiency die (yellow) to all combat checks for each ally who has been incapacitated this encounter.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "per_incapacitated_ally" }
+    },
+    {
+      "id": "tact-t3-06",
+      "name": "Heroic Fortitude",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "May spend 1 Destiny Point to ignore effects of Critical Injuries on checks until end of encounter.",
+      "mechanicalEffect": { "type": "ignore_critical_penalties", "cost": "destiny_point", "duration": "encounter" }
+    },
+    {
+      "id": "tact-t4-01",
+      "name": "Deadly Accuracy",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Choose one combat skill when purchased. Add ranks in that skill as bonus damage to one hit per round.",
+      "mechanicalEffect": { "type": "skill_damage_bonus", "perRank": true, "description": "Player selects combat skill at purchase" }
+    },
+    {
+      "id": "tact-t4-02",
+      "name": "Unstoppable",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Suffer 3 strain to perform a second Action this turn (once per encounter).",
+      "mechanicalEffect": { "type": "extra_action", "strainCost": 3, "perEncounter": true }
+    },
+    {
+      "id": "tact-t4-03",
+      "name": "Armor Master (Improved)",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor with defense rating 1+, increase defense pool upgrades by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "defenseUpgrades", "value": 1, "condition": "armor_defense_1_plus" },
+      "prerequisite": "tact-t3-03"
+    },
+    {
+      "id": "tact-t4-04",
+      "name": "Iron Body",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Reduce all strain suffered (from any source) by 1, to a minimum of 1.",
+      "mechanicalEffect": { "type": "reduce_strain_suffered", "value": 1, "minimum": 1 }
+    },
+    {
+      "id": "tact-t5-01",
+      "name": "Dedication (Intellect)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Intellect by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "intellect", "value": 1 }
+    },
+    {
+      "id": "tact-t5-02",
+      "name": "Dedication (Willpower)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Willpower by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "willpower", "value": 1 }
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "blaster-pistol": {
+    "id": "blaster-pistol",
+    "name": "Blaster Pistol",
+    "type": "Ranged",
+    "attackDice": {
+      "red": 1
+    },
+    "range": 8,
+    "surgeAbilities": [
+      {
+        "cost": 1,
+        "effect": "+1 damage",
+        "type": "damage"
+      }
+    ],
+    "keywords": ["Ranged"]
+  },
+  "blaster-rifle": {
+    "id": "blaster-rifle",
+    "name": "Blaster Rifle",
+    "type": "Ranged",
+    "attackDice": {
+      "blue": 1
+    },
+    "range": 12,
+    "surgeAbilities": [
+      {
+        "cost": 1,
+        "effect": "+1 accuracy",
+        "type": "accuracy"
+      },
+      {
+        "cost": 2,
+        "effect": "+2 damage",
+        "type": "damage"
+      }
+    ],
+    "keywords": ["Ranged", "Accurate"]
+  },
+  "vibroblade": {
+    "id": "vibroblade",
+    "name": "Vibroblade",
+    "type": "Melee",
+    "attackDice": {
+      "red": 1
+    },
+    "range": 1,
+    "surgeAbilities": [
+      {
+        "cost": 1,
+        "effect": "+2 damage",
+        "type": "damage"
+      }
+    ],
+    "keywords": ["Melee"]
+  },
+  "basic-weapon": {
+    "id": "basic-weapon",
+    "name": "Basic Weapon",
+    "type": "Ranged",
+    "attackDice": {
+      "blue": 1
+    },
+    "range": 8,
+    "surgeAbilities": [],
+    "keywords": []
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "meta": {
+    "version": "3.0",
+    "description": "Shadow Syndicate NPC stat blocks. Criminal underworld faction for Act 2. Melee-heavy, chaotic tactical identity. Precomputed pools. courage overrides tier defaults (M=1, R=2, N=3). mechanicalKeywords hook into engine systems."
+  },
+  "npcs": {
+    "gamorrean-brute": {
+      "id": "gamorrean-brute",
+      "name": "Gamorrean Brute",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "vibro-axe",
+          "name": "Vibro-axe",
+          "baseDamage": 3,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Vicious", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Syndicate", "Brute", "Melee"],
+      "mechanicalKeywords": [],
+      "abilities": [],
+      "threatCost": 2
+    },
+    "nikto-gunner": {
+      "id": "nikto-gunner",
+      "name": "Nikto Gunner",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "blaster-carbine",
+          "name": "Blaster Carbine",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Syndicate", "Gunner"],
+      "mechanicalKeywords": [],
+      "abilities": [],
+      "threatCost": 2
+    },
+    "trandoshan-hunter": {
+      "id": "trandoshan-hunter",
+      "name": "Trandoshan Hunter",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": 5,
+      "soak": 4,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "trandoshan-scattergun",
+          "name": "Trandoshan Scattergun",
+          "baseDamage": 9,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [{ "name": "Blast", "value": 4 }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Syndicate", "Trandoshan", "Hunter"],
+      "mechanicalKeywords": [],
+      "abilities": ["Regeneration: At the start of this NPC's activation, recover 2 wounds."],
+      "threatCost": 4
+    },
+    "ig-assassin-droid": {
+      "id": "ig-assassin-droid",
+      "name": "IG Assassin Droid",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 7,
+      "strainThreshold": 4,
+      "soak": 4,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "dual-blaster-pistols",
+          "name": "Dual Blaster Pistols",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Linked", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Syndicate", "Droid", "Assassin"],
+      "mechanicalKeywords": [{"name": "Armor", "value": 1}],
+      "abilities": [],
+      "threatCost": 5
+    },
+    "syndicate-lieutenant": {
+      "id": "syndicate-lieutenant",
+      "name": "Syndicate Lieutenant",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 8,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "holdout-blaster",
+          "name": "Holdout Blaster",
+          "baseDamage": 5,
+          "range": "Short",
+          "critical": 4,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Syndicate", "Leader", "Officer"],
+      "mechanicalKeywords": [{"name": "Disciplined", "value": 1}],
+      "abilities": [
+        "Bounty Call: Other Syndicate units within Short range add 1 Ability die to attacks.",
+        "Slippery: Once per encounter, disengage as an incidental."
+      ],
+      "threatCost": 3
+    },
+    "the-broker": {
+      "id": "the-broker",
+      "name": "The Broker",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 3 },
+      "defensePool": { "difficulty": 1, "challenge": 2 },
+      "woundThreshold": 14,
+      "strainThreshold": 16,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "disruptor-pistol",
+          "name": "Disruptor Pistol",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [{ "name": "Vicious", "value": 3 }]
+        }
+      ],
+      "aiArchetype": "hero",
+      "keywords": ["Syndicate", "Boss", "Underworld"],
+      "mechanicalKeywords": [{"name": "Dauntless"}],
+      "courage": 4,
+      "abilities": [
+        "Adversary 2: Upgrade difficulty of all combat checks against this target by 2.",
+        "Summon Bodyguards: As an Action, deploy 2 Gamorrean Brutes at Short range if threat pool allows.",
+        "Underhanded Tactics: Once per round, upgrade difficulty of one hero's next check by 1."
+      ],
+      "threatCost": 10
+    }
+  }
+}

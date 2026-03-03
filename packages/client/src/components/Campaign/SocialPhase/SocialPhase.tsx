@@ -1,0 +1,248 @@
+/**
+ * SocialPhase - Top-level orchestrator for the between-mission social phase.
+ * State machine: 'hub' | 'encounter' | 'check-result' | 'shop' | 'summary'
+ */
+
+import React, { useState, useMemo, useCallback } from 'react'
+import { useGameStore } from '../../../store/game-store'
+import type {
+  CampaignState,
+  SocialPhaseLocation,
+  SocialEncounter,
+  SocialNPC,
+  SocialCheckResult,
+  SocialOutcome,
+  Shop,
+} from '../../../../../engine/src/types'
+import {
+  applySocialOutcomes,
+  completeSocialPhase as finalizeSocialPhase,
+} from '../../../../../engine/src/social-phase'
+import { recoverHero, MEDICAL_RECOVERY_COST } from '../../../../../engine/src/campaign-v2'
+import act1HubData from '../../../../../../data/social/act1-hub.json'
+import act2HubData from '../../../../../../data/social/act2-hub.json'
+import act3HubData from '../../../../../../data/social/act3-hub.json'
+
+const socialHubsByAct: Record<number, any> = {
+  1: act1HubData,
+  2: act2HubData,
+  3: act3HubData,
+}
+import { SocialHub } from './SocialHub'
+import { SocialEncounter as SocialEncounterView } from './SocialEncounter'
+import { SocialCheckResult as SocialCheckResultView } from './SocialCheckResult'
+import { SocialShop } from './SocialShop'
+import { SocialSummary } from './SocialSummary'
+
+export type SocialView = 'hub' | 'encounter' | 'check-result' | 'shop' | 'summary'
+
+export interface SocialSessionState {
+  completedEncounterIds: Set<string>
+  encounterResults: SocialCheckResult[]
+  purchaseHistory: Array<{ itemId: string; price: number }>
+  salesHistory: Array<{ itemId: string; revenue: number }>
+  healingCreditsSpent: number
+  currentEncounter: SocialEncounter | null
+  selectedHeroId: string | null
+  lastCheckResult: SocialCheckResult | null
+  lastOutcomes: SocialOutcome[] | null
+  lastNarrativeText: string | null
+  activeShopId: string | null
+}
+
+const containerStyle: React.CSSProperties = {
+  width: '100vw',
+  height: '100vh',
+  backgroundColor: '#0a0a0f',
+  color: '#c0c0c0',
+  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+}
+
+export function SocialPhase() {
+  const { campaignState, closeSocialPhase, updateCampaignState } = useGameStore()
+  const [view, setView] = useState<SocialView>('hub')
+  const [session, setSession] = useState<SocialSessionState>(() => ({
+    completedEncounterIds: new Set(),
+    encounterResults: [],
+    purchaseHistory: [],
+    salesHistory: [],
+    healingCreditsSpent: 0,
+    currentEncounter: null,
+    selectedHeroId: null,
+    lastCheckResult: null,
+    lastOutcomes: null,
+    lastNarrativeText: null,
+    activeShopId: null,
+  }))
+
+  // Load location data based on current campaign act
+  const currentAct = campaignState?.currentAct ?? 1
+  const location = useMemo<SocialPhaseLocation>(() => {
+    const raw = socialHubsByAct[currentAct] ?? socialHubsByAct[1]
+    return (raw as any).location as SocialPhaseLocation
+  }, [currentAct])
+
+  const npcs = useMemo<Record<string, SocialNPC>>(() => {
+    const raw = socialHubsByAct[currentAct] ?? socialHubsByAct[1]
+    return (raw as any).npcs as Record<string, SocialNPC>
+  }, [currentAct])
+
+  if (!campaignState) {
+    return (
+      <div style={containerStyle}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#ff4444' }}>
+          No campaign loaded.
+        </div>
+      </div>
+    )
+  }
+
+  // Navigation callbacks
+  const goToEncounter = useCallback((encounter: SocialEncounter) => {
+    setSession(prev => ({ ...prev, currentEncounter: encounter, selectedHeroId: null }))
+    setView('encounter')
+  }, [])
+
+  const goToShop = useCallback((shopId: string) => {
+    setSession(prev => ({ ...prev, activeShopId: shopId }))
+    setView('shop')
+  }, [])
+
+  const goToHub = useCallback(() => {
+    setView('hub')
+  }, [])
+
+  const goToSummary = useCallback(() => {
+    setView('summary')
+  }, [])
+
+  // When a social check resolves
+  const onCheckResolved = useCallback((
+    result: SocialCheckResult,
+    outcomes: SocialOutcome[],
+    narrativeText: string,
+  ) => {
+    // Apply outcomes to campaign state
+    const updated = applySocialOutcomes(campaignState, outcomes, result.heroId)
+    updateCampaignState(updated)
+
+    // Record in session
+    setSession(prev => ({
+      ...prev,
+      encounterResults: [...prev.encounterResults, result],
+      completedEncounterIds: new Set([...prev.completedEncounterIds, result.encounterId]),
+      lastCheckResult: result,
+      lastOutcomes: outcomes,
+      lastNarrativeText: narrativeText,
+    }))
+    setView('check-result')
+  }, [campaignState, updateCampaignState])
+
+  // Purchase item
+  const onPurchase = useCallback((itemId: string, price: number, updatedCampaign: CampaignState) => {
+    updateCampaignState(updatedCampaign)
+    setSession(prev => ({
+      ...prev,
+      purchaseHistory: [...prev.purchaseHistory, { itemId, price }],
+    }))
+  }, [updateCampaignState])
+
+  // Sell item
+  const onSell = useCallback((itemId: string, revenue: number, updatedCampaign: CampaignState) => {
+    updateCampaignState(updatedCampaign)
+    setSession(prev => ({
+      ...prev,
+      salesHistory: [...prev.salesHistory, { itemId, revenue }],
+    }))
+  }, [updateCampaignState])
+
+  // Heal hero
+  const onHealHero = useCallback((heroId: string) => {
+    const result = recoverHero(campaignState, heroId)
+    if (result) {
+      updateCampaignState(result)
+      setSession(prev => ({
+        ...prev,
+        healingCreditsSpent: prev.healingCreditsSpent + MEDICAL_RECOVERY_COST,
+      }))
+    }
+  }, [campaignState, updateCampaignState])
+
+  // Complete phase and return to mission select
+  const onComplete = useCallback(() => {
+    const finalCampaign = finalizeSocialPhase(
+      campaignState,
+      location.id,
+      session.encounterResults,
+      session.purchaseHistory,
+      session.salesHistory,
+      session.healingCreditsSpent,
+    )
+    updateCampaignState(finalCampaign)
+    closeSocialPhase()
+  }, [campaignState, location, session, updateCampaignState, closeSocialPhase])
+
+  // Skip social phase entirely
+  const onSkip = useCallback(() => {
+    closeSocialPhase()
+  }, [closeSocialPhase])
+
+  const activeShop = session.activeShopId
+    ? location.shops.find(s => s.id === session.activeShopId) ?? null
+    : null
+
+  return (
+    <div style={containerStyle}>
+      {view === 'hub' && (
+        <SocialHub
+          location={location}
+          npcs={npcs}
+          campaign={campaignState}
+          session={session}
+          onSelectEncounter={goToEncounter}
+          onSelectShop={goToShop}
+          onHealHero={onHealHero}
+          onComplete={goToSummary}
+          onSkip={onSkip}
+        />
+      )}
+      {view === 'encounter' && session.currentEncounter && (
+        <SocialEncounterView
+          encounter={session.currentEncounter}
+          npc={npcs[session.currentEncounter.npcId]}
+          campaign={campaignState}
+          onCheckResolved={onCheckResolved}
+          onBack={goToHub}
+        />
+      )}
+      {view === 'check-result' && session.lastCheckResult && (
+        <SocialCheckResultView
+          result={session.lastCheckResult}
+          outcomes={session.lastOutcomes ?? []}
+          narrativeText={session.lastNarrativeText ?? ''}
+          onContinue={goToHub}
+        />
+      )}
+      {view === 'shop' && activeShop && (
+        <SocialShop
+          shop={activeShop}
+          campaign={campaignState}
+          onPurchase={onPurchase}
+          onSell={onSell}
+          onBack={goToHub}
+        />
+      )}
+      {view === 'summary' && (
+        <SocialSummary
+          session={session}
+          npcs={npcs}
+          location={location}
+          onComplete={onComplete}
+        />
+      )}
+    </div>
+  )
+}

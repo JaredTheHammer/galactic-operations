@@ -1,0 +1,233 @@
+/**
+ * Game Data Loader
+ * Loads and parses game data from JSON files
+ */
+
+import type {
+  GameData,
+  DieColor,
+  DieDefinition,
+  UnitDefinition,
+  Weapon,
+  TacticCard,
+  Equipment,
+  NPCProfile,
+  WeaponDefinition,
+  ArmorDefinition,
+  SpeciesDefinition,
+  CareerDefinition,
+  SpecializationDefinition,
+  TalentCard,
+  D6DieType,
+  D6DieDefinition,
+  BoardTemplate,
+  ConsumableItem,
+} from './types.js';
+
+/**
+ * Load game data from the file system
+ * Reads dice.json, units/imperials.json, units/operatives.json, cards/tactics.json, equipment.json
+ * Merges imperial and operative units into a single Record
+ * Returns a fully typed GameData object
+ *
+ * Note: This function is designed for Node.js file system access
+ */
+export async function loadGameData(basePath: string): Promise<GameData> {
+  // Dynamic import of fs to support both Node.js and browser environments
+  const { readFile } = await import('fs/promises');
+  const { join } = await import('path');
+
+  const diceData = JSON.parse(
+    await readFile(join(basePath, 'dice.json'), 'utf-8')
+  );
+  const imperialsData = JSON.parse(
+    await readFile(join(basePath, 'units', 'imperials.json'), 'utf-8')
+  );
+  const operativesData = JSON.parse(
+    await readFile(join(basePath, 'units', 'operatives.json'), 'utf-8')
+  );
+  const tacticsData = JSON.parse(
+    await readFile(join(basePath, 'cards', 'tactics.json'), 'utf-8')
+  );
+  const equipmentData = JSON.parse(
+    await readFile(join(basePath, 'equipment.json'), 'utf-8')
+  );
+
+  return loadGameDataFromObjects({
+    dice: diceData,
+    imperials: imperialsData,
+    operatives: operativesData,
+    tactics: tacticsData,
+    equipment: equipmentData,
+  });
+}
+
+/**
+ * Load game data from pre-imported JSON objects
+ * This version is useful for browser contexts where modules are pre-loaded
+ */
+export function loadGameDataFromObjects(data: {
+  dice: any;
+  imperials: any;
+  operatives: any;
+  tactics: any;
+  equipment: any;
+}): GameData {
+  // Merge imperial and operative units into a single Record
+  const units: Record<string, UnitDefinition> = {
+    ...data.imperials,
+    ...data.operatives,
+  };
+
+  // Build dice definitions map
+  const dice = {} as Record<DieColor, DieDefinition>;
+  if (Array.isArray(data.dice)) {
+    for (const die of data.dice) {
+      dice[die.color as DieColor] = die;
+    }
+  } else {
+    // If dice is already a Record
+    Object.assign(dice, data.dice);
+  }
+
+  // Build tactic cards map
+  const tacticCards: Record<string, TacticCard> = {};
+  if (Array.isArray(data.tactics)) {
+    for (const card of data.tactics) {
+      tacticCards[card.id] = card;
+    }
+  } else {
+    Object.assign(tacticCards, data.tactics);
+  }
+
+  // Build equipment map
+  const equipment: Record<string, Equipment> = {};
+  if (Array.isArray(data.equipment)) {
+    for (const item of data.equipment) {
+      equipment[item.id] = item;
+    }
+  } else {
+    Object.assign(equipment, data.equipment);
+  }
+
+  return {
+    dice,
+    units,
+    weapons: {}, // Weapons are derived from units for now
+    tacticCards,
+    equipment,
+  };
+}
+
+/**
+ * Load v2 game data from the file system.
+ * Returns the proper GameData shape used by the v2 engine:
+ * { dice, species, careers, specializations, weapons, armor, npcProfiles }
+ */
+export async function loadGameDataV2(basePath: string): Promise<GameData> {
+  const { readFile, readdir } = await import('fs/promises');
+  const { join } = await import('path');
+
+  // Dice (d6 system)
+  const diceRaw = JSON.parse(
+    await readFile(join(basePath, 'dice-d6.json'), 'utf-8')
+  );
+  const dice: Record<string, D6DieDefinition> = diceRaw.dieTypes ?? diceRaw;
+
+  // Species
+  const speciesRaw = JSON.parse(
+    await readFile(join(basePath, 'species.json'), 'utf-8')
+  );
+  const species: Record<string, SpeciesDefinition> = speciesRaw.species ?? speciesRaw;
+
+  // Careers
+  const careersRaw = JSON.parse(
+    await readFile(join(basePath, 'careers.json'), 'utf-8')
+  );
+  const careers: Record<string, CareerDefinition> = careersRaw.careers ?? careersRaw;
+
+  // Weapons (v2)
+  const weaponsRaw = JSON.parse(
+    await readFile(join(basePath, 'weapons-v2.json'), 'utf-8')
+  );
+  const weapons: Record<string, WeaponDefinition> = weaponsRaw.weapons ?? weaponsRaw;
+
+  // Armor
+  const armorRaw = JSON.parse(
+    await readFile(join(basePath, 'armor.json'), 'utf-8')
+  );
+  const armor: Record<string, ArmorDefinition> = armorRaw.armor ?? armorRaw;
+
+  // NPC Profiles (load all JSON files in npcs directory)
+  const npcProfiles: Record<string, NPCProfile> = {};
+  const npcsDir = join(basePath, 'npcs');
+  const npcFiles = await readdir(npcsDir);
+  for (const file of npcFiles) {
+    if (!file.endsWith('.json')) continue;
+    const raw = JSON.parse(await readFile(join(npcsDir, file), 'utf-8'));
+    const npcs = raw.npcs ?? raw;
+    for (const [id, npc] of Object.entries(npcs)) {
+      npcProfiles[id] = npc as NPCProfile;
+    }
+  }
+
+  // Specializations (load all JSON files in specializations directory)
+  const specializations: Record<string, SpecializationDefinition & { talents: TalentCard[] }> = {};
+  const specDir = join(basePath, 'specializations');
+  const specFiles = await readdir(specDir);
+  for (const file of specFiles) {
+    if (!file.endsWith('.json')) continue;
+    const raw = JSON.parse(await readFile(join(specDir, file), 'utf-8'));
+    if (raw.specialization) {
+      const specDef = raw.specialization;
+      specializations[specDef.id] = {
+        ...specDef,
+        talents: raw.talents ?? [],
+      };
+    }
+  }
+
+  return {
+    dice: dice as any,
+    species,
+    careers,
+    specializations,
+    weapons,
+    armor,
+    npcProfiles,
+  };
+}
+
+/**
+ * Load board templates from the data/boards directory.
+ * Used by the simulator to generate proper maps matching the live game.
+ */
+export async function loadBoardTemplates(basePath: string): Promise<BoardTemplate[]> {
+  const { readFile, readdir } = await import('fs/promises');
+  const { join } = await import('path');
+
+  const boardsDir = join(basePath, 'boards');
+  const files = await readdir(boardsDir);
+  const templates: BoardTemplate[] = [];
+
+  for (const file of files) {
+    if (!file.endsWith('.json') || file === 'index.json') continue;
+    const raw = JSON.parse(await readFile(join(boardsDir, file), 'utf-8'));
+    if (raw.id && raw.tiles) {
+      templates.push(raw as BoardTemplate);
+    }
+  }
+
+  return templates;
+}
+
+/**
+ * Load consumable item definitions from data/consumables.json.
+ */
+export async function loadConsumables(basePath: string): Promise<Record<string, ConsumableItem>> {
+  const { readFile } = await import('fs/promises');
+  const { join } = await import('path');
+
+  const raw = JSON.parse(await readFile(join(basePath, 'consumables.json'), 'utf-8'));
+  return raw.consumables as Record<string, ConsumableItem>;
+}

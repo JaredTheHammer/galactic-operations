@@ -1,0 +1,338 @@
+/* ============================================================================
+ * GALACTIC OPERATIONS - Global Stylesheet
+ * ============================================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ============================================================================
+ * Theme Variables
+ * ============================================================================ */
+
+:root {
+  /* --- Backgrounds (layered depth, darkest to lightest) --- */
+  --bg-base: #0a0a0f;
+  --bg-surface-1: #12121f;
+  --bg-surface-2: #1a1a2e;
+  --bg-surface-3: #2a2a3f;
+  --bg-panel: #131320;
+
+  /* --- Accent Colors --- */
+  --accent-blue: #4a9eff;
+  --accent-gold: #ffd700;
+  --accent-red: #ff4444;
+  --accent-green: #44ff44;
+  --accent-orange: #ff8800;
+  --accent-purple: #9966ff;
+  --accent-cyan: #00cc66;
+
+  /* --- Text --- */
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #999999;
+  --text-dim: #666666;
+  --text-faint: #555555;
+
+  /* --- Borders --- */
+  --border-default: #333355;
+  --border-subtle: #222244;
+  --border-accent: var(--accent-blue);
+
+  /* --- Shadows (blue glow variants) --- */
+  --shadow-glow-sm: 0 0 10px rgba(74, 158, 255, 0.2);
+  --shadow-glow-md: 0 0 20px rgba(74, 158, 255, 0.3);
+  --shadow-glow-lg: 0 0 40px rgba(74, 158, 255, 0.3);
+  --shadow-glow-gold-sm: 0 0 10px rgba(255, 215, 0, 0.2);
+  --shadow-glow-gold-md: 0 0 20px rgba(255, 215, 0, 0.3);
+
+  /* --- Panels (with transparency for backdrop-filter) --- */
+  --panel-bg: rgba(19, 19, 32, 0.95);
+  --panel-bg-solid: rgba(19, 19, 32, 0.98);
+  --panel-bg-light: rgba(19, 19, 32, 0.92);
+
+  /* --- Overlays --- */
+  --overlay-dark: rgba(0, 0, 0, 0.5);
+  --overlay-heavy: rgba(0, 0, 0, 0.7);
+
+  /* --- Dice colors (game-specific) --- */
+  --dice-ability: #44ff44;
+  --dice-proficiency: #ffd700;
+  --dice-difficulty: #9966ff;
+  --dice-challenge: #ff4444;
+  --dice-boost: #4a9eff;
+  --dice-setback: #333333;
+
+  /* --- Spacing scale --- */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* --- Border radius --- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* --- Transitions --- */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+
+  /* --- Font sizes --- */
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+}
+
+/* ============================================================================
+ * Base Styles
+ * ============================================================================ */
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================================
+ * Scrollbar
+ * ============================================================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-blue);
+}
+
+/* ============================================================================
+ * Button Base
+ * ============================================================================ */
+
+button {
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow-sm);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Focus-visible for keyboard navigation */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+ * Input Base
+ * ============================================================================ */
+
+input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 12px rgba(74, 158, 255, 0.3);
+}
+
+/* ============================================================================
+ * Touch-friendly
+ * ============================================================================ */
+
+button, input, select, [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+/* ============================================================================
+ * Panel Component
+ * ============================================================================ */
+
+.panel {
+  background-color: var(--panel-bg);
+  border: 2px solid var(--accent-blue);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  backdrop-filter: blur(4px);
+}
+
+/* ============================================================================
+ * Animation Keyframes
+ * ============================================================================ */
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(74, 158, 255, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(74, 158, 255, 0.6); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================================================
+ * Animation Utilities
+ * ============================================================================ */
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-glow {
+  animation: glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 300ms ease forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 300ms ease forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 300ms ease forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 200ms ease forwards;
+}
+
+/* ============================================================================
+ * Utility Classes
+ * ============================================================================ */
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.grid-center {
+  display: grid;
+  place-items: center;
+}
+
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================================================
+ * Scrollable Areas
+ * ============================================================================ */
+
+.scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================================================
+ * Responsive
+ * ============================================================================ */
+
+@media (max-width: 768px) {
+  button {
+    font-size: var(--text-sm);
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  input, select, textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* ============================================================================
+ * Print
+ * ============================================================================ */
+
+@media print {
+  body {
+    background-color: white;
+    color: black;
+  }
+}

@@ -1,0 +1,1372 @@
+/**
+ * Game Store (v2)
+ *
+ * Zustand store managing v2 GameState with:
+ * - v2 Figure (entityType/entityId, woundsCurrent/strainCurrent, conditions)
+ * - v2 action economy (1 Action + 1 Maneuver)
+ * - v2 combat pipeline (combat-v2.ts)
+ * - Hero + NPC registries on GameState
+ * - Hero creation pipeline (Phase 7d)
+ * - Active talent usage (UseTalent action)
+ */
+
+import { create } from 'zustand'
+import type {
+  GameState,
+  GameData,
+  GridCoordinate,
+  Player,
+  Figure,
+  NPCProfile,
+  HeroCharacter,
+  MapConfig,
+  BoardTemplate,
+  TalentCard,
+  SpecializationDefinition,
+  WeaponDefinition,
+  ArmorDefinition,
+  CampaignState,
+  CampaignDifficulty,
+  MissionDefinition,
+  MissionResult,
+} from '@engine/types.js'
+import { MAP_PRESETS } from '@engine/types.js'
+import {
+  createInitialGameStateV2,
+  deployFiguresV2,
+  executeActionV2,
+  resetForActivation,
+  getWoundThresholdV2,
+} from '@engine/turn-machine-v2.js'
+import type { ArmyCompositionV2 } from '@engine/turn-machine-v2.js'
+import { generateMap } from '@engine/map-generator.js'
+import {
+  getValidMoves,
+  moveFigure,
+} from '@engine/movement.js'
+import {
+  getValidTargetsV2,
+} from '@engine/ai/evaluate-v2.js'
+import { createHero } from '@engine/character-v2.js'
+import type { HeroCreationInput } from '@engine/character-v2.js'
+import { getEquippedTalents, canActivateTalent } from '@engine/talent-v2.js'
+import {
+  createCampaign,
+  getAvailableMissions,
+  completeMission,
+  prepareHeroesForMission,
+  saveCampaign,
+  loadCampaign,
+  campaignToJSON,
+  campaignFromJSON,
+  checkVictoryConditions,
+  evaluateObjective,
+} from '@engine/campaign-v2.js'
+import type { MissionCompletionInput } from '@engine/campaign-v2.js'
+
+// v2 data imports
+import diceD6Data from '@data/dice-d6.json'
+import imperialsNpcData from '@data/npcs/imperials.json'
+import weaponsV2Data from '@data/weapons-v2.json'
+import armorData from '@data/armor.json'
+import speciesData from '@data/species.json'
+import careersData from '@data/careers.json'
+import aiProfilesRaw from '@data/ai-profiles.json'
+import mercenarySpecData from '@data/specializations/mercenary.json'
+import smugglerSpecData from '@data/specializations/smuggler.json'
+import droidTechSpecData from '@data/specializations/droid-tech.json'
+import forceAdeptSpecData from '@data/specializations/force-adept.json'
+import tacticianSpecData from '@data/specializations/tactician.json'
+import assassinSpecData from '@data/specializations/assassin.json'
+
+// Campaign mission data
+import mission1Data from '@data/missions/act1-mission1-arrival.json'
+import mission2Data from '@data/missions/act1-mission2-intel.json'
+import mission3aData from '@data/missions/act1-mission3a-cache.json'
+import mission3bData from '@data/missions/act1-mission3b-ambush.json'
+import mission4Data from '@data/missions/act1-mission4-finale.json'
+import campaignData from '@data/campaigns/tangrene-liberation.json'
+
+// v1 data still used for board templates
+import openGround from '@data/boards/open-ground.json'
+import corridorComplex from '@data/boards/corridor-complex.json'
+import commandCenter from '@data/boards/command-center.json'
+import storageBay from '@data/boards/storage-bay.json'
+import landingPad from '@data/boards/landing-pad.json'
+import barracks from '@data/boards/barracks.json'
+
+const BOARD_TEMPLATES: BoardTemplate[] = [
+  openGround,
+  corridorComplex,
+  commandCenter,
+  storageBay,
+  landingPad,
+  barracks,
+] as BoardTemplate[]
+
+// ============================================================================
+// DATA LOADING (v2)
+// ============================================================================
+
+/**
+ * Build v2 GameData from JSON imports.
+ * Now loads specialization data for hero creation.
+ */
+function loadGameDataV2(): GameData {
+  // NPC profiles
+  const npcProfiles: Record<string, NPCProfile> = {}
+  const npcsRaw = (imperialsNpcData as any).npcs ?? imperialsNpcData
+  for (const [id, npc] of Object.entries(npcsRaw)) {
+    npcProfiles[id] = npc as NPCProfile
+  }
+
+  // Weapons
+  const weapons: Record<string, any> = {}
+  const weaponsRaw = (weaponsV2Data as any).weapons ?? weaponsV2Data
+  for (const [id, weapon] of Object.entries(weaponsRaw)) {
+    weapons[id] = weapon
+  }
+
+  // Armor
+  const armor: Record<string, any> = {}
+  const armorRaw = (armorData as any).armor ?? armorData
+  for (const [id, a] of Object.entries(armorRaw)) {
+    armor[id] = a
+  }
+
+  // Species
+  const species: Record<string, any> = {}
+  const speciesRaw = (speciesData as any).species ?? speciesData
+  for (const [id, sp] of Object.entries(speciesRaw)) {
+    species[id] = sp
+  }
+
+  // Careers
+  const careers: Record<string, any> = {}
+  const careersRaw = (careersData as any).careers ?? careersData
+  for (const [id, c] of Object.entries(careersRaw)) {
+    careers[id] = c
+  }
+
+  // Specializations (load all available)
+  const specializations: Record<string, SpecializationDefinition & { talents: TalentCard[] }> = {}
+  const specDataFiles = [
+    mercenarySpecData,
+    smugglerSpecData,
+    droidTechSpecData,
+    forceAdeptSpecData,
+    tacticianSpecData,
+    assassinSpecData,
+  ]
+  for (const specRaw of specDataFiles) {
+    const raw = specRaw as any
+    if (raw.specialization) {
+      const specDef = raw.specialization
+      specializations[specDef.id] = {
+        ...specDef,
+        talents: raw.talents ?? [],
+      }
+    }
+  }
+
+  // Dice (d6 system)
+  const dice = (diceD6Data as any).dieTypes ?? diceD6Data
+
+  return {
+    dice,
+    species,
+    careers,
+    specializations,
+    weapons,
+    armor,
+    npcProfiles,
+  }
+}
+
+/**
+ * Build campaign mission definitions from JSON data.
+ */
+function loadCampaignMissions(): Record<string, MissionDefinition> {
+  const missions: Record<string, MissionDefinition> = {}
+  const missionFiles = [mission1Data, mission2Data, mission3aData, mission3bData, mission4Data]
+  for (const raw of missionFiles) {
+    const m = raw as unknown as MissionDefinition
+    missions[m.id] = m
+  }
+  return missions
+}
+
+const CAMPAIGN_STORAGE_KEY = 'galactic-ops-campaign-save'
+
+/**
+ * Build default v2 army for AI battles.
+ *
+ * Asymmetric design (Imperial Assault-style):
+ * - Imperial starts with a small patrol force; reinforcements arrive each round
+ *   via the threat system (see applyReinforcementPhase in turn-machine-v2)
+ * - Operative has their full hero squad from the start
+ *
+ * Tension arc:
+ *   R1-3: Heroes outgun the initial patrol, focus on objectives
+ *   R4-6: Elite reinforcements create the balance point
+ *   R7+:  Imperial pressure mounts, heroes must finish or be overwhelmed
+ */
+function defaultArmyV2(heroes?: HeroCharacter[]): ArmyCompositionV2 {
+  return {
+    imperial: [
+      // Small initial patrol -- reinforcements come via threat system
+      { npcId: 'stormtrooper', count: 2 },
+      { npcId: 'imperial-officer', count: 1 },
+    ],
+    operative: heroes
+      ? heroes.map(h => ({ entityType: 'hero' as const, entityId: h.id, count: 1 }))
+      : [
+          { entityType: 'npc' as const, entityId: 'stormtrooper', count: 2 },
+          { entityType: 'npc' as const, entityId: 'stormtrooper-elite', count: 1 },
+          { entityType: 'npc' as const, entityId: 'imperial-officer', count: 1 },
+        ],
+  }
+}
+
+/**
+ * Generate 4 pre-built test heroes for AI vs AI playtesting.
+ * Each covers a different combat archetype with proper weapons and skills.
+ */
+function generateTestHeroes(gameData: GameData): HeroCharacter[] {
+  const heroes: HeroCharacter[] = []
+
+  // Hero 1: Wookiee Hired Gun / Mercenary -- tank/heavy weapons
+  const korrga = createHero({
+    name: 'Korrga',
+    speciesId: 'wookiee',
+    careerId: 'hired-gun',
+    specializationId: 'mercenary',
+    initialSkills: { 'ranged-heavy': 2, 'resilience': 1, 'athletics': 1 },
+    characteristicIncreases: { brawn: 1 },
+  }, gameData)
+  korrga.equipment.primaryWeapon = 'a280'
+  korrga.equipment.armor = 'heavy-battle-armor'
+  heroes.push(korrga)
+
+  // Hero 2: Human Scoundrel / Smuggler -- mobile DPS
+  const vex = createHero({
+    name: 'Vex Dorin',
+    speciesId: 'human',
+    careerId: 'scoundrel',
+    specializationId: 'smuggler',
+    initialSkills: { 'ranged-light': 2, 'cool': 1, 'coordination': 1 },
+    characteristicIncreases: { agility: 1 },
+  }, gameData)
+  vex.equipment.primaryWeapon = 'dl-44'
+  vex.equipment.armor = 'blast-vest'
+  heroes.push(vex)
+
+  // Hero 3: Twi'lek Commander / Tactician -- support/leader
+  const ashara = createHero({
+    name: 'Ashara Nev',
+    speciesId: 'twilek',
+    careerId: 'commander',
+    specializationId: 'tactician',
+    initialSkills: { 'ranged-light': 1, 'leadership': 2, 'cool': 1 },
+    characteristicIncreases: { presence: 1 },
+  }, gameData)
+  ashara.equipment.primaryWeapon = 'westar-35'
+  ashara.equipment.armor = 'padded-armor'
+  heroes.push(ashara)
+
+  // Hero 4: Trandoshan Bounty Hunter / Assassin -- sniper/finisher
+  const ssorku = createHero({
+    name: 'Ssorku',
+    speciesId: 'trandoshan',
+    careerId: 'bounty-hunter',
+    specializationId: 'assassin',
+    initialSkills: { 'ranged-heavy': 2, 'stealth': 1, 'perception': 1 },
+    characteristicIncreases: { agility: 1 },
+  }, gameData)
+  ssorku.equipment.primaryWeapon = 'e-11'
+  ssorku.equipment.armor = 'padded-armor'
+  heroes.push(ssorku)
+
+  return heroes
+}
+
+/**
+ * Build army composition that includes created heroes.
+ */
+function heroArmyV2(heroes: HeroCharacter[]): ArmyCompositionV2 {
+  return {
+    imperial: [
+      { npcId: 'stormtrooper', count: 3 },
+      { npcId: 'stormtrooper-elite', count: 1 },
+      { npcId: 'imperial-officer', count: 1 },
+    ],
+    operative: heroes.map(h => ({
+      entityType: 'hero' as const,
+      entityId: h.id,
+      count: 1,
+    })),
+  }
+}
+
+// ============================================================================
+// STORE TYPES
+// ============================================================================
+
+/** Active talent info for UI display */
+export interface ActivatableTalent {
+  talentId: string
+  name: string
+  description: string
+  activation: string
+  strainCost?: number
+}
+
+export interface GameStore {
+  // State
+  gameState: GameState | null
+  gameData: GameData | null
+  selectedFigureId: string | null
+  validMoves: GridCoordinate[]
+  validTargets: string[]
+  highlightedTile: GridCoordinate | null
+  combatLog: string[]
+  isInitialized: boolean
+  showSetup: boolean
+  isAIBattle: boolean
+
+  // Hero creation state
+  showHeroCreation: boolean
+  createdHeroes: HeroCharacter[]
+  pendingPlayers: Player[] | null
+  pendingMapConfig: MapConfig | null
+
+  // Campaign state
+  campaignState: CampaignState | null
+  campaignMissions: Record<string, MissionDefinition>
+  lastMissionResult: MissionResult | null
+  showMissionSelect: boolean
+  showPostMission: boolean
+  campaignHeroCreation: boolean // true when creating heroes for a new campaign
+
+  // AI visualization state
+  aiMovePath: GridCoordinate[] | null
+  aiAttackTarget: { from: GridCoordinate; to: GridCoordinate } | null
+
+  // Actions
+  initGame: (players: Player[], mapConfig?: MapConfig) => void
+  startHeroCreation: (players: Player[], mapConfig?: MapConfig) => void
+  addCreatedHero: (hero: HeroCharacter) => void
+  finishHeroCreation: () => void
+  cancelHeroCreation: () => void
+  selectFigure: (figureId: string | null) => void
+  moveFigure: (destination: GridCoordinate) => void
+  startAttack: (targetId: string) => void
+  rallyFigure: () => void
+  guardedStance: () => void
+  useTalent: (talentId: string) => void
+  endActivation: () => void
+  advancePhase: () => void
+  setHighlightedTile: (coord: GridCoordinate | null) => void
+  setAIMovePath: (path: GridCoordinate[] | null) => void
+  setAIAttackTarget: (target: { from: GridCoordinate; to: GridCoordinate } | null) => void
+  clearAIVisualization: () => void
+  addCombatLog: (message: string) => void
+  undoLastAction: () => void
+
+  // Campaign actions
+  startCampaign: (difficulty: CampaignDifficulty) => void
+  finishCampaignHeroCreation: () => void
+  startCampaignMission: (missionId: string) => void
+  completeCampaignMission: (input: MissionCompletionInput) => void
+  returnToMissionSelect: () => void
+  saveCampaignToStorage: () => void
+  loadCampaignFromStorage: () => boolean
+  exitCampaign: () => void
+
+  // Helpers
+  getGameData: () => GameData | null
+  getActivatableTalents: (figure: Figure) => ActivatableTalent[]
+}
+
+// ============================================================================
+// STORE
+// ============================================================================
+
+export const useGameStore = create<GameStore>((set, get) => ({
+  // Initial state
+  gameState: null,
+  gameData: null,
+  selectedFigureId: null,
+  validMoves: [],
+  validTargets: [],
+  highlightedTile: null,
+  combatLog: [],
+  isInitialized: false,
+  showSetup: true,
+  isAIBattle: false,
+
+  // Hero creation state
+  showHeroCreation: false,
+  createdHeroes: [],
+  pendingPlayers: null,
+  pendingMapConfig: null,
+
+  // Campaign state
+  campaignState: null,
+  campaignMissions: {},
+  lastMissionResult: null,
+  showMissionSelect: false,
+  showPostMission: false,
+  campaignHeroCreation: false,
+
+  // AI visualization state
+  aiMovePath: null,
+  aiAttackTarget: null,
+
+  // Start hero creation flow (Solo/HotSeat modes)
+  startHeroCreation: (players: Player[], mapConfig?: MapConfig) => {
+    const gameData = loadGameDataV2()
+    set({
+      showSetup: false,
+      showHeroCreation: true,
+      gameData,
+      createdHeroes: [],
+      pendingPlayers: players,
+      pendingMapConfig: mapConfig ?? MAP_PRESETS.skirmish,
+    })
+  },
+
+  addCreatedHero: (hero: HeroCharacter) => {
+    set(state => ({
+      createdHeroes: [...state.createdHeroes, hero],
+    }))
+  },
+
+  finishHeroCreation: () => {
+    const { pendingPlayers, pendingMapConfig, createdHeroes } = get()
+    if (!pendingPlayers) return
+
+    const gameData = loadGameDataV2()
+    const config = pendingMapConfig ?? MAP_PRESETS.skirmish
+    const generatedMap = generateMap(config, BOARD_TEMPLATES)
+
+    const mission = {
+      id: 'tutorial-1',
+      name: 'Imperial Outpost Raid',
+      description: 'Raid the Imperial outpost',
+      mapId: 'generated',
+      roundLimit: 10,
+      imperialThreat: 20,
+      imperialReinforcementPoints: 5,
+      victoryConditions: [
+        { side: 'Imperial' as const, description: 'Defeat all operatives', condition: 'allEnemiesDefeated' },
+        { side: 'Operative' as const, description: 'Defeat all imperials', condition: 'allEnemiesDefeated' },
+      ],
+    }
+
+    // Build heroes registry
+    const heroesRegistry: Record<string, HeroCharacter> = {}
+    for (const hero of createdHeroes) {
+      heroesRegistry[hero.id] = hero
+    }
+
+    // Create game state with hero registry
+    let gameState = createInitialGameStateV2(
+      mission,
+      pendingPlayers,
+      gameData,
+      generatedMap,
+      {
+        heroes: heroesRegistry,
+        npcProfiles: gameData.npcProfiles,
+      },
+    )
+
+    // Deploy with heroes
+    const army = createdHeroes.length > 0
+      ? heroArmyV2(createdHeroes)
+      : defaultArmyV2()
+    gameState = deployFiguresV2(gameState, army, gameData)
+
+    // Build activation order
+    gameState.activationOrder = gameState.figures
+      .filter(f => !f.isDefeated)
+      .map(f => f.id)
+    gameState.currentActivationIndex = 0
+    gameState.turnPhase = 'Activation'
+
+    set({
+      gameState,
+      gameData,
+      isInitialized: true,
+      showSetup: false,
+      showHeroCreation: false,
+      isAIBattle: false,
+      createdHeroes: [],
+      pendingPlayers: null,
+      pendingMapConfig: null,
+      combatLog: ['Mission started! Heroes deployed.'],
+    })
+  },
+
+  cancelHeroCreation: () => {
+    set({
+      showHeroCreation: false,
+      showSetup: true,
+      createdHeroes: [],
+      pendingPlayers: null,
+      pendingMapConfig: null,
+    })
+  },
+
+  // Initialize game with v2 pipeline
+  initGame: (players: Player[], mapConfig?: MapConfig) => {
+    const gameData = loadGameDataV2()
+    const isAIBattle = players.every(p => p.isAI)
+    const config = mapConfig ?? MAP_PRESETS.skirmish
+    const generatedMap = generateMap(config, BOARD_TEMPLATES)
+
+    const mission = {
+      id: 'tutorial-1',
+      name: 'Imperial Outpost Raid',
+      description: 'Raid the Imperial outpost',
+      mapId: 'generated',
+      roundLimit: isAIBattle ? 15 : 5,
+      // Threat system: moderate starting pool, 5/round income enables elites by R3-4.
+      // Initial patrol (~7 threat deployed), pool starts at 4 so R1 reinforcement
+      // can afford 1 trooper. Income of 5/round means by R3 the Empire can
+      // field elites (cost 4), and by R5+ it can sustain heavy pressure with
+      // mixed elite/minion waves.
+      imperialThreat: 4,
+      imperialReinforcementPoints: 4,
+      victoryConditions: isAIBattle ? [
+        { side: 'Imperial' as const, description: 'All heroes wounded', condition: 'allHeroesWounded' },
+        { side: 'Operative' as const, description: 'Complete mission objectives', condition: 'allEnemiesDefeated' },
+      ] : [],
+    }
+
+    // Create v2 game state with NPC profiles
+    let gameState = createInitialGameStateV2(
+      mission,
+      players,
+      gameData,
+      generatedMap,
+      { npcProfiles: gameData.npcProfiles },
+    )
+
+    if (isAIBattle) {
+      // Auto-generate test heroes for the operative side
+      const testHeroes = generateTestHeroes(gameData)
+      const heroesRegistry: Record<string, HeroCharacter> = {}
+      for (const hero of testHeroes) {
+        heroesRegistry[hero.id] = hero
+      }
+      gameState.heroes = heroesRegistry
+
+      // Deploy with auto-generated heroes as operatives
+      gameState = deployFiguresV2(gameState, defaultArmyV2(testHeroes), gameData)
+
+      // Build activation order
+      gameState.activationOrder = gameState.figures
+        .filter(f => !f.isDefeated)
+        .map(f => f.id)
+      gameState.currentActivationIndex = 0
+      gameState.turnPhase = 'Initiative'
+    } else {
+      // Manual deployment: create v2 NPC figures for tutorial
+      const impPlayer = players.find(p => p.role === 'Imperial')
+      const opPlayer = players.find(p => p.role === 'Operative')
+      if (impPlayer && opPlayer) {
+        const stormtrooperNpc = gameData.npcProfiles['stormtrooper']
+        const officerNpc = gameData.npcProfiles['imperial-officer']
+
+        const deployedFigures: Figure[] = [
+          {
+            id: 'imp-1',
+            entityType: 'npc',
+            entityId: 'stormtrooper',
+            playerId: impPlayer.id,
+            position: { x: 2, y: 2 },
+            woundsCurrent: 0,
+            strainCurrent: 0,
+            actionsRemaining: 1,
+            maneuversRemaining: 1,
+            hasUsedStrainForManeuver: false,
+            isActivated: false,
+            isDefeated: false,
+            conditions: [],
+            talentUsesThisEncounter: {},
+            talentUsesThisSession: {},
+            cachedAttackPool: stormtrooperNpc ? { ...stormtrooperNpc.attackPool } : null,
+            cachedDefensePool: stormtrooperNpc ? { ...stormtrooperNpc.defensePool } : null,
+          },
+          {
+            id: 'imp-2',
+            entityType: 'npc',
+            entityId: 'stormtrooper',
+            playerId: impPlayer.id,
+            position: { x: 3, y: 2 },
+            woundsCurrent: 0,
+            strainCurrent: 0,
+            actionsRemaining: 1,
+            maneuversRemaining: 1,
+            hasUsedStrainForManeuver: false,
+            isActivated: false,
+            isDefeated: false,
+            conditions: [],
+            talentUsesThisEncounter: {},
+            talentUsesThisSession: {},
+            cachedAttackPool: stormtrooperNpc ? { ...stormtrooperNpc.attackPool } : null,
+            cachedDefensePool: stormtrooperNpc ? { ...stormtrooperNpc.defensePool } : null,
+          },
+          {
+            id: 'op-1',
+            entityType: 'npc',
+            entityId: 'imperial-officer',
+            playerId: opPlayer.id,
+            position: { x: 7, y: 7 },
+            woundsCurrent: 0,
+            strainCurrent: 0,
+            actionsRemaining: 1,
+            maneuversRemaining: 1,
+            hasUsedStrainForManeuver: false,
+            isActivated: false,
+            isDefeated: false,
+            conditions: [],
+            talentUsesThisEncounter: {},
+            talentUsesThisSession: {},
+            cachedAttackPool: officerNpc ? { ...officerNpc.attackPool } : null,
+            cachedDefensePool: officerNpc ? { ...officerNpc.defensePool } : null,
+          },
+        ]
+
+        gameState.figures = deployedFigures
+        gameState.activationOrder = ['imp-1', 'imp-2', 'op-1']
+        gameState.currentActivationIndex = 0
+        gameState.turnPhase = 'Activation'
+      }
+    }
+
+    set({
+      gameState,
+      gameData,
+      isInitialized: true,
+      showSetup: false,
+      isAIBattle,
+      combatLog: [isAIBattle ? 'AI Battle started!' : 'Game started!'],
+    })
+  },
+
+  selectFigure: (figureId: string | null) => {
+    const { gameState, gameData } = get()
+    if (!gameState || !gameData) return
+
+    set({ selectedFigureId: figureId, validMoves: [], validTargets: [] })
+
+    if (figureId) {
+      const figure = gameState.figures.find(f => f.id === figureId)
+      if (figure) {
+        const moves = getValidMoves(figure, gameState)
+        set({ validMoves: moves })
+
+        // v2 valid targets using evaluate-v2
+        const targets = getValidTargetsV2(figure, figure.position, gameState, gameData)
+        set({ validTargets: targets.map(t => t.id) })
+      }
+    }
+  },
+
+  moveFigure: (destination: GridCoordinate) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure) return
+
+    try {
+      // Execute Move via v2 turn machine
+      const moveAction = {
+        type: 'Move' as const,
+        figureId: selectedFigureId,
+        payload: { path: [destination] },
+      }
+      const newGameState = executeActionV2(gameState, moveAction, gameData)
+      set({ gameState: newGameState })
+      addCombatLog(`${figure.id} moved to (${destination.x}, ${destination.y})`)
+
+      // Re-select to update valid moves/targets
+      const updatedFigure = newGameState.figures.find(f => f.id === selectedFigureId)
+      if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
+        const moves = getValidMoves(updatedFigure, newGameState)
+        const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
+        set({ validMoves: moves, validTargets: targets.map(t => t.id) })
+      } else {
+        set({ validMoves: [], validTargets: [] })
+      }
+    } catch (error) {
+      addCombatLog(`Invalid move: ${error}`)
+    }
+  },
+
+  startAttack: (targetId: string) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const attacker = gameState.figures.find(f => f.id === selectedFigureId)
+    const defender = gameState.figures.find(f => f.id === targetId)
+    if (!attacker || !defender) return
+
+    try {
+      // Resolve weapon ID from entity
+      const weaponId = resolveWeaponId(attacker, gameState, gameData)
+
+      const attackAction = {
+        type: 'Attack' as const,
+        figureId: selectedFigureId,
+        payload: { targetId, weaponId },
+      }
+      const newGameState = executeActionV2(gameState, attackAction, gameData)
+      set({ gameState: newGameState })
+
+      const resolution = newGameState.activeCombat?.resolution
+      if (resolution) {
+        addCombatLog(
+          `${attacker.id} attacks ${defender.id}: ` +
+          (resolution.isHit
+            ? `Hit! ${resolution.woundsDealt} wounds dealt`
+            : 'Miss!')
+        )
+        if (resolution.isDefeated) {
+          addCombatLog(`  !! ${defender.id} defeated!`)
+        }
+      } else {
+        addCombatLog(`Combat: ${attacker.id} vs ${defender.id}`)
+      }
+    } catch (error) {
+      addCombatLog(`Combat error: ${error}`)
+    }
+  },
+
+  rallyFigure: () => {
+    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure) return
+
+    const rallyAction = {
+      type: 'Rally' as const,
+      figureId: selectedFigureId,
+      payload: {},
+    }
+    const newGameState = executeActionV2(gameState, rallyAction, gameData)
+    set({ gameState: newGameState })
+
+    const updated = newGameState.figures.find(f => f.id === selectedFigureId)
+    const recovered = figure.strainCurrent - (updated?.strainCurrent ?? 0)
+    addCombatLog(`${selectedFigureId} rallied, recovered ${recovered} strain`)
+  },
+
+  guardedStance: () => {
+    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const guardAction = {
+      type: 'GuardedStance' as const,
+      figureId: selectedFigureId,
+      payload: {},
+    }
+    const newGameState = executeActionV2(gameState, guardAction, gameData)
+    set({ gameState: newGameState })
+    addCombatLog(`${selectedFigureId} took guarded stance`)
+  },
+
+  useTalent: (talentId: string) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure) return
+
+    try {
+      // Resolve weapon for combat-capable talents
+      const weaponId = resolveWeaponId(figure, gameState, gameData)
+
+      const talentAction = {
+        type: 'UseTalent' as const,
+        figureId: selectedFigureId,
+        payload: { talentId, weaponId },
+      }
+      const newGameState = executeActionV2(gameState, talentAction, gameData)
+      set({ gameState: newGameState })
+
+      // Find talent name for log
+      const hero = gameState.heroes[figure.entityId]
+      let talentName = talentId
+      if (hero && gameData.specializations) {
+        for (const specId of hero.specializations) {
+          const spec = gameData.specializations[specId]
+          if (spec) {
+            const card = spec.talents.find(t => t.id === talentId)
+            if (card) { talentName = card.name; break }
+          }
+        }
+      }
+
+      addCombatLog(`${selectedFigureId} used talent: ${talentName}`)
+
+      // Re-select to update valid moves/targets after talent use
+      const updatedFigure = newGameState.figures.find(f => f.id === selectedFigureId)
+      if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
+        const moves = getValidMoves(updatedFigure, newGameState)
+        const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
+        set({ validMoves: moves, validTargets: targets.map(t => t.id) })
+      } else {
+        set({ validMoves: [], validTargets: [] })
+      }
+    } catch (error) {
+      addCombatLog(`Talent error: ${error}`)
+    }
+  },
+
+  endActivation: () => {
+    const { gameState, addCombatLog } = get()
+    if (!gameState) return
+
+    const currentFigureId = gameState.activationOrder[gameState.currentActivationIndex]
+    const currentFigure = gameState.figures.find(f => f.id === currentFigureId)
+
+    if (currentFigure) {
+      // Mark current figure as activated
+      const newFigures = gameState.figures.map(f => {
+        if (f.id === currentFigure.id) {
+          return { ...f, isActivated: true, actionsRemaining: 0, maneuversRemaining: 0 }
+        }
+        return f
+      })
+
+      const nextIndex = gameState.currentActivationIndex + 1
+      const allDone = nextIndex >= gameState.activationOrder.length
+
+      const newGameState: GameState = {
+        ...gameState,
+        figures: newFigures,
+        currentActivationIndex: allDone ? gameState.currentActivationIndex : nextIndex,
+      }
+
+      // Reset next figure for activation
+      if (!allDone) {
+        const nextFigureId = gameState.activationOrder[nextIndex]
+        newGameState.figures = newGameState.figures.map(f => {
+          if (f.id === nextFigureId) {
+            return resetForActivation(f)
+          }
+          return f
+        })
+      }
+
+      set({ gameState: newGameState, selectedFigureId: null, validMoves: [], validTargets: [] })
+      addCombatLog(`${currentFigure.id} activation ended`)
+
+      if (allDone) {
+        addCombatLog('All units activated. Advance phase to continue.')
+      }
+    }
+  },
+
+  advancePhase: () => {
+    const { gameState, campaignState, campaignMissions, addCombatLog } = get()
+    if (!gameState) return
+
+    const phases: Array<typeof gameState.turnPhase> = [
+      'Setup',
+      'Initiative',
+      'Activation',
+      'Status',
+      'Reinforcement',
+    ]
+
+    const currentIndex = phases.indexOf(gameState.turnPhase)
+    const nextIndex = (currentIndex + 1) % phases.length
+    const newPhase = phases[nextIndex]
+    let newRound = gameState.roundNumber
+
+    if (newPhase === 'Setup') {
+      newRound += 1
+    }
+
+    // Reset figures for new activation phase (v2: 1 Action + 1 Maneuver)
+    let newFigures = gameState.figures
+    if (newPhase === 'Activation') {
+      newFigures = gameState.figures.map(f => resetForActivation(f))
+    }
+
+    const newGameState: GameState = {
+      ...gameState,
+      turnPhase: newPhase,
+      roundNumber: newRound,
+      currentActivationIndex: 0,
+      figures: newFigures,
+    }
+
+    // Check victory conditions during Status phase (campaign mode)
+    if (newPhase === 'Status' && campaignState && gameState.activeMissionId) {
+      const mission = campaignMissions[gameState.activeMissionId]
+      if (mission) {
+        // Update completed objectives
+        const completedObjectiveIds: string[] = []
+        for (const obj of mission.objectives) {
+          if (evaluateObjective(obj, newGameState, newGameState.lootCollected, newGameState.interactedTerminals)) {
+            completedObjectiveIds.push(obj.id)
+          }
+        }
+        newGameState.completedObjectiveIds = completedObjectiveIds
+
+        // Check victory
+        const winningSide = checkVictoryConditions(
+          mission,
+          newGameState,
+          newGameState.lootCollected,
+          newGameState.interactedTerminals,
+        )
+
+        if (winningSide) {
+          newGameState.winner = winningSide
+          newGameState.victoryCondition = `${winningSide} wins!`
+
+          const outcome = winningSide === 'Operative' ? 'victory' : 'defeat'
+          addCombatLog(`** MISSION ${outcome.toUpperCase()}: ${winningSide} wins! **`)
+
+          // Calculate kill counts
+          const heroKills: Record<string, number> = {}
+          for (const fig of newGameState.figures) {
+            if (fig.entityType === 'hero') {
+              heroKills[fig.entityId] = 0
+            }
+          }
+          // Count defeated enemies as kills (simplified attribution)
+          const imperialPlayer = newGameState.players.find(p => p.role === 'Imperial')
+          if (imperialPlayer) {
+            const deadEnemies = newGameState.figures.filter(
+              f => f.playerId === imperialPlayer.id && f.isDefeated,
+            ).length
+            // Distribute kills evenly among living heroes
+            const livingHeroes = Object.keys(heroKills)
+            if (livingHeroes.length > 0) {
+              const perHero = Math.floor(deadEnemies / livingHeroes.length)
+              const remainder = deadEnemies % livingHeroes.length
+              livingHeroes.forEach((hId, idx) => {
+                heroKills[hId] = perHero + (idx < remainder ? 1 : 0)
+              })
+            }
+          }
+
+          // Check if leader killed
+          const leaderKilled = newGameState.figures.some(
+            f => f.entityType === 'npc' &&
+              (f.entityId === 'imperial-officer' || f.entityId.includes('inquisitor')) &&
+              f.isDefeated,
+          )
+
+          // Heroes incapacitated
+          const heroesIncapacitated = newGameState.figures
+            .filter(f => f.entityType === 'hero' && f.isDefeated)
+            .map(f => f.entityId)
+
+          // Complete the campaign mission
+          get().completeCampaignMission({
+            mission,
+            outcome: outcome as 'victory' | 'defeat',
+            roundsPlayed: newGameState.roundNumber,
+            completedObjectiveIds,
+            heroKills,
+            lootCollected: newGameState.lootCollected,
+            heroesIncapacitated,
+            leaderKilled,
+            narrativeBonus: outcome === 'victory' ? 2 : 0,
+          })
+          return // Don't set gameState; completeCampaignMission handles the transition
+        }
+      }
+    }
+
+    // Also check simple skirmish victory (all enemies of one side defeated)
+    if (newPhase === 'Status' && !campaignState) {
+      const imperialPlayer = newGameState.players.find(p => p.role === 'Imperial')
+      const operativePlayer = newGameState.players.find(p => p.role === 'Operative')
+      if (imperialPlayer && operativePlayer) {
+        const allImperialsDown = newGameState.figures
+          .filter(f => f.playerId === imperialPlayer.id)
+          .every(f => f.isDefeated)
+        const allOperativesDown = newGameState.figures
+          .filter(f => f.playerId === operativePlayer.id)
+          .every(f => f.isDefeated)
+
+        if (allImperialsDown) {
+          newGameState.winner = 'Operative'
+          newGameState.victoryCondition = 'All Imperial forces eliminated!'
+          addCombatLog('** VICTORY: Operative forces win! **')
+        } else if (allOperativesDown) {
+          newGameState.winner = 'Imperial'
+          newGameState.victoryCondition = 'All Operative forces eliminated!'
+          addCombatLog('** VICTORY: Imperial forces win! **')
+        }
+      }
+    }
+
+    set({ gameState: newGameState })
+    addCombatLog(`Phase advanced to ${newPhase} (Round ${newRound})`)
+  },
+
+  setHighlightedTile: (coord: GridCoordinate | null) => {
+    set({ highlightedTile: coord })
+  },
+
+  setAIMovePath: (path: GridCoordinate[] | null) => {
+    set({ aiMovePath: path })
+  },
+
+  setAIAttackTarget: (target: { from: GridCoordinate; to: GridCoordinate } | null) => {
+    set({ aiAttackTarget: target })
+  },
+
+  clearAIVisualization: () => {
+    set({ aiMovePath: null, aiAttackTarget: null })
+  },
+
+  addCombatLog: (message: string) => {
+    set(state => ({
+      combatLog: [
+        ...state.combatLog.slice(-49),
+        `[R${state.gameState?.roundNumber ?? 0}] ${message}`,
+      ],
+    }))
+  },
+
+  undoLastAction: () => {
+    const { addCombatLog } = get()
+    addCombatLog('Undo not fully implemented')
+  },
+
+  // ========================================================================
+  // CAMPAIGN ACTIONS
+  // ========================================================================
+
+  /**
+   * Start a new campaign: load mission data, enter hero creation for campaign.
+   */
+  startCampaign: (difficulty: CampaignDifficulty) => {
+    const gameData = loadGameDataV2()
+    const missions = loadCampaignMissions()
+
+    set({
+      showSetup: false,
+      showHeroCreation: true,
+      campaignHeroCreation: true,
+      gameData,
+      campaignMissions: missions,
+      createdHeroes: [],
+      pendingPlayers: [
+        { id: 0, name: 'Imperial AI', role: 'Imperial' as const, isLocal: true, isAI: true },
+        { id: 1, name: 'Operative', role: 'Operative' as const, isLocal: true, isAI: false },
+      ],
+      pendingMapConfig: null,
+      // Store difficulty for campaign creation after heroes are made
+      campaignState: {
+        id: '',
+        name: '',
+        difficulty,
+        createdAt: '',
+        lastPlayedAt: '',
+        heroes: {},
+        currentAct: 1,
+        completedMissions: [],
+        availableMissionIds: [],
+        credits: 0,
+        narrativeItems: [],
+        threatLevel: 0,
+        threatMultiplier: 1,
+        missionsPlayed: 0,
+      },
+    })
+  },
+
+  /**
+   * Called when hero creation is done in campaign mode.
+   * Creates the actual campaign state and shows mission select.
+   */
+  finishCampaignHeroCreation: () => {
+    const { createdHeroes, campaignState, campaignMissions } = get()
+    if (!campaignState || createdHeroes.length === 0) return
+
+    const campaign = createCampaign({
+      name: (campaignData as any).name ?? 'Campaign',
+      difficulty: campaignState.difficulty,
+      heroes: createdHeroes,
+      startingMissionId: (campaignData as any).startingMissionId ?? 'act1-m1-arrival',
+      startingCredits: (campaignData as any).startingCredits ?? 0,
+    })
+
+    set({
+      campaignState: campaign,
+      showHeroCreation: false,
+      showMissionSelect: true,
+      campaignHeroCreation: false,
+      createdHeroes: [],
+      pendingPlayers: null,
+      combatLog: ['Campaign started! Select your first mission.'],
+    })
+  },
+
+  /**
+   * Launch a campaign mission: set up game state and start playing.
+   */
+  startCampaignMission: (missionId: string) => {
+    const { campaignState, campaignMissions } = get()
+    if (!campaignState) return
+
+    const mission = campaignMissions[missionId]
+    if (!mission) return
+
+    const gameData = loadGameDataV2()
+    const mapConfig: MapConfig = {
+      preset: mission.mapPreset as any,
+      boardsWide: mission.boardsWide,
+      boardsTall: mission.boardsTall,
+    }
+    const generatedMap = generateMap(mapConfig, BOARD_TEMPLATES)
+
+    // Prepare heroes from campaign roster
+    const heroes = prepareHeroesForMission(campaignState)
+    const heroesRegistry: Record<string, HeroCharacter> = {}
+    for (const hero of heroes) {
+      heroesRegistry[hero.id] = hero
+    }
+
+    // Create players
+    const players: Player[] = [
+      { id: 0, name: 'Imperial AI', role: 'Imperial', isLocal: true, isAI: true },
+      { id: 1, name: 'Operative', role: 'Operative', isLocal: true, isAI: false },
+    ]
+
+    // Build a mission object compatible with createInitialGameStateV2
+    const gameMission = {
+      id: mission.id,
+      name: mission.name,
+      description: mission.description,
+      mapId: mission.mapId,
+      roundLimit: mission.roundLimit,
+      imperialThreat: mission.imperialThreat,
+      imperialReinforcementPoints: mission.threatPerRound,
+      victoryConditions: mission.victoryConditions.map(vc => ({
+        side: vc.side,
+        description: vc.description,
+        condition: vc.requiredObjectiveIds.join(','),
+      })),
+    }
+
+    let gameState = createInitialGameStateV2(
+      gameMission,
+      players,
+      gameData,
+      generatedMap,
+      { heroes: heroesRegistry, npcProfiles: gameData.npcProfiles },
+    )
+
+    // Deploy heroes as operative army
+    const army: ArmyCompositionV2 = {
+      imperial: mission.initialEnemies.map(g => ({
+        npcId: g.npcProfileId,
+        count: g.count,
+      })),
+      operative: heroes.map(h => ({
+        entityType: 'hero' as const,
+        entityId: h.id,
+        count: 1,
+      })),
+    }
+    gameState = deployFiguresV2(gameState, army, gameData)
+
+    // Build activation order
+    gameState.activationOrder = gameState.figures
+      .filter(f => !f.isDefeated)
+      .map(f => f.id)
+    gameState.currentActivationIndex = 0
+    gameState.turnPhase = 'Activation'
+
+    set({
+      gameState,
+      gameData,
+      isInitialized: true,
+      showMissionSelect: false,
+      showPostMission: false,
+      isAIBattle: false,
+      combatLog: [`Mission started: ${mission.name}`],
+    })
+  },
+
+  /**
+   * Process a completed campaign mission and show the post-mission screen.
+   */
+  completeCampaignMission: (input: MissionCompletionInput) => {
+    const { campaignState, campaignMissions } = get()
+    if (!campaignState) return
+
+    const { campaign: newCampaign, result } = completeMission(
+      campaignState,
+      input,
+      campaignMissions,
+    )
+
+    set({
+      campaignState: newCampaign,
+      lastMissionResult: result,
+      showPostMission: true,
+      isInitialized: false,
+      gameState: null,
+    })
+  },
+
+  /**
+   * Return from post-mission screen to mission select.
+   */
+  returnToMissionSelect: () => {
+    set({
+      showPostMission: false,
+      showMissionSelect: true,
+      lastMissionResult: null,
+      gameState: null,
+      isInitialized: false,
+    })
+  },
+
+  /**
+   * Save campaign state to localStorage.
+   */
+  saveCampaignToStorage: () => {
+    const { campaignState } = get()
+    if (!campaignState) return
+
+    try {
+      const json = campaignToJSON(campaignState)
+      localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
+    } catch (e) {
+      console.error('Failed to save campaign:', e)
+    }
+  },
+
+  /**
+   * Load campaign state from localStorage.
+   * Returns true if a save was found and loaded.
+   */
+  loadCampaignFromStorage: (): boolean => {
+    try {
+      const json = localStorage.getItem(CAMPAIGN_STORAGE_KEY)
+      if (!json) return false
+
+      const campaign = campaignFromJSON(json)
+      const missions = loadCampaignMissions()
+      const gameData = loadGameDataV2()
+
+      set({
+        campaignState: campaign,
+        campaignMissions: missions,
+        gameData,
+        showSetup: false,
+        showMissionSelect: true,
+      })
+      return true
+    } catch (e) {
+      console.error('Failed to load campaign:', e)
+      return false
+    }
+  },
+
+  /**
+   * Exit campaign mode and return to setup.
+   */
+  exitCampaign: () => {
+    set({
+      campaignState: null,
+      campaignMissions: {},
+      lastMissionResult: null,
+      showMissionSelect: false,
+      showPostMission: false,
+      campaignHeroCreation: false,
+      showSetup: true,
+      gameState: null,
+      isInitialized: false,
+    })
+  },
+
+  getGameData: () => {
+    let { gameData } = get()
+    if (!gameData) {
+      gameData = loadGameDataV2()
+      set({ gameData })
+    }
+    return gameData
+  },
+
+  getActivatableTalents: (figure: Figure): ActivatableTalent[] => {
+    const { gameState, gameData } = get()
+    if (!gameState || !gameData || figure.entityType !== 'hero') return []
+
+    const hero = gameState.heroes[figure.entityId]
+    if (!hero) return []
+
+    const equipped = getEquippedTalents(hero, gameData)
+    const activatable: ActivatableTalent[] = []
+
+    for (const card of equipped) {
+      if (card.type !== 'active') continue
+
+      // Check if the talent can be activated right now
+      const result = canActivateTalent(card.id, hero, figure, gameData)
+      if (!result.canActivate) continue
+
+      // Determine strain cost from mechanical effect
+      let strainCost: number | undefined
+      const effect = card.mechanicalEffect
+      if (effect.strainCost != null) {
+        strainCost = effect.strainCost as number
+      }
+
+      activatable.push({
+        talentId: card.id,
+        name: card.name,
+        description: card.description,
+        activation: card.activation,
+        strainCost,
+      })
+    }
+
+    return activatable
+  },
+}))
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+/**
+ * Resolve the primary weapon ID for a figure.
+ */
+function resolveWeaponId(
+  figure: Figure,
+  gameState: GameState,
+  gameData: GameData,
+): string {
+  if (figure.entityType === 'hero') {
+    const hero = gameState.heroes[figure.entityId]
+    if (hero?.equipment.primaryWeapon) return hero.equipment.primaryWeapon
+    return 'fists'
+  }
+
+  const npc = gameState.npcProfiles[figure.entityId]
+  if (npc && npc.weapons.length > 0) {
+    return npc.weapons[0].weaponId
+  }
+
+  return 'fists'
+}

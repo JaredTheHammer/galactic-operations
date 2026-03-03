@@ -1,0 +1,65 @@
+{
+  "id": "tangrene-liberation",
+  "name": "Liberation of the Tangrene Sector",
+  "description": "A multi-act campaign arc following a rebel cell as they dismantle Imperial control, confront a rising criminal syndicate, and face a rogue Imperial warlord in the Tangrene Sector. Features branching mission paths and escalating threats.",
+  "acts": [
+    {
+      "act": 1,
+      "name": "Sparking the Flame",
+      "description": "The rebel cell gathers resources and intelligence before launching a decisive strike against the Imperial garrison.",
+      "missionIds": [
+        "act1-m1-arrival",
+        "act1-m2-intel",
+        "act1-m3-cache",
+        "act1-m3-ambush",
+        "act1-m4-finale"
+      ],
+      "socialHubId": "act1-hub"
+    },
+    {
+      "act": 2,
+      "name": "Shadow Syndicate",
+      "description": "With Imperial forces weakened, the Shadow Syndicate moves to fill the power vacuum. The rebel cell must dismantle this criminal empire before it enslaves the sector.",
+      "missionIds": [
+        "act2-m1-crossroads",
+        "act2-m2-bounty",
+        "act2-m3-warehouse",
+        "act2-m3-hunting-grounds",
+        "act2-m4-throne"
+      ],
+      "socialHubId": "act2-hub"
+    },
+    {
+      "act": 3,
+      "name": "The Fractured Alliance",
+      "description": "A rogue Imperial warlord has broken from the Empire and built a splinter faction with prototype war machines and defected rebel operatives. The rebel cell must destroy this new threat before Drayen's army overruns the sector.",
+      "missionIds": [
+        "act3-m1-defection",
+        "act3-m2-prototype",
+        "act3-m3-stronghold",
+        "act3-m3-betrayal",
+        "act3-m4-endgame"
+      ],
+      "socialHubId": "act3-hub"
+    }
+  ],
+  "startingMissionId": "act1-m1-arrival",
+  "startingCredits": 0,
+  "missionGraph": {
+    "act1-m1-arrival": ["act1-m2-intel"],
+    "act1-m2-intel": ["act1-m3-cache", "act1-m3-ambush"],
+    "act1-m3-cache": ["act1-m4-finale"],
+    "act1-m3-ambush": ["act1-m4-finale"],
+    "act1-m4-finale": ["act2-m1-crossroads"],
+    "act2-m1-crossroads": ["act2-m2-bounty"],
+    "act2-m2-bounty": ["act2-m3-warehouse", "act2-m3-hunting-grounds"],
+    "act2-m3-warehouse": ["act2-m4-throne"],
+    "act2-m3-hunting-grounds": ["act2-m4-throne"],
+    "act2-m4-throne": ["act3-m1-defection"],
+    "act3-m1-defection": ["act3-m2-prototype"],
+    "act3-m2-prototype": ["act3-m3-stronghold", "act3-m3-betrayal"],
+    "act3-m3-stronghold": ["act3-m4-endgame"],
+    "act3-m3-betrayal": ["act3-m4-endgame"]
+  },
+  "branchingNotes": "Act 1: After Mission 2 (The Listening Post), players choose between Mission 3a (The Weapons Cache - moderate, loot-focused) or Mission 3b (Ambush at Xylo Pass - hard, rescue-focused). Both lead to the Act 1 finale. Act 2: After Mission 2 (The Bounty Board), players choose between Mission 3a (Shadow Syndicate Warehouse - hard, raid) or Mission 3b (Trandoshan Hunting Grounds - hard, survival). Both lead to the Act 2 finale: The Broker's Throne. Act 3: After Mission 2 (The Prototype Factory), players choose between Mission 3a (Assault on the Stronghold - hard, destroy droid reserves) or Mission 3b (The Betrayal - hard, confront rebel turncoats). Both lead to the Act 3 finale: Fortress Drayen."
+}

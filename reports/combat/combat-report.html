@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combat Simulator - Comparison Report</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.6/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0f;
+    color: #c8cad0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    padding: 32px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #4a9eff;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 32px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #111118;
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .card h2 {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #4a9eff;
+    margin-bottom: 16px;
+  }
+  .card canvas { max-height: 280px; }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1a2e;
+  }
+  .stat-row:last-child { border: none; }
+  .stat-label { color: #888; }
+  .stat-value { font-weight: 700; }
+  .sideA { color: #ff4444; }
+  .sideB { color: #44ff44; }
+  .draw { color: #ffd700; }
+  .full-width { grid-column: 1 / -1; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: #4a9eff; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 6px 8px; border-bottom: 1px solid #1a1a2e; }
+  td { padding: 6px 8px; border-bottom: 1px solid #0d0d14; }
+  .scenario-section { margin-bottom: 48px; }
+  .scenario-section h3 {
+    font-size: 16px;
+    color: #ffd700;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #1a1a2e;
+  }
+</style>
+</head>
+<body>
+<h1>Combat Simulator - Comparison Report</h1>
+<div class="subtitle">400 total games | 2026-03-02</div>
+
+
+<!-- COMPARISON VIEW -->
+<div class="grid">
+  <div class="card full-width">
+    <h2>Win Rate Comparison</h2>
+    <canvas id="compWinChart"></canvas>
+  </div>
+
+  <div class="card full-width">
+    <h2>Avg Rounds to Resolution</h2>
+    <canvas id="compRoundsChart"></canvas>
+  </div>
+
+  <div class="card full-width">
+    <h2>Scenario Summary</h2>
+    <table>
+      <tr><th>Scenario</th><th>Games</th><th>Side A Win</th><th>Side B Win</th><th>Draw</th><th>Avg Rounds</th><th>Avg Dmg A</th><th>Avg Dmg B</th></tr>
+      
+      <tr>
+        <td>Korrga vs Stormtrooper Patrol</td>
+        <td>100</td>
+        <td class="sideA">35.0%</td>
+        <td class="sideB">65.0%</td>
+        <td class="draw">0.0%</td>
+        <td>10.4</td>
+        <td>8.2</td>
+        <td>11.0</td>
+      </tr>
+      <tr>
+        <td>Vex Dorin vs Stormtrooper Elite</td>
+        <td>100</td>
+        <td class="sideA">54.0%</td>
+        <td class="sideB">46.0%</td>
+        <td class="draw">0.0%</td>
+        <td>11.1</td>
+        <td>4.5</td>
+        <td>8.3</td>
+      </tr>
+      <tr>
+        <td>Full Hero Party vs Imperial Patrol</td>
+        <td>100</td>
+        <td class="sideA">28.0%</td>
+        <td class="sideB">72.0%</td>
+        <td class="draw">0.0%</td>
+        <td>10.4</td>
+        <td>18.6</td>
+        <td>16.4</td>
+      </tr>
+      <tr>
+        <td>Weapon A/B: A280 vs E-11 (Korrga)</td>
+        <td>100</td>
+        <td class="sideA">33.0%</td>
+        <td class="sideB">67.0%</td>
+        <td class="draw">0.0%</td>
+        <td>10.5</td>
+        <td>8.4</td>
+        <td>10.3</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
+
+<div class="scenario-section">
+  <h3>Korrga vs Stormtrooper Patrol</h3>
+  <div class="grid">
+    <!-- Win Rates -->
+    <div class="card">
+      <h2>Win Rates</h2>
+      <canvas id="winChart0"></canvas>
+    </div>
+
+    <!-- Summary -->
+    <div class="card">
+      <h2>Summary</h2>
+      <div class="stat-row"><span class="stat-label">Games</span><span class="stat-value">100</span></div>
+      <div class="stat-row"><span class="stat-label">Imperial Patrol</span><span class="stat-value sideA">35 (35.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Korrga Solo</span><span class="stat-value sideB">65 (65.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Draw</span><span class="stat-value draw">0 (0.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Rounds</span><span class="stat-value">10.4</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Dmg Taken (A)</span><span class="stat-value sideA">8.2</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Dmg Taken (B)</span><span class="stat-value sideB">11.0</span></div>
+    </div>
+
+    <!-- Rounds Distribution -->
+    <div class="card">
+      <h2>Rounds Distribution</h2>
+      <canvas id="roundsChart0"></canvas>
+    </div>
+
+    <!-- Figure Performance Table -->
+    <div class="card">
+      <h2>Figure Performance</h2>
+      <table>
+        <tr><th>Figure</th><th>Side</th><th>Survival</th><th>Avg Dmg</th><th>Wounded</th></tr>
+        
+        <tr>
+          <td>Stormtrooper</td>
+          <td>A</td>
+          <td>31%</td>
+          <td>2.7</td>
+          <td>0%</td>
+        </tr>
+        <tr>
+          <td>Korrga</td>
+          <td>B</td>
+          <td>85%</td>
+          <td>7.0</td>
+          <td>26%</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Figure Survival Chart -->
+    <div class="card full-width">
+      <h2>Figure Survival vs Damage Taken</h2>
+      <canvas id="figChart0"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="scenario-section">
+  <h3>Vex Dorin vs Stormtrooper Elite</h3>
+  <div class="grid">
+    <!-- Win Rates -->
+    <div class="card">
+      <h2>Win Rates</h2>
+      <canvas id="winChart1"></canvas>
+    </div>
+
+    <!-- Summary -->
+    <div class="card">
+      <h2>Summary</h2>
+      <div class="stat-row"><span class="stat-label">Games</span><span class="stat-value">100</span></div>
+      <div class="stat-row"><span class="stat-label">Elite Trooper</span><span class="stat-value sideA">54 (54.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Vex Dorin</span><span class="stat-value sideB">46 (46.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Draw</span><span class="stat-value draw">0 (0.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Rounds</span><span class="stat-value">11.1</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Dmg Taken (A)</span><span class="stat-value sideA">4.5</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Dmg Taken (B)</span><span class="stat-value sideB">8.3</span></div>
+    </div>
+
+    <!-- Rounds Distribution -->
+    <div class="card">
+      <h2>Rounds Distribution</h2>
+      <canvas id="roundsChart1"></canvas>
+    </div>
+
+    <!-- Figure Performance Table -->
+    <div class="card">
+      <h2>Figure Performance</h2>
+      <table>
+        <tr><th>Figure</th><th>Side</th><th>Survival</th><th>Avg Dmg</th><th>Wounded</th></tr>
+        
+        <tr>
+          <td>Stormtrooper Elite</td>
+          <td>A</td>
+          <td>54%</td>
+          <td>4.5</td>
+          <td>0%</td>
+        </tr>
+        <tr>
+          <td>Vex Dorin</td>
+          <td>B</td>
+          <td>77%</td>
+          <td>5.1</td>
+          <td>48%</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Figure Survival Chart -->
+    <div class="card full-width">
+      <h2>Figure Survival vs Damage Taken</h2>
+      <canvas id="figChart1"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="scenario-section">
+  <h3>Full Hero Party vs Imperial Patrol</h3>
+  <div class="grid">
+    <!-- Win Rates -->
+    <div class="card">
+      <h2>Win Rates</h2>
+      <canvas id="winChart2"></canvas>
+    </div>
+
+    <!-- Summary -->
+    <div class="card">
+      <h2>Summary</h2>
+      <div class="stat-row"><span class="stat-label">Games</span><span class="stat-value">100</span></div>
+      <div class="stat-row"><span class="stat-label">Imperial Force</span><span class="stat-value sideA">28 (28.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Hero Party</span><span class="stat-value sideB">72 (72.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Draw</span><span class="stat-value draw">0 (0.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Rounds</span><span class="stat-value">10.4</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Dmg Taken (A)</span><span class="stat-value sideA">18.6</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Dmg Taken (B)</span><span class="stat-value sideB">16.4</span></div>
+    </div>
+
+    <!-- Rounds Distribution -->
+    <div class="card">
+      <h2>Rounds Distribution</h2>
+      <canvas id="roundsChart2"></canvas>
+    </div>
+
+    <!-- Figure Performance Table -->
+    <div class="card">
+      <h2>Figure Performance</h2>
+      <table>
+        <tr><th>Figure</th><th>Side</th><th>Survival</th><th>Avg Dmg</th><th>Wounded</th></tr>
+        
+        <tr>
+          <td>Stormtrooper</td>
+          <td>A</td>
+          <td>28%</td>
+          <td>2.9</td>
+          <td>0%</td>
+        </tr>
+        <tr>
+          <td>Stormtrooper Elite</td>
+          <td>A</td>
+          <td>28%</td>
+          <td>5.8</td>
+          <td>0%</td>
+        </tr>
+        <tr>
+          <td>Imperial Officer</td>
+          <td>A</td>
+          <td>16%</td>
+          <td>4.2</td>
+          <td>0%</td>
+        </tr>
+        <tr>
+          <td>Korrga</td>
+          <td>B</td>
+          <td>100%</td>
+          <td>2.3</td>
+          <td>0%</td>
+        </tr>
+        <tr>
+          <td>Vex Dorin</td>
+          <td>B</td>
+          <td>88%</td>
+          <td>4.0</td>
+          <td>19%</td>
+        </tr>
+        <tr>
+          <td>Ashara Nev</td>
+          <td>B</td>
+          <td>84%</td>
+          <td>3.1</td>
+          <td>38%</td>
+        </tr>
+        <tr>
+          <td>Ssorku</td>
+          <td>B</td>
+          <td>100%</td>
+          <td>1.5</td>
+          <td>2%</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Figure Survival Chart -->
+    <div class="card full-width">
+      <h2>Figure Survival vs Damage Taken</h2>
+      <canvas id="figChart2"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="scenario-section">
+  <h3>Weapon A/B: A280 vs E-11 (Korrga)</h3>
+  <div class="grid">
+    <!-- Win Rates -->
+    <div class="card">
+      <h2>Win Rates</h2>
+      <canvas id="winChart3"></canvas>
+    </div>
+
+    <!-- Summary -->
+    <div class="card">
+      <h2>Summary</h2>
+      <div class="stat-row"><span class="stat-label">Games</span><span class="stat-value">100</span></div>
+      <div class="stat-row"><span class="stat-label">3x Stormtrooper</span><span class="stat-value sideA">33 (33.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Korrga (E-11)</span><span class="stat-value sideB">67 (67.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Draw</span><span class="stat-value draw">0 (0.0%)</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Rounds</span><span class="stat-value">10.5</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Dmg Taken (A)</span><span class="stat-value sideA">8.4</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Dmg Taken (B)</span><span class="stat-value sideB">10.3</span></div>
+    </div>
+
+    <!-- Rounds Distribution -->
+    <div class="card">
+      <h2>Rounds Distribution</h2>
+      <canvas id="roundsChart3"></canvas>
+    </div>
+
+    <!-- Figure Performance Table -->
+    <div class="card">
+      <h2>Figure Performance</h2>
+      <table>
+        <tr><th>Figure</th><th>Side</th><th>Survival</th><th>Avg Dmg</th><th>Wounded</th></tr>
+        
+        <tr>
+          <td>Stormtrooper</td>
+          <td>A</td>
+          <td>30%</td>
+          <td>2.8</td>
+          <td>0%</td>
+        </tr>
+        <tr>
+          <td>Korrga</td>
+          <td>B</td>
+          <td>88%</td>
+          <td>6.5</td>
+          <td>24%</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Figure Survival Chart -->
+    <div class="card full-width">
+      <h2>Figure Survival vs Damage Taken</h2>
+      <canvas id="figChart3"></canvas>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  Chart.defaults.color = '#888';
+  Chart.defaults.borderColor = '#1a1a2e';
+
+  
+  // Comparison Win Rate Chart
+  new Chart(document.getElementById('compWinChart'), {
+    type: 'bar',
+    data: {
+      labels: ["Korrga vs Stormtrooper Patrol","Vex Dorin vs Stormtrooper Elite","Full Hero Party vs Imperial Patrol","Weapon A/B: A280 vs E-11 (Korrga)"],
+      datasets: [
+        { label: 'Side A Win %', data: [35,54,28,33], backgroundColor: '#ff4444', borderRadius: 3 },
+        { label: 'Side B Win %', data: [65,46,72,67], backgroundColor: '#44ff44', borderRadius: 3 },
+        { label: 'Draw %', data: [0,0,0,0], backgroundColor: '#ffd700', borderRadius: 3 },
+      ]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } },
+      scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Win Rate %', color: '#666' } } }
+    }
+  });
+
+  // Comparison Rounds Chart
+  new Chart(document.getElementById('compRoundsChart'), {
+    type: 'bar',
+    data: {
+      labels: ["Korrga vs Stormtrooper Patrol","Vex Dorin vs Stormtrooper Elite","Full Hero Party vs Imperial Patrol","Weapon A/B: A280 vs E-11 (Korrga)"],
+      datasets: [{
+        label: 'Avg Rounds',
+        data: [10.4,11.1,10.4,10.5],
+        backgroundColor: '#4a9eff',
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, title: { display: true, text: 'Rounds', color: '#666' } } }
+    }
+  });
+  
+
+  
+  // Scenario 0: Win Rate Pie
+  new Chart(document.getElementById('winChart0'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Imperial Patrol', 'Korrga Solo', 'Draw'],
+      datasets: [{
+        data: [35, 65, 0],
+        backgroundColor: ['#ff4444', '#44ff44', '#ffd700'],
+        borderWidth: 0,
+      }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+  });
+
+  // Scenario 0: Rounds Distribution
+  new Chart(document.getElementById('roundsChart0'), {
+    type: 'bar',
+    data: {
+      labels: ["3","4","5","6","7","8","9","10","11","12","13","14","15","21"],
+      datasets: [{
+        label: 'Games',
+        data: [5,10,5,11,8,14,4,7,4,5,3,3,1,20],
+        backgroundColor: '#4a9eff',
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'Rounds', color: '#666' } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  // Scenario 0: Figure Performance
+  new Chart(document.getElementById('figChart0'), {
+    type: 'bar',
+    data: {
+      labels: ["Stormtrooper (A)","Korrga (B)"],
+      datasets: [
+        {
+          label: 'Survival Rate (%)',
+          data: [31.3,85],
+          backgroundColor: '#44ff44',
+          borderRadius: 3,
+        },
+        {
+          label: 'Avg Damage Taken',
+          data: [2.7,7],
+          backgroundColor: '#ff4444',
+          borderRadius: 3,
+        }
+      ]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+  
+
+  // Scenario 1: Win Rate Pie
+  new Chart(document.getElementById('winChart1'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Elite Trooper', 'Vex Dorin', 'Draw'],
+      datasets: [{
+        data: [54, 46, 0],
+        backgroundColor: ['#ff4444', '#44ff44', '#ffd700'],
+        borderWidth: 0,
+      }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+  });
+
+  // Scenario 1: Rounds Distribution
+  new Chart(document.getElementById('roundsChart1'), {
+    type: 'bar',
+    data: {
+      labels: ["2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"],
+      datasets: [{
+        label: 'Games',
+        data: [3,5,3,3,4,7,7,6,8,5,4,5,4,5,31],
+        backgroundColor: '#4a9eff',
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'Rounds', color: '#666' } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  // Scenario 1: Figure Performance
+  new Chart(document.getElementById('figChart1'), {
+    type: 'bar',
+    data: {
+      labels: ["Stormtrooper Elite (A)","Vex Dorin (B)"],
+      datasets: [
+        {
+          label: 'Survival Rate (%)',
+          data: [54,77],
+          backgroundColor: '#44ff44',
+          borderRadius: 3,
+        },
+        {
+          label: 'Avg Damage Taken',
+          data: [4.5,5.1],
+          backgroundColor: '#ff4444',
+          borderRadius: 3,
+        }
+      ]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+  
+
+  // Scenario 2: Win Rate Pie
+  new Chart(document.getElementById('winChart2'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Imperial Force', 'Hero Party', 'Draw'],
+      datasets: [{
+        data: [28, 72, 0],
+        backgroundColor: ['#ff4444', '#44ff44', '#ffd700'],
+        borderWidth: 0,
+      }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+  });
+
+  // Scenario 2: Rounds Distribution
+  new Chart(document.getElementById('roundsChart2'), {
+    type: 'bar',
+    data: {
+      labels: ["4","5","6","7","8","9","10","11","13","21"],
+      datasets: [{
+        label: 'Games',
+        data: [9,18,21,10,6,3,3,1,1,28],
+        backgroundColor: '#4a9eff',
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'Rounds', color: '#666' } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  // Scenario 2: Figure Performance
+  new Chart(document.getElementById('figChart2'), {
+    type: 'bar',
+    data: {
+      labels: ["Stormtrooper (A)","Stormtrooper Elite (A)","Imperial Officer (A)","Korrga (B)","Vex Dorin (B)","Ashara Nev (B)","Ssorku (B)"],
+      datasets: [
+        {
+          label: 'Survival Rate (%)',
+          data: [28,28,16,100,88,84,100],
+          backgroundColor: '#44ff44',
+          borderRadius: 3,
+        },
+        {
+          label: 'Avg Damage Taken',
+          data: [2.9,5.8,4.2,2.3,4,3.1,1.5],
+          backgroundColor: '#ff4444',
+          borderRadius: 3,
+        }
+      ]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+  
+
+  // Scenario 3: Win Rate Pie
+  new Chart(document.getElementById('winChart3'), {
+    type: 'doughnut',
+    data: {
+      labels: ['3x Stormtrooper', 'Korrga (E-11)', 'Draw'],
+      datasets: [{
+        data: [33, 67, 0],
+        backgroundColor: ['#ff4444', '#44ff44', '#ffd700'],
+        borderWidth: 0,
+      }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+  });
+
+  // Scenario 3: Rounds Distribution
+  new Chart(document.getElementById('roundsChart3'), {
+    type: 'bar',
+    data: {
+      labels: ["3","4","5","6","7","8","9","10","11","12","14","15","16","21"],
+      datasets: [{
+        label: 'Games',
+        data: [5,9,6,11,10,12,5,7,3,4,3,2,2,21],
+        backgroundColor: '#4a9eff',
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'Rounds', color: '#666' } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  // Scenario 3: Figure Performance
+  new Chart(document.getElementById('figChart3'), {
+    type: 'bar',
+    data: {
+      labels: ["Stormtrooper (A)","Korrga (B)"],
+      datasets: [
+        {
+          label: 'Survival Rate (%)',
+          data: [29.7,88],
+          backgroundColor: '#44ff44',
+          borderRadius: 3,
+        },
+        {
+          label: 'Avg Damage Taken',
+          data: [2.8,6.5],
+          backgroundColor: '#ff4444',
+          borderRadius: 3,
+        }
+      ]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+  
+</script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+{
+  "meta": {
+    "version": "2.4",
+    "description": "Warlord splinter faction NPC stat blocks for Act 3. Rogue Imperial Warlord Kael Drayen and his forces -- a mix of Imperial defectors, conscripts, and prototype war machines. courage overrides tier defaults (M=1, R=2, N=3). mechanicalKeywords hook into engine systems."
+  },
+  "npcs": {
+    "conscript-militia": {
+      "id": "conscript-militia",
+      "name": "Conscript Militia",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 3,
+      "strainThreshold": null,
+      "soak": 1,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "slugthrower-rifle",
+          "name": "Slugthrower Rifle",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 5,
+          "qualities": [{ "name": "Cumbersome", "value": 2 }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Warlord", "Conscript", "Expendable"],
+      "mechanicalKeywords": [],
+      "abilities": [],
+      "threatCost": 1
+    },
+    "defector-trooper": {
+      "id": "defector-trooper",
+      "name": "Defector Trooper",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "e-11",
+          "name": "E-11 Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Warlord", "Imperial Defector", "Trooper"],
+      "mechanicalKeywords": [{"name": "Disciplined", "value": 1}],
+      "abilities": ["Disciplined Retreat: When this figure's group drops below half strength, surviving minions gain +1 soak until end of round."],
+      "threatCost": 2
+    },
+    "war-droid-mk1": {
+      "id": "war-droid-mk1",
+      "name": "War Droid Mk-I",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": null,
+      "soak": 5,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "repeating-blaster-arm",
+          "name": "Integrated Repeating Blaster",
+          "baseDamage": 9,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Auto-fire", "value": null },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Warlord", "Droid", "Prototype"],
+      "mechanicalKeywords": [{"name": "Armor", "value": 1}],
+      "abilities": [
+        "Droid Resilience: Immune to Strain damage and Fear effects.",
+        "Armored Chassis: Reduce Critical Injury severity by 10."
+      ],
+      "threatCost": 5
+    },
+    "shock-commando": {
+      "id": "shock-commando",
+      "name": "Shock Commando",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 2, "challenge": 0 },
+      "woundThreshold": 8,
+      "strainThreshold": 5,
+      "soak": 4,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "dc-15a",
+          "name": "DC-15A Blaster Carbine",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        },
+        {
+          "weaponId": "stun-baton",
+          "name": "Shock Baton",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 5,
+          "qualities": [
+            { "name": "Stun Damage", "value": null },
+            { "name": "Disorient", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Warlord", "Imperial Defector", "Commando"],
+      "mechanicalKeywords": [{"name": "Relentless"}],
+      "abilities": [
+        "Rapid Assault: Once per encounter, this figure may perform a second Attack action (instead of a maneuver).",
+        "Flash-Bang: As an action, all figures within Short range must make a Difficulty 2 Discipline check or suffer Disoriented for 1 round."
+      ],
+      "threatCost": 4
+    },
+    "rebel-turncoat": {
+      "id": "rebel-turncoat",
+      "name": "Rebel Turncoat",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 7,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "westar-35",
+          "name": "Westar-35 Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Warlord", "Rebel Defector", "Traitor"],
+      "mechanicalKeywords": [{"name": "Agile"}],
+      "abilities": [
+        "Inside Knowledge: This figure adds 1 Proficiency die to attacks against Operative heroes (knows their tactics).",
+        "Slippery: When targeted by a ranged attack, may suffer 2 strain to add 1 Challenge die to the defense pool."
+      ],
+      "threatCost": 3
+    },
+    "siege-droid-mk2": {
+      "id": "siege-droid-mk2",
+      "name": "Siege Droid Mk-II",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 0, "proficiency": 3 },
+      "defensePool": { "difficulty": 2, "challenge": 1 },
+      "woundThreshold": 14,
+      "strainThreshold": null,
+      "soak": 6,
+      "speed": 2,
+      "weapons": [
+        {
+          "weaponId": "siege-cannon",
+          "name": "Siege Cannon",
+          "baseDamage": 12,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 6 },
+            { "name": "Breach", "value": 1 },
+            { "name": "Cumbersome", "value": 4 },
+            { "name": "Prepare", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Warlord", "Droid", "Prototype", "Heavy"],
+      "mechanicalKeywords": [{"name": "Armor", "value": 2}],
+      "abilities": [
+        "Droid Resilience: Immune to Strain damage and Fear effects.",
+        "Suppressive Fire: After attacking, the target's tile and all adjacent tiles become Suppressed until this figure's next activation (figures in Suppressed tiles upgrade difficulty of attacks by 1).",
+        "Emplaced: Cannot take Move maneuvers. Must be set up at deployment."
+      ],
+      "threatCost": 7
+    },
+    "warlord-drayen": {
+      "id": "warlord-drayen",
+      "name": "Warlord Kael Drayen",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 3 },
+      "defensePool": { "difficulty": 2, "challenge": 1 },
+      "woundThreshold": 18,
+      "strainThreshold": 14,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "commanders-blaster-rifle",
+          "name": "Customized E-22 Blaster Rifle",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 2 },
+            { "name": "Pierce", "value": 1 },
+            { "name": "Superior", "value": null }
+          ]
+        },
+        {
+          "weaponId": "vibrosword",
+          "name": "Dueling Vibrosword",
+          "baseDamage": 6,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Defensive", "value": 1 },
+            { "name": "Pierce", "value": 2 },
+            { "name": "Vicious", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Warlord", "Leader", "Boss", "Imperial Defector"],
+      "mechanicalKeywords": [{"name": "Dauntless"}, {"name": "Armor", "value": 1}],
+      "courage": 4,
+      "abilities": [
+        "Tactical Genius: At the start of each round, Drayen may issue a command. All allied figures within Medium range may immediately take a free Maneuver.",
+        "Adaptive Tactics: When an attack against Drayen misses, his next attack gains 1 Proficiency die.",
+        "Adversary 2: Upgrade difficulty of all combat checks against this target by 2.",
+        "Last Stand: When reduced below half wounds, Drayen gains +2 soak and all his attacks gain Pierce 2."
+      ],
+      "threatCost": 10
+    }
+  }
+}

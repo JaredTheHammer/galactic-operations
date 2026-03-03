@@ -1,0 +1,74 @@
+{
+  "red": {
+    "color": "red",
+    "name": "Red Attack Die",
+    "faces": [
+      ["Hit"],
+      ["Hit"],
+      ["Hit", "Surge"],
+      ["Hit", "Hit"],
+      ["Surge"],
+      ["Miss"]
+    ]
+  },
+  "green": {
+    "color": "green",
+    "name": "Green Attack Die",
+    "faces": [
+      ["Hit"],
+      ["Hit"],
+      ["Surge"],
+      ["Hit", "Surge"],
+      ["Miss"],
+      ["Miss"]
+    ]
+  },
+  "blue": {
+    "color": "blue",
+    "name": "Blue Attack Die",
+    "faces": [
+      ["Hit"],
+      ["Surge"],
+      ["Surge"],
+      ["Hit", "Hit"],
+      ["Miss"],
+      ["Miss"]
+    ]
+  },
+  "black": {
+    "color": "black",
+    "name": "Black Defense Die",
+    "faces": [
+      ["Block"],
+      ["Block"],
+      ["Block", "Evade"],
+      ["Evade"],
+      [],
+      []
+    ]
+  },
+  "white": {
+    "color": "white",
+    "name": "White Defense Die",
+    "faces": [
+      ["Block"],
+      ["Evade"],
+      ["Evade"],
+      ["Block", "Evade"],
+      [],
+      []
+    ]
+  },
+  "fate": {
+    "color": "fate",
+    "name": "Fate Die",
+    "faces": [
+      ["1"],
+      ["2"],
+      ["3"],
+      ["4"],
+      ["5"],
+      ["6"]
+    ]
+  }
+}

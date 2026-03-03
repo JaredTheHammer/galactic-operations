@@ -1,0 +1,124 @@
+[
+  {
+    "id": "stormtrooper",
+    "name": "Stormtrooper",
+    "side": "Imperial",
+    "tier": "Regular",
+    "health": 4,
+    "speed": 4,
+    "defense": {
+      "black": 1
+    },
+    "attackDice": {
+      "blue": 1,
+      "green": 1
+    },
+    "surgeAbilities": [
+      {
+        "cost": 1,
+        "effect": "+1 damage",
+        "type": "damage"
+      }
+    ],
+    "cost": 7,
+    "abilities": [],
+    "keywords": []
+  },
+  {
+    "id": "stormtrooper-elite",
+    "name": "Stormtrooper Elite",
+    "side": "Imperial",
+    "tier": "Elite",
+    "health": 6,
+    "speed": 4,
+    "defense": {
+      "black": 1
+    },
+    "attackDice": {
+      "red": 1,
+      "blue": 1
+    },
+    "surgeAbilities": [
+      {
+        "cost": 1,
+        "effect": "+2 damage",
+        "type": "damage"
+      },
+      {
+        "cost": 1,
+        "effect": "+1 accuracy",
+        "type": "accuracy"
+      }
+    ],
+    "cost": 9,
+    "abilities": [],
+    "keywords": []
+  },
+  {
+    "id": "imperial-officer",
+    "name": "Imperial Officer",
+    "side": "Imperial",
+    "tier": "Regular",
+    "health": 3,
+    "speed": 4,
+    "defense": {
+      "white": 1
+    },
+    "attackDice": {
+      "green": 1
+    },
+    "surgeAbilities": [],
+    "cost": 5,
+    "abilities": [
+      "Order: Give an adjacent friendly figure 1 bonus action this round"
+    ],
+    "keywords": ["Leader"]
+  },
+  {
+    "id": "probe-droid",
+    "name": "Probe Droid",
+    "side": "Imperial",
+    "tier": "Regular",
+    "health": 3,
+    "speed": 3,
+    "defense": {
+      "black": 1
+    },
+    "attackDice": {
+      "green": 1,
+      "blue": 1
+    },
+    "surgeAbilities": [],
+    "cost": 4,
+    "abilities": [
+      "Self-Destruct: When defeated, deal 1 damage to all figures within range 2"
+    ],
+    "keywords": ["Droid", "Mobile"]
+  },
+  {
+    "id": "e-web-engineer",
+    "name": "E-Web Engineer",
+    "side": "Imperial",
+    "tier": "Elite",
+    "health": 5,
+    "speed": 2,
+    "defense": {
+      "black": 1
+    },
+    "attackDice": {
+      "red": 1,
+      "green": 1,
+      "blue": 1
+    },
+    "surgeAbilities": [
+      {
+        "cost": 1,
+        "effect": "+2 damage, Pierce 1",
+        "type": "damage"
+      }
+    ],
+    "cost": 10,
+    "abilities": [],
+    "keywords": ["Heavy Weapon"]
+  }
+]

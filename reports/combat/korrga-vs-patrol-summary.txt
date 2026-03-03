@@ -1,0 +1,32 @@
+========================================================
+  COMBAT SIMULATOR - BALANCE REPORT
+========================================================
+  Scenario:       Korrga vs Stormtrooper Patrol
+  Games played:   100
+  Side A:         Imperial Patrol
+  Side B:         Korrga Solo
+
+--------------------------------------------------------
+  WIN RATES
+--------------------------------------------------------
+  Imperial Patrol      35.0%  (35 wins)
+  Korrga Solo          65.0%  (65 wins)
+  Draw                 0.0%  (0 draws)
+
+--------------------------------------------------------
+  AVERAGES PER GAME
+--------------------------------------------------------
+  Rounds played:       10.4
+  Side A damage taken: 8.2
+  Side B damage taken: 11.0
+  Side A defeated:     2.1
+  Side B defeated:     0.1
+
+--------------------------------------------------------
+  FIGURE PERFORMANCE
+--------------------------------------------------------
+  Figure                 Side  Survival  AvgDmgTkn  AvgRounds
+  Stormtrooper           A         31%        2.7        8.3
+  Korrga                 B         85%        7.0       10.4
+
+========================================================

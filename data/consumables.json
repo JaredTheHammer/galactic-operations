@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Consumable items for healing and support. Stim Packs target organic creatures (Medicine skill), Repair Patches target droids (Mechanics skill). Both have diminishing returns per figure per encounter: healing = max(1, baseValue - priorUses * 2). Strain recovery items have no skill check and no diminishing returns."
+  },
+  "consumables": {
+    "stim-pack": {
+      "id": "stim-pack",
+      "name": "Stim Pack",
+      "description": "Military-grade stimulant injector. Heals wounds on organic targets. Less effective with repeated use as the body builds tolerance.",
+      "targetType": "organic",
+      "effect": "heal_wounds",
+      "baseValue": 5,
+      "skillUsed": "medicine",
+      "characteristicUsed": "intellect",
+      "diminishingReturns": true,
+      "price": 25
+    },
+    "repair-patch": {
+      "id": "repair-patch",
+      "name": "Repair Patch",
+      "description": "Emergency droid repair kit with micro-welders and circuit sealant. Repairs damage on mechanical targets. Components degrade with repeated application to the same chassis.",
+      "targetType": "droid",
+      "effect": "heal_wounds",
+      "baseValue": 5,
+      "skillUsed": "mechanics",
+      "characteristicUsed": "intellect",
+      "diminishingReturns": true,
+      "price": 25
+    },
+    "adrenaline-stim": {
+      "id": "adrenaline-stim",
+      "name": "Adrenaline Stim",
+      "description": "Combat stimulant that clears fatigue and sharpens focus. Recovers strain on organic targets.",
+      "targetType": "organic",
+      "effect": "recover_strain",
+      "baseValue": 3,
+      "diminishingReturns": false,
+      "price": 15
+    },
+    "emergency-repair-kit": {
+      "id": "emergency-repair-kit",
+      "name": "Emergency Repair Kit",
+      "description": "Portable diagnostic and reset tool for droids. Clears processing errors and resets overloaded circuits.",
+      "targetType": "droid",
+      "effect": "recover_strain",
+      "baseValue": 3,
+      "diminishingReturns": false,
+      "price": 15
+    }
+  }
+}

@@ -1,0 +1,353 @@
+/**
+ * Combat Resolution System
+ * Handles complete combat pipeline from scenario setup to resolution
+ */
+
+import type {
+  CombatScenario,
+  CombatResolution,
+  CombatState,
+  Figure,
+  GameState,
+  GameData,
+  DicePool,
+  DiceRollResult,
+  DiceRollSummary,
+  GridCoordinate,
+} from './types.js';
+
+import { rollDicePool, summarizeRoll, hasMiss } from './dice.js';
+import { hasLineOfSight, getCover } from './los.js';
+import { getDistance } from './movement.js';
+
+/**
+ * Get valid attack targets for a figure
+ * Returns figure IDs of all enemy figures that are in range and have line of sight
+ *
+ * @param gameState Current game state
+ * @param attackerId The ID of the attacking figure
+ * @returns Array of figure IDs that are valid targets
+ */
+export function getValidTargets(gameState: GameState, attackerId: string): string[] {
+  const attacker = gameState.figures.find(f => f.id === attackerId);
+  if (!attacker) {
+    return [];
+  }
+
+  const maxRange = 8; // Default max attack range
+  const validTargets: string[] = [];
+
+  for (const figure of gameState.figures) {
+    // Skip self and defeated figures
+    if (figure.id === attackerId || figure.isDefeated) {
+      continue;
+    }
+
+    // Skip allies (same player)
+    if (figure.playerId === attacker.playerId) {
+      continue;
+    }
+
+    // Check range
+    const distance = getDistance(attacker.position, figure.position);
+    if (distance > maxRange) {
+      continue;
+    }
+
+    // Check line of sight
+    if (!hasLineOfSight(attacker.position, figure.position, gameState.map)) {
+      continue;
+    }
+
+    validTargets.push(figure.id);
+  }
+
+  return validTargets;
+}
+
+/**
+ * Create a combat scenario between attacker and defender with a specific weapon
+ * Builds initial scenario with range, cover, LOS, and elevation checks
+ *
+ * @param attacker The attacking figure
+ * @param defender The defending figure
+ * @param weaponId The ID of the weapon being used
+ * @param gameState Current game state
+ * @param gameData Game data containing unit and weapon definitions
+ * @returns Initial combat scenario
+ */
+export function createCombatScenario(
+  attacker: Figure,
+  defender: Figure,
+  weaponId: string,
+  gameState: GameState,
+  gameData: GameData
+): CombatScenario {
+  const { map } = gameState;
+
+  // Calculate range between figures
+  const range = getDistance(attacker.position, defender.position);
+
+  // Check line of sight
+  const hasLOS = hasLineOfSight(attacker.position, defender.position, map);
+
+  // Get cover
+  const cover = hasLOS ? getCover(attacker.position, defender.position, map) : 'Full';
+
+  // Calculate elevation difference
+  const attackerTile = map.tiles[attacker.position.y][attacker.position.x];
+  const defenderTile = map.tiles[defender.position.y][defender.position.x];
+  const elevationDiff = defenderTile.elevation - attackerTile.elevation;
+
+  return {
+    id: `combat_${Date.now()}_${Math.random()}`,
+    attackerId: attacker.id,
+    defenderId: defender.id,
+    weaponId,
+    range,
+    cover,
+    elevationDiff,
+    hasLOS,
+    state: 'Declaring',
+    attackRoll: null,
+    defenseRoll: null,
+    attackerTactics: [],
+    defenderTactics: [],
+    resolution: null,
+  };
+}
+
+/**
+ * Roll dice for attack and defense, updating the scenario
+ * Does not apply tactic cards yet
+ *
+ * @param scenario The combat scenario to resolve
+ * @param gameState Current game state (used to look up figures by ID)
+ * @param gameData Game data with dice and unit definitions
+ * @returns Updated combat scenario with dice rolls
+ */
+export function rollCombatDice(
+  scenario: CombatScenario,
+  gameState: GameState,
+  gameData: GameData
+): CombatScenario {
+  const attacker = gameState.figures.find(f => f.id === scenario.attackerId);
+  const defender = gameState.figures.find(f => f.id === scenario.defenderId);
+
+  if (!attacker || !defender) {
+    return scenario;
+  }
+
+  const attackerDef = gameData.units[attacker.unitId];
+  const defenderDef = gameData.units[defender.unitId];
+
+  // Use default dice pools if unit definitions not found in data
+  const effectiveAttackDice = attackerDef
+    ? buildAttackDicePool(attackerDef, scenario)
+    : ({ red: 1, green: 1 } as DicePool);
+
+  const attackRoll = rollDicePool(effectiveAttackDice, gameData.dice);
+
+  // Check for miss - if any die shows Miss, attack fails immediately
+  if (hasMiss(attackRoll)) {
+    return {
+      ...scenario,
+      state: 'Resolving',
+      attackRoll,
+      defenseRoll: [],
+    };
+  }
+
+  // Roll defense dice with modifiers based on cover
+  const effectiveDefenseDice = defenderDef
+    ? buildDefenseDicePool(defenderDef, scenario.cover)
+    : ({ black: 1 } as DicePool);
+
+  const defenseRoll = rollDicePool(effectiveDefenseDice, gameData.dice);
+
+  return {
+    ...scenario,
+    state: 'PlayingTactics',
+    attackRoll,
+    defenseRoll,
+  };
+}
+
+/**
+ * Build the attack dice pool with any applicable modifiers.
+ * elevationDiff = defenderElevation - attackerElevation:
+ *   negative => attacker has high ground (bonus blue attack die)
+ *   positive => defender has high ground (attacker loses accuracy, no bonus)
+ */
+function buildAttackDicePool(
+  attacker: any, // UnitDefinition
+  scenario: CombatScenario
+): DicePool {
+  const pool = { ...attacker.attackDice };
+
+  if (scenario.elevationDiff < 0) {
+    // Attacker has high ground: bonus blue attack die
+    pool.blue = (pool.blue || 0) + 1;
+  }
+  // When defender has high ground (elevationDiff > 0), no attacker bonus.
+  // Defender's advantage is handled by cover/terrain, not extra attack dice.
+
+  return pool;
+}
+
+/**
+ * Build the defense dice pool with cover modifiers.
+ *
+ * Balance v2 (Session 6b):
+ *   Light cover  =>  +1 white die   (E[blocks]+0.33, E[evades]+0.50)
+ *   Heavy cover  =>  +1 black die   (E[blocks]+0.50, E[evades]+0.33)
+ *
+ * Previous values (+1/+2 black) made cover nearly impenetrable for
+ * low-dice-pool units like Stormtroopers.
+ */
+function buildDefenseDicePool(defender: any, cover: string): DicePool {
+  const pool = { ...defender.defense };
+
+  if (cover === 'Light') {
+    pool.white = (pool.white || 0) + 1;
+  } else if (cover === 'Heavy') {
+    pool.black = (pool.black || 0) + 1;
+  }
+
+  return pool;
+}
+
+/**
+ * Apply tactic card effects to the combat rolls
+ * Modifies the rolls based on card effects before final resolution
+ *
+ * @param scenario The combat scenario
+ * @param attackerCards Array of tactic card IDs to apply for attacker
+ * @param defenderCards Array of tactic card IDs to apply for defender
+ * @param gameData Game data with tactic card definitions
+ * @returns Updated scenario with tactic effects applied
+ */
+export function applyTacticCards(
+  scenario: CombatScenario,
+  attackerCards: string[],
+  defenderCards: string[],
+  gameData: GameData
+): CombatScenario {
+  // Note: Actual tactic application would modify rolls
+  // For now, just record which cards were played
+  return {
+    ...scenario,
+    attackerTactics: attackerCards,
+    defenderTactics: defenderCards,
+  };
+}
+
+/**
+ * Resolve the combat and calculate final damage and outcome
+ * Calculates net hits, applies surge effects, determines if defender is defeated
+ *
+ * @param scenario The combat scenario with all rolls and tactics
+ * @param gameData Game data
+ * @returns Combat resolution with damage and outcome
+ */
+export function resolveCombat(
+  scenario: CombatScenario,
+  gameData: GameData
+): CombatResolution {
+  if (!scenario.attackRoll || !scenario.defenseRoll) {
+    return {
+      netHits: 0,
+      damage: 0,
+      defenderRemainingHealth: 0,
+      surgeEffects: [],
+      tacticEffects: [],
+      isDefeated: false,
+    };
+  }
+
+  // Check for miss
+  if (hasMiss(scenario.attackRoll)) {
+    return {
+      netHits: 0,
+      damage: 0,
+      defenderRemainingHealth: 0,
+      surgeEffects: [],
+      tacticEffects: [],
+      isDefeated: false,
+    };
+  }
+
+  const attackSummary = summarizeRoll(scenario.attackRoll);
+  const defenseSummary = summarizeRoll(scenario.defenseRoll);
+
+  // Imperial Assault damage model:
+  // 1. Hits are cancelled by Blocks (1:1)
+  // 2. Surges are cancelled by Evades (1:1)
+  // 3. Remaining surges convert to +1 damage each (surge abilities)
+  // 4. Total damage = uncancelled hits + uncancelled surges
+  const netHits = Math.max(0, attackSummary.hits - defenseSummary.blocks);
+  const netSurges = Math.max(0, attackSummary.surges - defenseSummary.evades);
+
+  // Each uncancelled surge provides +1 damage via surge abilities
+  let damage = netHits + netSurges;
+
+  const surgeEffects: string[] = [];
+  if (netSurges > 0) {
+    surgeEffects.push(`${netSurges} surge(s) converted to damage`);
+  }
+
+  // isDefeated is properly determined in executeCombat using actual health
+  const isDefeated = false;
+
+  return {
+    netHits,
+    damage,
+    defenderRemainingHealth: 0, // Would be updated in executeCombat
+    surgeEffects,
+    tacticEffects: [],
+    isDefeated,
+  };
+}
+
+/**
+ * Execute combat results and apply them to game state
+ * Damages defender, checks for defeat, applies morale effects
+ *
+ * @param scenario The combat scenario
+ * @param resolution The combat resolution
+ * @param gameState Current game state
+ * @returns Updated game state with combat results applied
+ */
+export function executeCombat(
+  scenario: CombatScenario,
+  resolution: CombatResolution,
+  gameState: GameState
+): GameState {
+  // Find defender in figures
+  const defenderIndex = gameState.figures.findIndex((f) => f.id === scenario.defenderId);
+  if (defenderIndex === -1) {
+    return gameState;
+  }
+
+  const defender = gameState.figures[defenderIndex];
+  const newHealth = Math.max(0, defender.currentHealth - resolution.damage);
+  const isDefeated = newHealth === 0;
+
+  // Update figures array with damage
+  const updatedFigures = gameState.figures.map((f, idx) => {
+    if (idx === defenderIndex) {
+      return {
+        ...f,
+        currentHealth: newHealth,
+        isDefeated: isDefeated,
+      };
+    }
+    return f;
+  });
+
+  return {
+    ...gameState,
+    figures: updatedFigures,
+  };
+}
+

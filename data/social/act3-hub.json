@@ -1,0 +1,377 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Act 3 social phase hub: The War Room, a hardened rebel command bunker on the edge of the Tangrene badlands. New contacts, vendors, and storylines for the Fractured Alliance arc."
+  },
+  "npcs": {
+    "intel-officer": {
+      "id": "intel-officer",
+      "name": "Lieutenant Sera Kade",
+      "description": "A sharp-eyed Mirialan intelligence officer who specializes in analyzing splinter faction movements. Her dossier on Warlord Drayen is the most complete in the sector.",
+      "disposition": "friendly",
+      "characteristics": { "willpower": 2, "presence": 2, "cunning": 3 },
+      "skills": { "computers": 2, "vigilance": 3, "perception": 2, "deception": 1 },
+      "keywords": ["intel-officer", "analyst", "rebel"],
+      "portrait": "sera-kade"
+    },
+    "defector-prisoner": {
+      "id": "defector-prisoner",
+      "name": "Corporal Dax Moren",
+      "description": "A captured defector trooper who claims he wants to come back to the rebellion. He knows the layout of Drayen's operations but his loyalty is questionable.",
+      "disposition": "neutral",
+      "characteristics": { "willpower": 2, "presence": 1, "cunning": 2 },
+      "skills": { "cool": 2, "deception": 2, "survival": 1, "ranged-heavy": 1 },
+      "keywords": ["defector", "prisoner", "informant"],
+      "portrait": "dax-moren"
+    },
+    "rebel-commander": {
+      "id": "rebel-commander",
+      "name": "Commander Talos Vane",
+      "description": "The veteran rebel commander is showing the strain. Drayen's rise has stretched his forces thin, and the defections have shaken his confidence in his own people.",
+      "disposition": "friendly",
+      "characteristics": { "willpower": 3, "presence": 3, "cunning": 2 },
+      "skills": { "leadership": 3, "discipline": 2, "cool": 2, "vigilance": 1 },
+      "keywords": ["rebel", "commander", "mission-giver"],
+      "portrait": "talos-vane"
+    },
+    "tech-specialist": {
+      "id": "tech-specialist",
+      "name": "Rook",
+      "description": "A taciturn Ugnaught mechanic who salvages and repurposes captured warlord tech. She's fascinated by the prototype war droids and wants to study every piece you bring back.",
+      "disposition": "friendly",
+      "characteristics": { "willpower": 2, "presence": 1, "cunning": 3 },
+      "skills": { "mechanics": 3, "computers": 2, "perception": 1 },
+      "keywords": ["mechanic", "tech-specialist", "vendor"],
+      "portrait": "rook"
+    },
+    "scout": {
+      "id": "scout",
+      "name": "Fenwick Taal",
+      "description": "A lanky Bothan scout who runs reconnaissance on Drayen's patrols. His intelligence is good, but his survival instinct sometimes overrides his duty.",
+      "disposition": "neutral",
+      "characteristics": { "willpower": 1, "presence": 2, "cunning": 3 },
+      "skills": { "stealth": 3, "perception": 2, "survival": 2, "streetwise": 1 },
+      "keywords": ["scout", "recon", "informant"],
+      "portrait": "fenwick-taal"
+    }
+  },
+  "location": {
+    "id": "war-room",
+    "name": "The War Room",
+    "description": "A reinforced command bunker built into a cave system on the edge of the Tangrene badlands. Holographic tactical displays cast a blue glow over folding tables covered in datapads and ration packs. The air recyclers hum constantly, and the distant thud of artillery practice echoes through the rock.",
+    "narrativeIntro": "The blast doors grind open as you descend into the rebel command bunker. The War Room buzzes with controlled urgency. Holographic maps of the sector flicker on every surface, red markers showing Drayen's known positions. Commander Vane stands at the central planning table, flanked by his officers. The mood is grim but determined. You've faced the Empire and the Syndicate. Now you face something more personal: a man who was once one of you.",
+    "campaignAct": 3,
+    "encounters": [
+      {
+        "id": "enc-sera-analysis",
+        "name": "Intelligence Briefing",
+        "description": "Lieutenant Kade has assembled a dossier on Warlord Drayen and his splinter faction.",
+        "narrativeIntro": "Sera Kade spreads a series of holoprojections across the table -- troop movements, intercepted communications, satellite imagery of the mountain stronghold. \"I've been tracking Drayen since he broke from the Imperial remnant. He's methodical, patient, and dangerously intelligent. Here's what we know.\"",
+        "npcId": "intel-officer",
+        "repeatable": false,
+        "dialogueOptions": [
+          {
+            "id": "sera-perception",
+            "text": "\"Show me his deployment patterns. There has to be a weakness.\"",
+            "skillId": "perception",
+            "difficulty": 2,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act3-m2-prototype",
+                "hintText": "Kade's analysis reveals that the prototype factory has a 30-minute gap in its patrol rotation during shift changes.",
+                "description": "Factory patrol rotation weakness identified."
+              },
+              {
+                "type": "xp",
+                "xpAmount": 3,
+                "description": "Your tactical eye impresses the intelligence officer."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act3-m2-prototype",
+                "hintText": "The data is too fragmented for a full analysis, but the factory appears to be lightly guarded.",
+                "description": "Partial intelligence on factory defenses."
+              }
+            ],
+            "triumphOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "drayen-weakness",
+                "description": "You spot a critical flaw in Drayen's command structure -- he trusts no one, which creates communication gaps."
+              }
+            ]
+          },
+          {
+            "id": "sera-computers",
+            "text": "\"Let me cross-reference those intercepts with the relay station data we recovered.\"",
+            "skillId": "computers",
+            "difficulty": 2,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act3-m3-stronghold",
+                "hintText": "Cross-referencing reveals the stronghold's shield generator location and its power source.",
+                "description": "Stronghold shield vulnerability mapped."
+              },
+              {
+                "type": "credits",
+                "credits": 100,
+                "description": "The combined intelligence is worth a bonus from rebel command."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "encrypted-data",
+                "description": "The encryption is too complex. The data remains partially obscured."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enc-dax-interrogation",
+        "name": "The Defector's Confession",
+        "description": "Corporal Dax Moren sits in a holding cell, hands cuffed to the table. He says he wants to talk.",
+        "narrativeIntro": "\"I know what you think of me,\" Dax says, his voice hollow. \"I was with Drayen for six months. I saw what he's building. It scared me enough to let your scouts pick me up.\" He leans forward, chains clinking. \"I'll tell you everything. But I want a deal.\"",
+        "npcId": "defector-prisoner",
+        "repeatable": false,
+        "dialogueOptions": [
+          {
+            "id": "dax-coercion",
+            "text": "\"You're in no position to negotiate. Talk, or rot in this cell.\"",
+            "skillId": "coercion",
+            "difficulty": 2,
+            "isOpposed": true,
+            "opposedSkillId": "cool",
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act3-m3-betrayal",
+                "hintText": "Dax breaks and reveals the turncoat camp's location and the names of the three rebel defectors leading it.",
+                "description": "Turncoat camp location and leadership revealed."
+              },
+              {
+                "type": "xp",
+                "xpAmount": 3,
+                "description": "The interrogation yields actionable intelligence."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "dax-stubborn",
+                "description": "Dax clams up. He won't talk without assurances."
+              }
+            ]
+          },
+          {
+            "id": "dax-charm",
+            "text": "\"You did the right thing, Dax. Help us stop Drayen and we'll make sure command knows you cooperated.\"",
+            "skillId": "charm",
+            "difficulty": 1,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act3-m3-betrayal",
+                "hintText": "Dax opens up about the turncoat training methods. They drill conscripts using rebel battle formations.",
+                "description": "Turncoat training methods revealed."
+              },
+              {
+                "type": "information",
+                "missionId": "act3-m4-endgame",
+                "hintText": "Dax describes the fortress layout: the command tower is in the northeast, accessible only through the main courtyard.",
+                "description": "Fortress Drayen layout intelligence."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act3-m3-betrayal",
+                "hintText": "Dax shares general information but holds back specifics. The camp is somewhere in the eastern jungle.",
+                "description": "Vague camp location."
+              }
+            ],
+            "advantageSpend": [
+              {
+                "cost": 2,
+                "outcome": {
+                  "type": "credits",
+                  "credits": 100,
+                  "description": "Dax reveals a hidden supply cache he stashed before defecting."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enc-talos-strategy",
+        "name": "Commander's War Council",
+        "description": "Commander Vane gathers his officers for a strategy session. Your input will shape the campaign's direction.",
+        "narrativeIntro": "\"We're fighting on three fronts,\" Vane says, gesturing at the holographic map. \"Drayen's factory, his turncoat training camp, and his fortress. We don't have the forces to hit all three at once. I need your team to lead the critical strike.\"",
+        "npcId": "rebel-commander",
+        "repeatable": false,
+        "requiresMissions": ["act3-m1-defection"],
+        "dialogueOptions": [
+          {
+            "id": "talos-leadership",
+            "text": "\"We hit the factory first. Cut off his droid supply, then mop up the rest.\"",
+            "skillId": "leadership",
+            "difficulty": 1,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act3-m2-prototype",
+                "hintText": "Vane assigns a diversionary strike team to draw off the factory's quick reaction force. You'll have a cleaner approach.",
+                "description": "Diversionary support for factory assault."
+              },
+              {
+                "type": "xp",
+                "xpAmount": 3,
+                "description": "Your strategic thinking earns Vane's respect."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act3-m2-prototype",
+                "hintText": "Vane approves the plan but can't spare any support units. You're on your own.",
+                "description": "Factory assault approved without support."
+              }
+            ]
+          },
+          {
+            "id": "talos-negotiate",
+            "text": "\"We need a bigger budget, Commander. Drayen's tech outclasses everything we have.\"",
+            "skillId": "negotiation",
+            "difficulty": 2,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "credits",
+                "credits": 300,
+                "description": "Vane secures emergency war funds from the sector's provisional government."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "credits",
+                "credits": 100,
+                "description": "The treasury is nearly empty, but Vane scrapes together what he can."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enc-fenwick-recon",
+        "name": "Scout Report",
+        "description": "Fenwick returns from a reconnaissance run, dusty and rattled.",
+        "narrativeIntro": "Fenwick slides into the booth across from you, fur matted with red dust. \"I got close to the stronghold perimeter,\" he says, pulling up a hand-drawn map. \"Closer than I wanted to. The place is crawling with droids.\" His whiskers twitch nervously.",
+        "npcId": "scout",
+        "repeatable": false,
+        "dialogueOptions": [
+          {
+            "id": "fenwick-survival",
+            "text": "\"Walk me through the approach routes. What's the terrain like?\"",
+            "skillId": "survival",
+            "difficulty": 1,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act3-m3-stronghold",
+                "hintText": "Fenwick identifies a dried riverbed that provides concealed access to the stronghold's southern wall.",
+                "description": "Concealed approach route to the stronghold."
+              },
+              {
+                "type": "xp",
+                "xpAmount": 2,
+                "description": "Tactical terrain knowledge gained."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act3-m3-stronghold",
+                "hintText": "Fenwick's map is rough but confirms the stronghold has at least two entry points.",
+                "description": "Basic stronghold layout."
+              }
+            ]
+          },
+          {
+            "id": "fenwick-streetwise",
+            "text": "\"What do the locals say about Drayen? Any weak points in his support?\"",
+            "skillId": "streetwise",
+            "difficulty": 2,
+            "isOpposed": false,
+            "successOutcomes": [
+              {
+                "type": "information",
+                "missionId": "act3-m4-endgame",
+                "hintText": "Local farmers report that Drayen's conscripts are poorly motivated. They fight because they're scared, not because they believe.",
+                "description": "Conscript morale intelligence."
+              },
+              {
+                "type": "credits",
+                "credits": 75,
+                "description": "Fenwick introduces you to a local who sells supplies at a discount."
+              }
+            ],
+            "failureOutcomes": [
+              {
+                "type": "narrative",
+                "narrativeItemId": "locals-silent",
+                "description": "The locals are too scared to talk. Drayen's reprisals have silenced the population."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "shops": [
+      {
+        "id": "shop-rook-salvage",
+        "name": "Rook's Salvage Workshop",
+        "description": "A cluttered workshop carved into the cave wall. Rook has converted captured warlord tech into usable equipment. Everything smells like ozone and machine oil.",
+        "inventory": [
+          { "itemId": "dc-15a", "category": "weapon", "basePrice": 850, "stock": 1 },
+          { "itemId": "a280", "category": "weapon", "basePrice": 950, "stock": 1 },
+          { "itemId": "dl-44", "category": "weapon", "basePrice": 700, "stock": 2 },
+          { "itemId": "vibro-blade", "category": "weapon", "basePrice": 700, "stock": 1 },
+          { "itemId": "scattergun", "category": "weapon", "basePrice": 700, "stock": 2 },
+          { "itemId": "heavy-battle-armor", "category": "armor", "basePrice": 2500, "stock": 1 },
+          { "itemId": "durasteel-plating", "category": "armor", "basePrice": 700, "stock": 2 },
+          { "itemId": "hunter-mesh", "category": "armor", "basePrice": 450, "stock": 2 },
+          { "itemId": "thermal-detonator", "category": "consumable", "basePrice": 1800, "stock": 1 },
+          { "itemId": "medkit", "category": "gear", "basePrice": 65, "stock": 5 }
+        ],
+        "buyCategories": ["weapon", "armor", "gear", "consumable"],
+        "sellRate": 0.5
+      },
+      {
+        "id": "shop-rebel-armory",
+        "name": "Rebel Field Armory",
+        "description": "A neatly organized supply depot run by Commander Vane's logistics team. Limited selection, but everything is battle-tested.",
+        "inventory": [
+          { "itemId": "e-11", "category": "weapon", "basePrice": 800, "stock": 2 },
+          { "itemId": "westar-35", "category": "weapon", "basePrice": 550, "stock": 2 },
+          { "itemId": "blast-vest", "category": "armor", "basePrice": 200, "stock": 3 },
+          { "itemId": "padded-armor", "category": "armor", "basePrice": 400, "stock": 2 },
+          { "itemId": "medkit", "category": "gear", "basePrice": 55, "stock": 8 },
+          { "itemId": "stim-pack", "category": "consumable", "basePrice": 45, "stock": 6 }
+        ],
+        "buyCategories": [],
+        "sellRate": 0
+      }
+    ]
+  }
+}

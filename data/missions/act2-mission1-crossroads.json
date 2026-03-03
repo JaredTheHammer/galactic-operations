@@ -1,0 +1,172 @@
+{
+  "id": "act2-m1-crossroads",
+  "name": "Crossroads",
+  "description": "The Shadow Syndicate's shakedown crew is terrorizing merchants at Nexus Station's upper market.",
+  "narrativeIntro": "With the Imperial garrison in retreat, a new threat has filled the vacuum. The Shadow Syndicate has claimed Nexus Station as their territory, extorting merchants and running protection rackets. Reports say a shakedown crew is roughing up traders in the upper market ring right now. Your rebel cell deploys to make first contact with this new enemy and send a message that the sector isn't theirs to take.",
+  "narrativeSuccess": "The Syndicate Lieutenant hits the deck, and your team secures the marketplace. As you tend to the rattled merchants, you find a datapad on the unconscious officer. It references someone called 'The Broker' and a bounty board operation run out of a nearby station. The Shadow Syndicate is far more organized than a simple protection racket. This runs deep.",
+  "narrativeFailure": "The Syndicate crew overwhelms your position, and the merchants scatter in panic. The upper market is now firmly under criminal control. Word spreads fast: the rebels couldn't even protect a handful of traders. The Shadow Syndicate tightens its grip on Nexus Station.",
+
+  "mapId": "station-market",
+  "mapPreset": "skirmish",
+  "boardsWide": 3,
+  "boardsTall": 3,
+
+  "difficulty": "easy",
+  "roundLimit": 8,
+  "recommendedHeroCount": 2,
+
+  "imperialThreat": 8,
+  "threatPerRound": 1,
+
+  "operativeDeployZone": [
+    {"x": 0, "y": 16}, {"x": 1, "y": 16}, {"x": 2, "y": 16},
+    {"x": 0, "y": 17}, {"x": 1, "y": 17}, {"x": 2, "y": 17}
+  ],
+  "initialEnemies": [
+    {
+      "npcProfileId": "nikto-gunner",
+      "count": 4,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 14, "y": 10}, {"x": 15, "y": 10}, {"x": 16, "y": 10}, {"x": 17, "y": 10}
+      ]
+    },
+    {
+      "npcProfileId": "gamorrean-brute",
+      "count": 2,
+      "asMinGroup": true,
+      "deployZone": [
+        {"x": 20, "y": 16}, {"x": 21, "y": 16}
+      ]
+    },
+    {
+      "npcProfileId": "syndicate-lieutenant",
+      "count": 1,
+      "asMinGroup": false,
+      "deployZone": [{"x": 18, "y": 14}]
+    }
+  ],
+  "reinforcements": [
+    {
+      "id": "wave-1",
+      "triggerRound": 4,
+      "groups": [
+        {
+          "npcProfileId": "nikto-gunner",
+          "count": 3,
+          "asMinGroup": true,
+          "deployZone": [
+            {"x": 34, "y": 0}, {"x": 35, "y": 0}, {"x": 34, "y": 1}
+          ]
+        }
+      ],
+      "threatCost": 2,
+      "narrativeText": "More Syndicate gunners burst through the service corridor!"
+    },
+    {
+      "id": "wave-2",
+      "triggerRound": 6,
+      "groups": [
+        {
+          "npcProfileId": "trandoshan-hunter",
+          "count": 1,
+          "asMinGroup": false,
+          "deployZone": [{"x": 35, "y": 17}]
+        }
+      ],
+      "threatCost": 4,
+      "narrativeText": "A Trandoshan Hunter stalks through the market gates, scattergun raised."
+    }
+  ],
+
+  "objectives": [
+    {
+      "id": "obj-eliminate",
+      "type": "eliminate_all",
+      "side": "Operative",
+      "description": "Eliminate all Shadow Syndicate forces.",
+      "priority": "primary",
+      "xpReward": 0
+    },
+    {
+      "id": "obj-protect-merchants",
+      "type": "interact_terminal",
+      "side": "Operative",
+      "description": "Secure the merchant stalls before the Syndicate trashes them (interact with 3 stalls). 2+ secured = bonus XP and shop discount.",
+      "targetCount": 3,
+      "priority": "secondary",
+      "xpReward": 5
+    }
+  ],
+  "victoryConditions": [
+    {
+      "side": "Operative",
+      "description": "Eliminate all Shadow Syndicate forces.",
+      "requiredObjectiveIds": ["obj-eliminate"]
+    },
+    {
+      "side": "Imperial",
+      "description": "Incapacitate all Operative heroes.",
+      "requiredObjectiveIds": []
+    }
+  ],
+
+  "objectivePoints": [
+    {
+      "id": "objpt-merchant-1",
+      "position": {"x": 10, "y": 12},
+      "type": "terminal",
+      "skillRequired": "charm",
+      "alternateSkill": "coercion",
+      "difficulty": 1,
+      "description": "Frightened Rodian merchant cowering behind a toppled display case."
+    },
+    {
+      "id": "objpt-merchant-2",
+      "position": {"x": 18, "y": 8},
+      "type": "terminal",
+      "skillRequired": "charm",
+      "alternateSkill": "leadership",
+      "difficulty": 1,
+      "description": "Twi'lek trader barricaded behind overturned crates."
+    },
+    {
+      "id": "objpt-merchant-3",
+      "position": {"x": 26, "y": 14},
+      "type": "terminal",
+      "skillRequired": "medicine",
+      "alternateSkill": "charm",
+      "difficulty": 2,
+      "description": "Injured Ithorian shopkeeper bleeding from a vibro-knife wound."
+    }
+  ],
+
+  "lootTokens": [
+    {
+      "id": "loot-market-1",
+      "position": {"x": 10, "y": 12},
+      "reward": {"type": "credits", "value": 75}
+    },
+    {
+      "id": "loot-market-2",
+      "position": {"x": 26, "y": 14},
+      "reward": {"type": "credits", "value": 75}
+    },
+    {
+      "id": "loot-datapad",
+      "position": {"x": 18, "y": 14},
+      "reward": {"type": "xp", "value": 3}
+    }
+  ],
+
+  "campaignAct": 2,
+  "missionIndex": 1,
+  "prerequisites": ["act1-m4-finale"],
+  "unlocksNext": ["act2-m2-bounty"],
+
+  "baseXP": 10,
+  "bonusXPPerLoot": 2,
+  "bonusXPPerKill": 1,
+  "maxKillXP": 4,
+  "leaderKillXP": 0
+}

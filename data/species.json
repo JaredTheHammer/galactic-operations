@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Playable species for hero creation. Each species defines starting Characteristics, wound/strain base thresholds, speed, and flavor text. Total characteristic points = 12 for all species."
+  },
+  "species": {
+    "human": {
+      "id": "human",
+      "name": "Human",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 110,
+      "specialAbility": null,
+      "description": "Versatile and adaptable. Humans are the most common species in the galaxy."
+    },
+    "twilek": {
+      "id": "twilek",
+      "name": "Twi'lek",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 3
+      },
+      "woundBase": 10,
+      "strainBase": 11,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": null,
+      "description": "Charismatic and resilient. Twi'leks are natural leaders and negotiators."
+    },
+    "wookiee": {
+      "id": "wookiee",
+      "name": "Wookiee",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 1,
+        "presence": 2
+      },
+      "woundBase": 14,
+      "strainBase": 8,
+      "speed": 4,
+      "startingXP": 90,
+      "specialAbility": null,
+      "description": "Powerful and loyal. Wookiees are fearsome warriors with an unbreakable honor code."
+    },
+    "rodian": {
+      "id": "rodian",
+      "name": "Rodian",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 3,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 1,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": null,
+      "description": "Quick and perceptive. Rodians are born hunters with excellent reflexes."
+    },
+    "trandoshan": {
+      "id": "trandoshan",
+      "name": "Trandoshan",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 1,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 12,
+      "strainBase": 9,
+      "speed": 4,
+      "startingXP": 90,
+      "specialAbility": null,
+      "description": "Brutal and relentless. Trandoshans worship the Scorekeeper and live for the hunt."
+    },
+    "bothan": {
+      "id": "bothan",
+      "name": "Bothan",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 3,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 10,
+      "strainBase": 11,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": null,
+      "description": "Shrewd and resourceful. Bothans are master spies and information brokers."
+    },
+    "droid": {
+      "id": "droid",
+      "name": "Droid",
+      "creatureType": "droid",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 1,
+        "intellect": 3,
+        "cunning": 1,
+        "willpower": 3,
+        "presence": 1
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 175,
+      "specialAbility": "droid_chassis",
+      "description": "Immune to Poison and Fear. Vulnerable to Ion damage. Stats vary by chassis model."
+    }
+  }
+}

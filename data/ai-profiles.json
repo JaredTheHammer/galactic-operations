@@ -1,0 +1,290 @@
+{
+  "archetypes": {
+    "trooper": {
+      "id": "trooper",
+      "name": "Trooper",
+      "cardTitle": "TROOPER TACTICS",
+      "description": "Standard infantry. Advance in groups, use cover, focus fire on weakest targets.",
+      "priorityRules": [
+        {
+          "rank": 1,
+          "condition": "can-kill-target",
+          "action": "attack-kill-target",
+          "cardText": "If you can defeat an enemy this attack: Attack that enemy."
+        },
+        {
+          "rank": 2,
+          "condition": "can-attack-from-cover",
+          "action": "move-to-cover-then-attack",
+          "cardText": "If you can move to cover AND attack: Move to cover, then Attack."
+        },
+        {
+          "rank": 3,
+          "condition": "enemy-in-range",
+          "action": "attack-best-target",
+          "cardText": "If an enemy is in range: Attack the lowest-health enemy."
+        },
+        {
+          "rank": 4,
+          "condition": "default",
+          "action": "advance-with-cover",
+          "cardText": "Otherwise: Move toward nearest enemy, staying in cover when possible."
+        }
+      ],
+      "weights": {
+        "killPotential": 10,
+        "coverValue": 7,
+        "proximity": 5,
+        "threatLevel": 3,
+        "elevation": 2,
+        "selfPreservation": 4,
+        "aimValue": 2,
+        "dodgeValue": 1
+      }
+    },
+    "elite": {
+      "id": "elite",
+      "name": "Elite",
+      "cardTitle": "ELITE TACTICS",
+      "description": "Veteran fighters. Prioritize high-value targets and use superior firepower.",
+      "priorityRules": [
+        {
+          "rank": 1,
+          "condition": "can-kill-target",
+          "action": "attack-kill-target",
+          "cardText": "If you can defeat an enemy: Attack that enemy."
+        },
+        {
+          "rank": 2,
+          "condition": "enemy-in-range",
+          "action": "attack-best-target",
+          "cardText": "If an enemy is in range: Attack the highest-threat enemy."
+        },
+        {
+          "rank": 3,
+          "condition": "should-aim-before-attack",
+          "action": "aim-then-attack",
+          "cardText": "If enemies are tough and aim would help: Aim for bonus dice, then reposition."
+        },
+        {
+          "rank": 4,
+          "condition": "can-attack-from-cover",
+          "action": "move-to-cover-then-attack",
+          "cardText": "If you can reach cover and attack: Move to cover, then Attack."
+        },
+        {
+          "rank": 5,
+          "condition": "default",
+          "action": "advance-with-cover",
+          "cardText": "Otherwise: Advance toward the highest-threat enemy using cover."
+        }
+      ],
+      "weights": {
+        "killPotential": 8,
+        "coverValue": 5,
+        "proximity": 4,
+        "threatLevel": 10,
+        "elevation": 3,
+        "selfPreservation": 5,
+        "aimValue": 5,
+        "dodgeValue": 3
+      }
+    },
+    "sniper": {
+      "id": "sniper",
+      "name": "Sniper",
+      "cardTitle": "SNIPER TACTICS",
+      "description": "Long-range specialist. Hold position, maximize range, seek elevated cover.",
+      "priorityRules": [
+        {
+          "rank": 1,
+          "condition": "can-kill-target",
+          "action": "attack-kill-target",
+          "cardText": "If you can defeat an enemy from here: Attack that enemy."
+        },
+        {
+          "rank": 2,
+          "condition": "enemy-in-range",
+          "action": "attack-best-target",
+          "cardText": "If any enemy is in range: Attack the lowest-health enemy."
+        },
+        {
+          "rank": 3,
+          "condition": "should-aim-before-attack",
+          "action": "aim-then-attack",
+          "cardText": "If enemies are approaching: Aim for bonus dice, prepare to fire."
+        },
+        {
+          "rank": 4,
+          "condition": "has-overwatch-opportunity",
+          "action": "set-overwatch",
+          "cardText": "If no targets but you have line of sight to open ground: Set Overwatch."
+        },
+        {
+          "rank": 5,
+          "condition": "should-dodge-for-defense",
+          "action": "dodge-and-hold",
+          "cardText": "If threatened and no good shot: Dodge and hold position."
+        },
+        {
+          "rank": 6,
+          "condition": "default",
+          "action": "advance-with-cover",
+          "cardText": "Otherwise: Move toward an elevated position or cover with long sightlines."
+        }
+      ],
+      "weights": {
+        "killPotential": 10,
+        "coverValue": 9,
+        "proximity": 1,
+        "threatLevel": 6,
+        "elevation": 10,
+        "selfPreservation": 8,
+        "aimValue": 8,
+        "dodgeValue": 4
+      }
+    },
+    "melee": {
+      "id": "melee",
+      "name": "Melee",
+      "cardTitle": "MELEE TACTICS",
+      "description": "Close combat specialist. Close distance aggressively, engage in melee.",
+      "priorityRules": [
+        {
+          "rank": 1,
+          "condition": "adjacent-to-enemy",
+          "action": "melee-charge",
+          "cardText": "If adjacent to an enemy: Attack! Target the lowest-health enemy."
+        },
+        {
+          "rank": 2,
+          "condition": "can-kill-target",
+          "action": "attack-kill-target",
+          "cardText": "If you can reach and defeat an enemy: Move adjacent, then Attack."
+        },
+        {
+          "rank": 3,
+          "condition": "enemy-in-range",
+          "action": "attack-best-target",
+          "cardText": "If you can reach an enemy: Move adjacent and Attack."
+        },
+        {
+          "rank": 4,
+          "condition": "should-dodge-for-defense",
+          "action": "dodge-and-hold",
+          "cardText": "If under fire and can't reach an enemy: Dodge and close distance."
+        },
+        {
+          "rank": 5,
+          "condition": "default",
+          "action": "move-toward-enemy",
+          "cardText": "Otherwise: Move as close as possible to the nearest enemy."
+        }
+      ],
+      "weights": {
+        "killPotential": 10,
+        "coverValue": 1,
+        "proximity": 10,
+        "threatLevel": 5,
+        "elevation": 1,
+        "selfPreservation": 2,
+        "aimValue": 0,
+        "dodgeValue": 3
+      }
+    },
+    "hero": {
+      "id": "hero",
+      "name": "Hero",
+      "cardTitle": "HERO TACTICS",
+      "description": "Powerful individual. Flexible tactics, high damage, pursue objectives.",
+      "priorityRules": [
+        {
+          "rank": 1,
+          "condition": "can-kill-target",
+          "action": "attack-kill-target",
+          "cardText": "If you can defeat an enemy: Attack that enemy."
+        },
+        {
+          "rank": 2,
+          "condition": "low-health-should-retreat",
+          "action": "retreat-to-cover",
+          "cardText": "If below half health and in the open: Retreat to nearest cover."
+        },
+        {
+          "rank": 3,
+          "condition": "can-interact-objective",
+          "action": "move-to-objective-interact",
+          "cardText": "If you can reach an uncompleted objective: Move adjacent and attempt skill check."
+        },
+        {
+          "rank": 4,
+          "condition": "enemy-in-range",
+          "action": "attack-best-target",
+          "cardText": "If an enemy is in range: Attack the highest-threat enemy."
+        },
+        {
+          "rank": 5,
+          "condition": "should-aim-before-attack",
+          "action": "aim-then-attack",
+          "cardText": "If enemies are tough and aim would help: Aim for bonus dice, then reposition."
+        },
+        {
+          "rank": 6,
+          "condition": "should-dodge-for-defense",
+          "action": "dodge-and-hold",
+          "cardText": "If wounded and under fire: Dodge and seek cover."
+        },
+        {
+          "rank": 7,
+          "condition": "can-attack-from-cover",
+          "action": "move-to-cover-then-attack",
+          "cardText": "If you can reach cover and attack: Move to cover, then Attack."
+        },
+        {
+          "rank": 8,
+          "condition": "default",
+          "action": "advance-with-cover",
+          "cardText": "Otherwise: Advance toward nearest objective or highest-threat enemy."
+        }
+      ],
+      "weights": {
+        "killPotential": 9,
+        "coverValue": 5,
+        "proximity": 6,
+        "threatLevel": 10,
+        "elevation": 3,
+        "selfPreservation": 7,
+        "objectiveValue": 8,
+        "aimValue": 5,
+        "dodgeValue": 5
+      }
+    }
+  },
+  "unitMapping": {
+    "stormtrooper": "trooper",
+    "rebel-trooper": "trooper",
+    "stormtrooper-elite": "elite",
+    "imperial-officer": "elite",
+    "probe-droid": "trooper",
+    "e-web-engineer": "sniper",
+    "inquisitor": "hero",
+    "jyn-odan": "hero",
+    "gaarkhan": "melee",
+    "fenn-signis": "hero",
+    "diala-passil": "melee",
+    "gamorrean-brute": "melee",
+    "nikto-gunner": "trooper",
+    "trandoshan-hunter": "elite",
+    "ig-assassin-droid": "sniper",
+    "syndicate-lieutenant": "elite",
+    "the-broker": "hero",
+    "conscript-militia": "trooper",
+    "defector-trooper": "trooper",
+    "war-droid-mk1": "trooper",
+    "shock-commando": "elite",
+    "rebel-turncoat": "elite",
+    "siege-droid-mk2": "sniper",
+    "warlord-drayen": "hero"
+  },
+  "defaultArchetype": "trooper"
+}

@@ -1,0 +1,174 @@
+[
+  {
+    "id": "korrga-vs-patrol",
+    "name": "Korrga vs Stormtrooper Patrol",
+    "description": "Tank survivability test: Wookiee heavy with A280 vs 3 Stormtroopers",
+    "arena": { "preset": "small", "cover": "light" },
+    "sideA": {
+      "label": "Imperial Patrol",
+      "figures": [
+        { "type": "npc", "npcId": "stormtrooper", "count": 3 }
+      ]
+    },
+    "sideB": {
+      "label": "Korrga Solo",
+      "figures": [
+        {
+          "type": "hero",
+          "heroId": "hero-korrga",
+          "spec": {
+            "name": "Korrga",
+            "species": "wookiee",
+            "career": "hired-gun",
+            "specialization": "mercenary",
+            "characteristicOverrides": { "brawn": 1 },
+            "skills": { "ranged-heavy": 2, "resilience": 1, "athletics": 1 },
+            "weapon": "a280",
+            "armor": "heavy-battle-armor"
+          }
+        }
+      ]
+    },
+    "simulation": { "count": 100, "seed": 42, "roundLimit": 20 }
+  },
+  {
+    "id": "vex-vs-elite",
+    "name": "Vex Dorin vs Stormtrooper Elite",
+    "description": "DPS race: mobile scoundrel vs veteran fighter",
+    "arena": { "preset": "small", "cover": "moderate" },
+    "sideA": {
+      "label": "Elite Trooper",
+      "figures": [
+        { "type": "npc", "npcId": "stormtrooper-elite", "count": 1 }
+      ]
+    },
+    "sideB": {
+      "label": "Vex Dorin",
+      "figures": [
+        {
+          "type": "hero",
+          "heroId": "hero-vex-dorin",
+          "spec": {
+            "name": "Vex Dorin",
+            "species": "human",
+            "career": "scoundrel",
+            "specialization": "smuggler",
+            "characteristicOverrides": { "agility": 1 },
+            "skills": { "ranged-light": 2, "cool": 1, "coordination": 1 },
+            "weapon": "dl-44",
+            "armor": "blast-vest"
+          }
+        }
+      ]
+    },
+    "simulation": { "count": 100, "seed": 42, "roundLimit": 15 }
+  },
+  {
+    "id": "party-vs-patrol",
+    "name": "Full Hero Party vs Imperial Patrol",
+    "description": "4 heroes vs 3 Stormtroopers + 1 Elite + 1 Officer (standard force)",
+    "arena": { "preset": "medium", "cover": "moderate" },
+    "sideA": {
+      "label": "Imperial Force",
+      "figures": [
+        { "type": "npc", "npcId": "stormtrooper", "count": 3 },
+        { "type": "npc", "npcId": "stormtrooper-elite", "count": 1 },
+        { "type": "npc", "npcId": "imperial-officer", "count": 1 }
+      ]
+    },
+    "sideB": {
+      "label": "Hero Party",
+      "figures": [
+        {
+          "type": "hero",
+          "heroId": "hero-korrga",
+          "spec": {
+            "name": "Korrga",
+            "species": "wookiee",
+            "career": "hired-gun",
+            "specialization": "mercenary",
+            "characteristicOverrides": { "brawn": 1 },
+            "skills": { "ranged-heavy": 2, "resilience": 1, "athletics": 1 },
+            "weapon": "a280",
+            "armor": "heavy-battle-armor"
+          }
+        },
+        {
+          "type": "hero",
+          "heroId": "hero-vex-dorin",
+          "spec": {
+            "name": "Vex Dorin",
+            "species": "human",
+            "career": "scoundrel",
+            "specialization": "smuggler",
+            "characteristicOverrides": { "agility": 1 },
+            "skills": { "ranged-light": 2, "cool": 1, "coordination": 1 },
+            "weapon": "dl-44",
+            "armor": "blast-vest"
+          }
+        },
+        {
+          "type": "hero",
+          "heroId": "hero-ashara-nev",
+          "spec": {
+            "name": "Ashara Nev",
+            "species": "twilek",
+            "career": "commander",
+            "specialization": "tactician",
+            "characteristicOverrides": { "presence": 1 },
+            "skills": { "ranged-light": 1, "leadership": 2, "cool": 1 },
+            "weapon": "westar-35",
+            "armor": "padded-armor"
+          }
+        },
+        {
+          "type": "hero",
+          "heroId": "hero-ssorku",
+          "spec": {
+            "name": "Ssorku",
+            "species": "trandoshan",
+            "career": "bounty-hunter",
+            "specialization": "assassin",
+            "characteristicOverrides": { "agility": 1 },
+            "skills": { "ranged-heavy": 2, "stealth": 1, "perception": 1 },
+            "weapon": "e-11",
+            "armor": "padded-armor"
+          }
+        }
+      ]
+    },
+    "simulation": { "count": 100, "seed": 42, "roundLimit": 20 }
+  },
+  {
+    "id": "weapon-compare-a280-vs-e11",
+    "name": "Weapon A/B: A280 vs E-11 (Korrga)",
+    "description": "Same hero, different weapon. A280 (dmg 9) vs E-11 (dmg 8) against 3 Stormtroopers.",
+    "arena": { "preset": "small", "cover": "light" },
+    "sideA": {
+      "label": "3x Stormtrooper",
+      "figures": [
+        { "type": "npc", "npcId": "stormtrooper", "count": 3 }
+      ]
+    },
+    "sideB": {
+      "label": "Korrga (E-11)",
+      "figures": [
+        {
+          "type": "hero",
+          "heroId": "hero-korrga",
+          "spec": {
+            "name": "Korrga",
+            "species": "wookiee",
+            "career": "hired-gun",
+            "specialization": "mercenary",
+            "characteristicOverrides": { "brawn": 1 },
+            "skills": { "ranged-heavy": 2, "resilience": 1, "athletics": 1 },
+            "weapon": "e-11",
+            "armor": "heavy-battle-armor"
+          }
+        }
+      ]
+    },
+    "simulation": { "count": 100, "seed": 42, "roundLimit": 20 }
+  }
+]

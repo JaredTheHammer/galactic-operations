@@ -1,0 +1,182 @@
+{
+  "weapons": [
+    {
+      "id": "blaster-rifle",
+      "name": "Blaster Rifle",
+      "type": "Ranged",
+      "attackDice": {
+        "blue": 1
+      },
+      "range": 6,
+      "surgeAbilities": [
+        {
+          "cost": 1,
+          "effect": "+1 damage",
+          "type": "damage"
+        }
+      ],
+      "keywords": []
+    },
+    {
+      "id": "blaster-pistol",
+      "name": "Blaster Pistol",
+      "type": "Ranged",
+      "attackDice": {
+        "green": 1
+      },
+      "range": 4,
+      "surgeAbilities": [
+        {
+          "cost": 1,
+          "effect": "+1 damage, +1 accuracy",
+          "type": "accuracy"
+        }
+      ],
+      "keywords": []
+    },
+    {
+      "id": "heavy-blaster",
+      "name": "Heavy Blaster",
+      "type": "Ranged",
+      "attackDice": {
+        "red": 1,
+        "green": 1
+      },
+      "range": 5,
+      "surgeAbilities": [
+        {
+          "cost": 1,
+          "effect": "+2 damage",
+          "type": "damage"
+        }
+      ],
+      "keywords": []
+    },
+    {
+      "id": "sniper-rifle",
+      "name": "Sniper Rifle",
+      "type": "Ranged",
+      "attackDice": {
+        "blue": 1,
+        "green": 1
+      },
+      "range": 8,
+      "surgeAbilities": [
+        {
+          "cost": 1,
+          "effect": "+2 accuracy, Pierce 1",
+          "type": "accuracy"
+        }
+      ],
+      "keywords": []
+    },
+    {
+      "id": "vibro-ax",
+      "name": "Vibro-Ax",
+      "type": "Melee",
+      "attackDice": {
+        "red": 1,
+        "green": 1
+      },
+      "range": 1,
+      "surgeAbilities": [
+        {
+          "cost": 1,
+          "effect": "+1 damage, Cleave 1",
+          "type": "damage"
+        }
+      ],
+      "keywords": []
+    },
+    {
+      "id": "lightsaber",
+      "name": "Lightsaber",
+      "type": "Melee",
+      "attackDice": {
+        "red": 1,
+        "blue": 1
+      },
+      "range": 1,
+      "surgeAbilities": [
+        {
+          "cost": 1,
+          "effect": "+2 damage, Pierce 2",
+          "type": "damage"
+        }
+      ],
+      "keywords": []
+    },
+    {
+      "id": "e-web-cannon",
+      "name": "E-Web Cannon",
+      "type": "Ranged",
+      "attackDice": {
+        "red": 1,
+        "green": 1,
+        "blue": 1
+      },
+      "range": 5,
+      "surgeAbilities": [
+        {
+          "cost": 1,
+          "effect": "+2 damage",
+          "type": "damage"
+        },
+        {
+          "cost": 1,
+          "effect": "Pierce 1",
+          "type": "pierce"
+        }
+      ],
+      "keywords": ["Heavy", "Fixed"]
+    },
+    {
+      "id": "bowcaster",
+      "name": "Bowcaster",
+      "type": "Ranged",
+      "attackDice": {
+        "red": 1,
+        "green": 1
+      },
+      "range": 5,
+      "surgeAbilities": [
+        {
+          "cost": 1,
+          "effect": "+1 damage, Pierce 1",
+          "type": "damage"
+        }
+      ],
+      "keywords": []
+    }
+  ],
+  "equipment": [
+    {
+      "id": "combat-armor",
+      "name": "Combat Armor",
+      "slot": "armor",
+      "effect": "Add +1 Black defense die to all defense rolls",
+      "cost": 150
+    },
+    {
+      "id": "medkit",
+      "name": "Medkit",
+      "slot": "utility",
+      "effect": "Rest action heals +2 additional health",
+      "cost": 75
+    },
+    {
+      "id": "targeting-computer",
+      "name": "Targeting Computer",
+      "slot": "mod",
+      "effect": "Reroll 1 attack die per attack",
+      "cost": 100
+    },
+    {
+      "id": "stealth-field",
+      "name": "Stealth Field",
+      "slot": "utility",
+      "effect": "Cannot be targeted beyond range 4 if in cover",
+      "cost": 125
+    }
+  ]
+}

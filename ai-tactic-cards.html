@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GALACTIC OPERATIONS — AI Tactic Cards</title>
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card-bg: #0d0d14;
+    --border: #1a1a2e;
+    --accent: #4a9eff;
+    --imperial-red: #ff4444;
+    --operative-green: #44ff44;
+    --gold: #ffd700;
+    --text: #c8cad0;
+    --text-bright: #e8eaef;
+    --text-dim: #6a6c78;
+    --card-w: 4in;
+    --card-h: 6in;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    padding: 24px;
+  }
+
+  /* ===== CONTROLS ===== */
+  .controls {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .controls h1 {
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    flex: 1;
+  }
+  .controls button {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: opacity 0.15s;
+  }
+  .controls button:hover { opacity: 0.85; }
+  .controls label {
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .controls input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+  }
+
+  /* ===== CARD GRID ===== */
+  .card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ===== CARD ===== */
+  .card {
+    width: var(--card-w);
+    height: var(--card-h);
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* corner decoration */
+  .card::before,
+  .card::after {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-color: var(--accent);
+    border-style: solid;
+    opacity: 0.35;
+  }
+  .card::before {
+    top: 6px; left: 6px;
+    border-width: 2px 0 0 2px;
+  }
+  .card::after {
+    bottom: 6px; right: 6px;
+    border-width: 0 2px 2px 0;
+  }
+
+  /* Header */
+  .card-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .card-header .archetype-icon {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 28px;
+    opacity: 0.7;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .card-desc {
+    font-size: 10.5px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    line-height: 1.4;
+    max-width: 85%;
+  }
+
+  /* Units strip */
+  .card-units {
+    padding: 6px 16px;
+    background: rgba(74, 158, 255, 0.06);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .card-units-label {
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-right: 4px;
+  }
+  .unit-tag {
+    font-size: 9.5px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .unit-tag.imperial {
+    background: rgba(255, 68, 68, 0.15);
+    color: var(--imperial-red);
+    border: 1px solid rgba(255, 68, 68, 0.25);
+  }
+  .unit-tag.operative {
+    background: rgba(68, 255, 68, 0.12);
+    color: var(--operative-green);
+    border: 1px solid rgba(68, 255, 68, 0.2);
+  }
+
+  /* Priority rules */
+  .card-rules {
+    flex: 1;
+    padding: 10px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .rules-header {
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 6px;
+    opacity: 0.8;
+  }
+  .rule {
+    display: flex;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: flex-start;
+  }
+  .rule:last-child { border-bottom: none; }
+  .rule-rank {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .rule-rank.r1 { background: var(--gold); color: #000; }
+  .rule-rank.r2 { background: rgba(255, 215, 0, 0.5); color: #000; }
+  .rule-rank.r3 { background: rgba(255, 215, 0, 0.25); color: var(--gold); }
+  .rule-rank.r4 { background: rgba(255, 255, 255, 0.08); color: var(--text-dim); }
+  .rule-rank.r5 { background: rgba(255, 255, 255, 0.05); color: var(--text-dim); }
+  .rule-text {
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--text-bright);
+  }
+  .rule-text .condition {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .rule-text .action {
+    color: var(--text);
+  }
+
+  /* Weights bar chart */
+  .card-weights {
+    padding: 8px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .weights-label {
+    font-size: 7.5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+  }
+  .weights-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3px 12px;
+  }
+  .weight-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .weight-name {
+    font-size: 7.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    width: 52px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .weight-bar-bg {
+    flex: 1;
+    height: 5px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .weight-bar {
+    height: 100%;
+    border-radius: 1px;
+    transition: width 0.3s;
+  }
+  .weight-bar.high { background: var(--gold); }
+  .weight-bar.mid { background: var(--accent); }
+  .weight-bar.low { background: var(--text-dim); }
+
+  /* Footer */
+  .card-footer {
+    padding: 8px 16px;
+    border-top: 1px solid var(--border);
+    background: rgba(255, 215, 0, 0.03);
+  }
+  .card-footer p {
+    font-size: 9px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .card-footer strong {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* ===== PRINT-FRIENDLY MODE ===== */
+  body.print-friendly .card {
+    background: #fff;
+    border-color: #333;
+    color: #222;
+  }
+  body.print-friendly .card::before,
+  body.print-friendly .card::after { border-color: #666; }
+  body.print-friendly .card-header { border-bottom-color: #ccc; }
+  body.print-friendly .card-title { color: #111; }
+  body.print-friendly .card-desc { color: #555; }
+  body.print-friendly .card-units { background: #f5f5f5; border-bottom-color: #ccc; }
+  body.print-friendly .card-units-label { color: #666; }
+  body.print-friendly .unit-tag.imperial {
+    background: #fee; color: #a00; border-color: #daa;
+  }
+  body.print-friendly .unit-tag.operative {
+    background: #efe; color: #060; border-color: #aca;
+  }
+  body.print-friendly .rules-header { color: #333; }
+  body.print-friendly .rule { border-bottom-color: #e8e8e8; }
+  body.print-friendly .rule-rank.r1 { background: #333; color: #fff; }
+  body.print-friendly .rule-rank.r2 { background: #666; color: #fff; }
+  body.print-friendly .rule-rank.r3 { background: #999; color: #fff; }
+  body.print-friendly .rule-rank.r4 { background: #ccc; color: #333; }
+  body.print-friendly .rule-rank.r5 { background: #ddd; color: #333; }
+  body.print-friendly .rule-text { color: #222; }
+  body.print-friendly .rule-text .condition { color: #005; font-weight: 800; }
+  body.print-friendly .rule-text .action { color: #222; }
+  body.print-friendly .card-weights { border-top-color: #ccc; }
+  body.print-friendly .weights-label { color: #666; }
+  body.print-friendly .weight-name { color: #555; }
+  body.print-friendly .weight-bar-bg { background: #e8e8e8; }
+  body.print-friendly .weight-bar.high { background: #333; }
+  body.print-friendly .weight-bar.mid { background: #777; }
+  body.print-friendly .weight-bar.low { background: #aaa; }
+  body.print-friendly .card-footer { background: #f8f8f5; border-top-color: #ccc; }
+  body.print-friendly .card-footer p { color: #444; }
+  body.print-friendly .card-footer strong { color: #111; }
+
+  /* ===== PRINT MEDIA ===== */
+  @media print {
+    body { background: #fff; padding: 0; }
+    .controls { display: none; }
+    .card-grid { gap: 0; }
+    .card {
+      page-break-after: always;
+      border-radius: 0;
+      margin: 0 auto;
+    }
+    .card:last-child { page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <h1>Galactic Operations — AI Tactic Cards</h1>
+  <label>
+    <input type="checkbox" id="printToggle" onchange="document.body.classList.toggle('print-friendly', this.checked)">
+    Print-friendly
+  </label>
+  <button onclick="window.print()">Print Cards</button>
+</div>
+
+<div class="card-grid" id="cardGrid"></div>
+
+<script>
+// ===== EMBEDDED DATA =====
+const profiles = {
+  "trooper": {
+    "id": "trooper", "name": "Trooper", "cardTitle": "TROOPER TACTICS",
+    "description": "Standard infantry. Advance in groups, use cover, focus fire on weakest targets.",
+    "icon": "\u2694\uFE0F",
+    "priorityRules": [
+      { "rank": 1, "cardText": "If you can defeat an enemy this attack: Attack that enemy." },
+      { "rank": 2, "cardText": "If you can move to cover AND attack: Move to cover, then Attack." },
+      { "rank": 3, "cardText": "If an enemy is in range: Attack the lowest-health enemy." },
+      { "rank": 4, "cardText": "Otherwise: Move toward nearest enemy, staying in cover when possible." }
+    ],
+    "weights": { "killPotential": 10, "coverValue": 7, "proximity": 5, "threatLevel": 3, "elevation": 2, "selfPreservation": 4 }
+  },
+  "elite": {
+    "id": "elite", "name": "Elite", "cardTitle": "ELITE TACTICS",
+    "description": "Veteran fighters. Prioritize high-value targets and use superior firepower.",
+    "icon": "\u2B50",
+    "priorityRules": [
+      { "rank": 1, "cardText": "If you can defeat an enemy: Attack that enemy." },
+      { "rank": 2, "cardText": "If an enemy is in range: Attack the highest-threat enemy." },
+      { "rank": 3, "cardText": "If you can reach cover and attack: Move to cover, then Attack." },
+      { "rank": 4, "cardText": "Otherwise: Advance toward the highest-threat enemy using cover." }
+    ],
+    "weights": { "killPotential": 8, "coverValue": 5, "proximity": 4, "threatLevel": 10, "elevation": 3, "selfPreservation": 5 }
+  },
+  "sniper": {
+    "id": "sniper", "name": "Sniper", "cardTitle": "SNIPER TACTICS",
+    "description": "Long-range specialist. Hold position, maximize range, seek elevated cover.",
+    "icon": "\uD83C\uDFAF",
+    "priorityRules": [
+      { "rank": 1, "cardText": "If you can defeat an enemy from here: Attack that enemy." },
+      { "rank": 2, "cardText": "If any enemy is in range: Attack the lowest-health enemy." },
+      { "rank": 3, "cardText": "If no targets but you have line of sight to open ground: Set Overwatch." },
+      { "rank": 4, "cardText": "Otherwise: Move toward an elevated position or cover with long sightlines." }
+    ],
+    "weights": { "killPotential": 10, "coverValue": 9, "proximity": 1, "threatLevel": 6, "elevation": 10, "selfPreservation": 8 }
+  },
+  "melee": {
+    "id": "melee", "name": "Melee", "cardTitle": "MELEE TACTICS",
+    "description": "Close combat specialist. Close distance aggressively, engage in melee.",
+    "icon": "\uD83D\uDDE1\uFE0F",
+    "priorityRules": [
+      { "rank": 1, "cardText": "If adjacent to an enemy: Attack! Target the lowest-health enemy." },
+      { "rank": 2, "cardText": "If you can reach and defeat an enemy: Move adjacent, then Attack." },
+      { "rank": 3, "cardText": "If you can reach an enemy: Move adjacent and Attack." },
+      { "rank": 4, "cardText": "Otherwise: Move as close as possible to the nearest enemy." }
+    ],
+    "weights": { "killPotential": 10, "coverValue": 1, "proximity": 10, "threatLevel": 5, "elevation": 1, "selfPreservation": 2 }
+  },
+  "hero": {
+    "id": "hero", "name": "Hero", "cardTitle": "HERO TACTICS",
+    "description": "Powerful individual. Flexible tactics, high damage, can take risks.",
+    "icon": "\uD83D\uDCAB",
+    "priorityRules": [
+      { "rank": 1, "cardText": "If you can defeat an enemy: Attack that enemy." },
+      { "rank": 2, "cardText": "If below half health and in the open: Retreat to nearest cover." },
+      { "rank": 3, "cardText": "If an enemy is in range: Attack the highest-threat enemy." },
+      { "rank": 4, "cardText": "If you can reach cover and attack: Move to cover, then Attack." },
+      { "rank": 5, "cardText": "Otherwise: Advance toward highest-threat enemy." }
+    ],
+    "weights": { "killPotential": 9, "coverValue": 5, "proximity": 6, "threatLevel": 10, "elevation": 3, "selfPreservation": 7 }
+  }
+};
+
+const unitMapping = {
+  "stormtrooper":       { name: "Stormtrooper",       side: "Imperial",   archetype: "trooper" },
+  "rebel-trooper":      { name: "Rebel Trooper",       side: "Operative",  archetype: "trooper" },
+  "probe-droid":        { name: "Probe Droid",         side: "Imperial",   archetype: "trooper" },
+  "stormtrooper-elite": { name: "Stormtrooper Elite",  side: "Imperial",   archetype: "elite"   },
+  "imperial-officer":   { name: "Imperial Officer",    side: "Imperial",   archetype: "elite"   },
+  "e-web-engineer":     { name: "E-Web Engineer",      side: "Imperial",   archetype: "sniper"  },
+  "jyn-odan":           { name: "Jyn Odan",            side: "Operative",  archetype: "hero"    },
+  "fenn-signis":        { name: "Fenn Signis",         side: "Operative",  archetype: "hero"    },
+  "gaarkhan":           { name: "Gaarkhan",            side: "Operative",  archetype: "melee"   },
+  "diala-passil":       { name: "Diala Passil",        side: "Operative",  archetype: "melee"   },
+};
+
+// ===== WEIGHT DISPLAY CONFIG =====
+const weightLabels = {
+  killPotential: "Kill",
+  coverValue: "Cover",
+  proximity: "Close",
+  threatLevel: "Threat",
+  elevation: "Elevate",
+  selfPreservation: "Survive",
+};
+
+// ===== PARSE CARD TEXT INTO CONDITION / ACTION =====
+function parseCardText(text) {
+  // Split on first colon after "If..." or "Otherwise"
+  const match = text.match(/^(If [^:]+|Otherwise):\s*(.+)$/);
+  if (match) {
+    return { condition: match[1] + ":", action: " " + match[2] };
+  }
+  return { condition: "", action: text };
+}
+
+// ===== RENDER =====
+function renderCards() {
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = '';
+
+  for (const [id, profile] of Object.entries(profiles)) {
+    // Find units for this archetype
+    const units = Object.values(unitMapping).filter(u => u.archetype === id);
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'card-header';
+    header.innerHTML = `
+      <div class="archetype-icon">${profile.icon || ''}</div>
+      <div class="card-title">${profile.cardTitle}</div>
+      <div class="card-desc">${profile.description}</div>
+    `;
+    card.appendChild(header);
+
+    // Units strip
+    const unitsEl = document.createElement('div');
+    unitsEl.className = 'card-units';
+    unitsEl.innerHTML = `<span class="card-units-label">UNITS</span>` +
+      units.map(u => `<span class="unit-tag ${u.side.toLowerCase()}">${u.name}</span>`).join('');
+    card.appendChild(unitsEl);
+
+    // Priority rules
+    const rulesEl = document.createElement('div');
+    rulesEl.className = 'card-rules';
+    rulesEl.innerHTML = `<div class="rules-header">Check these in order (first match wins)</div>`;
+
+    for (const rule of profile.priorityRules) {
+      const parsed = parseCardText(rule.cardText);
+      const ruleDiv = document.createElement('div');
+      ruleDiv.className = 'rule';
+      ruleDiv.innerHTML = `
+        <div class="rule-rank r${Math.min(rule.rank, 5)}">${rule.rank}</div>
+        <div class="rule-text"><span class="condition">${parsed.condition}</span><span class="action">${parsed.action}</span></div>
+      `;
+      rulesEl.appendChild(ruleDiv);
+    }
+    card.appendChild(rulesEl);
+
+    // Weights visualization
+    const weightsEl = document.createElement('div');
+    weightsEl.className = 'card-weights';
+    let weightsHTML = `<div class="weights-label">Scoring Weights (Digital AI)</div><div class="weights-grid">`;
+    for (const [key, label] of Object.entries(weightLabels)) {
+      const val = profile.weights[key] ?? 0;
+      const pct = (val / 10) * 100;
+      const cls = val >= 8 ? 'high' : val >= 4 ? 'mid' : 'low';
+      weightsHTML += `
+        <div class="weight-item">
+          <span class="weight-name">${label}</span>
+          <div class="weight-bar-bg"><div class="weight-bar ${cls}" style="width:${pct}%"></div></div>
+        </div>`;
+    }
+    weightsHTML += `</div>`;
+    weightsEl.innerHTML = weightsHTML;
+    card.appendChild(weightsEl);
+
+    // Footer
+    const footer = document.createElement('div');
+    footer.className = 'card-footer';
+    footer.innerHTML = `
+      <p><strong>REMEMBER:</strong> You get <strong>2 actions</strong> per activation. Broken morale = Move or Rest only.</p>
+    `;
+    card.appendChild(footer);
+
+    grid.appendChild(card);
+  }
+}
+
+renderCards();
+</script>
+
+</body>
+</html>

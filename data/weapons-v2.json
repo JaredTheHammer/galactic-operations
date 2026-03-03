@@ -1,0 +1,408 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Weapon definitions for v2. baseDamage is added to net successes. Melee weapons use Brawn + modifier (BR+N). Range bands: Engaged/Short/Medium/Long/Extreme."
+  },
+  "weapons": {
+    "fists": {
+      "id": "fists",
+      "name": "Fists",
+      "type": "Brawl",
+      "skill": "brawl",
+      "baseDamage": 0,
+      "damageAddBrawn": true,
+      "range": "Engaged",
+      "critical": 5,
+      "qualities": [
+        { "name": "Disorient", "value": 1 },
+        { "name": "Knockdown", "value": null }
+      ],
+      "encumbrance": 0,
+      "cost": 0
+    },
+    "vibro-knife": {
+      "id": "vibro-knife",
+      "name": "Vibro-knife",
+      "type": "Melee",
+      "skill": "melee",
+      "baseDamage": 1,
+      "damageAddBrawn": true,
+      "range": "Engaged",
+      "critical": 3,
+      "qualities": [
+        { "name": "Pierce", "value": 1 },
+        { "name": "Vicious", "value": 1 }
+      ],
+      "encumbrance": 1,
+      "cost": 250
+    },
+    "vibro-blade": {
+      "id": "vibro-blade",
+      "name": "Vibro-blade",
+      "type": "Melee",
+      "skill": "melee",
+      "baseDamage": 2,
+      "damageAddBrawn": true,
+      "range": "Engaged",
+      "critical": 2,
+      "qualities": [
+        { "name": "Defensive", "value": 1 },
+        { "name": "Pierce", "value": 2 }
+      ],
+      "encumbrance": 2,
+      "cost": 750
+    },
+    "gaffi-stick": {
+      "id": "gaffi-stick",
+      "name": "Gaffi Stick",
+      "type": "Melee",
+      "skill": "melee",
+      "baseDamage": 3,
+      "damageAddBrawn": true,
+      "range": "Engaged",
+      "critical": 3,
+      "qualities": [
+        { "name": "Disorient", "value": 2 }
+      ],
+      "encumbrance": 3,
+      "cost": 100
+    },
+    "lightsaber": {
+      "id": "lightsaber",
+      "name": "Lightsaber",
+      "type": "Melee",
+      "skill": "melee",
+      "baseDamage": 6,
+      "damageAddBrawn": true,
+      "range": "Engaged",
+      "critical": 1,
+      "qualities": [
+        { "name": "Breach", "value": 1 },
+        { "name": "Sunder", "value": null },
+        { "name": "Vicious", "value": 2 }
+      ],
+      "encumbrance": 1,
+      "cost": 0,
+      "restricted": true,
+      "notes": "Requires 'Ignite Lightsaber' talent to use. Without talent: BR+1, Crit 5."
+    },
+    "dl-44": {
+      "id": "dl-44",
+      "name": "DL-44 Heavy Blaster Pistol",
+      "type": "Ranged (Light)",
+      "skill": "ranged-light",
+      "baseDamage": 7,
+      "damageAddBrawn": false,
+      "range": "Medium",
+      "critical": 3,
+      "qualities": [
+        { "name": "Stun setting", "value": null }
+      ],
+      "encumbrance": 1,
+      "cost": 750
+    },
+    "westar-35": {
+      "id": "westar-35",
+      "name": "Westar-35 Blaster Pistol",
+      "type": "Ranged (Light)",
+      "skill": "ranged-light",
+      "baseDamage": 6,
+      "damageAddBrawn": false,
+      "range": "Medium",
+      "critical": 3,
+      "qualities": [
+        { "name": "Accurate", "value": 1 }
+      ],
+      "encumbrance": 1,
+      "cost": 600
+    },
+    "e-11": {
+      "id": "e-11",
+      "name": "E-11 Blaster Rifle",
+      "type": "Ranged (Heavy)",
+      "skill": "ranged-heavy",
+      "baseDamage": 8,
+      "damageAddBrawn": false,
+      "range": "Long",
+      "critical": 3,
+      "qualities": [
+        { "name": "Stun setting", "value": null }
+      ],
+      "encumbrance": 3,
+      "cost": 900
+    },
+    "a280": {
+      "id": "a280",
+      "name": "A280 Blaster Rifle",
+      "type": "Ranged (Heavy)",
+      "skill": "ranged-heavy",
+      "baseDamage": 9,
+      "damageAddBrawn": false,
+      "range": "Long",
+      "critical": 3,
+      "qualities": [],
+      "encumbrance": 3,
+      "cost": 1000
+    },
+    "scattergun": {
+      "id": "scattergun",
+      "name": "Scattergun",
+      "type": "Ranged (Heavy)",
+      "skill": "ranged-heavy",
+      "baseDamage": 8,
+      "damageAddBrawn": false,
+      "range": "Short",
+      "critical": 4,
+      "qualities": [
+        { "name": "Blast", "value": 5 },
+        { "name": "Knockdown", "value": null }
+      ],
+      "encumbrance": 3,
+      "cost": 750
+    },
+    "z6-rotary": {
+      "id": "z6-rotary",
+      "name": "Z-6 Rotary Cannon",
+      "type": "Gunnery",
+      "skill": "gunnery",
+      "baseDamage": 10,
+      "damageAddBrawn": false,
+      "range": "Long",
+      "critical": 3,
+      "qualities": [
+        { "name": "Auto-fire", "value": null },
+        { "name": "Cumbersome", "value": 3 }
+      ],
+      "encumbrance": 6,
+      "cost": 2500
+    },
+    "thermal-detonator": {
+      "id": "thermal-detonator",
+      "name": "Thermal Detonator",
+      "type": "Ranged (Light)",
+      "skill": "ranged-light",
+      "baseDamage": 10,
+      "damageAddBrawn": false,
+      "range": "Short",
+      "critical": 2,
+      "qualities": [
+        { "name": "Blast", "value": 8 },
+        { "name": "Limited Ammo", "value": 1 }
+      ],
+      "encumbrance": 1,
+      "cost": 2000
+    },
+    "flame-projector": {
+      "id": "flame-projector",
+      "name": "Flame Projector",
+      "type": "Ranged (Heavy)",
+      "skill": "ranged-heavy",
+      "baseDamage": 6,
+      "damageAddBrawn": false,
+      "range": "Short",
+      "critical": 3,
+      "qualities": [
+        { "name": "Burn", "value": 2 },
+        { "name": "Blast", "value": 4 }
+      ],
+      "encumbrance": 3,
+      "cost": 1200
+    },
+    "holdout-blaster": {
+      "id": "holdout-blaster",
+      "name": "Holdout Blaster",
+      "type": "Ranged (Light)",
+      "skill": "ranged-light",
+      "baseDamage": 5,
+      "damageAddBrawn": false,
+      "range": "Short",
+      "critical": 4,
+      "qualities": [{ "name": "Stun setting", "value": null }],
+      "encumbrance": 1,
+      "cost": 200
+    },
+    "heavy-blaster-pistol": {
+      "id": "heavy-blaster-pistol",
+      "name": "Heavy Blaster Pistol",
+      "type": "Ranged (Light)",
+      "skill": "ranged-light",
+      "baseDamage": 7,
+      "damageAddBrawn": false,
+      "range": "Medium",
+      "critical": 3,
+      "qualities": [
+        { "name": "Stun setting", "value": null }
+      ],
+      "encumbrance": 2,
+      "cost": 700
+    },
+    "scatter-blaster": {
+      "id": "scatter-blaster",
+      "name": "Scatter Blaster",
+      "type": "Ranged (Heavy)",
+      "skill": "ranged-heavy",
+      "baseDamage": 8,
+      "damageAddBrawn": false,
+      "range": "Short",
+      "critical": 4,
+      "qualities": [
+        { "name": "Blast", "value": 4 },
+        { "name": "Knockdown", "value": null }
+      ],
+      "encumbrance": 3,
+      "cost": 800
+    },
+    "dual-blaster-config": {
+      "id": "dual-blaster-config",
+      "name": "Dual Blaster Configuration",
+      "type": "Ranged (Heavy)",
+      "skill": "ranged-heavy",
+      "baseDamage": 7,
+      "damageAddBrawn": false,
+      "range": "Medium",
+      "critical": 3,
+      "qualities": [
+        { "name": "Linked", "value": 1 },
+        { "name": "Accurate", "value": 1 }
+      ],
+      "encumbrance": 4,
+      "cost": 0,
+      "restricted": true,
+      "notes": "Integrated droid weapon system. Cannot be looted."
+    },
+    "claws": {
+      "id": "claws",
+      "name": "Trandoshan Claws",
+      "type": "Brawl",
+      "skill": "brawl",
+      "baseDamage": 1,
+      "damageAddBrawn": true,
+      "range": "Engaged",
+      "critical": 3,
+      "qualities": [
+        { "name": "Vicious", "value": 1 }
+      ],
+      "encumbrance": 0,
+      "cost": 0
+    },
+    "disruptor-rifle": {
+      "id": "disruptor-rifle",
+      "name": "Disruptor Rifle",
+      "type": "Ranged (Heavy)",
+      "skill": "ranged-heavy",
+      "baseDamage": 10,
+      "damageAddBrawn": false,
+      "range": "Long",
+      "critical": 2,
+      "qualities": [
+        { "name": "Vicious", "value": 4 }
+      ],
+      "encumbrance": 4,
+      "cost": 5000,
+      "restricted": true,
+      "notes": "Illegal in most systems. Devastatingly effective against both armor and flesh."
+    },
+    "wrist-rockets": {
+      "id": "wrist-rockets",
+      "name": "Wrist Rockets",
+      "type": "Ranged (Light)",
+      "skill": "ranged-light",
+      "baseDamage": 8,
+      "damageAddBrawn": false,
+      "range": "Medium",
+      "critical": 3,
+      "qualities": [
+        { "name": "Blast", "value": 5 },
+        { "name": "Limited Ammo", "value": 3 }
+      ],
+      "encumbrance": 2,
+      "cost": 1500
+    },
+    "disruptor-pistol": {
+      "id": "disruptor-pistol",
+      "name": "Disruptor Pistol",
+      "type": "Ranged (Light)",
+      "skill": "ranged-light",
+      "baseDamage": 8,
+      "damageAddBrawn": false,
+      "range": "Medium",
+      "critical": 2,
+      "qualities": [{ "name": "Vicious", "value": 3 }],
+      "encumbrance": 1,
+      "cost": 1500,
+      "restricted": true,
+      "notes": "Illegal disruptor technology. Devastating against organic targets."
+    },
+    "trandoshan-scattergun": {
+      "id": "trandoshan-scattergun",
+      "name": "Trandoshan Scattergun",
+      "type": "Ranged (Heavy)",
+      "skill": "ranged-heavy",
+      "baseDamage": 9,
+      "damageAddBrawn": false,
+      "range": "Short",
+      "critical": 3,
+      "qualities": [{ "name": "Blast", "value": 4 }],
+      "encumbrance": 4,
+      "cost": 900
+    },
+    "vibro-axe": {
+      "id": "vibro-axe",
+      "name": "Vibro-axe",
+      "type": "Melee",
+      "skill": "melee",
+      "baseDamage": 3,
+      "damageAddBrawn": true,
+      "range": "Engaged",
+      "critical": 3,
+      "qualities": [
+        { "name": "Knockdown", "value": null },
+        { "name": "Vicious", "value": 1 }
+      ],
+      "encumbrance": 3,
+      "cost": 400
+    },
+    "blaster-carbine": {
+      "id": "blaster-carbine",
+      "name": "Blaster Carbine",
+      "type": "Ranged (Heavy)",
+      "skill": "ranged-heavy",
+      "baseDamage": 7,
+      "damageAddBrawn": false,
+      "range": "Medium",
+      "critical": 4,
+      "qualities": [{ "name": "Stun setting", "value": null }],
+      "encumbrance": 3,
+      "cost": 500
+    },
+    "dual-blaster-pistols": {
+      "id": "dual-blaster-pistols",
+      "name": "Dual Blaster Pistols",
+      "type": "Ranged (Light)",
+      "skill": "ranged-light",
+      "baseDamage": 7,
+      "damageAddBrawn": false,
+      "range": "Medium",
+      "critical": 3,
+      "qualities": [{ "name": "Linked", "value": 1 }],
+      "encumbrance": 2,
+      "cost": 800
+    },
+    "frag-grenade": {
+      "id": "frag-grenade",
+      "name": "Frag Grenade",
+      "type": "Ranged (Light)",
+      "skill": "ranged-light",
+      "baseDamage": 8,
+      "damageAddBrawn": false,
+      "range": "Short",
+      "critical": 4,
+      "qualities": [
+        { "name": "Blast", "value": 6 },
+        { "name": "Limited Ammo", "value": 1 }
+      ],
+      "encumbrance": 1,
+      "cost": 100
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Armor definitions. soak adds to Brawn + Resilience for total Soak. defense adds upgrades to defense pool (purple -> red)."
+  },
+  "armor": {
+    "none": {
+      "id": "none",
+      "name": "Clothing",
+      "soak": 0,
+      "defense": 0,
+      "encumbrance": 0,
+      "cost": 0,
+      "keywords": []
+    },
+    "blast-vest": {
+      "id": "blast-vest",
+      "name": "Blast Vest",
+      "soak": 1,
+      "defense": 0,
+      "encumbrance": 1,
+      "cost": 250,
+      "keywords": ["Concealable"]
+    },
+    "padded-armor": {
+      "id": "padded-armor",
+      "name": "Padded Armor",
+      "soak": 2,
+      "defense": 0,
+      "encumbrance": 2,
+      "cost": 500,
+      "keywords": []
+    },
+    "stormtrooper-plastoid": {
+      "id": "stormtrooper-plastoid",
+      "name": "Stormtrooper Plastoid",
+      "soak": 2,
+      "defense": 1,
+      "encumbrance": 3,
+      "cost": 0,
+      "keywords": ["Imperial Issue"]
+    },
+    "heavy-battle-armor": {
+      "id": "heavy-battle-armor",
+      "name": "Heavy Battle Armor",
+      "soak": 2,
+      "defense": 1,
+      "encumbrance": 4,
+      "cost": 3000,
+      "keywords": ["Cumbersome 3"]
+    },
+    "beskar-plating": {
+      "id": "beskar-plating",
+      "name": "Beskar Plating",
+      "soak": 3,
+      "defense": 2,
+      "encumbrance": 3,
+      "cost": 0,
+      "keywords": ["Cortosis"]
+    },
+    "dark-trooper-alloy": {
+      "id": "dark-trooper-alloy",
+      "name": "Dark Trooper Alloy",
+      "soak": 4,
+      "defense": 1,
+      "encumbrance": 5,
+      "cost": 0,
+      "keywords": ["Droid-only"]
+    },
+    "durasteel-plating": {
+      "id": "durasteel-plating",
+      "name": "Durasteel Plating",
+      "soak": 2,
+      "defense": 0,
+      "encumbrance": 3,
+      "cost": 750,
+      "keywords": ["Bounty Hunter"]
+    },
+    "hunter-mesh": {
+      "id": "hunter-mesh",
+      "name": "Hunter Mesh Armor",
+      "soak": 1,
+      "defense": 1,
+      "encumbrance": 2,
+      "cost": 500,
+      "keywords": ["Concealable", "Bounty Hunter"]
+    },
+    "syndicate-leathers": {
+      "id": "syndicate-leathers",
+      "name": "Syndicate Leathers",
+      "soak": 1,
+      "defense": 0,
+      "encumbrance": 1,
+      "cost": 150,
+      "keywords": ["Concealable", "Criminal"]
+    }
+  }
+}

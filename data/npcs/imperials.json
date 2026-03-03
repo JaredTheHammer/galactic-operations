@@ -1,0 +1,185 @@
+{
+  "meta": {
+    "version": "2.4",
+    "description": "Imperial NPC stat blocks. Precomputed pools -- no characteristic/skill derivation. Strain is null for Minions, a number for Rivals/Nemeses. threatCost is used by Imperial AI for reinforcement spending. courage overrides tier defaults (M=1, R=2, N=3). mechanicalKeywords hook into engine systems."
+  },
+  "npcs": {
+    "stormtrooper": {
+      "id": "stormtrooper",
+      "name": "Stormtrooper",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "e-11",
+          "name": "E-11 Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Imperial", "Trooper"],
+      "mechanicalKeywords": [],
+      "abilities": [],
+      "threatCost": 2
+    },
+    "stormtrooper-elite": {
+      "id": "stormtrooper-elite",
+      "name": "Stormtrooper Elite",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 8,
+      "strainThreshold": 6,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "e-11",
+          "name": "E-11 Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Trooper", "Elite"],
+      "mechanicalKeywords": [{"name": "Disciplined", "value": 1}],
+      "abilities": ["Tactical Direction: Other Imperial Minions within Short range add 1 Ability die to attacks."],
+      "threatCost": 4
+    },
+    "imperial-officer": {
+      "id": "imperial-officer",
+      "name": "Imperial Officer",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": 8,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "dl-44",
+          "name": "DL-44 Heavy Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Officer", "Leader"],
+      "mechanicalKeywords": [{"name": "Disciplined", "value": 1}],
+      "courage": 3,
+      "abilities": [
+        "Rally the Troops: As an Action, all Imperial allies within Short range recover 2 strain.",
+        "Commanding Presence: Imperial Minions within Short range do not flee due to morale."
+      ],
+      "threatCost": 3
+    },
+    "probe-droid": {
+      "id": "probe-droid",
+      "name": "Probe Droid",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "probe-blaster",
+          "name": "Integrated Blaster",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Imperial", "Droid"],
+      "mechanicalKeywords": [],
+      "abilities": ["Self-Destruct: When defeated, deal 5 damage to all figures within Engaged range (Blast 5)."],
+      "threatCost": 3
+    },
+    "e-web-engineer": {
+      "id": "e-web-engineer",
+      "name": "E-Web Engineer",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 4,
+      "soak": 3,
+      "speed": 2,
+      "weapons": [
+        {
+          "weaponId": "e-web",
+          "name": "E-Web Heavy Repeating Blaster",
+          "baseDamage": 11,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            { "name": "Auto-fire", "value": null },
+            { "name": "Cumbersome", "value": 4 }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Imperial", "Heavy Weapons", "Emplacement"],
+      "mechanicalKeywords": [{"name": "Armor", "value": 1}],
+      "abilities": ["Emplaced: Cannot take Move maneuvers. Must be set up at deployment."],
+      "threatCost": 5
+    },
+    "inquisitor": {
+      "id": "inquisitor",
+      "name": "Inquisitor",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 3 },
+      "defensePool": { "difficulty": 1, "challenge": 2 },
+      "woundThreshold": 16,
+      "strainThreshold": 14,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "lightsaber",
+          "name": "Inquisitor Lightsaber",
+          "baseDamage": 9,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Sunder", "value": null },
+            { "name": "Vicious", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Imperial", "Force-sensitive", "Dark Side", "Boss"],
+      "mechanicalKeywords": [{"name": "Dauntless"}],
+      "abilities": [
+        "Force Push: As an Action, make a Discipline check vs target's Discipline. On success, push target 2 tiles and deal 4 strain.",
+        "Parry: When hit by melee, suffer 3 strain to reduce damage by 5.",
+        "Adversary 2: Upgrade difficulty of all combat checks against this target by 2."
+      ],
+      "threatCost": 9
+    }
+  }
+}

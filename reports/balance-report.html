@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galactic Operations - Balance Report</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.6/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0f;
+    color: #c8cad0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    padding: 32px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #4a9eff;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 32px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #111118;
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .card h2 {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #4a9eff;
+    margin-bottom: 16px;
+  }
+  .card canvas { max-height: 260px; }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1a2e;
+  }
+  .stat-row:last-child { border: none; }
+  .stat-label { color: #888; }
+  .stat-value { font-weight: 700; }
+  .imp { color: #ff4444; }
+  .op { color: #44ff44; }
+  .draw { color: #ffd700; }
+  .full-width { grid-column: 1 / -1; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: #4a9eff; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 6px 8px; border-bottom: 1px solid #1a1a2e; }
+  td { padding: 6px 8px; border-bottom: 1px solid #0d0d14; }
+</style>
+</head>
+<body>
+<h1>Galactic Operations - Balance Report</h1>
+<div class="subtitle">50 games | base seed 42 | 2026-03-02</div>
+
+<div class="grid">
+  <!-- Win Rates -->
+  <div class="card">
+    <h2>Win Rates</h2>
+    <canvas id="winChart"></canvas>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="card">
+    <h2>Summary</h2>
+    <div class="stat-row"><span class="stat-label">Games</span><span class="stat-value">50</span></div>
+    <div class="stat-row"><span class="stat-label">Imperial Wins</span><span class="stat-value imp">28 (56.0%)</span></div>
+    <div class="stat-row"><span class="stat-label">Operative Wins</span><span class="stat-value op">22 (44.0%)</span></div>
+    <div class="stat-row"><span class="stat-label">Draws</span><span class="stat-value draw">0 (0.0%)</span></div>
+    <div class="stat-row"><span class="stat-label">Avg Rounds</span><span class="stat-value">10.5</span></div>
+    <div class="stat-row"><span class="stat-label">Avg Imp Damage</span><span class="stat-value imp">46.9</span></div>
+    <div class="stat-row"><span class="stat-label">Avg Op Damage</span><span class="stat-value op">48.4</span></div>
+  </div>
+
+  <!-- Rounds Distribution -->
+  <div class="card">
+    <h2>Rounds Distribution</h2>
+    <canvas id="roundsChart"></canvas>
+  </div>
+
+  <!-- Morale Trajectory -->
+  <div class="card">
+    <h2>Average Morale Trajectory</h2>
+    <canvas id="moraleChart"></canvas>
+  </div>
+
+  <!-- Unit Performance -->
+  <div class="card full-width">
+    <h2>Unit Performance</h2>
+    <table>
+      <tr><th>Unit</th><th>Appearances</th><th>Survival Rate</th><th>Avg Damage Taken</th></tr>
+      
+      <tr>
+        <td>Stormtrooper</td>
+        <td>150</td>
+        <td>23%</td>
+        <td>3.1</td>
+      </tr>
+      <tr>
+        <td>Stormtrooper Elite</td>
+        <td>50</td>
+        <td>88%</td>
+        <td>1.2</td>
+      </tr>
+      <tr>
+        <td>Imperial Officer</td>
+        <td>50</td>
+        <td>16%</td>
+        <td>4.2</td>
+      </tr>
+      <tr>
+        <td>Korrga</td>
+        <td>50</td>
+        <td>82%</td>
+        <td>7.1</td>
+      </tr>
+      <tr>
+        <td>Vex Dorin</td>
+        <td>50</td>
+        <td>40%</td>
+        <td>8.4</td>
+      </tr>
+      <tr>
+        <td>Ashara Nev</td>
+        <td>50</td>
+        <td>48%</td>
+        <td>6.0</td>
+      </tr>
+      <tr>
+        <td>Ssorku</td>
+        <td>50</td>
+        <td>82%</td>
+        <td>4.7</td>
+      </tr>
+      <tr>
+        <td>Syndicate Thug</td>
+        <td>516</td>
+        <td>19%</td>
+        <td>3.2</td>
+      </tr>
+      <tr>
+        <td>IG-Series Assassin Droid</td>
+        <td>160</td>
+        <td>99%</td>
+        <td>0.1</td>
+      </tr>
+      <tr>
+        <td>Syndicate Crime Lord</td>
+        <td>30</td>
+        <td>100%</td>
+        <td>0.0</td>
+      </tr>
+      <tr>
+        <td>Syndicate Enforcer</td>
+        <td>1</td>
+        <td>100%</td>
+        <td>0.0</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Unit Survival Chart -->
+  <div class="card full-width">
+    <h2>Unit Survival vs Damage Taken</h2>
+    <canvas id="unitChart"></canvas>
+  </div>
+</div>
+
+<script>
+  Chart.defaults.color = '#888';
+  Chart.defaults.borderColor = '#1a1a2e';
+
+  // Win Rate Pie
+  new Chart(document.getElementById('winChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Imperial', 'Operative', 'Draw'],
+      datasets: [{
+        data: [28, 22, 0],
+        backgroundColor: ['#ff4444', '#44ff44', '#ffd700'],
+        borderWidth: 0,
+      }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+  });
+
+  // Rounds Distribution
+  new Chart(document.getElementById('roundsChart'), {
+    type: 'bar',
+    data: {
+      labels: ["2","3","4","5","6","7","8","11","12","13","14","15","16"],
+      datasets: [{
+        label: 'Games',
+        data: [3,3,4,5,1,2,2,1,2,7,3,5,12],
+        backgroundColor: '#4a9eff',
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'Rounds Played', color: '#666' } },
+        y: { title: { display: true, text: 'Game Count', color: '#666' }, beginAtZero: true }
+      }
+    }
+  });
+
+  // Morale Trajectory
+  new Chart(document.getElementById('moraleChart'), {
+    type: 'line',
+    data: {
+      labels: ["R0","R1","R2","R3","R4","R5","R6","R7","R8","R9","R10","R11","R12","R13","R14","R15"],
+      datasets: [
+        {
+          label: 'Imperial',
+          data: [12,11.6,9.7,8,6.2,4.5,3.1,1.9,1.2,0.9,0.6,0.3,0.2,0.2,0.2,0.2],
+          borderColor: '#ff4444',
+          backgroundColor: 'rgba(255,68,68,0.1)',
+          tension: 0.3,
+          fill: true,
+        },
+        {
+          label: 'Operative',
+          data: [12,12,11.9,11.5,11.2,10.6,9.6,8.7,7.4,7.1,6.8,6.1,5.9,5.8,5.5,5.3],
+          borderColor: '#44ff44',
+          backgroundColor: 'rgba(68,255,68,0.1)',
+          tension: 0.3,
+          fill: true,
+        }
+      ]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } },
+      scales: {
+        y: { title: { display: true, text: 'Morale', color: '#666' }, min: 0 }
+      }
+    }
+  });
+
+  // Unit Performance
+  new Chart(document.getElementById('unitChart'), {
+    type: 'bar',
+    data: {
+      labels: ["Stormtrooper","Stormtrooper Elite","Imperial Officer","Korrga","Vex Dorin","Ashara Nev","Ssorku","Syndicate Thug","IG-Series Assassin Droid","Syndicate Crime Lord","Syndicate Enforcer"],
+      datasets: [
+        {
+          label: 'Survival Rate (%)',
+          data: [23.3,88,16,82,40,48,82,19.2,99.4,100,100],
+          backgroundColor: '#44ff44',
+          borderRadius: 3,
+        },
+        {
+          label: 'Avg Damage Taken',
+          data: [3.1,1.2,4.2,7.1,8.4,6,4.7,3.2,0.1,0,0],
+          backgroundColor: '#ff4444',
+          borderRadius: 3,
+        }
+      ]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1047 @@
+{
+  "id": "barracks",
+  "name": "Barracks",
+  "description": "Four rooms with central hallway. Room-to-room fighting.",
+  "width": 12,
+  "height": 12,
+  "tiles": [
+    [
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ],
+    [
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "LightCover",
+        "elevation": 0,
+        "cover": "Light",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "LightCover",
+        "elevation": 0,
+        "cover": "Light",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ],
+    [
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "HeavyCover",
+        "elevation": 0,
+        "cover": "Heavy",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Door",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Door",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "HeavyCover",
+        "elevation": 0,
+        "cover": "Heavy",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ],
+    [
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "LightCover",
+        "elevation": 0,
+        "cover": "Light",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ],
+    [
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Door",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Door",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ],
+    [
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "LightCover",
+        "elevation": 0,
+        "cover": "Light",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ],
+    [
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "LightCover",
+        "elevation": 0,
+        "cover": "Light",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ],
+    [
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Door",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Door",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ],
+    [
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "LightCover",
+        "elevation": 0,
+        "cover": "Light",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ],
+    [
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "LightCover",
+        "elevation": 0,
+        "cover": "Light",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Door",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Door",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "LightCover",
+        "elevation": 0,
+        "cover": "Light",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ],
+    [
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "HeavyCover",
+        "elevation": 0,
+        "cover": "Heavy",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "HeavyCover",
+        "elevation": 0,
+        "cover": "Heavy",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ],
+    [
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Wall",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      },
+      {
+        "terrain": "Open",
+        "elevation": 0,
+        "cover": "None",
+        "occupied": null,
+        "objective": null
+      }
+    ]
+  ],
+  "edges": {
+    "north": "open",
+    "south": "open",
+    "east": "open",
+    "west": "open"
+  }
+}

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "open-ground",
+    "name": "Open Ground",
+    "description": "Scattered cover across open terrain. Favors ranged combat.",
+    "edges": {
+      "north": "open",
+      "south": "open",
+      "east": "open",
+      "west": "open"
+    }
+  },
+  {
+    "id": "corridor-complex",
+    "name": "Corridor Complex",
+    "description": "L-shaped hallways with chokepoints and doors.",
+    "edges": {
+      "north": "mixed",
+      "south": "mixed",
+      "east": "open",
+      "west": "open"
+    }
+  },
+  {
+    "id": "command-center",
+    "name": "Command Center",
+    "description": "Fortified room with consoles. Strong defensive position.",
+    "edges": {
+      "north": "open",
+      "south": "open",
+      "east": "open",
+      "west": "open"
+    }
+  },
+  {
+    "id": "storage-bay",
+    "name": "Storage Bay",
+    "description": "Crate-filled warehouse with lanes and flanking routes.",
+    "edges": {
+      "north": "open",
+      "south": "open",
+      "east": "open",
+      "west": "open"
+    }
+  },
+  {
+    "id": "landing-pad",
+    "name": "Landing Pad",
+    "description": "Open pad with walled perimeter. Dangerous crossing, strong sniper positions.",
+    "edges": {
+      "north": "open",
+      "south": "open",
+      "east": "open",
+      "west": "open"
+    }
+  },
+  {
+    "id": "barracks",
+    "name": "Barracks",
+    "description": "Four rooms with central hallway. Room-to-room fighting.",
+    "edges": {
+      "north": "open",
+      "south": "open",
+      "east": "open",
+      "west": "open"
+    }
+  }
+]

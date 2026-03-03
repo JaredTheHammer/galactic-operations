@@ -1,0 +1,318 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Smuggler specialization (Scoundrel career). 30 talent cards: 10 Tier 1, 8 Tier 2, 6 Tier 3, 4 Tier 4, 2 Tier 5. Players draft 15 into a pyramid (5/4/3/2/1)."
+  },
+  "specialization": {
+    "id": "smuggler",
+    "name": "Smuggler",
+    "career": "scoundrel",
+    "description": "A fast-talking, quick-shooting rogue who relies on luck, charm, and a fast blaster. The Smuggler excels at ranged-light combat, evasion, and getting out of tight spots.",
+    "bonusCareerSkills": ["ranged-light", "cool", "deception", "coordination"],
+    "capstoneCharacteristics": ["agility", "cunning"]
+  },
+  "talents": [
+    {
+      "id": "smug-t1-01",
+      "name": "Quick Strike",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 Ability die per rank to combat checks against targets that have not yet acted this encounter.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "condition": "target_not_acted" }
+    },
+    {
+      "id": "smug-t1-02",
+      "name": "Grit",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Strain Threshold by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "strainThreshold", "value": 1, "perRank": true }
+    },
+    {
+      "id": "smug-t1-03",
+      "name": "Rapid Reaction",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Suffer 1 strain per rank to add successes equal to ranks to Initiative checks.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "condition": "initiative_check" }
+    },
+    {
+      "id": "smug-t1-04",
+      "name": "Quick Draw",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Draw or holster a weapon as an incidental instead of a maneuver.",
+      "mechanicalEffect": { "type": "free_maneuver", "action": "draw_weapon" }
+    },
+    {
+      "id": "smug-t1-05",
+      "name": "Convincing Demeanor",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 setback die per rank from Deception and Skulduggery checks.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["deception", "skulduggery"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "smug-t1-06",
+      "name": "Toughened",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Wound Threshold by 2 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "woundThreshold", "value": 2, "perRank": true }
+    },
+    {
+      "id": "smug-t1-07",
+      "name": "Black Market Contacts",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Reduce rarity of equipment sought on the black market by 1 per rank (minimum 0).",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "equipmentRarity", "value": -1, "perRank": true }
+    },
+    {
+      "id": "smug-t1-08",
+      "name": "Second Wind",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Once per encounter per rank, recover 2 strain as an incidental.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 2, "perEncounter": true, "perRank": true }
+    },
+    {
+      "id": "smug-t1-09",
+      "name": "Dodge",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "When targeted by a combat check, suffer strain up to ranks in Dodge to upgrade the difficulty of that check by an equal amount.",
+      "mechanicalEffect": { "type": "upgrade_defense", "attackType": "all", "value": 1, "perRank": true }
+    },
+    {
+      "id": "smug-t1-10",
+      "name": "Shortcut",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 setback die per rank from Athletics and Coordination checks when navigating difficult terrain.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["athletics", "coordination"], "value": 1, "perRank": true }
+    },
+    {
+      "id": "smug-t2-01",
+      "name": "Side Step",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, upgrade the difficulty of ranged attacks targeting you by 1 per rank until the start of your next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "attackType": "ranged", "value": 1, "perRank": true, "duration": "until_next_turn" }
+    },
+    {
+      "id": "smug-t2-02",
+      "name": "Point Blank",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to ranged attacks at Short range or closer.",
+      "mechanicalEffect": { "type": "bonus_damage", "condition": "range_short_or_closer", "value": 1, "perRank": true }
+    },
+    {
+      "id": "smug-t2-03",
+      "name": "Durable",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Subtract 10 per rank from critical injury rolls against you (minimum 11).",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "smug-t2-04",
+      "name": "Bought Time",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Suffer 2 strain to perform an additional maneuver on your turn.",
+      "mechanicalEffect": { "type": "extra_maneuver", "strainCost": 2 }
+    },
+    {
+      "id": "smug-t2-05",
+      "name": "Lucky Shot",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, upgrade attack pool by 1 per rank for next Ranged (Light) check this turn.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "skills": ["ranged-light"], "duration": "this_turn" }
+    },
+    {
+      "id": "smug-t2-06",
+      "name": "Smooth Talker",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Remove 1 setback die from Cool and Deception checks.",
+      "mechanicalEffect": { "type": "remove_setback", "skills": ["cool", "deception"], "value": 1 }
+    },
+    {
+      "id": "smug-t2-07",
+      "name": "Hidden Storage",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Gain +1 encumbrance capacity. One concealed item cannot be found by casual searches.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "encumbrance", "value": 1 }
+    },
+    {
+      "id": "smug-t2-08",
+      "name": "Lethal Blows",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add +10 per rank to critical injury rolls inflicted on opponents.",
+      "mechanicalEffect": { "type": "increase_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "smug-t3-01",
+      "name": "Natural Marksman",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Add 1 Proficiency die (yellow) to all Ranged (Light) checks.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "skill_ranged_light" }
+    },
+    {
+      "id": "smug-t3-02",
+      "name": "Heroic Resilience",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, when you would be incapacitated by wounds, immediately heal 5 wounds and continue acting.",
+      "mechanicalEffect": { "type": "prevent_incapacitation", "healValue": 5, "perSession": true }
+    },
+    {
+      "id": "smug-t3-03",
+      "name": "Improved Dodge",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When using Dodge, additionally add 1 Difficulty die (purple) to the attacker's pool.",
+      "mechanicalEffect": { "type": "upgrade_defense", "attackType": "all", "value": 1, "condition": "dodge_active" },
+      "prerequisite": "smug-t1-09"
+    },
+    {
+      "id": "smug-t3-04",
+      "name": "Guns Blazing",
+      "tier": 3,
+      "type": "active",
+      "activation": "action",
+      "ranked": false,
+      "description": "Make a Ranged (Light) attack against all targets within Short range of you.",
+      "mechanicalEffect": { "type": "area_attack", "areaRange": "Short", "attackType": "ranged" }
+    },
+    {
+      "id": "smug-t3-05",
+      "name": "Crippling Blow",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Increase Critical rating of next attack by 1 difficulty, but add +20 to the Critical Injury result.",
+      "mechanicalEffect": { "type": "empowered_critical", "criticalBonus": 20, "criticalCostIncrease": 1 }
+    },
+    {
+      "id": "smug-t3-06",
+      "name": "Enduring",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Gain +1 Soak per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "perRank": true }
+    },
+    {
+      "id": "smug-t4-01",
+      "name": "Deadly Accuracy",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Choose one combat skill when purchased. Add ranks in that skill as bonus damage to one hit per round.",
+      "mechanicalEffect": { "type": "skill_damage_bonus", "perRank": true, "description": "Player selects combat skill at purchase" }
+    },
+    {
+      "id": "smug-t4-02",
+      "name": "Unstoppable",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Suffer 3 strain to perform a second Action this turn (once per encounter).",
+      "mechanicalEffect": { "type": "extra_action", "strainCost": 3, "perEncounter": true }
+    },
+    {
+      "id": "smug-t4-03",
+      "name": "Supreme Dodge",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When targeted by a ranged attack, attacker must also add 1 Challenge die (red) to the pool.",
+      "mechanicalEffect": { "type": "upgrade_defense", "attackType": "ranged", "value": 1 },
+      "prerequisite": "smug-t3-03"
+    },
+    {
+      "id": "smug-t4-04",
+      "name": "Iron Body",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Reduce all strain suffered (from any source) by 1, to a minimum of 1.",
+      "mechanicalEffect": { "type": "reduce_strain_suffered", "value": 1, "minimum": 1 }
+    },
+    {
+      "id": "smug-t5-01",
+      "name": "Dedication (Agility)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Agility by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "agility", "value": 1 }
+    },
+    {
+      "id": "smug-t5-02",
+      "name": "Dedication (Cunning)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Cunning by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "cunning", "value": 1 }
+    }
+  ]
+}
