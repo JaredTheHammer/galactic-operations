@@ -3,6 +3,7 @@ import { useGameStore } from '../../store/game-store'
 import type { Player, MapConfig, MapSizePreset, CampaignDifficulty, MissionDefinition } from '@engine/types.js'
 import { MAP_PRESETS, BOARD_SIZE } from '@engine/types.js'
 import { t, mixins } from '../../styles/theme'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 // Import mission data for the skirmish mission picker
 import mission1Data from '@data/missions/act1-mission1-arrival.json'
@@ -32,6 +33,7 @@ export const GameSetup: React.FC = () => {
   const [playPath, setPlayPath] = useState<PlayPath>('skirmish')
   const [selectedMissionId, setSelectedMissionId] = useState<string>(ALL_MISSIONS[0]?.id ?? '')
 
+  const { isMobile } = useIsMobile()
   const { initGame, startHeroCreation, startCampaign, loadCampaignFromStorage, openCombatArena } = useGameStore()
 
   // When AI Battle is selected, force skirmish path
@@ -105,7 +107,7 @@ export const GameSetup: React.FC = () => {
   const renderGameModeSelector = () => (
     <div style={{ marginBottom: '20px', textAlign: 'left' }}>
       <label style={mixins.label}>Game Mode</label>
-      <div style={{ display: 'flex', gap: t.spaceSm }}>
+      <div style={{ display: 'flex', gap: t.spaceSm, flexWrap: 'wrap' }}>
         <button style={mixins.chip(gameMode === 'Solo')} onClick={() => setGameMode('Solo')}>
           Solo (AI vs Player)
         </button>
@@ -171,7 +173,7 @@ export const GameSetup: React.FC = () => {
             Liberation of the Tangrene Sector -- a 4-mission campaign with branching paths,
             persistent hero progression, and escalating Imperial threat.
           </div>
-          <div style={{ display: 'flex', gap: t.spaceSm }}>
+          <div style={{ display: 'flex', gap: t.spaceSm, flexDirection: isMobile ? 'column' : 'row' }}>
             <button
               style={{
                 ...mixins.buttonPrimary,
@@ -370,7 +372,7 @@ export const GameSetup: React.FC = () => {
 
       {/* Player Names -- hidden for AI Battle */}
       {gameMode !== 'AIBattle' && (
-        <div style={{ display: 'flex', gap: '12px', marginBottom: t.spaceMd }}>
+        <div style={{ display: 'flex', gap: '12px', marginBottom: t.spaceMd, flexDirection: isMobile ? 'column' : 'row' }}>
           <div style={{ flex: 1, textAlign: 'left' }}>
             <label style={mixins.label}>Imperial Commander</label>
             <input
@@ -406,7 +408,7 @@ export const GameSetup: React.FC = () => {
           START AI BATTLE
         </button>
       ) : (
-        <div style={{ display: 'flex', gap: t.spaceSm }}>
+        <div style={{ display: 'flex', gap: t.spaceSm, flexDirection: isMobile ? 'column' : 'row' }}>
           <button
             style={{
               ...mixins.buttonPrimary,
@@ -437,9 +439,15 @@ export const GameSetup: React.FC = () => {
 
   return (
     <div style={mixins.screenCenter}>
-      <div style={{ ...mixins.panel, maxWidth: '600px', width: '100%', textAlign: 'center' }}>
+      <div style={{
+        ...mixins.panel,
+        maxWidth: isMobile ? '100%' : '600px',
+        width: '100%',
+        textAlign: 'center',
+        ...(isMobile ? { padding: '20px 16px', borderRadius: t.radiusMd, margin: '0 8px' } : {}),
+      }}>
         <div style={{
-          fontSize: t.text3xl,
+          fontSize: isMobile ? t.text2xl : t.text3xl,
           fontWeight: 'bold',
           color: t.accentGold,
           marginBottom: t.spaceXs,
