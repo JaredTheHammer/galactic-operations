@@ -97,6 +97,12 @@ html, body, #root {
   --text-xl: 20px;
   --text-2xl: 24px;
   --text-3xl: 32px;
+
+  /* --- Safe areas (iPhone notch, Dynamic Island) --- */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
 
 /* ============================================================================
@@ -323,6 +329,13 @@ button, input, select, [role="button"] {
 
   input, select, textarea {
     font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Tighter spacing on mobile */
+  :root {
+    --space-lg: 16px;
+    --space-xl: 24px;
+    --space-2xl: 32px;
   }
 }
 
