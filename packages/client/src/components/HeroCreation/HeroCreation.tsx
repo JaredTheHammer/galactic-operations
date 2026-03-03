@@ -13,6 +13,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import { useGameStore } from '../../store/game-store'
 import type {
   Characteristics,
@@ -54,6 +55,8 @@ export default function HeroCreation() {
     gameData, createdHeroes, addCreatedHero, finishHeroCreation, cancelHeroCreation,
     campaignHeroCreation, finishCampaignHeroCreation, exitCampaign,
   } = useGameStore()
+
+  const { isMobile } = useIsMobile()
 
   const handleFinish = campaignHeroCreation ? finishCampaignHeroCreation : finishHeroCreation
   const handleCancel = campaignHeroCreation ? exitCampaign : cancelHeroCreation
@@ -202,13 +205,25 @@ export default function HeroCreation() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Create Hero {createdHeroes.length + 1}</h2>
-        <div style={styles.xpBadge}>XP: {xpRemaining} / {startingXP}</div>
+      <div style={{
+        ...styles.header,
+        ...(isMobile ? { padding: '8px 10px' } : {}),
+      }}>
+        <h2 style={{
+          ...styles.title,
+          ...(isMobile ? { fontSize: 15 } : {}),
+        }}>Create Hero {createdHeroes.length + 1}</h2>
+        <div style={{
+          ...styles.xpBadge,
+          ...(isMobile ? { fontSize: 12, padding: '3px 8px' } : {}),
+        }}>XP: {xpRemaining} / {startingXP}</div>
       </div>
 
       {/* Step indicator */}
-      <div style={styles.stepBar}>
+      <div style={{
+        ...styles.stepBar,
+        ...(isMobile ? { padding: '6px 8px', gap: 2 } : {}),
+      }}>
         {STEP_ORDER.map((s, i) => (
           <div
             key={s}
@@ -216,6 +231,7 @@ export default function HeroCreation() {
               ...styles.stepDot,
               backgroundColor: i === stepIdx ? '#fbbf24' : i < stepIdx ? '#10b981' : '#374151',
               color: i <= stepIdx ? '#000' : '#9ca3af',
+              ...(isMobile ? { fontSize: 9, padding: '3px 4px' } : {}),
             }}
             onClick={() => i < stepIdx && setStep(s)}
           >
@@ -225,11 +241,20 @@ export default function HeroCreation() {
       </div>
 
       {/* Step content */}
-      <div style={styles.content}>
+      <div style={{
+        ...styles.content,
+        ...(isMobile ? { padding: 10 } : {}),
+      }}>
         {step === 'species' && (
           <div>
-            <h3 style={styles.sectionTitle}>Choose Species</h3>
-            <div style={styles.cardGrid}>
+            <h3 style={{
+              ...styles.sectionTitle,
+              ...(isMobile ? { fontSize: 14, marginBottom: 8 } : {}),
+            }}>Choose Species</h3>
+            <div style={{
+              ...styles.cardGrid,
+              ...(isMobile ? { gridTemplateColumns: '1fr', gap: 6 } : {}),
+            }}>
               {speciesList.map(sp => (
                 <div
                   key={sp.id}
@@ -264,8 +289,14 @@ export default function HeroCreation() {
 
         {step === 'career' && (
           <div>
-            <h3 style={styles.sectionTitle}>Choose Career</h3>
-            <div style={styles.cardGrid}>
+            <h3 style={{
+              ...styles.sectionTitle,
+              ...(isMobile ? { fontSize: 14, marginBottom: 8 } : {}),
+            }}>Choose Career</h3>
+            <div style={{
+              ...styles.cardGrid,
+              ...(isMobile ? { gridTemplateColumns: '1fr', gap: 6 } : {}),
+            }}>
               {careerList.map(career => (
                 <div
                   key={career.id}
@@ -289,8 +320,15 @@ export default function HeroCreation() {
 
             {selectedCareer && currentCareer && (
               <>
-                <h3 style={{ ...styles.sectionTitle, marginTop: 16 }}>Choose Specialization</h3>
-                <div style={styles.cardGrid}>
+                <h3 style={{
+                  ...styles.sectionTitle,
+                  marginTop: isMobile ? 12 : 16,
+                  ...(isMobile ? { fontSize: 14, marginBottom: 8 } : {}),
+                }}>Choose Specialization</h3>
+                <div style={{
+                  ...styles.cardGrid,
+                  ...(isMobile ? { gridTemplateColumns: '1fr', gap: 6 } : {}),
+                }}>
                   {currentCareer.specializations.map(specId => {
                     const specDef = gameData.specializations[specId]
                     return (
@@ -329,38 +367,68 @@ export default function HeroCreation() {
 
         {step === 'characteristics' && currentSpecies && currentChars && (
           <div>
-            <h3 style={styles.sectionTitle}>Allocate Characteristics</h3>
-            <p style={styles.hint}>
+            <h3 style={{
+              ...styles.sectionTitle,
+              ...(isMobile ? { fontSize: 14, marginBottom: 8 } : {}),
+            }}>Allocate Characteristics</h3>
+            <p style={{
+              ...styles.hint,
+              ...(isMobile ? { fontSize: 11, marginBottom: 8 } : {}),
+            }}>
               Spend starting XP to increase characteristics. Cost: (new value) x 10.
               Characteristics cannot be increased after creation.
             </p>
-            <div style={styles.charGrid}>
+            <div style={{
+              ...styles.charGrid,
+              ...(isMobile ? { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 } : {}),
+            }}>
               {CHAR_NAMES.map(c => {
                 const base = currentSpecies.characteristics[c]
                 const inc = charIncreases[c] ?? 0
                 const current = base + inc
                 const upgradeCost = current < 5 ? charUpgradeCost(current) : 0
                 return (
-                  <div key={c} style={styles.charRow}>
-                    <span style={styles.charLabel}>{c.toUpperCase()}</span>
-                    <span style={styles.charBase}>(base {base})</span>
+                  <div key={c} style={{
+                    ...styles.charRow,
+                    ...(isMobile ? { gap: 4 } : {}),
+                  }}>
+                    <span style={{
+                      ...styles.charLabel,
+                      ...(isMobile ? { width: 'auto', fontSize: 11, minWidth: 50 } : {}),
+                    }}>{c.toUpperCase()}</span>
+                    {!isMobile && <span style={styles.charBase}>(base {base})</span>}
                     <button
-                      style={styles.charBtn}
+                      style={{
+                        ...styles.charBtn,
+                        ...(isMobile ? { width: 24, height: 24, fontSize: 14 } : {}),
+                      }}
                       onClick={() => decreaseChar(c)}
                       disabled={inc <= 0}
                     >-</button>
-                    <span style={styles.charValue}>{current}</span>
+                    <span style={{
+                      ...styles.charValue,
+                      ...(isMobile ? { width: 22, fontSize: 15 } : {}),
+                    }}>{current}</span>
                     <button
-                      style={styles.charBtn}
+                      style={{
+                        ...styles.charBtn,
+                        ...(isMobile ? { width: 24, height: 24, fontSize: 14 } : {}),
+                      }}
                       onClick={() => increaseChar(c)}
                       disabled={current >= 5 || upgradeCost > xpRemaining}
                     >+</button>
-                    {current < 5 && <span style={styles.charCost}>{upgradeCost} XP</span>}
+                    {current < 5 && <span style={{
+                      ...styles.charCost,
+                      ...(isMobile ? { fontSize: 10 } : {}),
+                    }}>{upgradeCost} XP</span>}
                   </div>
                 )
               })}
             </div>
-            <div style={styles.derivedStats}>
+            <div style={{
+              ...styles.derivedStats,
+              ...(isMobile ? { flexDirection: 'column' as const, gap: 4, fontSize: 12, marginTop: 10 } : {}),
+            }}>
               <span>Wound Threshold: {computeWoundThreshold(currentSpecies, currentChars)}</span>
               <span>Strain Threshold: {computeStrainThreshold(currentSpecies, currentChars)}</span>
               <span>Soak: {computeSoak(currentChars, selectedSkills)}</span>
@@ -370,11 +438,20 @@ export default function HeroCreation() {
 
         {step === 'skills' && currentCareer && (
           <div>
-            <h3 style={styles.sectionTitle}>Choose Starting Skills</h3>
-            <p style={styles.hint}>
+            <h3 style={{
+              ...styles.sectionTitle,
+              ...(isMobile ? { fontSize: 14, marginBottom: 8 } : {}),
+            }}>Choose Starting Skills</h3>
+            <p style={{
+              ...styles.hint,
+              ...(isMobile ? { fontSize: 11, marginBottom: 8 } : {}),
+            }}>
               Click career skills to add ranks (max 2 at creation). Non-career skills cost extra XP.
             </p>
-            <div style={styles.skillGrid}>
+            <div style={{
+              ...styles.skillGrid,
+              ...(isMobile ? { gap: 4 } : {}),
+            }}>
               {currentCareer.careerSkills.map(skillId => (
                 <div
                   key={skillId}
@@ -382,6 +459,7 @@ export default function HeroCreation() {
                     ...styles.skillChip,
                     backgroundColor: (selectedSkills[skillId] ?? 0) > 0 ? '#065f46' : '#1f2937',
                     borderColor: (selectedSkills[skillId] ?? 0) > 0 ? '#10b981' : '#374151',
+                    ...(isMobile ? { padding: '5px 8px', fontSize: 11 } : {}),
                   }}
                   onClick={() => toggleSkill(skillId)}
                 >
@@ -389,7 +467,7 @@ export default function HeroCreation() {
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 8, color: '#9ca3af', fontSize: 13 }}>
+            <div style={{ marginTop: 8, color: '#9ca3af', fontSize: isMobile ? 11 : 13 }}>
               Skill XP spent: {skillXPSpent} | Remaining: {xpRemaining}
             </div>
           </div>
@@ -397,27 +475,36 @@ export default function HeroCreation() {
 
         {step === 'equipment' && (
           <div>
-            <h3 style={styles.sectionTitle}>Choose Equipment</h3>
-            <h4 style={{ color: '#d1d5db', marginBottom: 8 }}>Primary Weapon</h4>
-            <div style={styles.cardGrid}>
+            <h3 style={{
+              ...styles.sectionTitle,
+              ...(isMobile ? { fontSize: 14, marginBottom: 8 } : {}),
+            }}>Choose Equipment</h3>
+            <h4 style={{ color: '#d1d5db', marginBottom: isMobile ? 6 : 8, fontSize: isMobile ? 13 : undefined }}>Primary Weapon</h4>
+            <div style={{
+              ...styles.cardGrid,
+              ...(isMobile ? { gridTemplateColumns: '1fr', gap: 6 } : {}),
+            }}>
               {weaponList.map((w: WeaponDefinition) => (
                 <div
                   key={w.id}
                   style={{
                     ...styles.card,
                     borderColor: selectedWeapon === w.id ? '#fbbf24' : '#374151',
-                    padding: '8px 12px',
+                    padding: isMobile ? '6px 10px' : '8px 12px',
                   }}
                   onClick={() => setSelectedWeapon(w.id)}
                 >
-                  <div style={styles.cardName}>{w.name}</div>
+                  <div style={{
+                    ...styles.cardName,
+                    ...(isMobile ? { fontSize: 13 } : {}),
+                  }}>{w.name}</div>
                   <div style={styles.statRow}>
                     <span style={styles.statChip}>Dmg {w.baseDamage}{w.damageAddBrawn ? '+BR' : ''}</span>
                     <span style={styles.statChip}>{w.range}</span>
                     <span style={styles.statChip}>Crit {w.critical}</span>
                   </div>
                   {w.qualities.length > 0 && (
-                    <div style={{ fontSize: 11, color: '#9ca3af' }}>
+                    <div style={{ fontSize: isMobile ? 10 : 11, color: '#9ca3af' }}>
                       {w.qualities.map(q => q.value != null ? `${q.name} ${q.value}` : q.name).join(', ')}
                     </div>
                   )}
@@ -425,19 +512,25 @@ export default function HeroCreation() {
               ))}
             </div>
 
-            <h4 style={{ color: '#d1d5db', marginTop: 16, marginBottom: 8 }}>Armor</h4>
-            <div style={styles.cardGrid}>
+            <h4 style={{ color: '#d1d5db', marginTop: isMobile ? 12 : 16, marginBottom: isMobile ? 6 : 8, fontSize: isMobile ? 13 : undefined }}>Armor</h4>
+            <div style={{
+              ...styles.cardGrid,
+              ...(isMobile ? { gridTemplateColumns: '1fr', gap: 6 } : {}),
+            }}>
               {armorList.map((a: ArmorDefinition) => (
                 <div
                   key={a.id}
                   style={{
                     ...styles.card,
                     borderColor: selectedArmor === a.id ? '#fbbf24' : '#374151',
-                    padding: '8px 12px',
+                    padding: isMobile ? '6px 10px' : '8px 12px',
                   }}
                   onClick={() => setSelectedArmor(a.id)}
                 >
-                  <div style={styles.cardName}>{a.name}</div>
+                  <div style={{
+                    ...styles.cardName,
+                    ...(isMobile ? { fontSize: 13 } : {}),
+                  }}>{a.name}</div>
                   <div style={styles.statRow}>
                     <span style={styles.statChip}>Soak +{a.soak}</span>
                     {a.defense > 0 && <span style={styles.statChip}>Def {a.defense}</span>}
@@ -450,18 +543,27 @@ export default function HeroCreation() {
 
         {step === 'review' && currentSpecies && currentChars && (
           <div>
-            <h3 style={styles.sectionTitle}>Review Hero</h3>
-            <div style={{ marginBottom: 12 }}>
-              <label style={{ color: '#9ca3af', marginRight: 8 }}>Name:</label>
+            <h3 style={{
+              ...styles.sectionTitle,
+              ...(isMobile ? { fontSize: 14, marginBottom: 8 } : {}),
+            }}>Review Hero</h3>
+            <div style={{ marginBottom: isMobile ? 8 : 12 }}>
+              <label style={{ color: '#9ca3af', marginRight: 8, fontSize: isMobile ? 12 : undefined }}>Name:</label>
               <input
                 type="text"
                 value={heroName}
                 onChange={e => setHeroName(e.target.value)}
                 placeholder="Enter hero name..."
-                style={styles.nameInput}
+                style={{
+                  ...styles.nameInput,
+                  ...(isMobile ? { width: '100%', fontSize: 13, boxSizing: 'border-box' as const } : {}),
+                }}
               />
             </div>
-            <div style={styles.reviewGrid}>
+            <div style={{
+              ...styles.reviewGrid,
+              ...(isMobile ? { gridTemplateColumns: '1fr', gap: 4, fontSize: 12 } : {}),
+            }}>
               <div><strong>Species:</strong> {currentSpecies.name}</div>
               <div><strong>Career:</strong> {currentCareer?.name}</div>
               <div><strong>Specialization:</strong> {currentSpecDef?.name}</div>
@@ -483,11 +585,11 @@ export default function HeroCreation() {
               <span style={styles.statChip}>Soak {computeSoak(currentChars, selectedSkills)}</span>
             </div>
             {Object.keys(selectedSkills).length > 0 && (
-              <div style={{ marginTop: 8, color: '#9ca3af', fontSize: 13 }}>
+              <div style={{ marginTop: 8, color: '#9ca3af', fontSize: isMobile ? 11 : 13 }}>
                 <strong>Skills:</strong> {Object.entries(selectedSkills).map(([s, r]) => `${s} ${r}`).join(', ')}
               </div>
             )}
-            <div style={{ marginTop: 8, color: '#9ca3af', fontSize: 13 }}>
+            <div style={{ marginTop: 8, color: '#9ca3af', fontSize: isMobile ? 11 : 13 }}>
               <strong>Weapon:</strong> {selectedWeapon ? (gameData.weapons[selectedWeapon] as WeaponDefinition)?.name : 'Fists'}
               {' | '}
               <strong>Armor:</strong> {selectedArmor ? (gameData.armor[selectedArmor] as ArmorDefinition)?.name : 'None'}
@@ -497,47 +599,91 @@ export default function HeroCreation() {
       </div>
 
       {/* Navigation */}
-      <div style={styles.navBar}>
-        <button style={styles.navBtn} onClick={handleCancel}>Cancel</button>
-
-        <div style={styles.navRight}>
-          {stepIdx > 0 && (
-            <button style={styles.navBtn} onClick={prevStep}>Back</button>
-          )}
-
-          {step === 'review' ? (
-            <>
-              <button
-                style={{ ...styles.navBtn, ...styles.primaryBtn }}
-                disabled={!canProceed()}
-                onClick={createAndAddHero}
-              >
-                Add Hero ({createdHeroes.length + 1})
-              </button>
-              {createdHeroes.length > 0 && (
+      <div style={{
+        ...styles.navBar,
+        ...(isMobile ? { flexDirection: 'column' as const, gap: 6, padding: '8px 10px' } : {}),
+      }}>
+        {isMobile ? (
+          <>
+            <div style={{ display: 'flex', gap: 6, width: '100%' }}>
+              <button style={{ ...styles.navBtn, ...(isMobile ? { flex: 1, fontSize: 12 } : {}) }} onClick={handleCancel}>Cancel</button>
+              {stepIdx > 0 && (
+                <button style={{ ...styles.navBtn, ...(isMobile ? { flex: 1, fontSize: 12 } : {}) }} onClick={prevStep}>Back</button>
+              )}
+            </div>
+            {step === 'review' ? (
+              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 6, width: '100%' }}>
                 <button
-                  style={{ ...styles.navBtn, ...styles.deployBtn }}
-                  onClick={handleFinish}
+                  style={{ ...styles.navBtn, ...styles.primaryBtn, width: '100%', fontSize: 12 }}
+                  disabled={!canProceed()}
+                  onClick={createAndAddHero}
                 >
-                  {campaignHeroCreation ? 'Start Campaign' : 'Deploy'} ({createdHeroes.length} heroes)
+                  Add Hero ({createdHeroes.length + 1})
+                </button>
+                {createdHeroes.length > 0 && (
+                  <button
+                    style={{ ...styles.navBtn, ...styles.deployBtn, width: '100%', fontSize: 12 }}
+                    onClick={handleFinish}
+                  >
+                    {campaignHeroCreation ? 'Start Campaign' : 'Deploy'} ({createdHeroes.length} heroes)
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                style={{ ...styles.navBtn, ...styles.primaryBtn, width: '100%', fontSize: 12 }}
+                disabled={!canProceed()}
+                onClick={nextStep}
+              >
+                Next
+              </button>
+            )}
+          </>
+        ) : (
+          <>
+            <button style={styles.navBtn} onClick={handleCancel}>Cancel</button>
+            <div style={styles.navRight}>
+              {stepIdx > 0 && (
+                <button style={styles.navBtn} onClick={prevStep}>Back</button>
+              )}
+              {step === 'review' ? (
+                <>
+                  <button
+                    style={{ ...styles.navBtn, ...styles.primaryBtn }}
+                    disabled={!canProceed()}
+                    onClick={createAndAddHero}
+                  >
+                    Add Hero ({createdHeroes.length + 1})
+                  </button>
+                  {createdHeroes.length > 0 && (
+                    <button
+                      style={{ ...styles.navBtn, ...styles.deployBtn }}
+                      onClick={handleFinish}
+                    >
+                      {campaignHeroCreation ? 'Start Campaign' : 'Deploy'} ({createdHeroes.length} heroes)
+                    </button>
+                  )}
+                </>
+              ) : (
+                <button
+                  style={{ ...styles.navBtn, ...styles.primaryBtn }}
+                  disabled={!canProceed()}
+                  onClick={nextStep}
+                >
+                  Next
                 </button>
               )}
-            </>
-          ) : (
-            <button
-              style={{ ...styles.navBtn, ...styles.primaryBtn }}
-              disabled={!canProceed()}
-              onClick={nextStep}
-            >
-              Next
-            </button>
-          )}
-        </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Already-created heroes list */}
       {createdHeroes.length > 0 && (
-        <div style={styles.heroesList}>
+        <div style={{
+          ...styles.heroesList,
+          ...(isMobile ? { padding: '6px 10px', fontSize: 11 } : {}),
+        }}>
           <strong>Created Heroes:</strong>{' '}
           {createdHeroes.map(h => (
             <span key={h.id} style={styles.heroBadge}>
