@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useGameStore } from '../../store/game-store'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult } from '../../../../engine/src/types'
 
 // ============================================================================
@@ -251,6 +252,7 @@ export default function MissionSelect() {
     openHeroProgression,
   } = useGameStore()
 
+  const { isMobile } = useIsMobile()
   const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null)
   const [saveFlash, setSaveFlash] = useState(false)
 
@@ -304,25 +306,45 @@ export default function MissionSelect() {
   const currentAct = campaignState.currentAct
   const subtitle = `Act ${currentAct} \u2014 ${campaignState.difficulty.charAt(0).toUpperCase() + campaignState.difficulty.slice(1)} Difficulty`
 
+  // Responsive style overrides for mobile
+  const headerResponsive: React.CSSProperties = {
+    ...headerStyle,
+    padding: isMobile ? '12px 16px' : headerStyle.padding,
+    flexWrap: isMobile ? 'wrap' : undefined,
+    gap: isMobile ? '8px' : undefined,
+  }
+
+  const mainResponsive: React.CSSProperties = isMobile
+    ? { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }
+    : mainStyle
+
+  const sidebarResponsive: React.CSSProperties = isMobile
+    ? { padding: '12px', borderBottom: '1px solid #2a2a3f', maxHeight: '200px', overflowY: 'auto' }
+    : sidebarStyle
+
+  const contentResponsive: React.CSSProperties = isMobile
+    ? { flex: 1, padding: '16px', overflowY: 'auto' }
+    : contentStyle
+
   return (
     <div style={containerStyle}>
       {/* Header */}
-      <div style={headerStyle}>
-        <div>
-          <h1 style={{ color: '#4a9eff', margin: 0, fontSize: '20px' }}>{campaignState.name}</h1>
+      <div style={headerResponsive}>
+        <div style={isMobile ? { width: '100%' } : undefined}>
+          <h1 style={{ color: '#4a9eff', margin: 0, fontSize: isMobile ? '18px' : '20px' }}>{campaignState.name}</h1>
           <div style={{ color: '#888', fontSize: '12px', marginTop: '2px' }}>
             {subtitle}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: isMobile ? 'wrap' : undefined, width: isMobile ? '100%' : undefined }}>
           <button
-            style={{ ...buttonStyle, backgroundColor: '#3a2a1a', color: '#ffd700' }}
+            style={{ ...buttonStyle, backgroundColor: '#3a2a1a', color: '#ffd700', flex: isMobile ? '1 1 auto' : undefined }}
             onClick={openSocialPhase}
           >
             VISIT CANTINA
           </button>
           <button
-            style={{ ...buttonStyle, backgroundColor: '#2a2a3a', color: '#bb99ff' }}
+            style={{ ...buttonStyle, backgroundColor: '#2a2a3a', color: '#bb99ff', flex: isMobile ? '1 1 auto' : undefined }}
             onClick={openHeroProgression}
           >
             UPGRADE HEROES
@@ -333,13 +355,14 @@ export default function MissionSelect() {
               backgroundColor: saveFlash ? '#44ff44' : '#2a4a2a',
               color: saveFlash ? '#000' : '#44ff44',
               transition: 'all 0.3s',
+              flex: isMobile ? '1 1 auto' : undefined,
             }}
             onClick={handleSave}
           >
             {saveFlash ? '\u2714 SAVED!' : 'SAVE CAMPAIGN'}
           </button>
           <button
-            style={{ ...buttonStyle, backgroundColor: '#3a2a2a', color: '#ff6644' }}
+            style={{ ...buttonStyle, backgroundColor: '#3a2a2a', color: '#ff6644', flex: isMobile ? '1 1 auto' : undefined }}
             onClick={exitCampaign}
           >
             EXIT
@@ -347,9 +370,9 @@ export default function MissionSelect() {
         </div>
       </div>
 
-      <div style={mainStyle}>
+      <div style={mainResponsive}>
         {/* Left sidebar: hero roster + stats + history */}
-        <div style={sidebarStyle}>
+        <div style={sidebarResponsive}>
           <CampaignStatsPanel campaign={campaignState} />
 
           <MissionHistoryPanel
@@ -366,7 +389,7 @@ export default function MissionSelect() {
         </div>
 
         {/* Main content: mission selection */}
-        <div style={contentStyle}>
+        <div style={contentResponsive}>
           <h2 style={{ color: '#fff', margin: '0 0 16px 0', fontSize: '18px' }}>
             Available Missions
           </h2>
@@ -376,9 +399,9 @@ export default function MissionSelect() {
               Campaign complete! All missions finished.
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: '24px' }}>
+            <div style={{ display: 'flex', gap: isMobile ? '16px' : '24px', flexDirection: isMobile ? 'column' : 'row' }}>
               {/* Mission list */}
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: isMobile ? undefined : 1 }}>
                 {availableMissions.map(mission => (
                   <MissionCard
                     key={mission.id}
