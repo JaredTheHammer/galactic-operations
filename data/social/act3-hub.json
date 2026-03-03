@@ -12,7 +12,7 @@
       "characteristics": { "willpower": 2, "presence": 2, "cunning": 3 },
       "skills": { "computers": 2, "vigilance": 3, "perception": 2, "deception": 1 },
       "keywords": ["intel-officer", "analyst", "rebel"],
-      "portrait": "sera-kade"
+      "portraitId": "sera-kade"
     },
     "defector-prisoner": {
       "id": "defector-prisoner",
@@ -22,7 +22,7 @@
       "characteristics": { "willpower": 2, "presence": 1, "cunning": 2 },
       "skills": { "cool": 2, "deception": 2, "survival": 1, "ranged-heavy": 1 },
       "keywords": ["defector", "prisoner", "informant"],
-      "portrait": "dax-moren"
+      "portraitId": "dax-moren"
     },
     "rebel-commander": {
       "id": "rebel-commander",
@@ -32,7 +32,7 @@
       "characteristics": { "willpower": 3, "presence": 3, "cunning": 2 },
       "skills": { "leadership": 3, "discipline": 2, "cool": 2, "vigilance": 1 },
       "keywords": ["rebel", "commander", "mission-giver"],
-      "portrait": "talos-vane"
+      "portraitId": "talos-vane"
     },
     "tech-specialist": {
       "id": "tech-specialist",
@@ -42,7 +42,7 @@
       "characteristics": { "willpower": 2, "presence": 1, "cunning": 3 },
       "skills": { "mechanics": 3, "computers": 2, "perception": 1 },
       "keywords": ["mechanic", "tech-specialist", "vendor"],
-      "portrait": "rook"
+      "portraitId": "rook"
     },
     "scout": {
       "id": "scout",
@@ -52,7 +52,7 @@
       "characteristics": { "willpower": 1, "presence": 2, "cunning": 3 },
       "skills": { "stealth": 3, "perception": 2, "survival": 2, "streetwise": 1 },
       "keywords": ["scout", "recon", "informant"],
-      "portrait": "fenwick-taal"
+      "portraitId": "fenwick-taal"
     }
   },
   "location": {

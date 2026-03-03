@@ -346,6 +346,7 @@ function createNPCFigure(
     consumableUsesThisEncounter: {},
     cachedAttackPool: { ...npc.attackPool },
     cachedDefensePool: { ...npc.defensePool },
+    baseSize: npc.baseSize ?? 'standard',
     minionGroupSize: npc.tier === 'Minion' ? 1 : undefined,
     minionGroupMax: npc.tier === 'Minion' ? 1 : undefined,
     suppressionTokens: 0,
@@ -385,6 +386,7 @@ function createHeroFigure(
     talentUsesThisEncounter: {},
     talentUsesThisSession: {},
     consumableUsesThisEncounter: {},
+    baseSize: 'standard',
     cachedAttackPool: null, // computed at activation
     cachedDefensePool: null,
     suppressionTokens: 0,

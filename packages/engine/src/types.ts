@@ -374,6 +374,9 @@ export interface HeroCharacter {
 
   xp: { total: number; available: number };
 
+  /** Portrait image ID (SHA-256 hash of image bytes) for token rendering */
+  portraitId?: string;
+
   /**
    * Persistent wounded status (carries between missions).
    * A hero becomes wounded if they reached wound threshold during a mission.
@@ -388,6 +391,54 @@ export interface HeroCharacter {
    */
   missionsRested?: number;
 }
+
+// ============================================================================
+// BASE SIZE AND MOVEMENT TRAITS (Phase 1: data + visual; Phase 2: mechanics)
+// ============================================================================
+
+/** Physical base size category determining tile footprint and visual token size */
+export type BaseSize =
+  | 'small'      // 1x1, mass 1  -- droids, critters, probe droids
+  | 'standard'   // 1x1, mass 2  -- infantry, most humanoids
+  | 'heavy'      // 1x2, mass 4  -- heavy weapons teams, speeder bikes
+  | 'large'      // 2x2, mass 6  -- walkers (AT-ST), landspeeders
+  | 'extended'   // 2x3, mass 10 -- tanks, light transports
+  | 'huge'       // 3x3, mass 16 -- AT-AT base section, large creatures
+  | 'massive'    // 4x4, mass 25 -- capital assault vehicles
+  | 'colossal';  // 5x5, mass 40 -- orbital strike zones, mega-units
+
+/** Movement traits governing how multi-tile units navigate terrain (Phase 2 mechanics) */
+export type MovementTrait =
+  | 'standard'     // normal movement rules
+  | 'squeeze'      // can fit through 1-tile gaps despite larger base
+  | 'juggernaut'   // destroys light cover when moving through
+  | 'rigid'        // cannot squeeze, must have full clearance for entire footprint
+  | 'agile'        // +1 movement on open terrain
+  | 'momentum'     // bonus movement when moving in a straight line
+  | 'emplacement'  // cannot move after deployment
+  | 'lumbering'    // -1 movement, cannot run
+  | 'rampaging';   // forced movement toward nearest enemy
+
+/** Definition of a base size category with footprint and mass properties */
+export interface BaseSizeDefinition {
+  id: BaseSize;
+  label: string;
+  footprint: { width: number; height: number };  // in tiles
+  mass: number;                                    // abstract mass value for Phase 2 mechanics
+  movementTraits: MovementTrait[];                 // default traits for this size category
+}
+
+/** All base size categories with their properties */
+export const BASE_SIZE_DEFINITIONS: Record<BaseSize, BaseSizeDefinition> = {
+  small:    { id: 'small',    label: 'Small',    footprint: { width: 1, height: 1 }, mass: 1,  movementTraits: ['standard', 'squeeze'] },
+  standard: { id: 'standard', label: 'Standard', footprint: { width: 1, height: 1 }, mass: 2,  movementTraits: ['standard'] },
+  heavy:    { id: 'heavy',    label: 'Heavy',    footprint: { width: 1, height: 2 }, mass: 4,  movementTraits: ['standard'] },
+  large:    { id: 'large',    label: 'Large',    footprint: { width: 2, height: 2 }, mass: 6,  movementTraits: ['standard', 'rigid'] },
+  extended: { id: 'extended', label: 'Extended', footprint: { width: 2, height: 3 }, mass: 10, movementTraits: ['rigid', 'lumbering'] },
+  huge:     { id: 'huge',     label: 'Huge',     footprint: { width: 3, height: 3 }, mass: 16, movementTraits: ['rigid', 'lumbering'] },
+  massive:  { id: 'massive',  label: 'Massive',  footprint: { width: 4, height: 4 }, mass: 25, movementTraits: ['rigid', 'lumbering', 'juggernaut'] },
+  colossal: { id: 'colossal', label: 'Colossal', footprint: { width: 5, height: 5 }, mass: 40, movementTraits: ['rigid', 'lumbering', 'juggernaut'] },
+};
 
 // ============================================================================
 // v2 CHARACTER TYPES: NPCs
@@ -457,6 +508,12 @@ export interface NPCProfile {
 
   /** Suppression courage threshold. Defaults: Minion=1, Rival=2, Nemesis=3 if unset. */
   courage?: number;
+
+  /** Default portrait image ID for this NPC type (SHA-256 hash of image bytes) */
+  defaultPortraitId?: string;
+
+  /** Physical base size. Defaults to 'standard' if unset. */
+  baseSize?: BaseSize;
 }
 
 // ============================================================================
@@ -558,6 +615,12 @@ export interface Figure {
   // Computed pools (cached at activation start for performance)
   cachedAttackPool: AttackPool | null;
   cachedDefensePool: DefensePool | null;
+
+  // Portrait and base size (for token rendering)
+  /** Portrait override for this specific figure instance. Falls back to hero/NPC default. */
+  portraitId?: string;
+  /** Physical base size. Defaults to 'standard' if unset. */
+  baseSize?: BaseSize;
 
   // Minion group tracking
   minionGroupSize?: number;  // current number of minions in group (Minion tier only)
@@ -1158,8 +1221,8 @@ export interface SocialNPC {
   skills: Partial<Record<SocialSkillId | 'discipline' | 'cool' | 'vigilance', number>>;
   /** Keywords for narrative flavor and conditional logic */
   keywords: string[];
-  /** Portrait/image identifier (for client rendering) */
-  portrait?: string;
+  /** Portrait image ID (SHA-256 hash of image bytes) for token rendering */
+  portraitId?: string;
 }
 
 /** Outcome type for social encounter resolution */

@@ -12,7 +12,7 @@
       "characteristics": { "willpower": 2, "presence": 2, "cunning": 3 },
       "skills": { "streetwise": 3, "deception": 2, "negotiation": 2 },
       "keywords": ["informant", "fixer", "underworld"],
-      "portrait": "maz-kallo"
+      "portraitId": "maz-kallo"
     },
     "arms-dealer": {
       "id": "arms-dealer",
@@ -22,7 +22,7 @@
       "characteristics": { "willpower": 2, "presence": 2, "cunning": 3 },
       "skills": { "negotiation": 3, "coercion": 2, "cool": 1 },
       "keywords": ["vendor", "weapons", "shady"],
-      "portrait": "torga-shen"
+      "portraitId": "torga-shen"
     },
     "slicer": {
       "id": "slicer",
@@ -32,7 +32,7 @@
       "characteristics": { "willpower": 1, "presence": 2, "cunning": 3 },
       "skills": { "computers": 3, "mechanics": 2, "skulduggery": 1 },
       "keywords": ["slicer", "tech", "rebel-sympathizer"],
-      "portrait": "pixel"
+      "portraitId": "pixel"
     },
     "ex-gladiator": {
       "id": "ex-gladiator",
@@ -42,7 +42,7 @@
       "characteristics": { "willpower": 3, "presence": 1, "cunning": 2 },
       "skills": { "brawl": 3, "discipline": 2, "resilience": 2 },
       "keywords": ["companion-candidate", "trandoshan", "fighter"],
-      "portrait": "krrssk"
+      "portraitId": "krrssk"
     },
     "doctor": {
       "id": "doctor",
@@ -52,7 +52,7 @@
       "characteristics": { "willpower": 2, "presence": 3, "cunning": 1 },
       "skills": { "medicine": 3, "charm": 2, "cool": 1 },
       "keywords": ["medic", "healer", "kind"],
-      "portrait": "syll-nareen"
+      "portraitId": "syll-nareen"
     }
   },
   "location": {

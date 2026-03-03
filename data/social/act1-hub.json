@@ -12,7 +12,7 @@
       "characteristics": { "willpower": 2, "presence": 3, "cunning": 3 },
       "skills": { "deception": 2, "cool": 2, "negotiation": 1, "charm": 1 },
       "keywords": ["informant", "gambler", "underworld"],
-      "portrait": "kell-tavari"
+      "portraitId": "kell-tavari"
     },
     "mechanic": {
       "id": "mechanic",
@@ -22,7 +22,7 @@
       "characteristics": { "willpower": 3, "presence": 1, "cunning": 2 },
       "skills": { "negotiation": 2, "discipline": 3, "cool": 1 },
       "keywords": ["mechanic", "vendor", "grumpy"],
-      "portrait": "greeska"
+      "portraitId": "greeska"
     },
     "rebel-contact": {
       "id": "rebel-contact",
@@ -32,7 +32,7 @@
       "characteristics": { "willpower": 3, "presence": 2, "cunning": 2 },
       "skills": { "leadership": 2, "discipline": 2, "vigilance": 2, "cool": 1 },
       "keywords": ["rebel", "contact", "logistics"],
-      "portrait": "vera-solaris"
+      "portraitId": "vera-solaris"
     },
     "bounty-hunter": {
       "id": "bounty-hunter",
@@ -42,7 +42,7 @@
       "characteristics": { "willpower": 3, "presence": 2, "cunning": 3 },
       "skills": { "coercion": 2, "discipline": 3, "cool": 2, "vigilance": 2 },
       "keywords": ["bounty-hunter", "mandalorian", "companion-candidate"],
-      "portrait": "drez-venn"
+      "portraitId": "drez-venn"
     },
     "medic": {
       "id": "medic",
@@ -52,7 +52,7 @@
       "characteristics": { "willpower": 2, "presence": 2, "cunning": 1 },
       "skills": { "negotiation": 1, "discipline": 2, "cool": 2 },
       "keywords": ["medic", "healer", "ex-imperial"],
-      "portrait": "doc-hessen"
+      "portraitId": "doc-hessen"
     }
   },
   "location": {
