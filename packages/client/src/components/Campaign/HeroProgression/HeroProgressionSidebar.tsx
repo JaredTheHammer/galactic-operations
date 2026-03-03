@@ -1,6 +1,7 @@
 import React from 'react'
 import type { HeroCharacter } from '@engine/types.js'
 import { useGameStore } from '../../../store/game-store'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 
 interface HeroProgressionSidebarProps {
   heroes: HeroCharacter[]
@@ -14,6 +15,9 @@ export const HeroProgressionSidebar: React.FC<HeroProgressionSidebarProps> = ({
   onSelectHero,
 }) => {
   const gameData = useGameStore(s => s.gameData)
+  const { isMobile } = useIsMobile()
+
+  if (isMobile) return null
 
   const sidebarStyle: React.CSSProperties = {
     width: '250px',

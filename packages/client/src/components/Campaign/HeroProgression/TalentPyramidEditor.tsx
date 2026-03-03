@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import type { HeroCharacter, TalentCard, TalentSlot } from '@engine/types.js'
 import { TALENT_XP_COST } from '@engine/character-v2.js'
 import { useGameStore } from '../../../store/game-store'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 
 interface TalentPyramidEditorProps {
   hero: HeroCharacter
@@ -18,6 +19,7 @@ const SLOTS_PER_TIER: Record<number, number> = { 1: 5, 2: 4, 3: 3, 4: 2, 5: 1 }
 
 export const TalentPyramidEditor: React.FC<TalentPyramidEditorProps> = ({ hero }) => {
   const { gameData, purchaseHeroTalent } = useGameStore()
+  const { isMobile } = useIsMobile()
   const [openSlot, setOpenSlot] = useState<{ tier: number; position: number } | null>(null)
   const [hoveredTalentId, setHoveredTalentId] = useState<string | null>(null)
 
@@ -112,12 +114,12 @@ export const TalentPyramidEditor: React.FC<TalentPyramidEditorProps> = ({ hero }
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '8px',
-    padding: '16px 0',
+    gap: isMobile ? '6px' : '8px',
+    padding: isMobile ? '8px 0' : '16px 0',
   }
 
   const tierLabelStyle: React.CSSProperties = {
-    fontSize: '10px',
+    fontSize: isMobile ? '9px' : '10px',
     color: '#666',
     textTransform: 'uppercase',
     letterSpacing: '1px',
@@ -126,8 +128,8 @@ export const TalentPyramidEditor: React.FC<TalentPyramidEditorProps> = ({ hero }
 
   const xpSummaryStyle: React.CSSProperties = {
     textAlign: 'center',
-    padding: '12px',
-    marginBottom: '16px',
+    padding: isMobile ? '10px' : '12px',
+    marginBottom: isMobile ? '10px' : '16px',
     backgroundColor: '#131320',
     borderRadius: '8px',
     border: '1px solid #333355',
@@ -138,38 +140,46 @@ export const TalentPyramidEditor: React.FC<TalentPyramidEditorProps> = ({ hero }
 
   const dropdownStyle: React.CSSProperties = {
     position: 'fixed',
-    top: dropdownPos?.top ?? 0,
-    left: dropdownPos?.left ?? 0,
-    transform: 'translateX(-50%)',
     zIndex: 1000,
     backgroundColor: '#1a1a2e',
     border: '2px solid #bb99ff',
     borderRadius: '6px',
     padding: '6px',
-    minWidth: '280px',
-    maxHeight: '300px',
     overflowY: 'auto',
     boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+    ...(isMobile ? {
+      left: '12px',
+      right: '12px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      maxHeight: '70vh',
+    } : {
+      top: dropdownPos?.top ?? 0,
+      left: dropdownPos?.left ?? 0,
+      transform: 'translateX(-50%)',
+      minWidth: '280px',
+      maxHeight: '300px',
+    }),
   }
 
   return (
     <div>
       {/* XP Summary */}
       <div style={xpSummaryStyle}>
-        <span style={{ color: '#bb99ff', fontSize: '18px', fontWeight: 'bold' }}>
+        <span style={{ color: '#bb99ff', fontSize: isMobile ? '16px' : '18px', fontWeight: 'bold' }}>
           {hero.xp.available} XP
         </span>
-        <span style={{ color: '#666', fontSize: '13px', marginLeft: '8px' }}>
+        <span style={{ color: '#666', fontSize: isMobile ? '12px' : '13px', marginLeft: '8px' }}>
           available ({hero.xp.total} total)
         </span>
       </div>
 
       {/* Legend */}
-      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', gap: isMobile ? '10px' : '16px', justifyContent: 'center', marginBottom: isMobile ? '10px' : '16px', flexWrap: 'wrap' }}>
         {Object.entries(ACTIVATION_COLORS).map(([type, color]) => (
           <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: color }} />
-            <span style={{ fontSize: '11px', color: '#888', textTransform: 'capitalize' }}>{type}</span>
+            <div style={{ width: isMobile ? 8 : 10, height: isMobile ? 8 : 10, borderRadius: '50%', backgroundColor: color }} />
+            <span style={{ fontSize: isMobile ? '10px' : '11px', color: '#888', textTransform: 'capitalize' }}>{type}</span>
           </div>
         ))}
       </div>
@@ -185,15 +195,15 @@ export const TalentPyramidEditor: React.FC<TalentPyramidEditorProps> = ({ hero }
               <div style={tierLabelStyle}>
                 Tier {tier} ({cost} XP)
               </div>
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: isMobile ? '4px' : '8px', justifyContent: 'center', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
                 {slots.map(slot => {
                   const card = slot.talentId ? allTalentCards.get(slot.talentId) ?? null : null
                   const purchasable = isSlotPurchasable(slot)
                   const lockReason = getLockReason(slot)
                   const isOpen = openSlot?.tier === slot.tier && openSlot?.position === slot.position
 
-                  const slotWidth = 130
-                  const slotHeight = 70
+                  const slotWidth = isMobile ? 62 : 130
+                  const slotHeight = isMobile ? 56 : 70
 
                   const slotStyle: React.CSSProperties = {
                     position: 'relative',
@@ -234,36 +244,39 @@ export const TalentPyramidEditor: React.FC<TalentPyramidEditorProps> = ({ hero }
                         // Filled slot
                         <>
                           <div style={{
-                            fontSize: '11px',
+                            fontSize: isMobile ? '9px' : '11px',
                             fontWeight: 'bold',
                             color: '#fff',
                             textAlign: 'center',
                             lineHeight: '1.2',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            maxWidth: '100%',
                           }}>
                             {card.name}
                           </div>
                           <div style={{
-                            fontSize: '9px',
+                            fontSize: isMobile ? '8px' : '9px',
                             color: ACTIVATION_COLORS[card.activation] ?? '#888',
                             textTransform: 'uppercase',
-                            marginTop: '4px',
+                            marginTop: isMobile ? '2px' : '4px',
                           }}>
-                            {card.activation}
+                            {isMobile ? card.activation.slice(0, 3) : card.activation}
                             {card.ranked && ' (R)'}
                           </div>
                         </>
                       ) : purchasable ? (
                         // Empty purchasable slot
                         <>
-                          <div style={{ fontSize: '18px', color: '#bb99ff' }}>+</div>
-                          <div style={{ fontSize: '10px', color: '#888' }}>{cost} XP</div>
+                          <div style={{ fontSize: isMobile ? '16px' : '18px', color: '#bb99ff' }}>+</div>
+                          <div style={{ fontSize: isMobile ? '9px' : '10px', color: '#888' }}>{cost} XP</div>
                         </>
                       ) : (
                         // Locked slot
                         <>
-                          <div style={{ fontSize: '16px', color: '#444' }}>&#128274;</div>
-                          <div style={{ fontSize: '9px', color: '#555', textAlign: 'center' }}>
-                            {lockReason ? lockReason.split(' ').slice(0, 4).join(' ') + '...' : 'Locked'}
+                          <div style={{ fontSize: isMobile ? '14px' : '16px', color: '#444' }}>&#128274;</div>
+                          <div style={{ fontSize: isMobile ? '8px' : '9px', color: '#555', textAlign: 'center' }}>
+                            {lockReason ? lockReason.split(' ').slice(0, (isMobile ? 2 : 4)).join(' ') + '...' : 'Locked'}
                           </div>
                         </>
                       )}
@@ -320,12 +333,13 @@ export const TalentPyramidEditor: React.FC<TalentPyramidEditorProps> = ({ hero }
                 <div
                   key={talent.id}
                   style={{
-                    padding: '8px',
+                    padding: isMobile ? '12px 8px' : '8px',
                     borderRadius: '4px',
                     cursor: 'pointer',
                     marginBottom: '2px',
                     backgroundColor: hoveredTalentId === talent.id ? '#2a2a4a' : 'transparent',
                     transition: 'background-color 0.15s',
+                    minHeight: isMobile ? '44px' : 'auto',
                   }}
                   onClick={() => handleSelectTalent(talent.id)}
                   onMouseEnter={() => setHoveredTalentId(talent.id)}
@@ -358,11 +372,15 @@ export const TalentPyramidEditor: React.FC<TalentPyramidEditorProps> = ({ hero }
               style={{
                 textAlign: 'center',
                 marginTop: '6px',
-                padding: '4px',
-                fontSize: '11px',
+                padding: isMobile ? '12px 4px' : '4px',
+                fontSize: isMobile ? '12px' : '11px',
                 color: '#666',
                 cursor: 'pointer',
                 borderTop: '1px solid #333',
+                minHeight: isMobile ? '44px' : 'auto',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
               onClick={() => setOpenSlot(null)}
             >

@@ -1,6 +1,7 @@
 import React from 'react'
 import type { HeroCharacter, SpecializationDefinition } from '@engine/types.js'
 import { useGameStore } from '../../../store/game-store'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 
 interface SpecializationPanelProps {
   hero: HeroCharacter
@@ -8,6 +9,7 @@ interface SpecializationPanelProps {
 
 export const SpecializationPanel: React.FC<SpecializationPanelProps> = ({ hero }) => {
   const { gameData, unlockHeroSpecialization } = useGameStore()
+  const { isMobile } = useIsMobile()
 
   if (!gameData) return null
 
@@ -37,25 +39,25 @@ export const SpecializationPanel: React.FC<SpecializationPanelProps> = ({ hero }
   }
 
   const containerStyle: React.CSSProperties = {
-    maxWidth: '700px',
+    maxWidth: isMobile ? '100%' : '700px',
     margin: '0 auto',
   }
 
   const xpSummaryStyle: React.CSSProperties = {
     textAlign: 'center',
-    padding: '12px',
-    marginBottom: '16px',
+    padding: isMobile ? '10px' : '12px',
+    marginBottom: isMobile ? '10px' : '16px',
     backgroundColor: '#131320',
     borderRadius: '8px',
     border: '1px solid #333355',
   }
 
   const sectionStyle: React.CSSProperties = {
-    marginBottom: '24px',
+    marginBottom: isMobile ? '16px' : '24px',
   }
 
   const sectionTitleStyle: React.CSSProperties = {
-    fontSize: '13px',
+    fontSize: isMobile ? '12px' : '13px',
     fontWeight: 'bold',
     color: '#bb99ff',
     textTransform: 'uppercase',
@@ -68,14 +70,14 @@ export const SpecializationPanel: React.FC<SpecializationPanelProps> = ({ hero }
   function renderCurrentSpec(spec: SpecializationDefinition, index: number) {
     return (
       <div key={spec.id} style={{
-        padding: '12px',
+        padding: isMobile ? '10px' : '12px',
         backgroundColor: '#1a1a2e',
         borderRadius: '6px',
         border: index === 0 ? '2px solid #bb99ff' : '2px solid #333355',
         marginBottom: '8px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>{spec.name}</span>
+          <span style={{ fontSize: isMobile ? '13px' : '14px', fontWeight: 'bold', color: '#fff' }}>{spec.name}</span>
           {index === 0 && (
             <span style={{
               fontSize: '9px',
@@ -88,22 +90,22 @@ export const SpecializationPanel: React.FC<SpecializationPanelProps> = ({ hero }
             </span>
           )}
         </div>
-        <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+        <div style={{ fontSize: isMobile ? '11px' : '12px', color: '#888', marginTop: '4px' }}>
           {spec.description}
         </div>
         <div style={{ marginTop: '6px' }}>
-          <span style={{ fontSize: '10px', color: '#666', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: isMobile ? '9px' : '10px', color: '#666', textTransform: 'uppercase' }}>
             Bonus Career Skills:{' '}
           </span>
-          <span style={{ fontSize: '11px', color: '#aaa' }}>
+          <span style={{ fontSize: isMobile ? '10px' : '11px', color: '#aaa' }}>
             {spec.bonusCareerSkills.join(', ')}
           </span>
         </div>
         <div style={{ marginTop: '4px' }}>
-          <span style={{ fontSize: '10px', color: '#666', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: isMobile ? '9px' : '10px', color: '#666', textTransform: 'uppercase' }}>
             Talents:{' '}
           </span>
-          <span style={{ fontSize: '11px', color: '#aaa' }}>
+          <span style={{ fontSize: isMobile ? '10px' : '11px', color: '#aaa' }}>
             {spec.talents.length} cards available
           </span>
         </div>
@@ -117,17 +119,17 @@ export const SpecializationPanel: React.FC<SpecializationPanelProps> = ({ hero }
 
     return (
       <div key={spec.id} style={{
-        padding: '12px',
+        padding: isMobile ? '10px' : '12px',
         backgroundColor: '#0f0f1a',
         borderRadius: '6px',
         border: '2px solid #222',
         marginBottom: '8px',
         opacity: canUnlock ? 1 : 0.5,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>{spec.name}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: isMobile ? '13px' : '14px', fontWeight: 'bold', color: '#fff' }}>{spec.name}</span>
               <span style={{
                 fontSize: '9px',
                 color: isInCareer ? '#ffd700' : '#888',
@@ -139,34 +141,41 @@ export const SpecializationPanel: React.FC<SpecializationPanelProps> = ({ hero }
                 {isInCareer ? 'IN-CAREER' : 'OUT-OF-CAREER'}
               </span>
             </div>
-            <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+            <div style={{ fontSize: isMobile ? '11px' : '12px', color: '#888', marginTop: '4px' }}>
               {spec.description}
             </div>
             <div style={{ marginTop: '4px' }}>
-              <span style={{ fontSize: '10px', color: '#666', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: isMobile ? '9px' : '10px', color: '#666', textTransform: 'uppercase' }}>
                 Bonus Skills:{' '}
               </span>
-              <span style={{ fontSize: '11px', color: '#aaa' }}>
+              <span style={{ fontSize: isMobile ? '10px' : '11px', color: '#aaa' }}>
                 {spec.bonusCareerSkills.join(', ')}
               </span>
             </div>
           </div>
-          <div style={{ textAlign: 'center', marginLeft: '16px', flexShrink: 0 }}>
+          <div style={{
+            textAlign: 'center',
+            marginLeft: isMobile ? '0' : '16px',
+            marginTop: isMobile ? '10px' : '0',
+            flexShrink: 0,
+            ...(isMobile ? { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } : {}),
+          }}>
             <div style={{ fontSize: '14px', fontWeight: 'bold', color: canUnlock ? '#bb99ff' : '#444' }}>
               {cost} XP
             </div>
             <button
               style={{
-                padding: '5px 14px',
-                fontSize: '11px',
+                padding: isMobile ? '10px 20px' : '5px 14px',
+                fontSize: isMobile ? '12px' : '11px',
                 fontWeight: 'bold',
                 border: 'none',
                 borderRadius: '4px',
                 cursor: canUnlock ? 'pointer' : 'default',
                 backgroundColor: canUnlock ? '#2a1a3a' : '#1a1a1a',
                 color: canUnlock ? '#bb99ff' : '#444',
-                marginTop: '4px',
+                marginTop: isMobile ? '0' : '4px',
                 transition: 'all 0.2s',
+                minHeight: isMobile ? '44px' : 'auto',
               }}
               disabled={!canUnlock}
               onClick={() => canUnlock && unlockHeroSpecialization(hero.id, spec.id)}
@@ -183,10 +192,10 @@ export const SpecializationPanel: React.FC<SpecializationPanelProps> = ({ hero }
     <div style={containerStyle}>
       {/* XP Summary */}
       <div style={xpSummaryStyle}>
-        <span style={{ color: '#bb99ff', fontSize: '18px', fontWeight: 'bold' }}>
+        <span style={{ color: '#bb99ff', fontSize: isMobile ? '16px' : '18px', fontWeight: 'bold' }}>
           {hero.xp.available} XP
         </span>
-        <span style={{ color: '#666', fontSize: '13px', marginLeft: '8px' }}>
+        <span style={{ color: '#666', fontSize: isMobile ? '12px' : '13px', marginLeft: '8px' }}>
           available ({hero.xp.total} total)
         </span>
       </div>

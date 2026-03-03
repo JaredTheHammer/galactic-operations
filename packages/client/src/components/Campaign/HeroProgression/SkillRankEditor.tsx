@@ -2,6 +2,7 @@ import React from 'react'
 import type { HeroCharacter } from '@engine/types.js'
 import { SKILL_LIST, skillRankXPCost, isCareerSkill } from '@engine/character-v2.js'
 import { useGameStore } from '../../../store/game-store'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 
 interface SkillRankEditorProps {
   hero: HeroCharacter
@@ -9,6 +10,7 @@ interface SkillRankEditorProps {
 
 export const SkillRankEditor: React.FC<SkillRankEditorProps> = ({ hero }) => {
   const { gameData, purchaseHeroSkillRank } = useGameStore()
+  const { isMobile } = useIsMobile()
 
   if (!gameData) return null
 
@@ -18,16 +20,16 @@ export const SkillRankEditor: React.FC<SkillRankEditorProps> = ({ hero }) => {
   const MAX_RANK = 5
 
   const containerStyle: React.CSSProperties = {
-    maxWidth: '700px',
+    maxWidth: isMobile ? '100%' : '700px',
     margin: '0 auto',
   }
 
   const sectionStyle: React.CSSProperties = {
-    marginBottom: '24px',
+    marginBottom: isMobile ? '16px' : '24px',
   }
 
   const sectionTitleStyle: React.CSSProperties = {
-    fontSize: '13px',
+    fontSize: isMobile ? '12px' : '13px',
     fontWeight: 'bold',
     color: '#bb99ff',
     textTransform: 'uppercase',
@@ -39,8 +41,8 @@ export const SkillRankEditor: React.FC<SkillRankEditorProps> = ({ hero }) => {
 
   const xpSummaryStyle: React.CSSProperties = {
     textAlign: 'center',
-    padding: '12px',
-    marginBottom: '16px',
+    padding: isMobile ? '10px' : '12px',
+    marginBottom: isMobile ? '10px' : '16px',
     backgroundColor: '#131320',
     borderRadius: '8px',
     border: '1px solid #333355',
@@ -56,7 +58,7 @@ export const SkillRankEditor: React.FC<SkillRankEditorProps> = ({ hero }) => {
     const rowStyle: React.CSSProperties = {
       display: 'flex',
       alignItems: 'center',
-      padding: '6px 8px',
+      padding: isMobile ? '8px 6px' : '6px 8px',
       borderRadius: '4px',
       marginBottom: '2px',
       backgroundColor: '#0f0f1a',
@@ -65,11 +67,12 @@ export const SkillRankEditor: React.FC<SkillRankEditorProps> = ({ hero }) => {
 
     const nameStyle: React.CSSProperties = {
       flex: 1,
-      fontSize: '13px',
+      fontSize: isMobile ? '12px' : '13px',
       color: '#fff',
       display: 'flex',
       alignItems: 'center',
-      gap: '6px',
+      gap: isMobile ? '4px' : '6px',
+      minWidth: 0,
     }
 
     const charStyle: React.CSSProperties = {
@@ -79,22 +82,26 @@ export const SkillRankEditor: React.FC<SkillRankEditorProps> = ({ hero }) => {
       textTransform: 'capitalize',
     }
 
+    const pipSize = isMobile ? 12 : 14
+
     const pipsStyle: React.CSSProperties = {
       display: 'flex',
-      gap: '3px',
-      width: '90px',
+      gap: isMobile ? '2px' : '3px',
+      width: isMobile ? 'auto' : '90px',
+      flexShrink: 0,
     }
 
     const costStyle: React.CSSProperties = {
-      width: '55px',
-      fontSize: '11px',
+      width: isMobile ? '40px' : '55px',
+      fontSize: isMobile ? '10px' : '11px',
       color: '#888',
       textAlign: 'right',
+      flexShrink: 0,
     }
 
     const buyBtnStyle: React.CSSProperties = {
-      padding: '3px 10px',
-      fontSize: '10px',
+      padding: isMobile ? '6px 12px' : '3px 10px',
+      fontSize: isMobile ? '11px' : '10px',
       fontWeight: 'bold',
       border: 'none',
       borderRadius: '3px',
@@ -102,35 +109,41 @@ export const SkillRankEditor: React.FC<SkillRankEditorProps> = ({ hero }) => {
       backgroundColor: canPurchase ? '#2a1a3a' : '#1a1a1a',
       color: canPurchase ? '#bb99ff' : '#444',
       opacity: canPurchase ? 1 : 0.5,
-      marginLeft: '8px',
+      marginLeft: isMobile ? '6px' : '8px',
       transition: 'all 0.2s',
+      minHeight: isMobile ? '44px' : 'auto',
+      minWidth: isMobile ? '44px' : 'auto',
+      flexShrink: 0,
     }
 
     return (
       <div key={skill.id} style={rowStyle}>
         <div style={nameStyle}>
-          {skill.name}
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {skill.name}
+          </span>
           {isCareer && (
             <span style={{
-              fontSize: '10px',
+              fontSize: isMobile ? '9px' : '10px',
               color: '#ffd700',
               padding: '1px 5px',
               backgroundColor: '#2a2a1a',
               borderRadius: '3px',
               border: '1px solid #554400',
+              flexShrink: 0,
             }}>
               Career
             </span>
           )}
         </div>
-        <div style={charStyle}>{skill.characteristic}</div>
+        {!isMobile && <div style={charStyle}>{skill.characteristic}</div>}
         <div style={pipsStyle}>
           {Array.from({ length: MAX_RANK }).map((_, i) => (
             <div
               key={i}
               style={{
-                width: 14,
-                height: 14,
+                width: pipSize,
+                height: pipSize,
                 borderRadius: '50%',
                 border: '2px solid ' + (i < currentRank ? '#bb99ff' : '#333'),
                 backgroundColor: i < currentRank ? '#bb99ff' : 'transparent',
@@ -157,17 +170,19 @@ export const SkillRankEditor: React.FC<SkillRankEditorProps> = ({ hero }) => {
     <div style={containerStyle}>
       {/* XP Summary */}
       <div style={xpSummaryStyle}>
-        <span style={{ color: '#bb99ff', fontSize: '18px', fontWeight: 'bold' }}>
+        <span style={{ color: '#bb99ff', fontSize: isMobile ? '16px' : '18px', fontWeight: 'bold' }}>
           {hero.xp.available} XP
         </span>
-        <span style={{ color: '#666', fontSize: '13px', marginLeft: '8px' }}>
+        <span style={{ color: '#666', fontSize: isMobile ? '12px' : '13px', marginLeft: '8px' }}>
           available ({hero.xp.total} total)
         </span>
       </div>
 
       {/* Cost Reference */}
-      <div style={{ textAlign: 'center', marginBottom: '16px', fontSize: '11px', color: '#666' }}>
-        Career skills: 5/10/15/20/25 XP per rank | Non-career: 10/15/20/25/30 XP per rank
+      <div style={{ textAlign: 'center', marginBottom: isMobile ? '10px' : '16px', fontSize: isMobile ? '10px' : '11px', color: '#666' }}>
+        {isMobile
+          ? 'Career: 5/10/15/20/25 | Non-career: 10/15/20/25/30'
+          : 'Career skills: 5/10/15/20/25 XP per rank | Non-career: 10/15/20/25/30 XP per rank'}
       </div>
 
       {/* Combat Skills */}
