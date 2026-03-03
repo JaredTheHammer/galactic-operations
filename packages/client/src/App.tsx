@@ -18,6 +18,7 @@ import MissionSelect from './components/Campaign/MissionSelect'
 import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
 import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgression'
+import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
 
@@ -34,6 +35,7 @@ function App() {
     showPostMission,
     showSocialPhase,
     showHeroProgression,
+    showPortraitManager,
     showCombatArena,
   } = useGameStore()
 
@@ -72,6 +74,11 @@ function App() {
   // Campaign: hero progression (XP spending)
   if (showHeroProgression) {
     return <HeroProgression />
+  }
+
+  // Campaign: portrait & faction visual manager
+  if (showPortraitManager) {
+    return <PortraitManagerPage />
   }
 
   // Campaign: post-mission results screen

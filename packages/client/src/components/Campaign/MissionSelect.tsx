@@ -257,6 +257,7 @@ export default function MissionSelect() {
     exitCampaign,
     openSocialPhase,
     openHeroProgression,
+    openPortraitManager,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -404,6 +405,12 @@ export default function MissionSelect() {
             onClick={openHeroProgression}
           >
             UPGRADE HEROES
+          </button>
+          <button
+            style={{ ...buttonStyle, backgroundColor: '#2a2a3a', color: '#bb99ff', flex: isMobile ? '1 1 auto' : undefined }}
+            onClick={openPortraitManager}
+          >
+            PORTRAITS
           </button>
           <button
             style={{

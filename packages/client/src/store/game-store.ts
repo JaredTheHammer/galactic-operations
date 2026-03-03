@@ -395,6 +395,7 @@ export interface GameStore {
   showPostMission: boolean
   showSocialPhase: boolean
   showHeroProgression: boolean
+  showPortraitManager: boolean
   campaignHeroCreation: boolean // true when creating heroes for a new campaign
   activeMissionDef: MissionDefinition | null // current mission definition for reinforcement waves
   triggeredWaveIds: string[] // mission reinforcement waves already deployed
@@ -456,6 +457,10 @@ export interface GameStore {
   // Hero progression actions
   openHeroProgression: () => void
   closeHeroProgression: () => void
+
+  // Portrait manager actions
+  openPortraitManager: () => void
+  closePortraitManager: () => void
   purchaseHeroTalent: (heroId: string, talentId: string, tier: 1 | 2 | 3 | 4 | 5, position: number) => void
   purchaseHeroSkillRank: (heroId: string, skillId: string) => void
   unlockHeroSpecialization: (heroId: string, specializationId: string) => void
@@ -502,6 +507,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   showPostMission: false,
   showSocialPhase: false,
   showHeroProgression: false,
+  showPortraitManager: false,
   campaignHeroCreation: false,
   activeMissionDef: null,
   triggeredWaveIds: [],
@@ -1618,6 +1624,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showPostMission: false,
       showSocialPhase: false,
       showHeroProgression: false,
+      showPortraitManager: false,
     })
 
     // Persist to localStorage immediately
@@ -1637,6 +1644,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showPostMission: false,
       showSocialPhase: false,
       showHeroProgression: false,
+      showPortraitManager: false,
       campaignHeroCreation: false,
       activeMissionDef: null,
       activeMission: null,
@@ -1688,6 +1696,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   closeHeroProgression: () => {
     set({
       showHeroProgression: false,
+      showMissionSelect: true,
+    })
+  },
+
+  // ---- Portrait Manager ----
+
+  openPortraitManager: () => {
+    set({
+      showMissionSelect: false,
+      showPortraitManager: true,
+    })
+  },
+
+  closePortraitManager: () => {
+    set({
+      showPortraitManager: false,
       showMissionSelect: true,
     })
   },
