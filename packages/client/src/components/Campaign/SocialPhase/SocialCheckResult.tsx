@@ -3,6 +3,7 @@
  */
 
 import React from 'react'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 import type { SocialCheckResult as SocialCheckResultType, SocialOutcome } from '../../../../../engine/src/types'
 
 interface Props {
@@ -37,21 +38,22 @@ const outcomeIcons: Record<string, string> = {
 }
 
 export function SocialCheckResult({ result, outcomes, narrativeText, onContinue }: Props) {
+  const { isMobile } = useIsMobile()
   const isSuccess = result.isSuccess
 
   return (
     <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      height: '100%', padding: '32px', overflowY: 'auto',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: isMobile ? 'flex-start' : 'center',
+      height: '100%', padding: isMobile ? '16px' : '32px', overflowY: 'auto',
     }}>
       <div style={{ maxWidth: '600px', width: '100%' }}>
         {/* Result banner */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '24px',
+          marginBottom: isMobile ? '16px' : '24px',
         }}>
           <div style={{
-            fontSize: '36px',
+            fontSize: isMobile ? '28px' : '36px',
             fontWeight: 'bold',
             color: isSuccess ? '#44ff44' : '#ff4444',
             textShadow: `0 0 30px ${isSuccess ? 'rgba(68, 255, 68, 0.4)' : 'rgba(255, 68, 68, 0.4)'}`,
@@ -109,19 +111,19 @@ export function SocialCheckResult({ result, outcomes, narrativeText, onContinue 
           border: '1px solid #2a2a3f',
           borderLeft: `3px solid ${isSuccess ? '#44ff44' : '#ff4444'}`,
           borderRadius: '8px',
-          padding: '16px',
-          marginBottom: '24px',
+          padding: isMobile ? '12px' : '16px',
+          marginBottom: isMobile ? '16px' : '24px',
           fontStyle: 'italic',
           color: '#ccc',
           fontSize: '14px',
-          lineHeight: '1.6',
+          lineHeight: isMobile ? '1.7' : '1.6',
         }}>
           {narrativeText}
         </div>
 
         {/* Outcomes */}
         {outcomes.length > 0 && (
-          <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: isMobile ? '16px' : '24px' }}>
             <h3 style={{ color: '#fff', margin: '0 0 12px 0', fontSize: '16px' }}>Outcomes</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {outcomes.map((outcome, i) => {
@@ -135,10 +137,10 @@ export function SocialCheckResult({ result, outcomes, narrativeText, onContinue 
                     backgroundColor: '#12121f',
                     border: `1px solid ${isNegative ? '#ff444440' : '#2a2a3f'}`,
                     borderRadius: '8px',
-                    padding: '12px 16px',
+                    padding: isMobile ? '10px 12px' : '12px 16px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
+                    gap: isMobile ? '8px' : '12px',
                   }}>
                     <span style={{ fontSize: '20px' }}>{icon}</span>
                     <div style={{ flex: 1 }}>
@@ -181,8 +183,8 @@ export function SocialCheckResult({ result, outcomes, narrativeText, onContinue 
         <button
           onClick={onContinue}
           style={{
-            padding: '14px 28px', borderRadius: '8px', border: 'none',
-            cursor: 'pointer', fontWeight: 'bold', fontSize: '16px',
+            padding: isMobile ? '12px 20px' : '14px 28px', borderRadius: '8px', border: 'none',
+            cursor: 'pointer', fontWeight: 'bold', fontSize: isMobile ? '14px' : '16px',
             backgroundColor: '#4a9eff', color: '#fff', width: '100%',
           }}
         >

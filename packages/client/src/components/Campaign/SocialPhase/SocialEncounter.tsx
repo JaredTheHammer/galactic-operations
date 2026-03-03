@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useMemo } from 'react'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 import type {
   CampaignState,
   SocialEncounter as SocialEncounterType,
@@ -43,6 +44,7 @@ const skillColors: Record<string, string> = {
 }
 
 export function SocialEncounter({ encounter, npc, campaign, onCheckResolved, onBack }: Props) {
+  const { isMobile } = useIsMobile()
   const heroes = useMemo(() => Object.values(campaign.heroes) as HeroCharacter[], [campaign.heroes])
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null)
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
@@ -80,24 +82,27 @@ export function SocialEncounter({ encounter, npc, campaign, onCheckResolved, onB
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header */}
       <div style={{
-        padding: '16px 24px',
+        padding: isMobile ? '12px 16px' : '16px 24px',
         borderBottom: '1px solid #2a2a3f',
         display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: isMobile ? 'stretch' : 'center',
+        gap: isMobile ? '8px' : undefined,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
-            width: '40px', height: '40px', borderRadius: '50%',
+            width: isMobile ? '32px' : '40px', height: isMobile ? '32px' : '40px', borderRadius: '50%',
             backgroundColor: `${dispositionColors[npc.disposition]}20`,
             border: `2px solid ${dispositionColors[npc.disposition]}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '18px', color: dispositionColors[npc.disposition], fontWeight: 'bold',
+            fontSize: isMobile ? '14px' : '18px', color: dispositionColors[npc.disposition], fontWeight: 'bold',
+            flexShrink: 0,
           }}>
             {npc.name[0]}
           </div>
           <div>
-            <h1 style={{ color: '#fff', margin: 0, fontSize: '20px' }}>{encounter.name}</h1>
+            <h1 style={{ color: '#fff', margin: 0, fontSize: isMobile ? '16px' : '20px' }}>{encounter.name}</h1>
             <div style={{ color: dispositionColors[npc.disposition], fontSize: '12px' }}>
               {npc.name} ({npc.disposition})
             </div>
@@ -106,8 +111,8 @@ export function SocialEncounter({ encounter, npc, campaign, onCheckResolved, onB
         <button
           onClick={onBack}
           style={{
-            padding: '10px 20px', borderRadius: '6px', border: '1px solid #555',
-            cursor: 'pointer', fontWeight: 'bold', fontSize: '14px',
+            padding: isMobile ? '8px 14px' : '10px 20px', borderRadius: '6px', border: '1px solid #555',
+            cursor: 'pointer', fontWeight: 'bold', fontSize: isMobile ? '13px' : '14px',
             backgroundColor: 'transparent', color: '#888',
           }}
         >
@@ -115,15 +120,21 @@ export function SocialEncounter({ encounter, npc, campaign, onCheckResolved, onB
         </button>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'row', overflow: isMobile ? 'auto' : 'hidden' }}>
         {/* Left: narrative + hero select */}
-        <div style={{ width: '340px', borderRight: '1px solid #2a2a3f', padding: '16px', overflowY: 'auto' }}>
+        <div style={{
+          width: isMobile ? '100%' : '340px',
+          borderRight: isMobile ? 'none' : '1px solid #2a2a3f',
+          borderBottom: isMobile ? '1px solid #2a2a3f' : 'none',
+          padding: isMobile ? '12px 16px' : '16px',
+          overflowY: isMobile ? 'visible' : 'auto',
+        }}>
           {/* Narrative intro */}
           <div style={{
             backgroundColor: '#12121f', border: '1px solid #2a2a3f',
             borderLeft: '3px solid #ffd700', borderRadius: '8px',
-            padding: '16px', marginBottom: '20px',
-            fontStyle: 'italic', color: '#ccc', fontSize: '13px', lineHeight: '1.6',
+            padding: isMobile ? '12px' : '16px', marginBottom: isMobile ? '16px' : '20px',
+            fontStyle: 'italic', color: '#ccc', fontSize: '13px', lineHeight: isMobile ? '1.7' : '1.6',
           }}>
             {encounter.narrativeIntro}
           </div>
@@ -172,7 +183,7 @@ export function SocialEncounter({ encounter, npc, campaign, onCheckResolved, onB
         </div>
 
         {/* Right: dialogue options */}
-        <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+        <div style={{ flex: 1, padding: isMobile ? '16px' : '24px', overflowY: isMobile ? 'visible' : 'auto' }}>
           <h2 style={{ color: '#fff', margin: '0 0 16px 0', fontSize: '18px' }}>
             Dialogue Options
           </h2>
@@ -258,7 +269,7 @@ function DialogueOptionCard({
       onMouseLeave={e => { if (isAvailable && !isSelected) e.currentTarget.style.borderColor = '#2a2a3f' }}
     >
       {/* Dialogue text */}
-      <div style={{ color: '#ccc', fontSize: '14px', lineHeight: '1.5', marginBottom: '12px', fontStyle: 'italic' }}>
+      <div style={{ color: '#ccc', fontSize: '14px', lineHeight: '1.6', marginBottom: '12px', fontStyle: 'italic' }}>
         {option.text}
       </div>
 

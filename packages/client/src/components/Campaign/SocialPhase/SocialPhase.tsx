@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 import { useGameStore } from '../../../store/game-store'
 import type {
   CampaignState,
@@ -50,7 +51,7 @@ export interface SocialSessionState {
   activeShopId: string | null
 }
 
-const containerStyle: React.CSSProperties = {
+const getContainerStyle = (isMobile: boolean): React.CSSProperties => ({
   width: '100vw',
   height: '100vh',
   backgroundColor: '#0a0a0f',
@@ -58,10 +59,11 @@ const containerStyle: React.CSSProperties = {
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
   display: 'flex',
   flexDirection: 'column',
-  overflow: 'hidden',
-}
+  overflow: isMobile ? 'auto' : 'hidden',
+})
 
 export function SocialPhase() {
+  const { isMobile } = useIsMobile()
   const { campaignState, closeSocialPhase, updateCampaignState } = useGameStore()
   const [view, setView] = useState<SocialView>('hub')
   const [session, setSession] = useState<SocialSessionState>(() => ({
@@ -92,7 +94,7 @@ export function SocialPhase() {
 
   if (!campaignState) {
     return (
-      <div style={containerStyle}>
+      <div style={getContainerStyle(isMobile)}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#ff4444' }}>
           No campaign loaded.
         </div>
@@ -195,7 +197,7 @@ export function SocialPhase() {
     : null
 
   return (
-    <div style={containerStyle}>
+    <div style={getContainerStyle(isMobile)}>
       {view === 'hub' && (
         <SocialHub
           location={location}

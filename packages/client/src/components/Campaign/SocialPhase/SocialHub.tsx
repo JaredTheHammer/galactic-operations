@@ -3,6 +3,7 @@
  */
 
 import React from 'react'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 import type {
   CampaignState,
   SocialPhaseLocation,
@@ -42,6 +43,7 @@ const dispositionLabels: Record<Disposition, string> = {
 }
 
 export function SocialHub({ location, npcs, campaign, session, onSelectEncounter, onSelectShop, onHealHero, onComplete, onSkip }: Props) {
+  const { isMobile } = useIsMobile()
   const availableEncounters = getAvailableEncounters(location, campaign, session.completedEncounterIds)
   const allEncounters = location.encounters
   const heroes = Object.values(campaign.heroes) as HeroCharacter[]
@@ -50,14 +52,16 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header */}
       <div style={{
-        padding: '16px 24px',
+        padding: isMobile ? '12px 16px' : '16px 24px',
         borderBottom: '1px solid #2a2a3f',
         display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: isMobile ? 'stretch' : 'center',
+        gap: isMobile ? '8px' : undefined,
       }}>
         <div>
-          <h1 style={{ color: '#ffd700', margin: 0, fontSize: '20px', textShadow: '0 0 20px rgba(255, 215, 0, 0.3)' }}>
+          <h1 style={{ color: '#ffd700', margin: 0, fontSize: isMobile ? '18px' : '20px', textShadow: '0 0 20px rgba(255, 215, 0, 0.3)' }}>
             {location.name}
           </h1>
           <div style={{ color: '#888', fontSize: '12px', marginTop: '2px' }}>Social Phase</div>
@@ -65,8 +69,9 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
             style={{
-              padding: '10px 20px', borderRadius: '6px', border: 'none', cursor: 'pointer',
-              fontWeight: 'bold', fontSize: '14px', backgroundColor: '#ffd700', color: '#0a0a0f',
+              padding: isMobile ? '8px 14px' : '10px 20px', borderRadius: '6px', border: 'none', cursor: 'pointer',
+              fontWeight: 'bold', fontSize: isMobile ? '13px' : '14px', backgroundColor: '#ffd700', color: '#0a0a0f',
+              flex: isMobile ? 1 : undefined,
             }}
             onClick={onComplete}
           >
@@ -74,8 +79,9 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
           </button>
           <button
             style={{
-              padding: '10px 20px', borderRadius: '6px', border: '1px solid #555', cursor: 'pointer',
-              fontWeight: 'bold', fontSize: '14px', backgroundColor: 'transparent', color: '#888',
+              padding: isMobile ? '8px 14px' : '10px 20px', borderRadius: '6px', border: '1px solid #555', cursor: 'pointer',
+              fontWeight: 'bold', fontSize: isMobile ? '13px' : '14px', backgroundColor: 'transparent', color: '#888',
+              flex: isMobile ? 1 : undefined,
             }}
             onClick={onSkip}
           >
@@ -84,9 +90,15 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
         </div>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'row', overflow: isMobile ? 'auto' : 'hidden' }}>
         {/* Left sidebar: hero roster + stats */}
-        <div style={{ width: '280px', borderRight: '1px solid #2a2a3f', padding: '16px', overflowY: 'auto' }}>
+        <div style={{
+          width: isMobile ? '100%' : '280px',
+          borderRight: isMobile ? 'none' : '1px solid #2a2a3f',
+          borderBottom: isMobile ? '1px solid #2a2a3f' : 'none',
+          padding: isMobile ? '12px 16px' : '16px',
+          overflowY: isMobile ? 'visible' : 'auto',
+        }}>
           {/* Credits */}
           <div style={{ marginBottom: '16px' }}>
             <div style={{ fontSize: '12px', color: '#888', textTransform: 'uppercase', marginBottom: '4px' }}>Credits</div>
@@ -111,7 +123,7 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
         </div>
 
         {/* Main content */}
-        <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+        <div style={{ flex: 1, padding: isMobile ? '16px' : '24px', overflowY: isMobile ? 'visible' : 'auto' }}>
           {/* Narrative intro */}
           <div style={{
             backgroundColor: '#12121f',
@@ -130,7 +142,7 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
 
           {/* NPC Encounters */}
           <h2 style={{ color: '#fff', margin: '0 0 16px 0', fontSize: '18px' }}>Encounters</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px', marginBottom: '24px' }}>
             {allEncounters.map(enc => {
               const npc = npcs[enc.npcId]
               const isAvailable = availableEncounters.some(e => e.id === enc.id)
@@ -150,7 +162,7 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
 
           {/* Shops */}
           <h2 style={{ color: '#fff', margin: '0 0 16px 0', fontSize: '18px' }}>Shops</h2>
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '12px' }}>
             {location.shops.map(shop => (
               <div
                 key={shop.id}
@@ -160,7 +172,7 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
                   backgroundColor: '#12121f',
                   border: '1px solid #2a2a3f',
                   borderRadius: '8px',
-                  padding: '16px',
+                  padding: isMobile ? '12px' : '16px',
                   cursor: 'pointer',
                   transition: 'border-color 0.2s',
                 }}

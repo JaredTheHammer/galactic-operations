@@ -3,6 +3,7 @@
  */
 
 import React from 'react'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 import type {
   SocialPhaseLocation,
   SocialNPC,
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function SocialSummary({ session, npcs, location, onComplete }: Props) {
+  const { isMobile } = useIsMobile()
   const { encounterResults, purchaseHistory, salesHistory, healingCreditsSpent } = session
 
   // Calculate net credit change from encounters
@@ -51,26 +53,26 @@ export function SocialSummary({ session, npcs, location, onComplete }: Props) {
 
   return (
     <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      height: '100%', padding: '32px', overflowY: 'auto',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: isMobile ? 'flex-start' : 'center',
+      height: '100%', padding: isMobile ? '16px' : '32px', overflowY: 'auto',
     }}>
       <div style={{ maxWidth: '600px', width: '100%' }}>
         {/* Header */}
         <h1 style={{
-          color: '#ffd700', textAlign: 'center', margin: '0 0 8px 0', fontSize: '28px',
+          color: '#ffd700', textAlign: 'center', margin: '0 0 8px 0', fontSize: isMobile ? '22px' : '28px',
           textShadow: '0 0 20px rgba(255, 215, 0, 0.3)',
         }}>
           PHASE COMPLETE
         </h1>
-        <div style={{ textAlign: 'center', color: '#888', fontSize: '14px', marginBottom: '24px' }}>
+        <div style={{ textAlign: 'center', color: '#888', fontSize: isMobile ? '13px' : '14px', marginBottom: isMobile ? '16px' : '24px' }}>
           {location.name}
         </div>
 
         {isEmpty ? (
           <div style={{
-            textAlign: 'center', color: '#888', padding: '40px',
+            textAlign: 'center', color: '#888', padding: isMobile ? '24px' : '40px',
             backgroundColor: '#12121f', borderRadius: '8px', border: '1px solid #2a2a3f',
-            marginBottom: '24px',
+            marginBottom: isMobile ? '16px' : '24px',
           }}>
             No interactions this visit.
           </div>
@@ -193,10 +195,10 @@ export function SocialSummary({ session, npcs, location, onComplete }: Props) {
         <button
           onClick={onComplete}
           style={{
-            padding: '14px 28px', borderRadius: '8px', border: 'none',
-            cursor: 'pointer', fontWeight: 'bold', fontSize: '16px',
+            padding: isMobile ? '12px 20px' : '14px 28px', borderRadius: '8px', border: 'none',
+            cursor: 'pointer', fontWeight: 'bold', fontSize: isMobile ? '14px' : '16px',
             backgroundColor: '#ffd700', color: '#0a0a0f', width: '100%',
-            marginTop: '24px',
+            marginTop: isMobile ? '16px' : '24px',
           }}
         >
           RETURN TO CAMPAIGN

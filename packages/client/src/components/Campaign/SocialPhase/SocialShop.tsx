@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useMemo } from 'react'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 import type {
   CampaignState,
   Shop,
@@ -30,6 +31,7 @@ const categoryColors: Record<string, string> = {
 }
 
 export function SocialShop({ shop, campaign, onPurchase, onSell, onBack }: Props) {
+  const { isMobile } = useIsMobile()
   const [tab, setTab] = useState<'buy' | 'sell'>('buy')
   const [transactions, setTransactions] = useState<string[]>([])
 
@@ -79,25 +81,27 @@ export function SocialShop({ shop, campaign, onPurchase, onSell, onBack }: Props
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header */}
       <div style={{
-        padding: '16px 24px',
+        padding: isMobile ? '12px 16px' : '16px 24px',
         borderBottom: '1px solid #2a2a3f',
         display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: isMobile ? 'stretch' : 'center',
+        gap: isMobile ? '8px' : undefined,
       }}>
         <div>
-          <h1 style={{ color: '#ffd700', margin: 0, fontSize: '20px' }}>{shop.name}</h1>
+          <h1 style={{ color: '#ffd700', margin: 0, fontSize: isMobile ? '18px' : '20px' }}>{shop.name}</h1>
           <div style={{ color: '#888', fontSize: '12px', marginTop: '2px' }}>{shop.description}</div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ fontSize: '20px', color: '#ffd700', fontWeight: 'bold' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '16px' }}>
+          <div style={{ fontSize: isMobile ? '16px' : '20px', color: '#ffd700', fontWeight: 'bold' }}>
             {campaign.credits} credits
           </div>
           <button
             onClick={onBack}
             style={{
-              padding: '10px 20px', borderRadius: '6px', border: '1px solid #555',
-              cursor: 'pointer', fontWeight: 'bold', fontSize: '14px',
+              padding: isMobile ? '8px 14px' : '10px 20px', borderRadius: '6px', border: '1px solid #555',
+              cursor: 'pointer', fontWeight: 'bold', fontSize: isMobile ? '13px' : '14px',
               backgroundColor: 'transparent', color: '#888',
             }}
           >
@@ -136,23 +140,25 @@ export function SocialShop({ shop, campaign, onPurchase, onSell, onBack }: Props
         )}
       </div>
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'row', overflow: isMobile ? 'auto' : 'hidden' }}>
         {/* Item list */}
-        <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+        <div style={{ flex: 1, padding: isMobile ? '16px' : '24px', overflowY: isMobile ? 'visible' : 'auto' }}>
           {tab === 'buy' ? (
             <>
               {/* Column headers */}
-              <div style={{
-                display: 'grid', gridTemplateColumns: '1fr 80px 80px 80px 80px',
-                gap: '8px', padding: '0 0 8px 0', borderBottom: '1px solid #1a1a2f',
-                fontSize: '11px', color: '#666', textTransform: 'uppercase',
-              }}>
-                <span>Item</span>
-                <span style={{ textAlign: 'center' }}>Category</span>
-                <span style={{ textAlign: 'right' }}>Price</span>
-                <span style={{ textAlign: 'center' }}>Stock</span>
-                <span />
-              </div>
+              {!isMobile && (
+                <div style={{
+                  display: 'grid', gridTemplateColumns: '1fr 80px 80px 80px 80px',
+                  gap: '8px', padding: '0 0 8px 0', borderBottom: '1px solid #1a1a2f',
+                  fontSize: '11px', color: '#666', textTransform: 'uppercase',
+                }}>
+                  <span>Item</span>
+                  <span style={{ textAlign: 'center' }}>Category</span>
+                  <span style={{ textAlign: 'right' }}>Price</span>
+                  <span style={{ textAlign: 'center' }}>Stock</span>
+                  <span />
+                </div>
+              )}
 
               {sortedInventory.map(item => {
                 const effectivePrice = getEffectivePrice(item, campaign)
@@ -160,6 +166,64 @@ export function SocialShop({ shop, campaign, onPurchase, onSell, onBack }: Props
                 const available = canBuyItem(item)
                 const soldOut = item.stock === 0
                 const locked = item.requiresNarrativeItems?.some(r => !campaign.narrativeItems.includes(r))
+
+                if (isMobile) {
+                  return (
+                    <div key={item.itemId} style={{
+                      backgroundColor: '#12121f',
+                      border: '1px solid #1a1a2f',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      marginBottom: '8px',
+                      opacity: available ? 1 : 0.4,
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <div style={{ color: '#fff', fontSize: '13px', fontWeight: 'bold' }}>
+                          {item.itemId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                        </div>
+                        <span style={{
+                          fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase',
+                          padding: '2px 6px', borderRadius: '4px',
+                          backgroundColor: `${categoryColors[item.category]}20`,
+                          color: categoryColors[item.category],
+                        }}>
+                          {item.category}
+                        </span>
+                      </div>
+                      {locked && (
+                        <div style={{ fontSize: '10px', color: '#ff6644', marginBottom: '8px' }}>
+                          Locked: requires {item.requiresNarrativeItems?.join(', ')}
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <span style={{ color: '#ffd700', fontSize: '14px', fontWeight: 'bold' }}>{effectivePrice}</span>
+                          {hasDiscount && (
+                            <span style={{ color: '#666', fontSize: '10px', textDecoration: 'line-through', marginLeft: '6px' }}>
+                              {item.basePrice}
+                            </span>
+                          )}
+                          <span style={{ color: soldOut ? '#ff4444' : '#888', fontSize: '12px', marginLeft: '8px' }}>
+                            {soldOut ? 'SOLD OUT' : item.stock === -1 ? '\u221E' : `${item.stock} left`}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => available && handleBuy(item)}
+                          disabled={!available}
+                          style={{
+                            padding: '6px 16px', borderRadius: '4px', border: 'none',
+                            fontSize: '12px', fontWeight: 'bold',
+                            cursor: available ? 'pointer' : 'not-allowed',
+                            backgroundColor: available ? '#ffd700' : '#1a1a2e',
+                            color: available ? '#0a0a0f' : '#666',
+                          }}
+                        >
+                          BUY
+                        </button>
+                      </div>
+                    </div>
+                  )
+                }
 
                 return (
                   <div key={item.itemId} style={{
@@ -234,7 +298,9 @@ export function SocialShop({ shop, campaign, onPurchase, onSell, onBack }: Props
 
                   return (
                     <div key={itemId} style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+                      justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center',
+                      gap: isMobile ? '8px' : undefined,
                       padding: '12px 0', borderBottom: '1px solid #1a1a2f',
                     }}>
                       <div>
@@ -248,9 +314,10 @@ export function SocialShop({ shop, campaign, onPurchase, onSell, onBack }: Props
                       <button
                         onClick={() => handleSell(itemId, basePrice)}
                         style={{
-                          padding: '4px 12px', borderRadius: '4px', border: 'none',
-                          fontSize: '11px', fontWeight: 'bold', cursor: 'pointer',
+                          padding: isMobile ? '8px 12px' : '4px 12px', borderRadius: '4px', border: 'none',
+                          fontSize: isMobile ? '12px' : '11px', fontWeight: 'bold', cursor: 'pointer',
                           backgroundColor: '#44ff44', color: '#0a0a0f',
+                          width: isMobile ? '100%' : undefined,
                         }}
                       >
                         SELL
@@ -266,7 +333,11 @@ export function SocialShop({ shop, campaign, onPurchase, onSell, onBack }: Props
         {/* Transaction log sidebar */}
         {transactions.length > 0 && (
           <div style={{
-            width: '220px', borderLeft: '1px solid #2a2a3f', padding: '16px', overflowY: 'auto',
+            width: isMobile ? '100%' : '220px',
+            borderLeft: isMobile ? 'none' : '1px solid #2a2a3f',
+            borderTop: isMobile ? '1px solid #2a2a3f' : 'none',
+            padding: isMobile ? '12px 16px' : '16px',
+            overflowY: isMobile ? 'visible' : 'auto',
           }}>
             <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', marginBottom: '8px' }}>
               Transactions
