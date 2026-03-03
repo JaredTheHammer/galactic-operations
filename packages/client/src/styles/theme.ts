@@ -92,6 +92,12 @@ export const t = {
   textXl:  'var(--text-xl)',
   text2xl: 'var(--text-2xl)',
   text3xl: 'var(--text-3xl)',
+
+  // Safe areas
+  safeTop: 'var(--safe-top)',
+  safeBottom: 'var(--safe-bottom)',
+  safeLeft: 'var(--safe-left)',
+  safeRight: 'var(--safe-right)',
 } as const
 
 // ---------------------------------------------------------------------------
@@ -265,5 +271,48 @@ export const mixins = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+  } as React.CSSProperties,
+
+  /** Full-width mobile panel with reduced padding */
+  mobilePanel: {
+    width: '100%',
+    maxWidth: '100vw',
+    padding: '16px',
+    borderRadius: 0,
+    border: 'none',
+    borderBottom: `1px solid ${t.border}`,
+  } as React.CSSProperties,
+
+  /** Converts sidebar+content flex to vertical stack */
+  mobileStack: {
+    flexDirection: 'column' as const,
+    overflow: 'auto',
+  } as React.CSSProperties,
+
+  /** Compact horizontal bar (mobile HUD) */
+  compactBar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '8px 12px',
+    backgroundColor: t.panelBg,
+    borderBottom: `1px solid ${t.border}`,
+    gap: '8px',
+    flexShrink: 0,
+  } as React.CSSProperties,
+
+  /** Mobile-safe full-screen container (respects notch) */
+  mobileScreen: {
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: t.bgBase,
+    color: t.textPrimary,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    overflow: 'hidden',
+    paddingTop: t.safeTop,
+    paddingBottom: t.safeBottom,
+    paddingLeft: t.safeLeft,
+    paddingRight: t.safeRight,
   } as React.CSSProperties,
 } as const
