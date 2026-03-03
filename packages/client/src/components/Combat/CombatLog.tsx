@@ -2,9 +2,12 @@ import React, { useEffect, useRef } from 'react'
 
 interface CombatLogProps {
   messages: string[]
+  compact?: boolean
+  visible?: boolean
+  onClose?: () => void
 }
 
-export const CombatLog: React.FC<CombatLogProps> = ({ messages }) => {
+export const CombatLog: React.FC<CombatLogProps> = ({ messages, compact = false, visible, onClose }) => {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -12,6 +15,56 @@ export const CombatLog: React.FC<CombatLogProps> = ({ messages }) => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages])
+
+  if (compact) {
+    if (!visible) return null
+    return (
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(10, 10, 15, 0.98)',
+        zIndex: 300,
+        display: 'flex', flexDirection: 'column',
+        padding: '16px',
+        paddingTop: 'calc(16px + var(--safe-top))',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <span style={{ color: '#ffd700', fontWeight: 'bold', fontSize: '14px' }}>Combat Log</span>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: '1px solid #333355',
+              color: '#ffffff',
+              padding: '6px 12px',
+              borderRadius: '4px',
+              fontSize: '14px',
+              cursor: 'pointer',
+              minWidth: '44px',
+              minHeight: '44px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            ✕
+          </button>
+        </div>
+        <div ref={scrollRef} style={{ overflowY: 'auto', flex: 1, fontFamily: 'monospace', lineHeight: '1.4', fontSize: '12px', color: '#ffffff' }}>
+          {messages.length === 0 ? (
+            <div style={{ color: '#999999', textAlign: 'center', padding: '20px 0' }}>
+              No events yet
+            </div>
+          ) : (
+            messages.map((msg, idx) => (
+              <div key={idx} style={{ marginBottom: '4px', padding: '2px 0', borderBottom: '1px solid rgba(74, 158, 255, 0.1)' }}>
+                {msg}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    )
+  }
 
   const containerStyle: React.CSSProperties = {
     position: 'fixed',

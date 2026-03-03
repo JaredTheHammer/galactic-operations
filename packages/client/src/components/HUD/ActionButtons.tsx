@@ -5,9 +5,10 @@ import { getWoundThresholdV2 } from '@engine/turn-machine-v2.js'
 
 interface ActionButtonsProps {
   selectedFigure: Figure | null
+  compact?: boolean
 }
 
-export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure }) => {
+export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, compact = false }) => {
   const {
     moveFigure, startAttack, rallyFigure, guardedStance, useTalent,
     endActivation, validMoves, validTargets, gameState, getActivatableTalents,
@@ -29,7 +30,18 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure }) 
   // Get activatable talents for hero figures
   const activatableTalents = getActivatableTalents(selectedFigure)
 
-  const containerStyle: React.CSSProperties = {
+  const containerStyle: React.CSSProperties = compact ? {
+    display: 'flex',
+    gap: '8px',
+    overflowX: 'auto',
+    padding: '8px 12px',
+    paddingBottom: 'calc(8px + var(--safe-bottom))',
+    backgroundColor: 'rgba(10, 10, 15, 0.95)',
+    borderTop: '1px solid #333355',
+    WebkitOverflowScrolling: 'touch',
+    flexShrink: 0,
+    zIndex: 100,
+  } : {
     position: 'fixed',
     bottom: '20px',
     left: '50%',

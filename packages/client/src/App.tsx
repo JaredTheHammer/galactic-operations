@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useGameStore } from './store/game-store'
 import { TacticalGrid } from './canvas/TacticalGrid'
 import { GameSetup } from './components/Setup/GameSetup'
@@ -19,6 +19,7 @@ import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
 import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgression'
 import { CombatArena } from './components/CombatArena/CombatArena'
+import { useIsMobile } from './hooks/useIsMobile'
 
 function App() {
   const {
@@ -35,6 +36,9 @@ function App() {
     showHeroProgression,
     showCombatArena,
   } = useGameStore()
+
+  const { isMobile } = useIsMobile()
+  const [showCombatLog, setShowCombatLog] = useState(false)
 
   const selectedFigure = gameState?.figures.find(f => f.id === selectedFigureId) || null
   const currentActivatingId = gameState?.activationOrder[gameState?.currentActivationIndex]
@@ -86,6 +90,95 @@ function App() {
   // AI Battle mode: use the dedicated watch mode UI
   if (isAIBattle) {
     return <AIBattle />
+  }
+
+  // ---- Mobile Combat Layout ----
+  if (isMobile) {
+    return (
+      <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0a0a0f', overflow: 'hidden' }}>
+        {/* Compact top bar */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 12px',
+          paddingTop: 'calc(8px + var(--safe-top))',
+          backgroundColor: '#131320',
+          borderBottom: '1px solid #333355',
+          gap: '8px',
+          flexShrink: 0,
+        }}>
+          <TurnIndicator gameState={gameState} compact hideControls />
+          <MoraleTracker gameState={gameState} compact />
+          <ThreatTracker gameState={gameState} compact />
+          <ObjectiveProgress gameState={gameState} compact />
+          <button
+            onClick={() => setShowCombatLog(true)}
+            style={{
+              background: 'none',
+              border: '1px solid #333355',
+              color: '#ffd700',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '10px',
+              cursor: 'pointer',
+              minWidth: '32px',
+              minHeight: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            LOG
+          </button>
+        </div>
+
+        {/* Canvas fills remaining space */}
+        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          <TacticalGrid gameState={gameState} />
+        </div>
+
+        {/* Action buttons strip */}
+        {currentActivatingFigure?.id === selectedFigureId && (
+          <ActionButtons selectedFigure={selectedFigure} compact />
+        )}
+
+        {/* Info drawer */}
+        {selectedFigure && (
+          <InfoPanel selectedFigure={selectedFigure} gameState={gameState} compact />
+        )}
+
+        {/* Combat log overlay */}
+        <CombatLog messages={combatLog} compact visible={showCombatLog} onClose={() => setShowCombatLog(false)} />
+
+        {/* Objective hover tooltip */}
+        <ObjectiveTooltip />
+
+        {/* Notification popups */}
+        <NotificationCenter />
+
+        {/* Combat panel overlay */}
+        {gameState.activeCombat && (
+          <CombatPanel combat={gameState.activeCombat} gameState={gameState} />
+        )}
+
+        {/* Semi-transparent backdrop for combat */}
+        {gameState.activeCombat && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 150,
+              pointerEvents: 'none',
+            }}
+          />
+        )}
+      </div>
+    )
   }
 
   const appStyle: React.CSSProperties = {

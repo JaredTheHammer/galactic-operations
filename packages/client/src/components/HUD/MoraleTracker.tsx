@@ -3,6 +3,7 @@ import type { GameState } from '@engine/types.js'
 
 interface MoraleTrackerProps {
   gameState: GameState | null
+  compact?: boolean
 }
 
 const MORALE_COLORS: Record<string, string> = {
@@ -12,7 +13,7 @@ const MORALE_COLORS: Record<string, string> = {
   Broken: '#ff4444',
 }
 
-export const MoraleTracker: React.FC<MoraleTrackerProps> = ({ gameState }) => {
+export const MoraleTracker: React.FC<MoraleTrackerProps> = ({ gameState, compact = false }) => {
   const [imperialFlash, setImperialFlash] = useState(false)
   const [operativeFlash, setOperativeFlash] = useState(false)
 
@@ -33,6 +34,21 @@ export const MoraleTracker: React.FC<MoraleTrackerProps> = ({ gameState }) => {
   }, [gameState?.operativeMorale.state])
 
   if (!gameState) return null
+
+  if (compact) {
+    return (
+      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', fontSize: '9px' }}>
+        <span style={{ color: '#ff4444' }}>IMP</span>
+        <div style={{ width: '40px', height: '6px', backgroundColor: '#1a1a2e', borderRadius: '3px', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${(gameState.imperialMorale.value / gameState.imperialMorale.max) * 100}%`, backgroundColor: MORALE_COLORS[gameState.imperialMorale.state] }} />
+        </div>
+        <span style={{ color: '#44ff44' }}>OPS</span>
+        <div style={{ width: '40px', height: '6px', backgroundColor: '#1a1a2e', borderRadius: '3px', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${(gameState.operativeMorale.value / gameState.operativeMorale.max) * 100}%`, backgroundColor: MORALE_COLORS[gameState.operativeMorale.state] }} />
+        </div>
+      </div>
+    )
+  }
 
   const containerStyle: React.CSSProperties = {
     position: 'fixed',

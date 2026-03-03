@@ -11,15 +11,28 @@ import type { GameState } from '@engine/types.js'
 
 interface ObjectiveProgressProps {
   gameState: GameState | null
+  compact?: boolean
 }
 
-export const ObjectiveProgress: React.FC<ObjectiveProgressProps> = ({ gameState }) => {
+export const ObjectiveProgress: React.FC<ObjectiveProgressProps> = ({ gameState, compact = false }) => {
   if (!gameState?.objectivePoints || gameState.objectivePoints.length === 0) return null
 
   const completed = gameState.objectivePoints.filter(o => o.isCompleted).length
   const total = gameState.objectivePoints.length
   const allDone = completed === total
   const percent = (completed / total) * 100
+
+  if (compact) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '9px' }}>
+        <span style={{ color: allDone ? '#44ff44' : '#ffd700', fontWeight: 'bold' }}>OBJ</span>
+        <div style={{ width: '30px', height: '6px', backgroundColor: '#1a1a2e', borderRadius: '3px', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${percent}%`, backgroundColor: allDone ? '#44ff44' : '#4a9eff' }} />
+        </div>
+        <span style={{ color: allDone ? '#44ff44' : '#cccccc' }}>{completed}/{total}</span>
+      </div>
+    )
+  }
 
   const containerStyle: React.CSSProperties = {
     position: 'fixed',

@@ -6,9 +6,10 @@ import { useGameStore } from '../../store/game-store'
 interface InfoPanelProps {
   selectedFigure: Figure | null
   gameState: GameState | null
+  compact?: boolean
 }
 
-export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState }) => {
+export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState, compact = false }) => {
   const gameData = useGameStore(s => s.gameData)
 
   if (!selectedFigure || !gameState) return null
@@ -49,7 +50,22 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState 
     }
   }
 
-  const panelStyle: React.CSSProperties = {
+  const panelStyle: React.CSSProperties = compact ? {
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    maxHeight: '40vh',
+    overflowY: 'auto',
+    backgroundColor: 'rgba(19, 19, 32, 0.98)',
+    borderTop: '2px solid #4a9eff',
+    borderRadius: '12px 12px 0 0',
+    padding: '12px 16px',
+    paddingBottom: 'calc(12px + var(--safe-bottom))',
+    zIndex: 200,
+    color: '#ffffff',
+    fontSize: '12px',
+  } : {
     position: 'fixed',
     top: '80px',
     right: '20px',
@@ -118,6 +134,10 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState 
 
   return (
     <div style={panelStyle}>
+      {/* Drag handle for mobile drawer */}
+      {compact && (
+        <div style={{ width: '40px', height: '4px', backgroundColor: '#4a9eff', borderRadius: '2px', margin: '0 auto 8px' }} />
+      )}
       {/* Title */}
       <div style={{ ...sectionStyle, marginBottom: '16px' }}>
         <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#ffd700' }}>

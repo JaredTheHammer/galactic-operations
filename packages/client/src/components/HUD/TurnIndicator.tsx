@@ -5,6 +5,7 @@ import type { GameState } from '@engine/types.js'
 interface TurnIndicatorProps {
   gameState: GameState | null
   hideControls?: boolean
+  compact?: boolean
 }
 
 const PHASE_COLORS: Record<string, string> = {
@@ -16,7 +17,7 @@ const PHASE_COLORS: Record<string, string> = {
   GameOver: '#ff4444',
 }
 
-export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideControls = false }) => {
+export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideControls = false, compact = false }) => {
   const { advancePhase } = useGameStore()
 
   if (!gameState) return null
@@ -26,6 +27,15 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideCon
   const currentFigure = gameState.figures.find(f => f.id === currentFigureId)
 
   const phaseColor = PHASE_COLORS[gameState.turnPhase] || '#999999'
+
+  if (compact) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
+        <span style={{ color: '#ffd700', fontWeight: 'bold' }}>R{gameState.roundNumber}</span>
+        <span style={{ color: phaseColor, fontWeight: 'bold' }}>{gameState.turnPhase}</span>
+      </div>
+    )
+  }
 
   const containerStyle: React.CSSProperties = {
     position: 'fixed',

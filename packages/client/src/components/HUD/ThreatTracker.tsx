@@ -12,9 +12,10 @@ import { useGameStore } from '../../store/game-store'
 
 interface ThreatTrackerProps {
   gameState: GameState | null
+  compact?: boolean
 }
 
-export const ThreatTracker: React.FC<ThreatTrackerProps> = ({ gameState }) => {
+export const ThreatTracker: React.FC<ThreatTrackerProps> = ({ gameState, compact = false }) => {
   const threatFlash = useGameStore(s => s.threatFlash)
 
   if (!gameState) return null
@@ -26,6 +27,17 @@ export const ThreatTracker: React.FC<ThreatTrackerProps> = ({ gameState }) => {
   const barMax = 20
   const barPercent = Math.min((threat / barMax) * 100, 100)
   const isHigh = threat >= 12
+
+  if (compact) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
+        <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{threat}</span>
+        <div style={{ width: '30px', height: '6px', backgroundColor: '#1a1a2e', borderRadius: '3px', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${barPercent}%`, backgroundColor: isHigh ? '#ff4444' : '#ffd700' }} />
+        </div>
+      </div>
+    )
+  }
 
   const containerStyle: React.CSSProperties = {
     position: 'fixed',
