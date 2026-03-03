@@ -7,6 +7,7 @@ import React from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { MissionResult, HeroCharacter } from '../../../../engine/src/types'
+import { HeroPortrait } from '../Portrait/HeroPortrait'
 
 const containerStyle: React.CSSProperties = {
   width: '100vw',
@@ -103,7 +104,10 @@ function HeroStatusCard({
       marginRight: isMobile ? 0 : pillStyle.marginRight,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-        <span style={{ color: '#4a9eff', fontWeight: 'bold', fontSize: '13px' }}>{hero.name}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <HeroPortrait portraitId={hero.portraitId} name={hero.name} size={28} accentColor="#4a9eff" />
+          <span style={{ color: '#4a9eff', fontWeight: 'bold', fontSize: '13px' }}>{hero.name}</span>
+        </div>
         <span style={{ color: statusColor, fontSize: '10px', fontWeight: 'bold' }}>
           {statusIcon} {statusText}
         </span>

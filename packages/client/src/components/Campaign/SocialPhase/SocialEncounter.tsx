@@ -14,6 +14,7 @@ import type {
   HeroCharacter,
   Disposition,
 } from '../../../../../engine/src/types'
+import { HeroPortrait } from '../../Portrait/HeroPortrait'
 import {
   getAvailableDialogueOptions,
   computeSocialDifficulty,
@@ -156,9 +157,14 @@ export function SocialEncounter({ encounter, npc, campaign, onCheckResolved, onB
               onMouseEnter={e => { if (selectedHeroId !== hero.id) e.currentTarget.style.borderColor = '#3a3a5f' }}
               onMouseLeave={e => { if (selectedHeroId !== hero.id) e.currentTarget.style.borderColor = '#2a2a3f' }}
             >
-              <div style={{ color: '#4a9eff', fontWeight: 'bold', fontSize: '13px' }}>{hero.name}</div>
-              <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
-                {hero.species} {hero.career} / {hero.specializations[0]}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <HeroPortrait portraitId={hero.portraitId} name={hero.name} size={32} accentColor={selectedHeroId === hero.id ? '#4a9eff' : '#374151'} />
+                <div>
+                  <div style={{ color: '#4a9eff', fontWeight: 'bold', fontSize: '13px' }}>{hero.name}</div>
+                  <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
+                    {hero.species} {hero.career} / {hero.specializations[0]}
+                  </div>
+                </div>
               </div>
               {/* Social skill ranks */}
               <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>

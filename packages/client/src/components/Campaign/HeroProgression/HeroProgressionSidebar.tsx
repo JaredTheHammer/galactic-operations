@@ -2,6 +2,7 @@ import React from 'react'
 import type { HeroCharacter } from '@engine/types.js'
 import { useGameStore } from '../../../store/game-store'
 import { useIsMobile } from '../../../hooks/useIsMobile'
+import { HeroPortrait } from '../../Portrait/HeroPortrait'
 
 interface HeroProgressionSidebarProps {
   heroes: HeroCharacter[]
@@ -101,9 +102,14 @@ export const HeroProgressionSidebar: React.FC<HeroProgressionSidebarProps> = ({
             style={cardStyle}
             onClick={() => onSelectHero(hero.id)}
           >
-            <div style={nameStyle}>{hero.name}</div>
-            <div style={subStyle}>
-              {speciesName} {specName}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+              <HeroPortrait portraitId={hero.portraitId} name={hero.name} size={28} accentColor={isSelected ? '#bb99ff' : '#374151'} />
+              <div>
+                <div style={nameStyle}>{hero.name}</div>
+                <div style={subStyle}>
+                  {speciesName} {specName}
+                </div>
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
               <span style={xpBadgeStyle}>

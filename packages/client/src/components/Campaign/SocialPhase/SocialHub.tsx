@@ -15,6 +15,7 @@ import type {
 import { getAvailableEncounters } from '../../../../../engine/src/social-phase'
 import { MEDICAL_RECOVERY_COST } from '../../../../../engine/src/campaign-v2'
 import type { SocialSessionState } from './SocialPhase'
+import { HeroPortrait } from '../../Portrait/HeroPortrait'
 
 interface Props {
   location: SocialPhaseLocation
@@ -296,10 +297,13 @@ function HeroStatusCard({
       marginBottom: '8px',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <div style={{ color: '#4a9eff', fontWeight: 'bold', fontSize: '13px' }}>{hero.name}</div>
-          <div style={{ fontSize: '11px', color: '#666' }}>
-            {hero.species} {hero.career}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <HeroPortrait portraitId={hero.portraitId} name={hero.name} size={32} accentColor="#4a9eff" />
+          <div>
+            <div style={{ color: '#4a9eff', fontWeight: 'bold', fontSize: '13px' }}>{hero.name}</div>
+            <div style={{ fontSize: '11px', color: '#666' }}>
+              {hero.species} {hero.career}
+            </div>
           </div>
         </div>
         {isWounded && (

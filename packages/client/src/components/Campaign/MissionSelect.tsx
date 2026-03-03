@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult } from '../../../../engine/src/types'
+import { HeroPortrait } from '../Portrait/HeroPortrait'
 
 // ============================================================================
 // STYLES
@@ -94,7 +95,10 @@ function HeroCard({ hero }: { hero: HeroCharacter }) {
   return (
     <div style={{ ...cardStyle, cursor: 'default', borderColor }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', alignItems: 'center' }}>
-        <span style={{ color: '#4a9eff', fontWeight: 'bold' }}>{hero.name}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <HeroPortrait portraitId={hero.portraitId} name={hero.name} size={28} accentColor="#4a9eff" />
+          <span style={{ color: '#4a9eff', fontWeight: 'bold' }}>{hero.name}</span>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isWounded && (
             <span style={{
