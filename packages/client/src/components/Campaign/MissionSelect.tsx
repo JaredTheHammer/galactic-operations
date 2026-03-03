@@ -4,11 +4,13 @@
  * completed mission history, and XP spending.
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useCallback, useRef, useState, useEffect } from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult } from '../../../../engine/src/types'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
+import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
+import { usePortraitStore } from '../../store/portrait-store'
 
 // ============================================================================
 // STYLES
@@ -251,6 +253,7 @@ export default function MissionSelect() {
     campaignMissions,
     startCampaignMission,
     saveCampaignToStorage,
+    loadImportedCampaign,
     exitCampaign,
     openSocialPhase,
     openHeroProgression,
@@ -259,6 +262,9 @@ export default function MissionSelect() {
   const { isMobile } = useIsMobile()
   const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null)
   const [saveFlash, setSaveFlash] = useState(false)
+  const [exportFlash, setExportFlash] = useState(false)
+  const [importStatus, setImportStatus] = useState<string | null>(null)
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   // Auto-select first available mission
   useEffect(() => {
@@ -301,6 +307,52 @@ export default function MissionSelect() {
     setSaveFlash(true)
     setTimeout(() => setSaveFlash(false), 2000)
   }
+
+  const handleExport = useCallback(async () => {
+    if (!campaignState) return
+    try {
+      await downloadCampaignBundle(campaignState)
+      setExportFlash(true)
+      setTimeout(() => setExportFlash(false), 2000)
+    } catch (e) {
+      console.error('Export failed:', e)
+      setImportStatus('Export failed')
+      setTimeout(() => setImportStatus(null), 3000)
+    }
+  }, [campaignState])
+
+  const handleImportClick = useCallback(() => {
+    importInputRef.current?.click()
+  }, [])
+
+  const handleImportFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    try {
+      setImportStatus('Importing...')
+      const result = await importCampaignFromFile(file)
+
+      // Load the imported campaign into the game store
+      loadImportedCampaign(result.campaign)
+
+      // Re-hydrate portrait store to pick up imported portraits
+      await usePortraitStore.getState().hydrate()
+
+      const parts: string[] = [`Imported!`]
+      if (result.portraitsImported > 0) parts.push(`${result.portraitsImported} portraits`)
+      if (result.portraitsSkipped > 0) parts.push(`${result.portraitsSkipped} skipped`)
+      setImportStatus(parts.join(' \u2022 '))
+      setTimeout(() => setImportStatus(null), 4000)
+    } catch (err) {
+      console.error('Import failed:', err)
+      setImportStatus('Import failed -- invalid file')
+      setTimeout(() => setImportStatus(null), 4000)
+    }
+
+    // Reset file input so same file can be re-imported
+    e.target.value = ''
+  }, [loadImportedCampaign])
 
   // Count healthy heroes for warning
   const heroes = Object.values(campaignState.heroes) as HeroCharacter[]
@@ -366,6 +418,41 @@ export default function MissionSelect() {
             {saveFlash ? '\u2714 SAVED!' : 'SAVE CAMPAIGN'}
           </button>
           <button
+            style={{
+              ...buttonStyle,
+              backgroundColor: exportFlash ? '#44ff44' : '#1a2a3a',
+              color: exportFlash ? '#000' : '#88bbff',
+              transition: 'all 0.3s',
+              fontSize: '12px',
+              padding: '10px 14px',
+              flex: isMobile ? '1 1 auto' : undefined,
+            }}
+            onClick={handleExport}
+          >
+            {exportFlash ? '\u2714 EXPORTED' : 'EXPORT'}
+          </button>
+          <button
+            style={{
+              ...buttonStyle,
+              backgroundColor: '#1a2a3a',
+              color: '#88bbff',
+              fontSize: '12px',
+              padding: '10px 14px',
+              flex: isMobile ? '1 1 auto' : undefined,
+            }}
+            onClick={handleImportClick}
+          >
+            IMPORT
+          </button>
+          {/* Hidden file input for import */}
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".json"
+            style={{ display: 'none' }}
+            onChange={handleImportFile}
+          />
+          <button
             style={{ ...buttonStyle, backgroundColor: '#3a2a2a', color: '#ff6644', flex: isMobile ? '1 1 auto' : undefined }}
             onClick={exitCampaign}
           >
@@ -373,6 +460,20 @@ export default function MissionSelect() {
           </button>
         </div>
       </div>
+
+      {/* Import status toast */}
+      {importStatus && (
+        <div style={{
+          padding: '6px 16px',
+          backgroundColor: importStatus.startsWith('Import failed') ? '#3a1a1a' : '#1a2a1a',
+          color: importStatus.startsWith('Import failed') ? '#ff6644' : '#44ff44',
+          fontSize: '12px',
+          textAlign: 'center',
+          borderBottom: '1px solid #2a2a3f',
+        }}>
+          {importStatus}
+        </div>
+      )}
 
       <div style={mainResponsive}>
         {/* Left sidebar: hero roster + stats + history */}

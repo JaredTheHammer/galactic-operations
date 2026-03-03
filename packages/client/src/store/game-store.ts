@@ -445,6 +445,7 @@ export interface GameStore {
   returnToMissionSelect: () => void
   saveCampaignToStorage: () => void
   loadCampaignFromStorage: () => boolean
+  loadImportedCampaign: (campaign: CampaignState) => void
   exitCampaign: () => void
 
   // Social phase actions
@@ -1597,6 +1598,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
       console.error('Failed to load campaign:', e)
       return false
     }
+  },
+
+  /**
+   * Load an imported campaign state directly (from export bundle).
+   * Skips localStorage read -- the CampaignState comes from the import parser.
+   * Also persists to localStorage so the imported save sticks.
+   */
+  loadImportedCampaign: (campaign: CampaignState) => {
+    const missions = loadCampaignMissions()
+    const gameData = loadGameDataV2()
+
+    set({
+      campaignState: campaign,
+      campaignMissions: missions,
+      gameData,
+      showSetup: false,
+      showMissionSelect: true,
+      showPostMission: false,
+      showSocialPhase: false,
+      showHeroProgression: false,
+    })
+
+    // Persist to localStorage immediately
+    const json = campaignToJSON(campaign)
+    localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
   },
 
   /**
