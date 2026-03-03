@@ -303,13 +303,29 @@ export const usePortraitStore = create<PortraitStoreState>((set, get) => ({
 
 // ============================================================================
 // Selectors (for use with usePortraitStore(selector))
+//
+// IMPORTANT: Selectors that derive arrays/objects MUST be memoized so they
+// return the same reference when the underlying data hasn't changed.
+// Zustand v5 uses Object.is for equality; returning new arrays on every
+// call causes useSyncExternalStore to enter an infinite re-render loop.
 // ============================================================================
+
+// --- Memoization caches (module-scoped, single-consumer safe) ---
+let _cachedPortraitsRef: Record<string, PortraitEntry> | null = null;
+let _cachedPortraitList: PortraitEntry[] = [];
+
+let _cachedTagsPortraitsRef: Record<string, PortraitEntry> | null = null;
+let _cachedTagIds: string[] = [];
+let _cachedTagResult: PortraitEntry[] = [];
 
 /** Get all portrait entries as an array, sorted by creation date (newest first). */
 export function selectPortraitList(state: PortraitStoreState): PortraitEntry[] {
-  return Object.values(state.portraits).sort(
+  if (state.portraits === _cachedPortraitsRef) return _cachedPortraitList;
+  _cachedPortraitsRef = state.portraits;
+  _cachedPortraitList = Object.values(state.portraits).sort(
     (a, b) => b.createdAt.localeCompare(a.createdAt)
   );
+  return _cachedPortraitList;
 }
 
 /** Get portraits filtered by a set of tag IDs (AND logic). */
@@ -317,10 +333,28 @@ export function selectPortraitsByTags(
   state: PortraitStoreState,
   tagIds: string[],
 ): PortraitEntry[] {
-  if (tagIds.length === 0) return selectPortraitList(state);
-  return selectPortraitList(state).filter(p =>
-    tagIds.every(tag => p.tags.includes(tag))
-  );
+  const list = selectPortraitList(state);
+
+  // Check if inputs are unchanged (portraits ref + tag content)
+  if (
+    state.portraits === _cachedTagsPortraitsRef &&
+    tagIds.length === _cachedTagIds.length &&
+    tagIds.every((t, i) => t === _cachedTagIds[i])
+  ) {
+    return _cachedTagResult;
+  }
+
+  _cachedTagsPortraitsRef = state.portraits;
+  _cachedTagIds = tagIds;
+
+  if (tagIds.length === 0) {
+    _cachedTagResult = list;
+  } else {
+    _cachedTagResult = list.filter(p =>
+      tagIds.every(tag => p.tags.includes(tag))
+    );
+  }
+  return _cachedTagResult;
 }
 
 /** Get a single portrait entry by ID. */

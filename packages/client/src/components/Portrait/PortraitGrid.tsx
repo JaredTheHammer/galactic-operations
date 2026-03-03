@@ -89,6 +89,9 @@ const emptyStyle: React.CSSProperties = {
   padding: '32px 16px',
 };
 
+// Stable default to prevent useCallback dependency churn ([] !== [] each render)
+const EMPTY_TAGS: string[] = [];
+
 // ============================================================================
 // Thumbnail Cell
 // ============================================================================
@@ -183,7 +186,7 @@ interface PortraitGridProps {
 export const PortraitGrid: React.FC<PortraitGridProps> = ({
   selectedId,
   onSelect,
-  filterTags = [],
+  filterTags = EMPTY_TAGS,
 }) => {
   const hydrate = usePortraitStore(s => s.hydrate);
   const portraits = usePortraitStore(
