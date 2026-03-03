@@ -19,6 +19,7 @@ import { PortraitUploader } from './PortraitUploader';
 import { PortraitGrid } from './PortraitGrid';
 import { CropEditor } from './CropEditor';
 import { TagEditor } from './TagEditor';
+import { PromptBuilder } from './PromptBuilder';
 
 // ============================================================================
 // Styles
@@ -258,6 +259,14 @@ export const PortraitEditor: React.FC<PortraitEditorProps> = ({
                 <br />
                 ID: {selectedPortrait.id.slice(0, 12)}...
               </div>
+
+              <div style={dividerStyle} />
+
+              {/* AI Prompt Builder */}
+              <PromptBuilder
+                portraitTags={selectedPortrait.tags}
+                compact={compact}
+              />
             </>
           ) : (
             <div style={noSelectionStyle}>
