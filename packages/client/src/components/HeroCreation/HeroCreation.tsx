@@ -12,9 +12,11 @@
  * Phase 7d: Client Talent UI
  */
 
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { useGameStore } from '../../store/game-store'
+import { usePortraitStore } from '../../store/portrait-store'
+import { PortraitPicker } from '../Portrait/PortraitPicker'
 import type {
   Characteristics,
   CharacteristicName,
@@ -70,6 +72,10 @@ export default function HeroCreation() {
   const [selectedSkills, setSelectedSkills] = useState<Record<string, number>>({})
   const [selectedWeapon, setSelectedWeapon] = useState<string | null>(null)
   const [selectedArmor, setSelectedArmor] = useState<string | null>(null)
+  const [selectedPortraitId, setSelectedPortraitId] = useState<string | null>(null)
+
+  // Hydrate portrait store on mount so the picker has data
+  useEffect(() => { usePortraitStore.getState().hydrate() }, [])
 
   if (!gameData) return <div style={styles.container}>Loading game data...</div>
 
@@ -175,7 +181,7 @@ export default function HeroCreation() {
       gameData,
     )
 
-    // Apply equipment
+    // Apply equipment and portrait
     const equipped: HeroCharacter = {
       ...hero,
       equipment: {
@@ -183,6 +189,7 @@ export default function HeroCreation() {
         primaryWeapon: selectedWeapon,
         armor: selectedArmor,
       },
+      ...(selectedPortraitId ? { portraitId: selectedPortraitId } : {}),
     }
 
     addCreatedHero(equipped)
@@ -197,6 +204,7 @@ export default function HeroCreation() {
     setSelectedSkills({})
     setSelectedWeapon(null)
     setSelectedArmor(null)
+    setSelectedPortraitId(null)
   }
 
   // ============================================================================
@@ -560,6 +568,21 @@ export default function HeroCreation() {
                 }}
               />
             </div>
+
+            {/* Portrait picker */}
+            <div style={{ marginBottom: isMobile ? 8 : 12 }}>
+              <label style={{ color: '#9ca3af', display: 'block', marginBottom: 6, fontSize: isMobile ? 12 : 13 }}>Portrait:</label>
+              <PortraitPicker
+                selectedPortraitId={selectedPortraitId}
+                onSelect={setSelectedPortraitId}
+                placeholder="No portrait (uses silhouette)"
+                defaultTags={[
+                  'character',
+                  ...(currentSpecies ? [currentSpecies.name.toLowerCase()] : []),
+                ]}
+              />
+            </div>
+
             <div style={{
               ...styles.reviewGrid,
               ...(isMobile ? { gridTemplateColumns: '1fr', gap: 4, fontSize: 12 } : {}),
