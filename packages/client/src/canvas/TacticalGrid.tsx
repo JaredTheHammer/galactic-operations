@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { TacticalGridRenderer, TILE_SIZE } from './renderer'
 import { Camera } from './camera'
 import { useGameStore } from '../store/game-store'
+import { usePortraitStore } from '../store/portrait-store'
 import type { GridCoordinate } from '@engine/types.js'
+import { getThumbnail } from '../services'
 
 interface TacticalGridProps {
   gameState: any
@@ -63,6 +65,11 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  // Hydrate portrait store on mount (lazy, idempotent)
+  useEffect(() => {
+    usePortraitStore.getState().hydrate()
+  }, [])
+
   // Animation frame loop
   useEffect(() => {
     let animationId: number
@@ -74,6 +81,28 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
       cameraRef.current.update()
       const cameraState = cameraRef.current.getState()
       rendererRef.current.setCamera(cameraState.x, cameraState.y, cameraState.zoom)
+
+      // Collect portrait bitmaps from the in-memory cache for all figures.
+      // This is synchronous (cache hits only) -- async loading is handled
+      // separately by ensureThumbnail calls below.
+      const bitmaps = new Map<string, ImageBitmap>()
+      if (gameState.figures) {
+        for (const figure of gameState.figures) {
+          if (figure.isDefeated) continue
+          const pid =
+            figure.portraitId ??
+            (figure.entityType === 'hero'
+              ? gameState.heroes?.[figure.entityId]?.portraitId
+              : gameState.npcProfiles?.[figure.entityId]?.defaultPortraitId)
+          if (pid) {
+            const cached = getThumbnail(pid)
+            if (cached) {
+              bitmaps.set(pid, cached)
+            }
+          }
+        }
+      }
+      rendererRef.current.setPortraitBitmaps(bitmaps)
 
       // Get current activation figure
       const currentFigure =
@@ -101,6 +130,35 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
     animationId = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(animationId)
   }, [gameState, selectedFigureId, validMoves, validTargets, highlightedTile, aiMovePath, aiAttackTarget])
+
+  // Async portrait loading: when game state changes, ensure thumbnails
+  // are loaded into the LRU cache. Once cached, the synchronous getThumbnail()
+  // in the animation loop above will find them.
+  useEffect(() => {
+    if (!gameState?.figures) return
+
+    const store = usePortraitStore.getState()
+    const portraitIds = new Set<string>()
+
+    for (const figure of gameState.figures) {
+      if (figure.isDefeated) continue
+      const pid =
+        figure.portraitId ??
+        (figure.entityType === 'hero'
+          ? gameState.heroes?.[figure.entityId]?.portraitId
+          : gameState.npcProfiles?.[figure.entityId]?.defaultPortraitId)
+      if (pid) portraitIds.add(pid)
+    }
+
+    // Fire-and-forget: load any missing thumbnails from IndexedDB into cache
+    for (const pid of portraitIds) {
+      if (!getThumbnail(pid)) {
+        store.ensureThumbnail(pid).catch(() => {
+          // Silently ignore -- portrait not in library
+        })
+      }
+    }
+  }, [gameState])
 
   // Handle mouse/touch events
   const handleCanvasClick = useCallback(

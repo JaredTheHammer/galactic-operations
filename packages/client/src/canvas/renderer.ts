@@ -1,5 +1,7 @@
-import type { GameState, GridCoordinate, Figure, ObjectivePoint } from '@engine/types.js'
+import type { GameState, GridCoordinate, Figure, ObjectivePoint, BaseSize } from '@engine/types.js'
 import { BOARD_SIZE } from '@engine/types.js'
+import type { SilhouetteType } from '../types/portrait'
+import { drawSilhouetteOnContext, inferSilhouetteType } from './silhouettes'
 
 export const TILE_SIZE = 56
 const GRID_COLOR = '#1a2a4a'
@@ -35,6 +37,29 @@ interface UIState {
   aiAttackTarget: { from: GridCoordinate; to: GridCoordinate } | null
 }
 
+// ============================================================================
+// Token size mapping for base sizes
+// ============================================================================
+
+/** Map base size to tile footprint (widthInTiles) and visual radius multiplier. */
+function getBaseSizeMetrics(baseSize?: BaseSize): { footprint: number; radiusMult: number } {
+  switch (baseSize) {
+    case 'small':    return { footprint: 1, radiusMult: 0.75 }
+    case 'heavy':    return { footprint: 1, radiusMult: 1.15 }
+    case 'large':    return { footprint: 2, radiusMult: 1.8 }
+    case 'extended': return { footprint: 2, radiusMult: 2.2 }
+    case 'huge':     return { footprint: 3, radiusMult: 2.8 }
+    case 'massive':  return { footprint: 4, radiusMult: 3.5 }
+    case 'colossal': return { footprint: 5, radiusMult: 4.2 }
+    case 'standard':
+    default:         return { footprint: 1, radiusMult: 1.0 }
+  }
+}
+
+// ============================================================================
+// Renderer
+// ============================================================================
+
 export class TacticalGridRenderer {
   private canvas: HTMLCanvasElement | null = null
   private ctx: CanvasRenderingContext2D | null = null
@@ -42,6 +67,20 @@ export class TacticalGridRenderer {
   private cameraX: number = 0
   private cameraY: number = 0
   private zoom: number = 1.0
+
+  /**
+   * Portrait bitmaps keyed by portrait ID (SHA-256 hash).
+   * Populated by the React wrapper from the portrait store's cache.
+   */
+  private portraitBitmaps: Map<string, ImageBitmap> = new Map()
+
+  /**
+   * Push resolved portrait bitmaps into the renderer.
+   * Called by TacticalGrid.tsx each frame with cached ImageBitmaps.
+   */
+  setPortraitBitmaps(bitmaps: Map<string, ImageBitmap>): void {
+    this.portraitBitmaps = bitmaps
+  }
 
   init(canvas: HTMLCanvasElement) {
     this.canvas = canvas
@@ -488,16 +527,20 @@ export class TacticalGridRenderer {
     gameState.figures.forEach(figure => {
       if (figure.isDefeated) return
 
-      const screenX = figure.position.x * TILE_SIZE + TILE_SIZE / 2
-      const screenY = figure.position.y * TILE_SIZE + TILE_SIZE / 2
-      const radius = TILE_SIZE / 3
+      const { footprint, radiusMult } = getBaseSizeMetrics(figure.baseSize)
+      const tileSpan = footprint * TILE_SIZE
 
-      // Get figure data from game state for styling
-      const unit = gameState.players.find(
-        p => p.id === figure.playerId
-      )
+      // Center of the figure's tile footprint
+      const screenX = figure.position.x * TILE_SIZE + tileSpan / 2
+      const screenY = figure.position.y * TILE_SIZE + tileSpan / 2
+      const radius = (TILE_SIZE / 3) * radiusMult
 
-      // Draw selection glow
+      // Get player for faction coloring
+      const player = gameState.players.find(p => p.id === figure.playerId)
+      const isOperative = player?.role === 'Operative'
+      const factionColor = isOperative ? OPERATIVE_COLOR : IMPERIAL_COLOR
+
+      // --- Selection glow ---
       if (figure.id === uiState.selectedFigureId) {
         this.ctx.strokeStyle = SELECTED_GLOW
         this.ctx.lineWidth = 3
@@ -506,7 +549,7 @@ export class TacticalGridRenderer {
         this.ctx.stroke()
       }
 
-      // Draw pulsing border for current activation
+      // --- Pulsing border for current activation ---
       if (figure.id === uiState.currentActivatingId) {
         const pulse = Math.sin(Date.now() / 200) * 0.5 + 0.5
         this.ctx.strokeStyle = `rgba(255, 215, 0, ${pulse})`
@@ -516,18 +559,17 @@ export class TacticalGridRenderer {
         this.ctx.stroke()
       }
 
-      // Draw figure circle based on side
-      let circleColor = IMPERIAL_COLOR
-      if (unit?.role === 'Operative') {
-        circleColor = OPERATIVE_COLOR
-      }
+      // --- Token face: portrait, silhouette, or colored circle ---
+      this.drawTokenFace(figure, gameState, screenX, screenY, radius, factionColor)
 
-      this.ctx.fillStyle = circleColor
+      // --- Faction-colored border ring ---
+      this.ctx.strokeStyle = factionColor
+      this.ctx.lineWidth = 2
       this.ctx.beginPath()
       this.ctx.arc(screenX, screenY, radius, 0, Math.PI * 2)
-      this.ctx.fill()
+      this.ctx.stroke()
 
-      // Draw wounded indicator (dashed red ring + red dot above)
+      // --- Wounded indicator (dashed red ring + red dot) ---
       if (figure.isWounded && !figure.isDefeated) {
         this.ctx.save()
         this.ctx.strokeStyle = '#ff4444'
@@ -537,7 +579,6 @@ export class TacticalGridRenderer {
         this.ctx.arc(screenX, screenY, radius + 3, 0, Math.PI * 2)
         this.ctx.stroke()
         this.ctx.setLineDash([])
-        // Small red dot above figure as wound marker
         this.ctx.fillStyle = '#ff4444'
         this.ctx.beginPath()
         this.ctx.arc(screenX, screenY - radius - 6, 3, 0, Math.PI * 2)
@@ -545,42 +586,165 @@ export class TacticalGridRenderer {
         this.ctx.restore()
       }
 
-      // Draw health bar below figure
-      const barWidth = TILE_SIZE * 0.6
+      // --- Minion group count badge ---
+      if (figure.minionGroupSize && figure.minionGroupSize > 1) {
+        const badgeR = 7
+        const badgeX = screenX + radius * 0.7
+        const badgeY = screenY - radius * 0.7
+        this.ctx.fillStyle = factionColor
+        this.ctx.beginPath()
+        this.ctx.arc(badgeX, badgeY, badgeR, 0, Math.PI * 2)
+        this.ctx.fill()
+        this.ctx.strokeStyle = '#0a0a0f'
+        this.ctx.lineWidth = 1
+        this.ctx.stroke()
+        this.ctx.fillStyle = '#ffffff'
+        this.ctx.font = 'bold 9px monospace'
+        this.ctx.textAlign = 'center'
+        this.ctx.textBaseline = 'middle'
+        this.ctx.fillText(String(figure.minionGroupSize), badgeX, badgeY)
+      }
+
+      // --- Health bar below figure ---
+      const barWidth = Math.min(TILE_SIZE * 0.6, radius * 2 * 0.8)
       const barHeight = 4
       const barX = screenX - barWidth / 2
       const barY = screenY + radius + 6
 
-      // Background (dark)
       this.ctx.fillStyle = '#333333'
       this.ctx.fillRect(barX, barY, barWidth, barHeight)
 
-      // Wound bar (inverted: full bar = healthy, empty = near defeat)
-      // woundsCurrent = wounds TAKEN, so remaining = threshold - current
-      // We approximate threshold as 5 for rendering (no gameState access here)
       const woundThreshold = (figure as any).woundThreshold ?? 5
       const woundsRemaining = Math.max(0, woundThreshold - figure.woundsCurrent)
       const healthPercent = woundThreshold > 0 ? woundsRemaining / woundThreshold : 1
       const healthBarWidth = barWidth * healthPercent
 
       if (healthPercent > 0.5) {
-        this.ctx.fillStyle = '#44ff44' // Green
+        this.ctx.fillStyle = '#44ff44'
       } else if (healthPercent > 0.25) {
-        this.ctx.fillStyle = '#ffff00' // Yellow
+        this.ctx.fillStyle = '#ffff00'
       } else {
-        this.ctx.fillStyle = '#ff4444' // Red
+        this.ctx.fillStyle = '#ff4444'
       }
 
       this.ctx.fillRect(barX, barY, healthBarWidth, barHeight)
-
-      // Draw unit identifier in center
-      this.ctx.fillStyle = '#ffffff'
-      this.ctx.font = 'bold 14px monospace'
-      this.ctx.textAlign = 'center'
-      this.ctx.textBaseline = 'middle'
-      const initial = figure.id.charAt(0).toUpperCase()
-      this.ctx.fillText(initial, screenX, screenY)
     })
+  }
+
+  /**
+   * Draw the token face for a figure: portrait bitmap, silhouette, or colored circle.
+   * Priority: 1) Portrait from bitmap cache, 2) Silhouette fallback, 3) Colored circle
+   */
+  private drawTokenFace(
+    figure: Figure,
+    gameState: GameState,
+    cx: number,
+    cy: number,
+    radius: number,
+    factionColor: string,
+  ): void {
+    if (!this.ctx) return
+
+    // Resolve portrait ID: figure override -> hero/NPC default
+    const portraitId = this.resolvePortraitId(figure, gameState)
+    const bitmap = portraitId ? this.portraitBitmaps.get(portraitId) : undefined
+
+    if (bitmap) {
+      // --- Draw portrait bitmap clipped to circle ---
+      this.ctx.save()
+      this.ctx.beginPath()
+      this.ctx.arc(cx, cy, radius - 1, 0, Math.PI * 2)
+      this.ctx.clip()
+
+      // Draw bitmap centered and scaled to cover the circle
+      const size = radius * 2
+      const aspect = bitmap.width / bitmap.height
+      let drawW: number, drawH: number
+      if (aspect >= 1) {
+        drawH = size
+        drawW = size * aspect
+      } else {
+        drawW = size
+        drawH = size / aspect
+      }
+      this.ctx.drawImage(bitmap, cx - drawW / 2, cy - drawH / 2, drawW, drawH)
+      this.ctx.restore()
+    } else {
+      // --- Silhouette or colored circle fallback ---
+      const silType = this.inferSilhouetteForFigure(figure, gameState)
+
+      if (silType) {
+        // Draw silhouette into circle
+        drawSilhouetteOnContext(
+          this.ctx,
+          silType,
+          cx,
+          cy,
+          radius * 2,
+          factionColor,
+          '#1a1a2e',
+        )
+      } else {
+        // Ultimate fallback: simple colored circle with initial
+        this.ctx.fillStyle = factionColor
+        this.ctx.beginPath()
+        this.ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+        this.ctx.fill()
+
+        this.ctx.fillStyle = '#ffffff'
+        this.ctx.font = `bold ${Math.round(radius * 0.9)}px monospace`
+        this.ctx.textAlign = 'center'
+        this.ctx.textBaseline = 'middle'
+        this.ctx.fillText(figure.id.charAt(0).toUpperCase(), cx, cy)
+      }
+    }
+  }
+
+  /**
+   * Resolve the portrait ID for a figure by checking:
+   * 1. Figure instance override (figure.portraitId)
+   * 2. Hero character default (hero.portraitId)
+   * 3. NPC profile default (npc.defaultPortraitId)
+   */
+  private resolvePortraitId(figure: Figure, gameState: GameState): string | undefined {
+    if (figure.portraitId) return figure.portraitId
+
+    if (figure.entityType === 'hero') {
+      return gameState.heroes?.[figure.entityId]?.portraitId
+    }
+    if (figure.entityType === 'npc') {
+      return gameState.npcProfiles?.[figure.entityId]?.defaultPortraitId
+    }
+
+    return undefined
+  }
+
+  /**
+   * Infer a silhouette type for figures without portraits.
+   * Uses NPC keywords, entity type, and base size hints.
+   */
+  private inferSilhouetteForFigure(figure: Figure, gameState: GameState): SilhouetteType | null {
+    // NPCs: use keywords from their profile
+    if (figure.entityType === 'npc') {
+      const npc = gameState.npcProfiles?.[figure.entityId]
+      if (npc?.keywords && npc.keywords.length > 0) {
+        return inferSilhouetteType(npc.keywords)
+      }
+      // Fallback: infer from base size
+      if (figure.baseSize === 'large' || figure.baseSize === 'huge' ||
+          figure.baseSize === 'extended' || figure.baseSize === 'massive' ||
+          figure.baseSize === 'colossal') {
+        return 'vehicle'
+      }
+      return 'infantry'
+    }
+
+    // Heroes: default to officer
+    if (figure.entityType === 'hero') {
+      return 'officer'
+    }
+
+    return null
   }
 
   private drawObjectives(gameState: GameState) {
