@@ -5,6 +5,7 @@
 
 import React from 'react'
 import { useGameStore } from '../../store/game-store'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import type { MissionResult, HeroCharacter } from '../../../../engine/src/types'
 
 const containerStyle: React.CSSProperties = {
@@ -76,10 +77,12 @@ function HeroStatusCard({
   hero,
   kills,
   wasIncapacitated,
+  isMobile,
 }: {
   hero: HeroCharacter
   kills: number
   wasIncapacitated: boolean
+  isMobile?: boolean
 }) {
   const isWounded = hero.isWounded
   const borderColor = wasIncapacitated ? '#ff4444' : isWounded ? '#ffaa00' : '#2a4a2a'
@@ -95,7 +98,9 @@ function HeroStatusCard({
       flexDirection: 'column',
       alignItems: 'flex-start',
       gap: '4px',
-      minWidth: '140px',
+      minWidth: isMobile ? undefined : '140px',
+      width: isMobile ? '100%' : undefined,
+      marginRight: isMobile ? 0 : pillStyle.marginRight,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
         <span style={{ color: '#4a9eff', fontWeight: 'bold', fontSize: '13px' }}>{hero.name}</span>
@@ -118,6 +123,7 @@ function HeroStatusCard({
 
 export default function PostMission() {
   const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState } = useGameStore()
+  const { isMobile } = useIsMobile()
 
   if (!lastMissionResult) {
     return (
@@ -146,28 +152,36 @@ export default function PostMission() {
 
   return (
     <div style={containerStyle}>
-      <div style={panelStyle}>
+      <div style={{
+        ...panelStyle,
+        ...(isMobile ? {
+          maxWidth: '100%',
+          width: '100%',
+          padding: '16px',
+          borderRadius: '0',
+        } : {}),
+      }}>
         {/* Outcome header */}
         <h1 style={{
           color: outcomeColor,
           textAlign: 'center',
           margin: '0 0 8px 0',
-          fontSize: '28px',
+          fontSize: isMobile ? '22px' : '28px',
           textShadow: `0 0 20px ${outcomeColor}40`,
         }}>
           {outcomeText}
         </h1>
-        <div style={{ textAlign: 'center', color: '#888', marginBottom: '24px', fontSize: '14px' }}>
+        <div style={{ textAlign: 'center', color: '#888', marginBottom: isMobile ? '16px' : '24px', fontSize: isMobile ? '13px' : '14px' }}>
           Completed in {result.roundsPlayed} rounds
         </div>
 
         {/* XP Breakdown */}
-        <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ color: '#4a9eff', margin: '0 0 8px 0', fontSize: '16px' }}>XP Earned</h3>
+        <div style={{ marginBottom: isMobile ? '16px' : '24px' }}>
+          <h3 style={{ color: '#4a9eff', margin: '0 0 8px 0', fontSize: isMobile ? '14px' : '16px' }}>XP Earned</h3>
           <div style={{
             backgroundColor: '#0a0a1a',
             borderRadius: '8px',
-            padding: '12px',
+            padding: isMobile ? '8px' : '12px',
             border: '1px solid #1a1a2f',
           }}>
             <XPRow label="Participation" value={result.xpBreakdown.participation} />
@@ -183,7 +197,7 @@ export default function PostMission() {
               padding: '10px 0 0 0',
               marginTop: '8px',
               borderTop: '1px solid #2a2a3f',
-              fontSize: '18px',
+              fontSize: isMobile ? '15px' : '18px',
               fontWeight: 'bold',
             }}>
               <span style={{ color: '#fff' }}>Total</span>
@@ -196,15 +210,21 @@ export default function PostMission() {
 
         {/* Hero Status */}
         {heroes.length > 0 && (
-          <div style={{ marginBottom: '20px' }}>
+          <div style={{ marginBottom: isMobile ? '12px' : '20px' }}>
             <h3 style={{ ...sectionHeaderStyle, color: '#4a9eff' }}>Squad Status</h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '4px',
+              flexDirection: isMobile ? 'column' : 'row',
+            }}>
               {heroes.map(hero => (
                 <HeroStatusCard
                   key={hero.id}
                   hero={hero}
                   kills={result.heroKills[hero.id] ?? 0}
                   wasIncapacitated={result.heroesIncapacitated.includes(hero.name)}
+                  isMobile={isMobile}
                 />
               ))}
             </div>
@@ -213,13 +233,21 @@ export default function PostMission() {
 
         {/* Objectives completed */}
         {result.completedObjectiveIds.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
+          <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
             <h3 style={{ ...sectionHeaderStyle, color: '#4a9eff' }}>
               Objectives Completed ({result.completedObjectiveIds.length})
             </h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              flexDirection: isMobile ? 'column' : 'row',
+            }}>
               {result.completedObjectiveIds.map(id => (
-                <span key={id} style={{ ...pillStyle, color: '#44ff44' }}>
+                <span key={id} style={{
+                  ...pillStyle,
+                  color: '#44ff44',
+                  ...(isMobile ? { width: '100%', marginRight: 0 } : {}),
+                }}>
                   <span style={{ fontSize: '14px' }}>{'\u2714'}</span>
                   {id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                 </span>
@@ -230,13 +258,22 @@ export default function PostMission() {
 
         {/* Loot collected */}
         {result.lootCollected.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
+          <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
             <h3 style={{ ...sectionHeaderStyle, color: '#ffaa00' }}>
               Loot Secured ({result.lootCollected.length})
             </h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              flexDirection: isMobile ? 'column' : 'row',
+            }}>
               {result.lootCollected.map((item, i) => (
-                <span key={i} style={{ ...pillStyle, color: '#ffd700', borderColor: '#3a3a1a' }}>
+                <span key={i} style={{
+                  ...pillStyle,
+                  color: '#ffd700',
+                  borderColor: '#3a3a1a',
+                  ...(isMobile ? { width: '100%', marginRight: 0 } : {}),
+                }}>
                   <span style={{ fontSize: '14px' }}>{'\u2B50'}</span>
                   {item}
                 </span>
