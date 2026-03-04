@@ -5,6 +5,7 @@ import { useGameStore } from '../store/game-store'
 import { usePortraitStore } from '../store/portrait-store'
 import type { GridCoordinate } from '@engine/types.js'
 import { getThumbnail } from '../services'
+import { sharedCamera } from './camera-state'
 
 interface TacticalGridProps {
   gameState: any
@@ -91,6 +92,15 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
       cameraRef.current.update()
       const cameraState = cameraRef.current.getState()
       rendererRef.current.setCamera(cameraState.x, cameraState.y, cameraState.zoom)
+
+      // Share camera state for minimap
+      sharedCamera.x = cameraState.x
+      sharedCamera.y = cameraState.y
+      sharedCamera.zoom = cameraState.zoom
+      if (canvasRef.current) {
+        sharedCamera.canvasWidth = canvasRef.current.width
+        sharedCamera.canvasHeight = canvasRef.current.height
+      }
 
       // Collect portrait bitmaps from the in-memory cache for all figures.
       // This is synchronous (cache hits only) -- async loading is handled

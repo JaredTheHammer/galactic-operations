@@ -9,11 +9,11 @@ const BOARD_BOUNDARY_COLOR = '#4a9eff'
 const DEPLOY_IMPERIAL_COLOR = 'rgba(255, 68, 68, 0.06)'
 const DEPLOY_OPERATIVE_COLOR = 'rgba(68, 255, 68, 0.06)'
 const OPEN_TERRAIN = '#1a1a2e'
-const WALL_TERRAIN = '#333355'
-const COVER_LIGHT = '#1a1a2e'
-const COVER_HEAVY = '#1a1a2e'
-const DIFFICULT_TERRAIN = '#2a2a1e'
-const ELEVATED_TERRAIN = '#2a2a3e'
+const WALL_TERRAIN = '#2a2a44'
+const COVER_LIGHT = '#1e2a1e'
+const COVER_HEAVY = '#1e331e'
+const DIFFICULT_TERRAIN = '#2e2a18'
+const ELEVATED_TERRAIN = '#242038'
 const DOOR_TERRAIN = '#2a2a4e'
 const IMPASSABLE_TERRAIN = '#0a0a0a'
 
@@ -193,32 +193,112 @@ export class TacticalGridRenderer {
         this.ctx.fillStyle = color
         this.ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE)
 
-        // Draw cover markers
+        // Terrain-specific visual patterns
         if (tile.terrain === 'LightCover') {
-          this.ctx.fillStyle = '#ffff00'
-          const size = 6
-          const centerX = screenX + TILE_SIZE / 2
-          const centerY = screenY + TILE_SIZE / 2
-          this.ctx.fillRect(centerX - size / 2, centerY - size / 2, size, size)
+          // Diagonal hash lines + corner marker
+          this.ctx.strokeStyle = 'rgba(180, 200, 80, 0.15)'
+          this.ctx.lineWidth = 1
+          for (let d = -TILE_SIZE; d < TILE_SIZE * 2; d += 12) {
+            this.ctx.beginPath()
+            this.ctx.moveTo(screenX + d, screenY)
+            this.ctx.lineTo(screenX + d + TILE_SIZE, screenY + TILE_SIZE)
+            this.ctx.stroke()
+          }
+          // Corner shield marker
+          this.ctx.fillStyle = 'rgba(220, 220, 80, 0.5)'
+          this.ctx.fillRect(screenX + 2, screenY + 2, 6, 6)
         } else if (tile.terrain === 'HeavyCover') {
-          this.ctx.fillStyle = '#ff9900'
-          const size = 10
-          const centerX = screenX + TILE_SIZE / 2
-          const centerY = screenY + TILE_SIZE / 2
+          // Cross-hatch pattern + larger corner marker
+          this.ctx.strokeStyle = 'rgba(100, 200, 100, 0.18)'
+          this.ctx.lineWidth = 1
+          for (let d = -TILE_SIZE; d < TILE_SIZE * 2; d += 10) {
+            this.ctx.beginPath()
+            this.ctx.moveTo(screenX + d, screenY)
+            this.ctx.lineTo(screenX + d + TILE_SIZE, screenY + TILE_SIZE)
+            this.ctx.stroke()
+            this.ctx.beginPath()
+            this.ctx.moveTo(screenX + d + TILE_SIZE, screenY)
+            this.ctx.lineTo(screenX + d, screenY + TILE_SIZE)
+            this.ctx.stroke()
+          }
+          // Corner shield marker (orange diamond)
+          const cx = screenX + 7
+          const cy = screenY + 7
+          this.ctx.fillStyle = 'rgba(255, 160, 40, 0.7)'
           this.ctx.beginPath()
-          this.ctx.moveTo(centerX, centerY - size / 2)
-          this.ctx.lineTo(centerX + size / 2, centerY)
-          this.ctx.lineTo(centerX, centerY + size / 2)
-          this.ctx.lineTo(centerX - size / 2, centerY)
+          this.ctx.moveTo(cx, cy - 5)
+          this.ctx.lineTo(cx + 5, cy)
+          this.ctx.lineTo(cx, cy + 5)
+          this.ctx.lineTo(cx - 5, cy)
+          this.ctx.closePath()
+          this.ctx.fill()
+        } else if (tile.terrain === 'Wall') {
+          // Brick-like pattern
+          this.ctx.strokeStyle = 'rgba(100, 100, 160, 0.25)'
+          this.ctx.lineWidth = 1
+          const bw = TILE_SIZE / 3
+          const bh = TILE_SIZE / 2
+          for (let by = 0; by < 2; by++) {
+            const offsetX = by % 2 === 0 ? 0 : bw / 2
+            for (let bx = 0; bx < 4; bx++) {
+              this.ctx.strokeRect(screenX + bx * bw + offsetX, screenY + by * bh, bw, bh)
+            }
+          }
+        } else if (tile.terrain === 'Difficult') {
+          // Scattered dots pattern
+          this.ctx.fillStyle = 'rgba(200, 180, 80, 0.2)'
+          const offsets = [[8, 12], [22, 8], [38, 18], [14, 38], [32, 34], [46, 44]]
+          for (const [dx, dy] of offsets) {
+            this.ctx.beginPath()
+            this.ctx.arc(screenX + dx, screenY + dy, 2, 0, Math.PI * 2)
+            this.ctx.fill()
+          }
+        } else if (tile.terrain === 'Elevated') {
+          // Upward chevron pattern
+          this.ctx.strokeStyle = 'rgba(140, 120, 200, 0.2)'
+          this.ctx.lineWidth = 1
+          const cx = screenX + TILE_SIZE / 2
+          this.ctx.beginPath()
+          this.ctx.moveTo(cx - 10, screenY + TILE_SIZE - 8)
+          this.ctx.lineTo(cx, screenY + TILE_SIZE - 16)
+          this.ctx.lineTo(cx + 10, screenY + TILE_SIZE - 8)
+          this.ctx.stroke()
+        } else if (tile.terrain === 'Impassable') {
+          // X pattern
+          this.ctx.strokeStyle = 'rgba(255, 50, 50, 0.15)'
+          this.ctx.lineWidth = 1.5
+          this.ctx.beginPath()
+          this.ctx.moveTo(screenX + 4, screenY + 4)
+          this.ctx.lineTo(screenX + TILE_SIZE - 4, screenY + TILE_SIZE - 4)
+          this.ctx.stroke()
+          this.ctx.beginPath()
+          this.ctx.moveTo(screenX + TILE_SIZE - 4, screenY + 4)
+          this.ctx.lineTo(screenX + 4, screenY + TILE_SIZE - 4)
+          this.ctx.stroke()
+        }
+
+        // Also render tile.cover when it differs from terrain type
+        if (tile.cover === 'Light' && tile.terrain !== 'LightCover') {
+          this.ctx.fillStyle = 'rgba(220, 220, 80, 0.4)'
+          this.ctx.fillRect(screenX + 2, screenY + 2, 5, 5)
+        } else if (tile.cover === 'Heavy' && tile.terrain !== 'HeavyCover') {
+          this.ctx.fillStyle = 'rgba(255, 160, 40, 0.6)'
+          const cx = screenX + 6
+          const cy = screenY + 6
+          this.ctx.beginPath()
+          this.ctx.moveTo(cx, cy - 4)
+          this.ctx.lineTo(cx + 4, cy)
+          this.ctx.lineTo(cx, cy + 4)
+          this.ctx.lineTo(cx - 4, cy)
           this.ctx.closePath()
           this.ctx.fill()
         }
 
-        // Draw elevation
+        // Draw elevation number
         if (tile.elevation > 0) {
-          this.ctx.fillStyle = '#ffffff'
-          this.ctx.font = '10px monospace'
-          this.ctx.fillText(String(tile.elevation), screenX + 4, screenY + 12)
+          this.ctx.fillStyle = 'rgba(180, 160, 255, 0.7)'
+          this.ctx.font = 'bold 10px monospace'
+          this.ctx.fillText(`E${tile.elevation}`, screenX + TILE_SIZE - 22, screenY + 12)
         }
 
         // Draw objectives (legacy fallback -- enhanced objectives drawn in drawObjectives)
