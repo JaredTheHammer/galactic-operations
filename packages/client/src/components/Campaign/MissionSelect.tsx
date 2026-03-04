@@ -161,6 +161,113 @@ function CampaignStatsPanel({ campaign }: { campaign: CampaignState }) {
   )
 }
 
+const factionDisplayNames: Record<string, string> = {
+  underworld: 'Underworld',
+  mandalorian: 'Mandalorians',
+  rebel: 'Rebel Alliance',
+  imperial: 'Empire',
+  hutt: 'Hutt Cartel',
+}
+
+function FactionReputationPanel({ reputation }: { reputation: Record<string, number> }) {
+  const entries = Object.entries(reputation)
+  if (entries.length === 0) return null
+
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <h3 style={{ color: '#4a9eff', margin: '0 0 8px 0', fontSize: '14px' }}>Faction Standing</h3>
+      {entries.map(([factionId, value]) => {
+        const name = factionDisplayNames[factionId] ?? factionId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+        const color = value > 0 ? '#44ff44' : value < 0 ? '#ff4444' : '#888'
+        const sign = value > 0 ? '+' : ''
+        // Bar: map value to a visual width (-10 to +10 range)
+        const barWidth = Math.min(Math.abs(value) * 10, 100)
+        const barColor = value > 0 ? '#44ff4440' : '#ff444440'
+        const barAlign = value >= 0 ? 'left' : 'right'
+        return (
+          <div key={factionId} style={{
+            padding: '6px 8px',
+            marginBottom: '4px',
+            backgroundColor: '#0a0a1a',
+            borderRadius: '4px',
+            fontSize: '12px',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              [barAlign]: 0,
+              bottom: 0,
+              width: `${barWidth}%`,
+              backgroundColor: barColor,
+              transition: 'width 0.3s',
+            }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
+              <span style={{ color: '#ccc' }}>{name}</span>
+              <span style={{ color, fontWeight: 'bold' }}>{sign}{value}</span>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function InventoryPanel({ campaign }: { campaign: CampaignState }) {
+  const narrativeItems = campaign.narrativeItems ?? []
+  const consumables = Object.entries(campaign.consumableInventory ?? {}).filter(([, qty]) => qty > 0)
+
+  if (narrativeItems.length === 0 && consumables.length === 0) return null
+
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <h3 style={{ color: '#4a9eff', margin: '0 0 8px 0', fontSize: '14px' }}>Inventory</h3>
+      {consumables.length > 0 && (
+        <div style={{ marginBottom: narrativeItems.length > 0 ? '8px' : '0' }}>
+          {consumables.map(([id, qty]) => {
+            const name = id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+            return (
+              <div key={id} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '4px 8px',
+                marginBottom: '2px',
+                backgroundColor: '#0a0a1a',
+                borderRadius: '3px',
+                fontSize: '11px',
+              }}>
+                <span style={{ color: '#ff6644' }}>{name}</span>
+                <span style={{ color: '#888' }}>x{qty}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      {narrativeItems.length > 0 && (
+        <div>
+          <div style={{ fontSize: '10px', color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>Intel & Items</div>
+          {narrativeItems.map((item, i) => {
+            const name = item.replace(/^(item:|info:)/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+            return (
+              <div key={i} style={{
+                padding: '3px 8px',
+                marginBottom: '2px',
+                backgroundColor: '#0a0a1a',
+                borderRadius: '3px',
+                fontSize: '11px',
+                color: '#cc77ff',
+              }}>
+                {name}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function MissionHistoryPanel({
   missions,
   missionDefs,
@@ -487,6 +594,12 @@ export default function MissionSelect() {
         {/* Left sidebar: hero roster + stats + history */}
         <div style={sidebarResponsive}>
           <CampaignStatsPanel campaign={campaignState} />
+
+          {campaignState.factionReputation && Object.keys(campaignState.factionReputation).length > 0 && (
+            <FactionReputationPanel reputation={campaignState.factionReputation} />
+          )}
+
+          <InventoryPanel campaign={campaignState} />
 
           <MissionHistoryPanel
             missions={campaignState.completedMissions}

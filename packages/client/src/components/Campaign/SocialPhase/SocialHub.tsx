@@ -106,6 +106,36 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
             <div style={{ fontSize: '24px', color: '#ffd700', fontWeight: 'bold' }}>{campaign.credits}</div>
           </div>
 
+          {/* Faction Reputation */}
+          {campaign.factionReputation && Object.keys(campaign.factionReputation).length > 0 && (
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '12px', color: '#888', textTransform: 'uppercase', marginBottom: '4px' }}>Faction Standing</div>
+              {Object.entries(campaign.factionReputation).map(([factionId, value]) => {
+                const nameMap: Record<string, string> = {
+                  underworld: 'Underworld',
+                  mandalorian: 'Mandalorians',
+                  rebel: 'Rebel Alliance',
+                  imperial: 'Empire',
+                  hutt: 'Hutt Cartel',
+                }
+                const name = nameMap[factionId] ?? factionId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                const color = value > 0 ? '#44ff44' : value < 0 ? '#ff4444' : '#888'
+                const sign = value > 0 ? '+' : ''
+                return (
+                  <div key={factionId} style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '3px 0',
+                    fontSize: '12px',
+                  }}>
+                    <span style={{ color: '#ccc' }}>{name}</span>
+                    <span style={{ color, fontWeight: 'bold' }}>{sign}{value}</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
           {/* Companions */}
           {campaign.companions && campaign.companions.length > 0 && (
             <div style={{ marginBottom: '16px' }}>
