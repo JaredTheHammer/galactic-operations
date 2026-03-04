@@ -1,0 +1,318 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Figurehead specialization (Commander career). 30 talent cards: 10 Tier 1, 8 Tier 2, 6 Tier 3, 4 Tier 4, 2 Tier 5. Players draft 15 into a pyramid (5/4/3/2/1)."
+  },
+  "specialization": {
+    "id": "figurehead",
+    "name": "Figurehead",
+    "career": "commander",
+    "description": "An inspirational leader whose presence on the battlefield rallies allies and demoralizes enemies. The Figurehead leads from the front, using rhetoric and sheer force of personality to turn the tide of battle.",
+    "bonusCareerSkills": ["charm", "cool", "leadership", "negotiation"],
+    "capstoneCharacteristics": ["presence", "willpower"]
+  },
+  "talents": [
+    {
+      "id": "fghd-t1-01",
+      "name": "Grit",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Strain Threshold by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "strainThreshold", "value": 1, "perRank": true }
+    },
+    {
+      "id": "fghd-t1-02",
+      "name": "Toughened",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Wound Threshold by 2 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "woundThreshold", "value": 2, "perRank": true }
+    },
+    {
+      "id": "fghd-t1-03",
+      "name": "Commanding Presence",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from Leadership and Cool checks.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "skill": "leadership" }
+    },
+    {
+      "id": "fghd-t1-04",
+      "name": "Second Wind",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Once per encounter, recover strain equal to ranks in Second Wind.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 1, "perRank": true }
+    },
+    {
+      "id": "fghd-t1-05",
+      "name": "Inspiring Rhetoric",
+      "tier": 1,
+      "type": "active",
+      "activation": "action",
+      "ranked": true,
+      "description": "Make a Leadership check. Each Success allows one ally within Short range to recover 1 strain. Each Advantage recovers 1 additional strain.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 1, "perRank": true, "condition": "ally_strain_recovery" }
+    },
+    {
+      "id": "fghd-t1-06",
+      "name": "Quick Draw",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per round, draw or holster a weapon as an incidental instead of a maneuver.",
+      "mechanicalEffect": { "type": "free_maneuver" }
+    },
+    {
+      "id": "fghd-t1-07",
+      "name": "Confidence",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from Discipline checks to resist fear and coercion.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "skill": "discipline" }
+    },
+    {
+      "id": "fghd-t1-08",
+      "name": "Kill with Kindness",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from Charm and Leadership checks.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "skill": "charm" }
+    },
+    {
+      "id": "fghd-t1-09",
+      "name": "Durable",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Subtract 10 per rank from critical injury rolls against you (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "fghd-t1-10",
+      "name": "Heroic Fortitude",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "May spend a Destiny Point to ignore effects of critical injuries on checks until end of encounter.",
+      "mechanicalEffect": { "type": "ignore_critical_penalties" }
+    },
+    {
+      "id": "fghd-t2-01",
+      "name": "Command",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "As a maneuver, grant 1 ally within Medium range 1 Boost die per rank on their next check this round.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "target": "ally" }
+    },
+    {
+      "id": "fghd-t2-02",
+      "name": "Side Step",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, as a maneuver, upgrade the difficulty of ranged attacks targeting you by 1 per rank until the start of your next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "perRank": true }
+    },
+    {
+      "id": "fghd-t2-03",
+      "name": "Bought Time",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "On your turn, suffer 2 strain to perform an additional maneuver.",
+      "mechanicalEffect": { "type": "extra_maneuver" }
+    },
+    {
+      "id": "fghd-t2-04",
+      "name": "Enduring",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Soak by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "perRank": true }
+    },
+    {
+      "id": "fghd-t2-05",
+      "name": "Lethal Blows",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add +10 per rank to critical injury rolls inflicted on opponents.",
+      "mechanicalEffect": { "type": "increase_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "fghd-t2-06",
+      "name": "Natural Leader",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Once per session, reroll one Leadership or Cool check.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "leadership_reroll" }
+    },
+    {
+      "id": "fghd-t2-07",
+      "name": "Point Blank",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one attack per round when firing a ranged weapon at Short range or closer.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "short_range" }
+    },
+    {
+      "id": "fghd-t2-08",
+      "name": "Barrage",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one attack per round when using a weapon with a range of Short or greater.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "ranged_short_or_greater" }
+    },
+    {
+      "id": "fghd-t3-01",
+      "name": "Improved Inspiring Rhetoric",
+      "tier": 3,
+      "type": "active",
+      "activation": "action",
+      "ranked": false,
+      "description": "When using Inspiring Rhetoric, each ally affected also adds 1 Boost die to their next check.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "rhetoric_boost", "target": "ally" },
+      "prerequisite": "fghd-t1-05"
+    },
+    {
+      "id": "fghd-t3-02",
+      "name": "True Aim",
+      "tier": 3,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, use a maneuver to gain +1 Boost die per rank on your next ranged attack this turn.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true }
+    },
+    {
+      "id": "fghd-t3-03",
+      "name": "Heroic Resilience",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, when you would be incapacitated by wounds, make a Hard Resilience check. On success, remain conscious with 1 wound remaining.",
+      "mechanicalEffect": { "type": "prevent_incapacitation" }
+    },
+    {
+      "id": "fghd-t3-04",
+      "name": "Crippling Blow",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Increase the difficulty of your next combat check by 1. If you deal a critical, add +10 to the roll.",
+      "mechanicalEffect": { "type": "empowered_critical", "bonus": 10 }
+    },
+    {
+      "id": "fghd-t3-05",
+      "name": "Armor Master",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor, increase total Soak by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "condition": "wearing_armor" }
+    },
+    {
+      "id": "fghd-t3-06",
+      "name": "Last One Standing",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Add 1 Boost die to combat checks for each ally that has been incapacitated this encounter.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "per_incapacitated_ally" }
+    },
+    {
+      "id": "fghd-t4-01",
+      "name": "Deadly Accuracy",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When making a ranged attack, add ranks in the weapon's skill as bonus damage to one hit.",
+      "mechanicalEffect": { "type": "skill_damage_bonus", "skill": "ranged-heavy" }
+    },
+    {
+      "id": "fghd-t4-02",
+      "name": "Unstoppable",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, perform a bonus action during your turn. Suffer 4 strain.",
+      "mechanicalEffect": { "type": "extra_action" }
+    },
+    {
+      "id": "fghd-t4-03",
+      "name": "Supreme Inspiring Rhetoric",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "May use Inspiring Rhetoric as a maneuver instead of an action.",
+      "mechanicalEffect": { "type": "free_maneuver", "condition": "rhetoric_as_maneuver" },
+      "prerequisite": "fghd-t3-01"
+    },
+    {
+      "id": "fghd-t4-04",
+      "name": "Iron Body",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Reduce strain suffered from voluntary maneuvers and actions by 1 per rank (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_strain_suffered", "value": 1, "perRank": true }
+    },
+    {
+      "id": "fghd-t5-01",
+      "name": "Dedication (Presence)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Presence by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "presence" }
+    },
+    {
+      "id": "fghd-t5-02",
+      "name": "Dedication (Willpower)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Willpower by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "willpower" }
+    }
+  ]
+}

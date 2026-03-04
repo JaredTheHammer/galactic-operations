@@ -22,6 +22,18 @@ const specFiles = [
   'data/specializations/force-adept.json',
   'data/specializations/smuggler.json',
   'data/specializations/tactician.json',
+  'data/specializations/bodyguard.json',
+  'data/specializations/demolitionist.json',
+  'data/specializations/gadgeteer.json',
+  'data/specializations/survivalist.json',
+  'data/specializations/gunslinger.json',
+  'data/specializations/charmer.json',
+  'data/specializations/outlaw-tech.json',
+  'data/specializations/slicer.json',
+  'data/specializations/healer.json',
+  'data/specializations/niman-disciple.json',
+  'data/specializations/figurehead.json',
+  'data/specializations/strategist.json',
 ];
 
 const npcFiles = [
