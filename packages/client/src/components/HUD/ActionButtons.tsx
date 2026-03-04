@@ -12,7 +12,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
   const {
     moveFigure, startAttack, rallyFigure, guardedStance, useTalent,
     endActivation, validMoves, validTargets, gameState, getActivatableTalents,
-    aimFigure, dodgeFigure, undoLastAction, gameStateHistory,
+    aimFigure, dodgeFigure, takeCover, standUp, undoLastAction, gameStateHistory,
     useConsumable, getAvailableConsumables,
   } = useGameStore()
 
@@ -43,6 +43,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
   const canGuardedStance = selectedFigure.actionsRemaining > 0
   const canAim = selectedFigure.actionsRemaining > 0 && selectedFigure.aimTokens < 2
   const canDodge = selectedFigure.actionsRemaining > 0 && selectedFigure.dodgeTokens < 1
+  const canTakeCover = selectedFigure.maneuversRemaining > 0
+  const isProne = selectedFigure.conditions?.includes('Prone') ?? false
+  const canStandUp = isProne && selectedFigure.maneuversRemaining > 0
 
   const woundThreshold = gameState ? getWoundThresholdV2(selectedFigure, gameState) : 0
 
@@ -195,6 +198,26 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
       >
         <span>Guard</span>
       </button>
+
+      <button
+        style={buttonStyle('#8899aa', !canTakeCover)}
+        onClick={() => takeCover()}
+        title="Take Cover: Use maneuver to gain +1 ranged defense this round"
+        disabled={!canTakeCover}
+      >
+        <span>Cover</span>
+      </button>
+
+      {isProne && (
+        <button
+          style={buttonStyle('#ff8844', !canStandUp)}
+          onClick={() => standUp()}
+          title="Stand Up: Remove Prone condition (maneuver)"
+          disabled={!canStandUp}
+        >
+          <span>Stand</span>
+        </button>
+      )}
 
       {/* Consumable items button (heroes only) */}
       {hasConsumables && (

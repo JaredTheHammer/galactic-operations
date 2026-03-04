@@ -4,6 +4,7 @@ const SHORTCUTS = [
   { key: 'I', action: 'Aim (gain aim token)' },
   { key: 'D', action: 'Dodge (gain dodge token)' },
   { key: 'G', action: 'Guard / Standby' },
+  { key: 'C', action: 'Take Cover (+1 defense)' },
   { key: 'R', action: 'Rally (recover strain)' },
   { key: 'E', action: 'End Activation' },
   { key: 'N', action: 'Next Phase' },

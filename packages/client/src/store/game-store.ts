@@ -469,6 +469,8 @@ export interface GameStore {
   rallyFigure: () => void
   aimFigure: () => void
   dodgeFigure: () => void
+  takeCover: () => void
+  standUp: () => void
   guardedStance: () => void
   useTalent: (talentId: string) => void
   useConsumable: (itemId: string, targetId?: string) => void
@@ -1055,6 +1057,41 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newGameState = executeActionV2(gameState, dodgeAction, gameData)
     set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
     addCombatLog(`${selectedFigureId} braced for dodge (1 dodge token)`)
+  },
+
+  takeCover: () => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure || figure.maneuversRemaining <= 0) return
+
+    const action = {
+      type: 'TakeCover' as const,
+      figureId: selectedFigureId,
+      payload: {},
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+    addCombatLog(`${selectedFigureId} took cover (+1 defense)`)
+  },
+
+  standUp: () => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure || figure.maneuversRemaining <= 0) return
+    if (!figure.conditions?.includes('Prone')) return
+
+    const action = {
+      type: 'StandUp' as const,
+      figureId: selectedFigureId,
+      payload: {},
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+    addCombatLog(`${selectedFigureId} stood up`)
   },
 
   guardedStance: () => {

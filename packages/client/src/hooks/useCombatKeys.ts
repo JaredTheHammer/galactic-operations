@@ -88,6 +88,13 @@ export function useCombatKeys(enabled: boolean) {
           }
           break
 
+        case 'c': // Take Cover
+          if (isActivating && selectedFigure.maneuversRemaining > 0) {
+            e.preventDefault()
+            store.getState().takeCover()
+          }
+          break
+
         case 'e': // End Activation
           if (isActivating) {
             e.preventDefault()
