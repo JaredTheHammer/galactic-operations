@@ -4,7 +4,7 @@ import { TacticCardHand } from './TacticCardHand'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { useGameStore } from '../../store/game-store'
 import type { CombatScenario, GameState, TacticCard } from '@engine/types.js'
-import { getWoundThresholdV2 } from '@engine/turn-machine-v2.js'
+import { getWoundThresholdV2, getFigureName } from '@engine/turn-machine-v2.js'
 
 interface CombatPanelProps {
   combat: CombatScenario | null
@@ -24,6 +24,8 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
 
   const attackerWT = getWoundThresholdV2(attacker, gameState)
   const defenderWT = getWoundThresholdV2(defender, gameState)
+  const attackerName = getFigureName(attacker, gameState)
+  const defenderName = getFigureName(defender, gameState)
 
   const containerStyle: React.CSSProperties = {
     position: 'fixed',
@@ -103,9 +105,25 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
       <div style={sectionStyle}>
         <div style={sideHeaderStyle('#ff4444')}>⚔️ Attacker</div>
         <div style={figureInfoStyle}>
-          <span>{attacker.id}</span>
+          <span>{attackerName}</span>
           <span>Wounds: {attacker.woundsCurrent}/{attackerWT}</span>
         </div>
+        {/* Weapon and range info */}
+        {(() => {
+          const weapon = gameData?.weapons?.[combat.weaponId]
+          const weaponName = weapon?.name ?? combat.weaponId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+          const rangeColors: Record<string, string> = {
+            Engaged: '#ff6644', Short: '#ffaa00', Medium: '#44ff44', Long: '#4a9eff', Extreme: '#cc77ff',
+          }
+          return (
+            <div style={{ fontSize: '10px', color: '#ccc', marginBottom: '4px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ color: '#ff8844' }}>{weaponName}</span>
+              {weapon && <span style={{ color: '#888' }}>Dmg {weapon.baseDamage}{weapon.damageAddBrawn ? '+Br' : ''}</span>}
+              <span style={{ color: rangeColors[combat.rangeBand] ?? '#888' }}>{combat.rangeBand}</span>
+              {combat.cover !== 'None' && <span style={{ color: '#888' }}>Cover: {combat.cover}</span>}
+            </div>
+          )
+        })()}
         {/* Aim token indicator */}
         {attacker.aimTokens > 0 && (
           <div style={{ fontSize: '10px', color: '#ffd700', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -130,7 +148,7 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
       <div style={sectionStyle}>
         <div style={sideHeaderStyle('#44ff44')}>🛡️ Defender</div>
         <div style={figureInfoStyle}>
-          <span>{defender.id}</span>
+          <span>{defenderName}</span>
           <span>Wounds: {defender.woundsCurrent}/{defenderWT}</span>
         </div>
         {/* Dodge token indicator */}

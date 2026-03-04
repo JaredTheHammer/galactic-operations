@@ -26,6 +26,7 @@ import { useIsMobile } from './hooks/useIsMobile'
 import { useCombatKeys } from './hooks/useCombatKeys'
 import { useImperialAI } from './hooks/useImperialAI'
 import { useAutoPhase } from './hooks/useAutoPhase'
+import { useAutosave } from './hooks/useAutosave'
 import { AutosaveToast } from './components/HUD/AutosaveToast'
 import { ShortcutHelp } from './components/HUD/ShortcutHelp'
 
@@ -95,6 +96,9 @@ function App() {
 
   // Auto-advance non-interactive phases + auto-skip defeated player figures
   useAutoPhase(inTacticalCombat && !isAIBattle)
+
+  // Periodic campaign autosave (every 60s when campaign is active)
+  useAutosave()
 
   const selectedFigure = gameState?.figures.find(f => f.id === selectedFigureId) || null
   const currentActivatingId = gameState?.activationOrder[gameState?.currentActivationIndex]
