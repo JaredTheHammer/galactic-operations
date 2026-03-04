@@ -21,7 +21,6 @@ import type {
   D6DieType,
   D6DieDefinition,
   BoardTemplate,
-  ConsumableItem,
 } from './types.js';
 
 /**
@@ -221,13 +220,3 @@ export async function loadBoardTemplates(basePath: string): Promise<BoardTemplat
   return templates;
 }
 
-/**
- * Load consumable item definitions from data/consumables.json.
- */
-export async function loadConsumables(basePath: string): Promise<Record<string, ConsumableItem>> {
-  const { readFile } = await import('fs/promises');
-  const { join } = await import('path');
-
-  const raw = JSON.parse(await readFile(join(basePath, 'consumables.json'), 'utf-8'));
-  return raw.consumables as Record<string, ConsumableItem>;
-}

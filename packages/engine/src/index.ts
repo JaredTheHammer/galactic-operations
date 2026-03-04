@@ -75,7 +75,6 @@ export {
   loadGameDataFromObjects,
   loadGameDataV2,
   loadBoardTemplates,
-  loadConsumables,
 } from './data-loader.js';
 
 // Re-export dice functions (v2 Genesys-style)
