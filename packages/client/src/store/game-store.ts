@@ -1361,12 +1361,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
           newGameState.interactedTerminals,
         )
 
-        if (winningSide) {
-          newGameState.winner = winningSide
-          newGameState.victoryCondition = `${winningSide} wins!`
+        // Round limit defeat: if we've exceeded the mission's round limit, Imperial wins
+        const roundLimitWinner = !winningSide && activeMission?.roundLimit && newRound > activeMission.roundLimit
+          ? 'Imperial' as const
+          : winningSide
 
-          const outcome = winningSide === 'Operative' ? 'victory' : 'defeat'
-          addCombatLog(`** MISSION ${outcome.toUpperCase()}: ${winningSide} wins! **`)
+        if (roundLimitWinner) {
+          newGameState.winner = roundLimitWinner
+          const isRoundLimit = !winningSide && roundLimitWinner === 'Imperial'
+          newGameState.victoryCondition = isRoundLimit
+            ? `Time ran out! Imperial wins after ${activeMission!.roundLimit} rounds.`
+            : `${roundLimitWinner} wins!`
+
+          const outcome = roundLimitWinner === 'Operative' ? 'victory' : 'defeat'
+          if (isRoundLimit) {
+            addCombatLog(`** MISSION FAILED: Round limit (${activeMission!.roundLimit}) exceeded! **`)
+          } else {
+            addCombatLog(`** MISSION ${outcome.toUpperCase()}: ${roundLimitWinner} wins! **`)
+          }
 
           // Calculate kill counts
           const heroKills: Record<string, number> = {}
@@ -1392,10 +1404,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
             }
           }
 
-          // Check if leader killed
+          // Check if leader killed (Act 1: imperial-officer, inquisitor; Act 2: the-broker)
+          const leaderNpcIds = ['imperial-officer', 'the-broker']
           const leaderKilled = newGameState.figures.some(
             f => f.entityType === 'npc' &&
-              (f.entityId === 'imperial-officer' || f.entityId.includes('inquisitor')) &&
+              (leaderNpcIds.includes(f.entityId) || f.entityId.includes('inquisitor')) &&
               f.isDefeated,
           )
 
@@ -1404,19 +1417,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
             .filter(f => f.entityType === 'hero' && f.isDefeated)
             .map(f => f.entityId)
 
-          // Complete the campaign mission
-          get().completeCampaignMission({
-            mission,
-            outcome: outcome as 'victory' | 'defeat',
-            roundsPlayed: newGameState.roundNumber,
-            completedObjectiveIds,
-            heroKills,
-            lootCollected: newGameState.lootCollected,
-            heroesIncapacitated,
-            leaderKilled,
-            narrativeBonus: outcome === 'victory' ? 2 : 0,
-          })
-          return // Don't set gameState; completeCampaignMission handles the transition
+          // Show the victory/defeat state on the tactical grid briefly before transitioning
+          set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+
+          // Delayed transition to PostMission (gives player time to see the result)
+          setTimeout(() => {
+            get().completeCampaignMission({
+              mission,
+              outcome: outcome as 'victory' | 'defeat',
+              roundsPlayed: newGameState.roundNumber,
+              completedObjectiveIds,
+              heroKills,
+              lootCollected: newGameState.lootCollected,
+              heroesIncapacitated,
+              leaderKilled,
+              narrativeBonus: outcome === 'victory' ? 2 : 0,
+            })
+          }, 3000)
+          return
         }
       }
     }

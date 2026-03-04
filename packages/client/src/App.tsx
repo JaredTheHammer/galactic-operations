@@ -27,6 +27,40 @@ import { useImperialAI } from './hooks/useImperialAI'
 import { useAutoPhase } from './hooks/useAutoPhase'
 import { AutosaveToast } from './components/HUD/AutosaveToast'
 
+/** Brief victory/defeat overlay shown on the tactical grid before PostMission transition */
+const MissionOutcomeOverlay: React.FC<{ winner: string; victoryCondition?: string }> = ({ winner, victoryCondition }) => {
+  const isVictory = winner === 'Operative'
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: isVictory ? 'rgba(0, 40, 0, 0.85)' : 'rgba(40, 0, 0, 0.85)',
+      zIndex: 500,
+      pointerEvents: 'none',
+    }}>
+      <div style={{
+        fontSize: '42px',
+        fontWeight: 'bold',
+        color: isVictory ? '#44ff44' : '#ff4444',
+        textShadow: `0 0 30px ${isVictory ? 'rgba(68, 255, 68, 0.6)' : 'rgba(255, 68, 68, 0.6)'}`,
+        letterSpacing: '4px',
+        marginBottom: '16px',
+      }}>
+        {isVictory ? 'MISSION COMPLETE' : 'MISSION FAILED'}
+      </div>
+      {victoryCondition && (
+        <div style={{ fontSize: '16px', color: '#cccccc', maxWidth: '400px', textAlign: 'center' }}>
+          {victoryCondition}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function App() {
   const {
     gameState,
@@ -207,6 +241,11 @@ function App() {
             }}
           />
         )}
+
+        {/* Campaign mission outcome overlay */}
+        {gameState.winner && (
+          <MissionOutcomeOverlay winner={gameState.winner} victoryCondition={gameState.victoryCondition} />
+        )}
       </div>
     )
   }
@@ -284,6 +323,11 @@ function App() {
             pointerEvents: 'none',
           }}
         />
+      )}
+
+      {/* Campaign mission outcome overlay */}
+      {gameState.winner && (
+        <MissionOutcomeOverlay winner={gameState.winner} victoryCondition={gameState.victoryCondition} />
       )}
     </div>
   )
