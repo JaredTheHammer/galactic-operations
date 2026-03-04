@@ -1,0 +1,317 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Niman Disciple specialization (Mystic career). 30 talent cards: 10 Tier 1, 8 Tier 2, 6 Tier 3, 4 Tier 4, 2 Tier 5. Players draft 15 into a pyramid (5/4/3/2/1)."
+  },
+  "specialization": {
+    "id": "niman-disciple",
+    "name": "Niman Disciple",
+    "career": "mystic",
+    "description": "A practitioner of Form VI lightsaber combat, blending Force powers with balanced swordplay. The Niman Disciple uses Willpower to fuel attacks and draws enemies close with the Force, creating a versatile melee-Force hybrid.",
+    "bonusCareerSkills": ["discipline", "leadership", "negotiation", "melee"],
+    "capstoneCharacteristics": ["willpower", "presence"]
+  },
+  "talents": [
+    {
+      "id": "nimn-t1-01",
+      "name": "Grit",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Strain Threshold by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "strainThreshold", "value": 1, "perRank": true }
+    },
+    {
+      "id": "nimn-t1-02",
+      "name": "Toughened",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Wound Threshold by 2 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "woundThreshold", "value": 2, "perRank": true }
+    },
+    {
+      "id": "nimn-t1-03",
+      "name": "Parry",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "When hit by a melee attack, suffer 3 strain to reduce damage by 2 + ranks in Parry.",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 2, "perRank": true, "condition": "melee_defense" }
+    },
+    {
+      "id": "nimn-t1-04",
+      "name": "Niman Technique",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When making a Melee combat check, use Willpower instead of Brawn for the attack.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 0, "condition": "willpower_for_melee" }
+    },
+    {
+      "id": "nimn-t1-05",
+      "name": "Second Wind",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Once per encounter, recover strain equal to ranks in Second Wind.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 1, "perRank": true }
+    },
+    {
+      "id": "nimn-t1-06",
+      "name": "Quick Draw",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per round, draw or holster a weapon as an incidental instead of a maneuver.",
+      "mechanicalEffect": { "type": "free_maneuver" }
+    },
+    {
+      "id": "nimn-t1-07",
+      "name": "Conditioned",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from Athletics and Coordination checks.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "skill": "athletics" }
+    },
+    {
+      "id": "nimn-t1-08",
+      "name": "Resolve",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from Discipline and Cool checks.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "skill": "discipline" }
+    },
+    {
+      "id": "nimn-t1-09",
+      "name": "Durable",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Subtract 10 per rank from critical injury rolls against you (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "nimn-t1-10",
+      "name": "Force Sensitivity",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Add 1 Boost die to Discipline checks to resist Fear and Force-based attacks.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "force_resistance" }
+    },
+    {
+      "id": "nimn-t2-01",
+      "name": "Center of Being",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, as a maneuver, attacks against you cannot benefit from Advantage or Triumph for triggering weapon qualities until the start of your next turn. Costs 1 strain per rank used.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "perRank": true, "condition": "suppress_qualities" }
+    },
+    {
+      "id": "nimn-t2-02",
+      "name": "Feral Strength",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage to one Brawl or Melee attack per round.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "melee_or_brawl" }
+    },
+    {
+      "id": "nimn-t2-03",
+      "name": "Bought Time",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "On your turn, suffer 2 strain to perform an additional maneuver.",
+      "mechanicalEffect": { "type": "extra_maneuver" }
+    },
+    {
+      "id": "nimn-t2-04",
+      "name": "Enduring",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Soak by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "perRank": true }
+    },
+    {
+      "id": "nimn-t2-05",
+      "name": "Lethal Blows",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add +10 per rank to critical injury rolls inflicted on opponents.",
+      "mechanicalEffect": { "type": "increase_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "nimn-t2-06",
+      "name": "Defensive Training",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, as a maneuver, upgrade the difficulty of all melee attacks targeting you by 1 per rank until the start of your next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "perRank": true, "condition": "melee_only" }
+    },
+    {
+      "id": "nimn-t2-07",
+      "name": "Draw Closer",
+      "tier": 2,
+      "type": "active",
+      "activation": "action",
+      "ranked": false,
+      "description": "Make a Melee combat check. If successful, may also move the target one range band closer before dealing damage.",
+      "mechanicalEffect": { "type": "impose_condition", "condition": "pulled_closer", "range_bands": 1 }
+    },
+    {
+      "id": "nimn-t2-08",
+      "name": "Sense Danger",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Remove 1 Setback die from all Perception and Vigilance checks.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "skill": "perception" }
+    },
+    {
+      "id": "nimn-t3-01",
+      "name": "Force Assault",
+      "tier": 3,
+      "type": "active",
+      "activation": "action",
+      "ranked": false,
+      "description": "After a successful Melee attack, spend 2 Advantage to deal additional damage equal to Willpower to the target.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 0, "condition": "add_willpower_to_damage" }
+    },
+    {
+      "id": "nimn-t3-02",
+      "name": "Heroic Resilience",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, when you would be incapacitated by wounds, make a Hard Resilience check. On success, remain conscious with 1 wound remaining.",
+      "mechanicalEffect": { "type": "prevent_incapacitation" }
+    },
+    {
+      "id": "nimn-t3-03",
+      "name": "Crippling Blow",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Increase the difficulty of your next combat check by 1. If you deal a critical, add +10 to the roll.",
+      "mechanicalEffect": { "type": "empowered_critical", "bonus": 10 }
+    },
+    {
+      "id": "nimn-t3-04",
+      "name": "Armor Master",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor, increase total Soak by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "condition": "wearing_armor" }
+    },
+    {
+      "id": "nimn-t3-05",
+      "name": "True Aim",
+      "tier": 3,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, use a maneuver to gain +1 Boost die per rank on your next ranged attack this turn.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true }
+    },
+    {
+      "id": "nimn-t3-06",
+      "name": "Last One Standing",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Add 1 Boost die to combat checks for each ally that has been incapacitated this encounter.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "per_incapacitated_ally" }
+    },
+    {
+      "id": "nimn-t4-01",
+      "name": "Deadly Accuracy",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When making a melee attack, add ranks in the weapon's skill as bonus damage to one hit.",
+      "mechanicalEffect": { "type": "skill_damage_bonus", "skill": "melee" }
+    },
+    {
+      "id": "nimn-t4-02",
+      "name": "Unstoppable",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, perform a bonus action during your turn. Suffer 4 strain.",
+      "mechanicalEffect": { "type": "extra_action" }
+    },
+    {
+      "id": "nimn-t4-03",
+      "name": "Improved Center of Being",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When using Center of Being, also reduce damage from melee attacks by 1.",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 1, "condition": "improved_center" },
+      "prerequisite": "nimn-t2-01"
+    },
+    {
+      "id": "nimn-t4-04",
+      "name": "Iron Body",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Reduce strain suffered from voluntary maneuvers and actions by 1 per rank (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_strain_suffered", "value": 1, "perRank": true }
+    },
+    {
+      "id": "nimn-t5-01",
+      "name": "Dedication (Willpower)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Willpower by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "willpower" }
+    },
+    {
+      "id": "nimn-t5-02",
+      "name": "Dedication (Presence)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Presence by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "presence" }
+    }
+  ]
+}

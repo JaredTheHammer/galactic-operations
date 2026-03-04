@@ -62,6 +62,11 @@ function App() {
     window.addEventListener('click', handler)
     return () => window.removeEventListener('click', handler)
   }, [unlockAudio])
+  // Keyboard shortcuts for tactical combat (disabled on non-combat screens and mobile)
+  const inTacticalCombat = !!gameState && isInitialized && !isAIBattle && !showSetup && !showHeroCreation
+    && !showMissionSelect && !showPostMission && !showSocialPhase && !showHeroProgression
+    && !showPortraitManager && !showCombatArena
+  useCombatKeys(inTacticalCombat && !isMobile)
 
   const selectedFigure = gameState?.figures.find(f => f.id === selectedFigureId) || null
   const currentActivatingId = gameState?.activationOrder[gameState?.currentActivationIndex]
@@ -95,16 +100,19 @@ function App() {
   // Campaign: mission select screen
   if (showMissionSelect) {
     return <><AudioControls /><MissionSelect /></>
+    return <><MissionSelect /><AutosaveToast /></>
   }
 
   // Campaign: social phase (between missions)
   if (showSocialPhase) {
     return <><AudioControls /><SocialPhase /></>
+    return <><SocialPhase /><AutosaveToast /></>
   }
 
   // Campaign: hero progression (XP spending)
   if (showHeroProgression) {
     return <><AudioControls /><HeroProgression /></>
+    return <><HeroProgression /><AutosaveToast /></>
   }
 
   // Campaign: portrait & faction visual manager
@@ -138,11 +146,13 @@ function App() {
         <CampaignStats />
       </React.Suspense>
     )
+    return <><PortraitManagerPage /><AutosaveToast /></>
   }
 
   // Campaign: post-mission results screen
   if (showPostMission) {
     return <><AudioControls /><PostMission /></>
+    return <><PostMission /><AutosaveToast /></>
   }
 
   if (!gameState || !isInitialized) {

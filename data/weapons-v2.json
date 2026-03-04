@@ -403,6 +403,22 @@
       ],
       "encumbrance": 1,
       "cost": 100
+    },
+    "dc-15a": {
+      "id": "dc-15a",
+      "name": "DC-15A Blaster Rifle",
+      "type": "Ranged (Heavy)",
+      "skill": "ranged-heavy",
+      "baseDamage": 9,
+      "damageAddBrawn": false,
+      "range": "Long",
+      "critical": 3,
+      "qualities": [
+        { "name": "Stun setting", "value": null },
+        { "name": "Accurate", "value": 1 }
+      ],
+      "encumbrance": 4,
+      "cost": 850
     }
   }
 }
