@@ -76,6 +76,10 @@ const SPECIES_CATEGORY: TaxonomyCategory = {
     { id: 'tusken', label: 'Tusken Raider', eras: [] },
     { id: 'ewok', label: 'Ewok', eras: ['galactic-civil-war', 'new-republic'] },
     { id: 'hutt', label: 'Hutt', eras: [] },
+    { id: 'gungan', label: 'Gungan', eras: ['clone-wars'] },
+    { id: 'nautolan', label: 'Nautolan', eras: [] },
+    { id: 'cerean', label: 'Cerean', eras: [] },
+    { id: 'kel-dor', label: 'Kel Dor', eras: [] },
   ],
 };
 

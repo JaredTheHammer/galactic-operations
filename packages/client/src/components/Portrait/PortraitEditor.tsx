@@ -20,6 +20,7 @@ import { PortraitGrid } from './PortraitGrid';
 import { CropEditor } from './CropEditor';
 import { TagEditor } from './TagEditor';
 import { PromptBuilder } from './PromptBuilder';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 // ============================================================================
 // Styles
@@ -34,6 +35,21 @@ const panelStyle: React.CSSProperties = {
   borderRadius: '8px',
   padding: '16px',
   color: '#cccccc',
+  overflow: 'hidden',
+  minWidth: 0,
+};
+
+const panelMobileStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+  backgroundColor: '#131320',
+  border: '1px solid #333355',
+  borderRadius: '8px',
+  padding: '12px',
+  color: '#cccccc',
+  minWidth: 0,
+  // No overflow constraint - let content expand naturally so parent scrolls
 };
 
 const headerStyle: React.CSSProperties = {
@@ -48,10 +64,20 @@ const titleStyle: React.CSSProperties = {
   color: '#bb99ff',
 };
 
+// Desktop: side-by-side columns
 const layoutStyle: React.CSSProperties = {
   display: 'flex',
   gap: '16px',
   minHeight: '320px',
+  minWidth: 0,
+};
+
+// Mobile: vertical stack
+const layoutMobileStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '12px',
+  minWidth: 0,
 };
 
 const leftColumnStyle: React.CSSProperties = {
@@ -61,6 +87,14 @@ const leftColumnStyle: React.CSSProperties = {
   gap: '12px',
   overflowY: 'auto',
   maxHeight: '500px',
+  minWidth: 0,
+};
+
+const leftColumnMobileStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '12px',
+  minWidth: 0,
 };
 
 const rightColumnStyle: React.CSSProperties = {
@@ -70,6 +104,14 @@ const rightColumnStyle: React.CSSProperties = {
   gap: '12px',
   overflowY: 'auto',
   maxHeight: '500px',
+  minWidth: 0,
+};
+
+const rightColumnMobileStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '12px',
+  minWidth: 0,
 };
 
 const detailHeaderStyle: React.CSSProperties = {
@@ -143,6 +185,7 @@ export const PortraitEditor: React.FC<PortraitEditorProps> = ({
   filterTags,
   compact = false,
 }) => {
+  const { isMobile } = useIsMobile();
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId);
   const portraits = usePortraitStore(s => s.portraits);
   const updatePortrait = usePortraitStore(s => s.updatePortrait);
@@ -190,16 +233,18 @@ export const PortraitEditor: React.FC<PortraitEditorProps> = ({
     onSelectPortrait?.(null);
   }, [selectedId, deletePortrait, onSelectPortrait]);
 
+  const mobile = isMobile || compact;
+
   return (
-    <div style={panelStyle}>
+    <div style={mobile ? panelMobileStyle : panelStyle}>
       <div style={headerStyle}>
         <div style={titleStyle}>Portrait Library</div>
         <div style={countStyle}>{portraitCount} portrait{portraitCount !== 1 ? 's' : ''}</div>
       </div>
 
-      <div style={layoutStyle}>
+      <div style={mobile ? layoutMobileStyle : layoutStyle}>
         {/* Left column: upload + grid */}
-        <div style={leftColumnStyle}>
+        <div style={mobile ? leftColumnMobileStyle : leftColumnStyle}>
           <PortraitUploader
             onUploaded={handleUploaded}
             defaultTags={defaultTags}
@@ -212,7 +257,7 @@ export const PortraitEditor: React.FC<PortraitEditorProps> = ({
         </div>
 
         {/* Right column: detail editor */}
-        <div style={rightColumnStyle}>
+        <div style={mobile ? rightColumnMobileStyle : rightColumnStyle}>
           {selectedPortrait ? (
             <>
               {/* Label + delete */}
@@ -246,7 +291,7 @@ export const PortraitEditor: React.FC<PortraitEditorProps> = ({
               <TagEditor
                 tags={selectedPortrait.tags}
                 onTagsChange={handleTagsChange}
-                compact={compact}
+                compact={mobile}
               />
 
               {/* Metadata footer */}
@@ -265,7 +310,7 @@ export const PortraitEditor: React.FC<PortraitEditorProps> = ({
               {/* AI Prompt Builder */}
               <PromptBuilder
                 portraitTags={selectedPortrait.tags}
-                compact={compact}
+                compact={mobile}
               />
             </>
           ) : (

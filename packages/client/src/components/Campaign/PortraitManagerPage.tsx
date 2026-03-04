@@ -73,6 +73,11 @@ const contentStyle: React.CSSProperties = {
   padding: '20px 24px',
 }
 
+const contentMobileStyle: React.CSSProperties = {
+  ...contentStyle,
+  padding: '12px 10px',
+}
+
 const buttonStyle: React.CSSProperties = {
   padding: '10px 18px',
   border: 'none',
@@ -135,7 +140,7 @@ export default function PortraitManagerPage() {
       </div>
 
       {/* Content area */}
-      <div style={contentStyle}>
+      <div style={isMobile ? contentMobileStyle : contentStyle}>
         {activeTab === 'portraits' && (
           <PortraitEditor />
         )}
