@@ -9,12 +9,42 @@
 import React from 'react'
 import { useGameStore } from '../../store/game-store'
 import { getWoundThresholdV2 } from '@engine/turn-machine-v2.js'
+import type { Figure, GameState, GridCoordinate, RangeBand } from '@engine/types.js'
+
+function getDistance(a: GridCoordinate, b: GridCoordinate): number {
+  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y)
+}
+
+function distToRangeBand(dist: number): RangeBand {
+  if (dist <= 1) return 'Engaged'
+  if (dist <= 4) return 'Short'
+  if (dist <= 8) return 'Medium'
+  if (dist <= 16) return 'Long'
+  return 'Extreme'
+}
+
+const RANGE_COLORS: Record<string, string> = {
+  Engaged: '#44ff44',
+  Short: '#88cc44',
+  Medium: '#ccaa00',
+  Long: '#ff8844',
+  Extreme: '#ff4444',
+}
+
+function getCoverAtPosition(pos: GridCoordinate, gs: GameState): string | null {
+  const tile = gs.map.tiles[pos.y]?.[pos.x]
+  if (!tile) return null
+  if (tile.terrain === 'HeavyCover') return 'Heavy Cover'
+  if (tile.terrain === 'LightCover') return 'Light Cover'
+  return null
+}
 
 export const FigureTooltip: React.FC = () => {
   const hoveredFigureId = useGameStore(s => s.hoveredFigureId)
   const figureTooltipPos = useGameStore(s => s.figureTooltipPos)
   const gameState = useGameStore(s => s.gameState)
   const selectedFigureId = useGameStore(s => s.selectedFigureId)
+  const validTargets = useGameStore(s => s.validTargets)
 
   // Don't show tooltip for the already-selected figure (InfoPanel covers it)
   if (!hoveredFigureId || !figureTooltipPos || !gameState) return null
@@ -145,6 +175,45 @@ export const FigureTooltip: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Attack preview when this figure is a valid target */}
+      {validTargets.includes(hoveredFigureId) && selectedFigureId && (() => {
+        const attacker = gameState.figures.find(f => f.id === selectedFigureId)
+        if (!attacker) return null
+        const dist = getDistance(attacker.position, figure.position)
+        const rangeBand = distToRangeBand(dist)
+        const cover = getCoverAtPosition(figure.position, gameState)
+        const rangeColor = RANGE_COLORS[rangeBand] ?? '#ffffff'
+
+        return (
+          <div style={{
+            marginTop: '5px',
+            paddingTop: '5px',
+            borderTop: '1px solid #333355',
+            fontSize: '10px',
+          }}>
+            <div style={{ color: '#ff8888', fontWeight: 'bold', fontSize: '9px', letterSpacing: '1px', marginBottom: '3px' }}>
+              TARGET
+            </div>
+            <div>
+              <span style={{ color: '#999999' }}>Range: </span>
+              <span style={{ color: rangeColor }}>{rangeBand}</span>
+              <span style={{ color: '#666666' }}> ({dist} tiles)</span>
+            </div>
+            {cover && (
+              <div>
+                <span style={{ color: '#999999' }}>Cover: </span>
+                <span style={{ color: '#44cc44' }}>{cover}</span>
+              </div>
+            )}
+            {figure.dodgeTokens > 0 && (
+              <div style={{ color: '#3388dd', fontSize: '9px', marginTop: '2px' }}>
+                Dodge token will cancel hits
+              </div>
+            )}
+          </div>
+        )
+      })()}
     </div>
   )
 }

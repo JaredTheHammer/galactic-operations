@@ -54,6 +54,7 @@ export {
   getRemainingHealth,
   findAttackPositions,
   findMeleePositions,
+  getAttackRangeInTiles,
 } from './evaluate-v2.js';
 
 // ============================================================================

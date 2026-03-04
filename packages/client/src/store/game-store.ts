@@ -53,6 +53,7 @@ import {
 } from '@engine/movement.js'
 import {
   getValidTargetsV2,
+  getAttackRangeInTiles,
 } from '@engine/ai/evaluate-v2.js'
 import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization } from '@engine/character-v2.js'
 import type { HeroCreationInput } from '@engine/character-v2.js'
@@ -454,6 +455,9 @@ export interface GameStore {
   aiMovePath: GridCoordinate[] | null
   aiAttackTarget: { from: GridCoordinate; to: GridCoordinate } | null
 
+  // Attack range overlay for selected figure
+  attackRange: { center: GridCoordinate; radius: number } | null
+
   // Undo history (stores previous game states for undo)
   gameStateHistory: GameState[]
 
@@ -613,6 +617,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // AI visualization state
   aiMovePath: null,
   aiAttackTarget: null,
+  attackRange: null,
 
   // Imperial AI state (campaign combat)
   imperialAIPhase: null,
@@ -965,7 +970,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { gameState, gameData } = get()
     if (!gameState || !gameData) return
 
-    set({ selectedFigureId: figureId, validMoves: [], validTargets: [] })
+    set({ selectedFigureId: figureId, validMoves: [], validTargets: [], attackRange: null })
 
     if (figureId) {
       const figure = gameState.figures.find(f => f.id === figureId)
@@ -976,6 +981,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         // v2 valid targets using evaluate-v2
         const targets = getValidTargetsV2(figure, figure.position, gameState, gameData)
         set({ validTargets: targets.map(t => t.id) })
+
+        // Attack range overlay
+        const range = getAttackRangeInTiles(figure, gameState, gameData)
+        set({ attackRange: { center: figure.position, radius: range } })
       }
     }
   },
@@ -998,12 +1007,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
       addCombatLog(`${figure.id} moved to (${destination.x}, ${destination.y})`)
 
-      // Re-select to update valid moves/targets
+      // Re-select to update valid moves/targets + range overlay
       const updatedFigure = newGameState.figures.find(f => f.id === selectedFigureId)
       if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
         const moves = getValidMoves(updatedFigure, newGameState)
         const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
-        set({ validMoves: moves, validTargets: targets.map(t => t.id) })
+        const range = getAttackRangeInTiles(updatedFigure, newGameState, gameData)
+        set({ validMoves: moves, validTargets: targets.map(t => t.id), attackRange: { center: updatedFigure.position, radius: range } })
       } else {
         set({ validMoves: [], validTargets: [] })
       }

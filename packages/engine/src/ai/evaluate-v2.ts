@@ -1871,3 +1871,16 @@ function evalShouldUseConsumable(
 
   return { satisfied: false, context: { reasoning: 'No injured allies needing consumables' } };
 }
+
+/**
+ * Get the attack range in tiles for a figure's primary weapon.
+ * Exported for UI range overlay rendering.
+ */
+export function getAttackRangeInTiles(
+  figure: Figure,
+  gameState: GameState,
+  gameData: GameData,
+): number {
+  const weapon = getPrimaryWeapon(figure, gameState, gameData);
+  return getMaxRangeInTiles(weapon);
+}

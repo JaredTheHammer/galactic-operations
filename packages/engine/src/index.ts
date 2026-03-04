@@ -208,6 +208,7 @@ export {
   getSoakForFigure,
   getWoundThreshold,
   getRemainingHealth,
+  getAttackRangeInTiles,
   findAttackPositions,
   findMeleePositions,
   buildMoveAction,

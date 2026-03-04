@@ -38,6 +38,7 @@ interface UIState {
   currentActivatingId: string | null
   aiMovePath: GridCoordinate[] | null
   aiAttackTarget: { from: GridCoordinate; to: GridCoordinate } | null
+  attackRange: { center: GridCoordinate; radius: number } | null
 }
 
 // ============================================================================
@@ -415,6 +416,28 @@ export class TacticalGridRenderer {
 
   private drawHighlights(gameState: GameState, uiState: UIState) {
     if (!this.ctx) return
+
+    // Draw attack range overlay (subtle tint showing weapon reach)
+    if (uiState.attackRange) {
+      const { center, radius } = uiState.attackRange
+      const ctx = this.ctx!
+      const cx = center.x * TILE_SIZE + TILE_SIZE / 2
+      const cy = center.y * TILE_SIZE + TILE_SIZE / 2
+      const radiusPx = radius * TILE_SIZE
+
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(cx, cy, radiusPx, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(255, 68, 68, 0.04)'
+      ctx.fill()
+
+      // Dashed border ring
+      ctx.strokeStyle = 'rgba(255, 68, 68, 0.15)'
+      ctx.lineWidth = 1
+      ctx.setLineDash([6, 4])
+      ctx.stroke()
+      ctx.restore()
+    }
 
     // Draw valid moves
     uiState.validMoves.forEach(coord => {
