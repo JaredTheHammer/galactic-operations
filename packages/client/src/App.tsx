@@ -21,6 +21,7 @@ import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
 import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgression'
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
+const CampaignStats = React.lazy(() => import('./components/Campaign/CampaignStats'))
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
 import { AudioControls } from './components/HUD/AudioControls'
@@ -39,6 +40,7 @@ function App() {
     showSocialPhase,
     showHeroProgression,
     showPortraitManager,
+    showCampaignStats,
     showCombatArena,
   } = useGameStore()
 
@@ -91,6 +93,20 @@ function App() {
   // Campaign: portrait & faction visual manager
   if (showPortraitManager) {
     return <><AudioControls /><PortraitManagerPage /></>
+  }
+
+  // Campaign: stats dashboard (lazy-loaded with Plotly)
+  if (showCampaignStats) {
+    return (
+      <React.Suspense fallback={
+        <div style={{ width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a0f' }}>
+          <div style={{ color: '#4a9eff', fontSize: '16px' }}>Loading analytics...</div>
+        </div>
+      }>
+        <AudioControls />
+        <CampaignStats />
+      </React.Suspense>
+    )
   }
 
   // Campaign: post-mission results screen

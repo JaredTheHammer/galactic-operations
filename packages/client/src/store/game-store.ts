@@ -396,6 +396,7 @@ export interface GameStore {
   showSocialPhase: boolean
   showHeroProgression: boolean
   showPortraitManager: boolean
+  showCampaignStats: boolean
   campaignHeroCreation: boolean // true when creating heroes for a new campaign
   activeMissionDef: MissionDefinition | null // current mission definition for reinforcement waves
   triggeredWaveIds: string[] // mission reinforcement waves already deployed
@@ -458,6 +459,10 @@ export interface GameStore {
   openHeroProgression: () => void
   closeHeroProgression: () => void
 
+  // Campaign stats actions
+  openCampaignStats: () => void
+  closeCampaignStats: () => void
+
   // Portrait manager actions
   openPortraitManager: () => void
   closePortraitManager: () => void
@@ -508,6 +513,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   showSocialPhase: false,
   showHeroProgression: false,
   showPortraitManager: false,
+  showCampaignStats: false,
   campaignHeroCreation: false,
   activeMissionDef: null,
   triggeredWaveIds: [],
@@ -1625,6 +1631,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showSocialPhase: false,
       showHeroProgression: false,
       showPortraitManager: false,
+      showCampaignStats: false,
     })
 
     // Persist to localStorage immediately
@@ -1645,6 +1652,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showSocialPhase: false,
       showHeroProgression: false,
       showPortraitManager: false,
+      showCampaignStats: false,
       campaignHeroCreation: false,
       activeMissionDef: null,
       activeMission: null,
@@ -1712,6 +1720,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   closePortraitManager: () => {
     set({
       showPortraitManager: false,
+      showMissionSelect: true,
+    })
+  },
+
+  // ---- Campaign Stats ----
+
+  openCampaignStats: () => {
+    set({
+      showMissionSelect: false,
+      showCampaignStats: true,
+    })
+  },
+
+  closeCampaignStats: () => {
+    set({
+      showCampaignStats: false,
       showMissionSelect: true,
     })
   },
