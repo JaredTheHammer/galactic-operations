@@ -30,6 +30,10 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideCon
   const figureName = currentFigure ? getFigureName(currentFigure, gameState) : currentFigure?.id
 
   const phaseColor = PHASE_COLORS[gameState.turnPhase] || '#999999'
+  const isNonInteractivePhase = ['Setup', 'Initiative', 'Status', 'Reinforcement'].includes(gameState.turnPhase)
+  const allActivationsDone = gameState.turnPhase === 'Activation'
+    && currentFigure?.isActivated
+    && gameState.currentActivationIndex + 1 >= gameState.activationOrder.length
 
   if (compact) {
     return (
@@ -123,7 +127,23 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideCon
           ENEMY TURN{imperialAIPhase === 'thinking' ? ' - Analyzing...' : ' - Executing...'}
         </div>
       )}
-      {!hideControls && !isAITurn && (
+      {!hideControls && isNonInteractivePhase && !gameState.winner && (
+        <button
+          style={{ ...buttonStyle, opacity: 0.7 }}
+          onClick={() => advancePhase()}
+        >
+          Continuing...
+        </button>
+      )}
+      {!hideControls && allActivationsDone && !gameState.winner && (
+        <button
+          style={{ ...buttonStyle, opacity: 0.7 }}
+          onClick={() => advancePhase()}
+        >
+          All units done
+        </button>
+      )}
+      {!hideControls && !isAITurn && !isNonInteractivePhase && !allActivationsDone && gameState.turnPhase === 'Activation' && (
         <button style={buttonStyle} onClick={() => advancePhase()}>
           Next Phase
         </button>

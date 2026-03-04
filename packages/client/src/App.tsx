@@ -24,6 +24,7 @@ import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useCombatKeys } from './hooks/useCombatKeys'
 import { useImperialAI } from './hooks/useImperialAI'
+import { useAutoPhase } from './hooks/useAutoPhase'
 import { AutosaveToast } from './components/HUD/AutosaveToast'
 
 function App() {
@@ -55,6 +56,9 @@ function App() {
 
   // Auto-execute Imperial AI turns in campaign combat (not AI Battle mode)
   const { isImperialTurn } = useImperialAI(inTacticalCombat && !isAIBattle)
+
+  // Auto-advance non-interactive phases + auto-skip defeated player figures
+  useAutoPhase(inTacticalCombat && !isAIBattle)
 
   const selectedFigure = gameState?.figures.find(f => f.id === selectedFigureId) || null
   const currentActivatingId = gameState?.activationOrder[gameState?.currentActivationIndex]
