@@ -428,6 +428,8 @@ export interface GameStore {
   pendingMissionId: string | null
   showPostMission: boolean
   showSocialPhase: boolean
+  showActTransition: boolean
+  actTransitionData: { fromAct: number; toAct: number } | null
   showHeroProgression: boolean
   showPortraitManager: boolean
   campaignHeroCreation: boolean // true when creating heroes for a new campaign
@@ -513,6 +515,7 @@ export interface GameStore {
   startCampaignMission: (missionId: string) => void
   completeCampaignMission: (input: MissionCompletionInput) => void
   returnToMissionSelect: () => void
+  dismissActTransition: () => void
   saveCampaignToStorage: () => void
   loadCampaignFromStorage: () => boolean
   loadImportedCampaign: (campaign: CampaignState) => void
@@ -581,6 +584,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   pendingMissionId: null,
   showPostMission: false,
   showSocialPhase: false,
+  showActTransition: false,
+  actTransitionData: null,
   showHeroProgression: false,
   showPortraitManager: false,
   campaignHeroCreation: false,
@@ -1980,6 +1985,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ? { ...campaignState, consumableInventory: { ...gameState.consumableInventory } }
       : campaignState
 
+    const previousAct = updatedCampaign.currentAct
     const { campaign: newCampaign, result } = completeMission(
       updatedCampaign,
       input,
@@ -1992,6 +1998,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showPostMission: true,
       isInitialized: false,
       gameState: null,
+      // Flag act transition if act advanced
+      actTransitionData: newCampaign.currentAct > previousAct
+        ? { fromAct: previousAct, toAct: newCampaign.currentAct }
+        : null,
     })
     get().saveCampaignToStorage()
   },
@@ -2000,17 +2010,40 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Return from post-mission screen to mission select.
    */
   returnToMissionSelect: () => {
-    set({
-      showPostMission: false,
-      showMissionSelect: true,
-      lastMissionResult: null,
-      activeMissionDef: null,
-      activeMission: null,
-      triggeredWaveIds: [],
-      gameState: null,
-      isInitialized: false,
-    })
+    const { actTransitionData } = get()
+    if (actTransitionData) {
+      // Show act transition screen before returning to mission select
+      set({
+        showPostMission: false,
+        showActTransition: true,
+        lastMissionResult: null,
+        activeMissionDef: null,
+        activeMission: null,
+        triggeredWaveIds: [],
+        gameState: null,
+        isInitialized: false,
+      })
+    } else {
+      set({
+        showPostMission: false,
+        showMissionSelect: true,
+        lastMissionResult: null,
+        activeMissionDef: null,
+        activeMission: null,
+        triggeredWaveIds: [],
+        gameState: null,
+        isInitialized: false,
+      })
+    }
     get().saveCampaignToStorage()
+  },
+
+  dismissActTransition: () => {
+    set({
+      showActTransition: false,
+      actTransitionData: null,
+      showMissionSelect: true,
+    })
   },
 
   /**
@@ -2075,6 +2108,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       pendingMissionId: null,
       showPostMission: false,
       showSocialPhase: false,
+      showActTransition: false,
+      actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
     })
@@ -2097,6 +2132,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       pendingMissionId: null,
       showPostMission: false,
       showSocialPhase: false,
+      showActTransition: false,
+      actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
       campaignHeroCreation: false,

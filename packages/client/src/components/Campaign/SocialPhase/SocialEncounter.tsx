@@ -92,16 +92,7 @@ export function SocialEncounter({ encounter, npc, campaign, onCheckResolved, onB
         gap: isMobile ? '8px' : undefined,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            width: isMobile ? '32px' : '40px', height: isMobile ? '32px' : '40px', borderRadius: '50%',
-            backgroundColor: `${dispositionColors[npc.disposition]}20`,
-            border: `2px solid ${dispositionColors[npc.disposition]}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: isMobile ? '14px' : '18px', color: dispositionColors[npc.disposition], fontWeight: 'bold',
-            flexShrink: 0,
-          }}>
-            {npc.name[0]}
-          </div>
+          <HeroPortrait portraitId={npc.portraitId} name={npc.name} size={isMobile ? 32 : 40} accentColor={dispositionColors[npc.disposition]} />
           <div>
             <h1 style={{ color: '#fff', margin: 0, fontSize: isMobile ? '16px' : '20px' }}>{encounter.name}</h1>
             <div style={{ color: dispositionColors[npc.disposition], fontSize: '12px' }}>

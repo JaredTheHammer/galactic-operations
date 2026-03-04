@@ -28,6 +28,7 @@ import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
 import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgression'
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
 import MissionBriefing from './components/Campaign/MissionBriefing'
+import { ActTransition } from './components/Campaign/ActTransition'
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useCombatKeys } from './hooks/useCombatKeys'
@@ -87,6 +88,7 @@ function App() {
     showPortraitManager,
     showCombatArena,
     showMissionBriefing,
+    showActTransition,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -95,7 +97,7 @@ function App() {
   // Keyboard shortcuts for tactical combat (disabled on non-combat screens and mobile)
   const inTacticalCombat = !!gameState && isInitialized && !isAIBattle && !showSetup && !showHeroCreation
     && !showMissionSelect && !showPostMission && !showSocialPhase && !showHeroProgression
-    && !showPortraitManager && !showCombatArena && !showMissionBriefing
+    && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition
   useCombatKeys(inTacticalCombat && !isMobile)
 
   // Auto-execute Imperial AI turns in campaign combat (not AI Battle mode)
@@ -154,6 +156,11 @@ function App() {
   // Campaign: post-mission results screen
   if (showPostMission) {
     return <><PostMission /><AutosaveToast /></>
+  }
+
+  // Campaign: act transition cinematic (between acts)
+  if (showActTransition) {
+    return <ActTransition />
   }
 
   if (!gameState || !isInitialized) {

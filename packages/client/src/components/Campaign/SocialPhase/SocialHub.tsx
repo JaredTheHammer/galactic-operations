@@ -267,14 +267,7 @@ function NPCEncounterCard({
         </div>
       )}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-        <div style={{
-          width: '36px', height: '36px', borderRadius: '50%',
-          backgroundColor: `${dispColor}20`, border: `2px solid ${dispColor}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '16px', color: dispColor, fontWeight: 'bold',
-        }}>
-          {npc.name[0]}
-        </div>
+        <HeroPortrait portraitId={npc.portraitId} name={npc.name} size={36} accentColor={dispColor} />
         <div>
           <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{npc.name}</div>
           <div style={{ fontSize: '11px', color: dispColor }}>{dispositionLabels[npc.disposition]}</div>
