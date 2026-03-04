@@ -32,6 +32,7 @@ import aiProfilesRaw from '@data/ai-profiles.json'
 const DELAYS = {
   thinkMs: 600,
   actionMs: 500,
+  combatResultMs: 1800,
   postActivationMs: 300,
 }
 
@@ -239,8 +240,12 @@ export function useImperialAI(enabled: boolean): { isImperialTurn: boolean } {
               }
             }
 
-            // Clear activeCombat overlay so it doesn't block
-            if (gs.activeCombat) {
+            // Show combat results panel briefly for attacks so player sees dice
+            if (gs.activeCombat && action.type === 'Attack') {
+              useGameStore.setState({ gameState: gs })
+              await delay(DELAYS.combatResultMs)
+              gs = { ...gs, activeCombat: null }
+            } else if (gs.activeCombat) {
               gs = { ...gs, activeCombat: null }
             }
             useGameStore.setState({ gameState: gs })
