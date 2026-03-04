@@ -21,6 +21,8 @@ import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgr
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
+import { useCombatKeys } from './hooks/useCombatKeys'
+import { AutosaveToast } from './components/HUD/AutosaveToast'
 
 function App() {
   const {
@@ -41,6 +43,12 @@ function App() {
 
   const { isMobile } = useIsMobile()
   const [showCombatLog, setShowCombatLog] = useState(false)
+
+  // Keyboard shortcuts for tactical combat (disabled on non-combat screens and mobile)
+  const inTacticalCombat = !!gameState && isInitialized && !isAIBattle && !showSetup && !showHeroCreation
+    && !showMissionSelect && !showPostMission && !showSocialPhase && !showHeroProgression
+    && !showPortraitManager && !showCombatArena
+  useCombatKeys(inTacticalCombat && !isMobile)
 
   const selectedFigure = gameState?.figures.find(f => f.id === selectedFigureId) || null
   const currentActivatingId = gameState?.activationOrder[gameState?.currentActivationIndex]
@@ -63,27 +71,27 @@ function App() {
 
   // Campaign: mission select screen
   if (showMissionSelect) {
-    return <MissionSelect />
+    return <><MissionSelect /><AutosaveToast /></>
   }
 
   // Campaign: social phase (between missions)
   if (showSocialPhase) {
-    return <SocialPhase />
+    return <><SocialPhase /><AutosaveToast /></>
   }
 
   // Campaign: hero progression (XP spending)
   if (showHeroProgression) {
-    return <HeroProgression />
+    return <><HeroProgression /><AutosaveToast /></>
   }
 
   // Campaign: portrait & faction visual manager
   if (showPortraitManager) {
-    return <PortraitManagerPage />
+    return <><PortraitManagerPage /><AutosaveToast /></>
   }
 
   // Campaign: post-mission results screen
   if (showPostMission) {
-    return <PostMission />
+    return <><PostMission /><AutosaveToast /></>
   }
 
   if (!gameState || !isInitialized) {

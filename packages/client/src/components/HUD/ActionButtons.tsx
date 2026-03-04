@@ -12,7 +12,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
   const {
     moveFigure, startAttack, rallyFigure, guardedStance, useTalent,
     endActivation, validMoves, validTargets, gameState, getActivatableTalents,
-    aimFigure, dodgeFigure,
+    aimFigure, dodgeFigure, undoLastAction, gameStateHistory,
   } = useGameStore()
 
   if (!selectedFigure) return null
@@ -198,6 +198,20 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="End Activation (E)"
       >
         <span>End</span>
+      </button>
+
+      <button
+        style={buttonStyle('#665588', gameStateHistory.length === 0)}
+        onClick={() => undoLastAction()}
+        title="Undo Last Action (Ctrl+Z)"
+        disabled={gameStateHistory.length === 0}
+      >
+        <span>Undo</span>
+        {gameStateHistory.length > 0 && (
+          <span style={{ fontSize: '10px', marginTop: '2px' }}>
+            {gameStateHistory.length}
+          </span>
+        )}
       </button>
 
       {/* Status readout */}
