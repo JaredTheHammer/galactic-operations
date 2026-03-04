@@ -12,8 +12,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
   const {
     moveFigure, startAttack, rallyFigure, guardedStance, useTalent,
     endActivation, validMoves, validTargets, gameState, getActivatableTalents,
-    aimFigure, dodgeFigure, takeCover, standUp, undoLastAction, gameStateHistory,
-    useConsumable, getAvailableConsumables,
+    aimFigure, dodgeFigure, takeCover, standUp, strainForManeuver, drawHolster,
+    undoLastAction, gameStateHistory,
+    useConsumable, getAvailableConsumables, gameData,
   } = useGameStore()
 
   const [showConsumableMenu, setShowConsumableMenu] = useState(false)
@@ -46,6 +47,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
   const canTakeCover = selectedFigure.maneuversRemaining > 0
   const isProne = selectedFigure.conditions?.includes('Prone') ?? false
   const canStandUp = isProne && selectedFigure.maneuversRemaining > 0
+  const canStrainForManeuver = !selectedFigure.hasUsedStrainForManeuver
+  const hero = selectedFigure.entityType === 'hero' && gameState
+    ? gameState.heroes?.[selectedFigure.entityId]
+    : null
+  const hasSecondaryWeapon = hero?.equipment?.secondaryWeapon != null
+  const canDrawHolster = hasSecondaryWeapon && selectedFigure.maneuversRemaining > 0
 
   const woundThreshold = gameState ? getWoundThresholdV2(selectedFigure, gameState) : 0
 
@@ -216,6 +223,30 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
           disabled={!canStandUp}
         >
           <span>Stand</span>
+        </button>
+      )}
+
+      <button
+        style={buttonStyle('#bb66ff', !canStrainForManeuver)}
+        onClick={() => strainForManeuver()}
+        title="Strain for Maneuver: Suffer 2 strain to gain extra maneuver (once per turn) (S)"
+        disabled={!canStrainForManeuver}
+      >
+        <span>+Man</span>
+        <span style={{ fontSize: '9px', marginTop: '1px' }}>2 strain</span>
+      </button>
+
+      {hasSecondaryWeapon && (
+        <button
+          style={buttonStyle('#ff6600', !canDrawHolster)}
+          onClick={() => drawHolster()}
+          title={`Swap Weapon: Draw ${gameData?.weapons?.[hero?.equipment?.secondaryWeapon ?? '']?.name ?? 'secondary'} (maneuver)`}
+          disabled={!canDrawHolster}
+        >
+          <span>Swap</span>
+          <span style={{ fontSize: '9px', marginTop: '1px' }}>
+            {gameData?.weapons?.[hero?.equipment?.secondaryWeapon ?? '']?.name?.slice(0, 8) ?? 'wpn'}
+          </span>
         </button>
       )}
 

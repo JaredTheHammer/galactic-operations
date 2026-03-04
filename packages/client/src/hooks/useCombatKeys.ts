@@ -95,6 +95,13 @@ export function useCombatKeys(enabled: boolean) {
           }
           break
 
+        case 's': // Strain for Maneuver
+          if (isActivating && !selectedFigure.hasUsedStrainForManeuver) {
+            e.preventDefault()
+            store.getState().strainForManeuver()
+          }
+          break
+
         case 'e': // End Activation
           if (isActivating) {
             e.preventDefault()

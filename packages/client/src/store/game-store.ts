@@ -450,6 +450,8 @@ export interface GameStore {
   threatFlash: boolean
   hoveredObjectiveId: string | null
   tooltipScreenPos: { x: number; y: number } | null
+  hoveredFigureId: string | null
+  figureTooltipPos: { x: number; y: number } | null
 
   // Imperial AI state (campaign combat)
   imperialAIPhase: 'thinking' | 'executing' | null
@@ -471,6 +473,8 @@ export interface GameStore {
   dodgeFigure: () => void
   takeCover: () => void
   standUp: () => void
+  strainForManeuver: () => void
+  drawHolster: () => void
   guardedStance: () => void
   useTalent: (talentId: string) => void
   useConsumable: (itemId: string, targetId?: string) => void
@@ -524,6 +528,7 @@ export interface GameStore {
   addNotification: (notif: Omit<GameNotification, 'id' | 'createdAt'>) => void
   removeNotification: (id: string) => void
   setHoveredObjective: (id: string | null, screenPos?: { x: number; y: number }) => void
+  setHoveredFigure: (id: string | null, screenPos?: { x: number; y: number }) => void
 
   // Helpers
   getGameData: () => GameData | null
@@ -591,6 +596,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   threatFlash: false,
   hoveredObjectiveId: null,
   tooltipScreenPos: null,
+  hoveredFigureId: null,
+  figureTooltipPos: null,
 
   // Combat Arena
   openCombatArena: () => {
@@ -1092,6 +1099,64 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newGameState = executeActionV2(gameState, action, gameData)
     set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
     addCombatLog(`${selectedFigureId} stood up`)
+  },
+
+  strainForManeuver: () => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure || figure.hasUsedStrainForManeuver) return
+
+    const action = {
+      type: 'StrainForManeuver' as const,
+      figureId: selectedFigureId,
+      payload: {},
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+    addCombatLog(`${selectedFigureId} suffered 2 strain for extra maneuver`)
+  },
+
+  drawHolster: () => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure || figure.entityType !== 'hero' || figure.maneuversRemaining <= 0) return
+
+    const hero = gameState.heroes[figure.entityId]
+    if (!hero?.equipment.secondaryWeapon) return
+
+    // Swap primary and secondary weapons
+    const newPrimary = hero.equipment.secondaryWeapon
+    const newSecondary = hero.equipment.primaryWeapon
+
+    const action = {
+      type: 'DrawHolster' as const,
+      figureId: selectedFigureId,
+      payload: { weaponId: newPrimary },
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+
+    // Update hero equipment in the new state
+    const updatedHeroes = { ...newGameState.heroes }
+    updatedHeroes[figure.entityId] = {
+      ...updatedHeroes[figure.entityId],
+      equipment: {
+        ...updatedHeroes[figure.entityId].equipment,
+        primaryWeapon: newPrimary,
+        secondaryWeapon: newSecondary,
+      },
+    }
+
+    set({
+      gameState: { ...newGameState, heroes: updatedHeroes },
+      gameStateHistory: [...gameStateHistory.slice(-19), gameState],
+    })
+
+    const weaponName = gameData.weapons?.[newPrimary]?.name ?? newPrimary
+    addCombatLog(`${selectedFigureId} drew ${weaponName}`)
   },
 
   guardedStance: () => {
@@ -1606,6 +1671,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       hoveredObjectiveId: id,
       tooltipScreenPos: screenPos ?? null,
+    })
+  },
+
+  setHoveredFigure: (id: string | null, screenPos?: { x: number; y: number }) => {
+    set({
+      hoveredFigureId: id,
+      figureTooltipPos: screenPos ?? null,
     })
   },
 

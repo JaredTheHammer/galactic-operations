@@ -5,6 +5,7 @@ const SHORTCUTS = [
   { key: 'D', action: 'Dodge (gain dodge token)' },
   { key: 'G', action: 'Guard / Standby' },
   { key: 'C', action: 'Take Cover (+1 defense)' },
+  { key: 'S', action: 'Strain for Maneuver (-2 strain)' },
   { key: 'R', action: 'Rally (recover strain)' },
   { key: 'E', action: 'End Activation' },
   { key: 'N', action: 'Next Phase' },

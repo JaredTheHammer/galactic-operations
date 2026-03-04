@@ -238,13 +238,26 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
           hovered ? { x: e.clientX, y: e.clientY } : undefined,
         )
       }
+
+      // Check if hovering over a figure for tooltip
+      const figures = gameState?.figures
+      if (figures) {
+        const hoveredFig = figures.find(
+          (f: any) => f.position.x === gridCoord.x && f.position.y === gridCoord.y && !f.isDefeated
+        )
+        useGameStore.getState().setHoveredFigure(
+          hoveredFig ? hoveredFig.id : null,
+          hoveredFig ? { x: e.clientX, y: e.clientY } : undefined,
+        )
+      }
     },
-    [setHighlightedTile, gameState?.objectivePoints]
+    [setHighlightedTile, gameState?.objectivePoints, gameState?.figures]
   )
 
   const handleCanvasMouseLeave = useCallback(() => {
     setHighlightedTile(null)
     useGameStore.getState().setHoveredObjective(null)
+    useGameStore.getState().setHoveredFigure(null)
   }, [setHighlightedTile])
 
   // Handle wheel zoom

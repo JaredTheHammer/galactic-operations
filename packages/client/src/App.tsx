@@ -14,6 +14,7 @@ import { CombatLog } from './components/Combat/CombatLog'
 import { ObjectiveProgress } from './components/HUD/ObjectiveProgress'
 import { ThreatTracker } from './components/HUD/ThreatTracker'
 import { ObjectiveTooltip } from './components/HUD/ObjectiveTooltip'
+import { FigureTooltip } from './components/HUD/FigureTooltip'
 import { NotificationCenter } from './components/HUD/NotificationCenter'
 import MissionSelect from './components/Campaign/MissionSelect'
 import PostMission from './components/Campaign/PostMission'
@@ -221,8 +222,9 @@ function App() {
         {/* Combat log overlay */}
         <CombatLog messages={combatLog} compact visible={showCombatLog} onClose={() => setShowCombatLog(false)} />
 
-        {/* Objective hover tooltip */}
+        {/* Hover tooltips */}
         <ObjectiveTooltip />
+        <FigureTooltip />
 
         {/* Notification popups */}
         <NotificationCenter />
@@ -294,8 +296,9 @@ function App() {
       {/* Top Left (below morale): Threat Pool */}
       <ThreatTracker gameState={gameState} />
 
-      {/* Objective hover tooltip */}
+      {/* Hover tooltips */}
       <ObjectiveTooltip />
+      <FigureTooltip />
 
       {/* Notification popups (reinforcements, narrative events) */}
       <NotificationCenter />
