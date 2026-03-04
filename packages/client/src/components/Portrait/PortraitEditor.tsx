@@ -161,9 +161,70 @@ const countStyle: React.CSSProperties = {
   color: '#555566',
 };
 
+const promptButtonStyle: React.CSSProperties = {
+  padding: '5px 12px',
+  fontSize: '11px',
+  backgroundColor: '#1a1030',
+  border: '1px solid #333355',
+  borderRadius: '4px',
+  color: '#8888aa',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  transition: 'all 0.15s',
+};
+
+const modalBackdropStyle: React.CSSProperties = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1000,
+};
+
+const modalContentStyle: React.CSSProperties = {
+  backgroundColor: '#131320',
+  border: '1px solid #333355',
+  borderRadius: '10px',
+  padding: '20px',
+  maxWidth: '640px',
+  width: '90vw',
+  maxHeight: '85vh',
+  overflowY: 'auto',
+  position: 'relative',
+};
+
+const modalCloseStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '12px',
+  right: '14px',
+  background: 'none',
+  border: 'none',
+  color: '#666677',
+  fontSize: '18px',
+  cursor: 'pointer',
+  padding: '4px 8px',
+  lineHeight: 1,
+};
+
+const metadataStyle: React.CSSProperties = {
+  fontSize: '9px',
+  color: '#444455',
+  marginTop: '2px',
+};
+
 // ============================================================================
 // Component
 // ============================================================================
+
+/** Categories shown in the main tag editor (appearance excluded). */
+const TAG_CATEGORIES = ['species', 'gender', 'faction', 'career'];
 
 interface PortraitEditorProps {
   /** Called when a portrait is selected (useful in hero creation flow). */
@@ -187,6 +248,7 @@ export const PortraitEditor: React.FC<PortraitEditorProps> = ({
 }) => {
   const { isMobile } = useIsMobile();
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId);
+  const [showPromptBuilder, setShowPromptBuilder] = useState(false);
   const portraits = usePortraitStore(s => s.portraits);
   const updatePortrait = usePortraitStore(s => s.updatePortrait);
   const deletePortrait = usePortraitStore(s => s.deletePortrait);
@@ -287,35 +349,62 @@ export const PortraitEditor: React.FC<PortraitEditorProps> = ({
 
               <div style={dividerStyle} />
 
-              {/* Tag editor */}
+              {/* Tag editor (species, gender, faction, career -- no appearance) */}
               <TagEditor
                 tags={selectedPortrait.tags}
                 onTagsChange={handleTagsChange}
+                visibleCategories={TAG_CATEGORIES}
                 compact={mobile}
               />
 
-              {/* Metadata footer */}
-              <div style={{
-                fontSize: '9px',
-                color: '#444455',
-                marginTop: '4px',
-              }}>
-                {selectedPortrait.originalWidth}x{selectedPortrait.originalHeight} {selectedPortrait.mimeType}
-                <br />
-                ID: {selectedPortrait.id.slice(0, 12)}...
+              {/* Footer: metadata + prompt builder button */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                <div style={metadataStyle}>
+                  {selectedPortrait.originalWidth}x{selectedPortrait.originalHeight} &middot; {selectedPortrait.mimeType}
+                </div>
+                <button
+                  style={promptButtonStyle}
+                  onClick={() => setShowPromptBuilder(true)}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = '#bb99ff';
+                    e.currentTarget.style.color = '#bb99ff';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = '#333355';
+                    e.currentTarget.style.color = '#8888aa';
+                  }}
+                  title="Generate AI image prompts from portrait tags"
+                >
+                  <span style={{ fontSize: '13px' }}>&#x2728;</span> AI Prompt
+                </button>
               </div>
-
-              <div style={dividerStyle} />
-
-              {/* AI Prompt Builder */}
-              <PromptBuilder
-                portraitTags={selectedPortrait.tags}
-                compact={mobile}
-              />
             </>
           ) : (
             <div style={noSelectionStyle}>
               Select a portrait to edit
+            </div>
+          )}
+
+          {/* Prompt Builder modal */}
+          {showPromptBuilder && selectedPortrait && (
+            <div
+              style={modalBackdropStyle}
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setShowPromptBuilder(false);
+              }}
+            >
+              <div style={modalContentStyle}>
+                <button
+                  style={modalCloseStyle}
+                  onClick={() => setShowPromptBuilder(false)}
+                  title="Close"
+                >
+                  &times;
+                </button>
+                <PromptBuilder
+                  portraitTags={selectedPortrait.tags}
+                />
+              </div>
             </div>
           )}
         </div>
