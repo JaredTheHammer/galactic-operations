@@ -281,6 +281,26 @@ export interface Characteristics {
 
 export type CharacteristicName = keyof Characteristics;
 
+/** Species ability effect types */
+export type SpeciesAbilityEffect =
+  | { type: 'bonus_strain_recovery'; value: number }
+  | { type: 'social_skill_upgrade'; value: number }
+  | { type: 'wounded_melee_bonus'; value: number }
+  | { type: 'condition_immunity'; condition: string }
+  | { type: 'first_attack_bonus'; value: number }
+  | { type: 'regeneration'; value: number }
+  | { type: 'skill_bonus'; skills: string[]; value: number }
+  | { type: 'soak_bonus'; value: number };
+
+/** A single species ability (passive mechanical effect) */
+export interface SpeciesAbility {
+  id: string;
+  name: string;
+  description: string;
+  type: 'passive';
+  effect: SpeciesAbilityEffect;
+}
+
 /** Species definition loaded from species.json */
 export interface SpeciesDefinition {
   id: string;
@@ -292,6 +312,7 @@ export interface SpeciesDefinition {
   speed: number;
   startingXP: number;
   specialAbility: string | null;
+  abilities?: SpeciesAbility[];
   description: string;
 }
 

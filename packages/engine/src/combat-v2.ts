@@ -60,6 +60,12 @@ import {
   applyArmorKeyword,
 } from './keywords';
 
+import {
+  getSpeciesAttackBonus,
+  getSpeciesWoundedMeleeBonus,
+  getSpeciesSoakBonus,
+} from './species-abilities';
+
 // ============================================================================
 // HELPER: RESOLVE ENTITY BACKING A FIGURE
 // ============================================================================
@@ -162,7 +168,10 @@ function computeSoak(
   // Talent soak bonuses (Enduring, Armor Master)
   const talentSoak = getTalentSoakBonus(entity, gameData);
 
-  return brawn + resilienceRank + armorSoak + talentSoak;
+  // Species soak bonus (e.g., Droid Enduring Chassis: +1 soak)
+  const speciesSoak = isHero(entity) ? getSpeciesSoakBonus(entity, gameData) : 0;
+
+  return brawn + resilienceRank + armorSoak + talentSoak + speciesSoak;
 }
 
 /**
@@ -308,6 +317,12 @@ export function buildCombatPools(
     };
     const atkMods = getPassiveAttackPoolModifiers(attackerEntity, gameData, talentCtx);
     attackPool = applyTalentAttackPoolModifiers(attackPool, atkMods);
+
+    // Species attack pool bonus (e.g., Rodian Expert Tracker: +1 on first attack)
+    const speciesAtkBonus = getSpeciesAttackBonus(attacker, attackerEntity, gameData);
+    if (speciesAtkBonus > 0) {
+      attackPool = { ...attackPool, ability: attackPool.ability + speciesAtkBonus };
+    }
   }
 
   // --- DEFENSE POOL ---
@@ -760,6 +775,11 @@ export function resolveCombatV2(
     };
     const dmgMods = getPassiveDamageModifiers(attackerEntity, gameData, talentCtx);
     talentBonusDamage = dmgMods.bonusDamage;
+
+    // Species damage bonus (e.g., Wookiee Rage: +1 melee damage when wounded)
+    talentBonusDamage += getSpeciesWoundedMeleeBonus(
+      attacker, attackerEntity, gameData, poolCtx.weapon.skill ?? poolCtx.weapon.type,
+    );
   }
 
   // 6. Auto-spend advantages/threats

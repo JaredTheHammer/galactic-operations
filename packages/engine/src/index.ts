@@ -67,6 +67,9 @@ export type {
   // Unit Keywords
   UnitKeyword,
   UnitKeywordName,
+  // Species Abilities
+  SpeciesAbilityEffect,
+  SpeciesAbility,
 } from './types.js';
 
 // Re-export data loader functions
@@ -155,6 +158,21 @@ export {
   getHeroCourage,
 } from './turn-machine-v2.js';
 export type { ArmyCompositionV2, SuppressionState } from './turn-machine-v2.js';
+
+// Re-export species ability system
+export {
+  getHeroSpecies,
+  getSpeciesAbilities,
+  hasSpeciesAbility,
+  getSpeciesAttackBonus,
+  getSpeciesWoundedMeleeBonus,
+  getSpeciesSoakBonus,
+  getSpeciesRegeneration,
+  getSpeciesBonusStrainRecovery,
+  isImmuneToCondition,
+  filterImmuneConditions,
+  getSpeciesSkillBonus,
+} from './species-abilities.js';
 
 // Re-export keyword system (Legion-inspired mechanical keywords)
 export {

@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "2.1",
-    "description": "Playable species for hero creation. Each species defines starting Characteristics, wound/strain base thresholds, speed, and flavor text. Total characteristic points = 12 for all species."
+    "version": "2.2",
+    "description": "Playable species for hero creation. Each species defines starting Characteristics, wound/strain base thresholds, speed, and mechanical abilities. Total characteristic points = 12 for all species."
   },
   "species": {
     "human": {
@@ -20,7 +20,16 @@
       "strainBase": 10,
       "speed": 4,
       "startingXP": 110,
-      "specialAbility": null,
+      "specialAbility": "adaptable",
+      "abilities": [
+        {
+          "id": "adaptable",
+          "name": "Adaptable",
+          "description": "Recover 1 additional strain during Rest actions. Humans are versatile and recover composure quickly.",
+          "type": "passive",
+          "effect": { "type": "bonus_strain_recovery", "value": 1 }
+        }
+      ],
       "description": "Versatile and adaptable. Humans are the most common species in the galaxy."
     },
     "twilek": {
@@ -39,7 +48,16 @@
       "strainBase": 11,
       "speed": 4,
       "startingXP": 100,
-      "specialAbility": null,
+      "specialAbility": "beguiling",
+      "abilities": [
+        {
+          "id": "beguiling",
+          "name": "Beguiling",
+          "description": "Upgrade attack pool once when making social skill checks. Natural charm and lekku body language give Twi'leks an edge in negotiations.",
+          "type": "passive",
+          "effect": { "type": "social_skill_upgrade", "value": 1 }
+        }
+      ],
       "description": "Charismatic and resilient. Twi'leks are natural leaders and negotiators."
     },
     "wookiee": {
@@ -58,7 +76,23 @@
       "strainBase": 8,
       "speed": 4,
       "startingXP": 90,
-      "specialAbility": null,
+      "specialAbility": "wookiee_rage",
+      "abilities": [
+        {
+          "id": "wookiee_rage",
+          "name": "Wookiee Rage",
+          "description": "+1 damage on melee/Brawl attacks when wounded. The legendary Wookiee berserker fury makes them more dangerous as they take damage.",
+          "type": "passive",
+          "effect": { "type": "wounded_melee_bonus", "value": 1 }
+        },
+        {
+          "id": "wookiee_intimidating",
+          "name": "Intimidating",
+          "description": "Immune to Fear condition. Wookiees do not break -- they break others.",
+          "type": "passive",
+          "effect": { "type": "condition_immunity", "condition": "Fear" }
+        }
+      ],
       "description": "Powerful and loyal. Wookiees are fearsome warriors with an unbreakable honor code."
     },
     "rodian": {
@@ -77,7 +111,16 @@
       "strainBase": 10,
       "speed": 4,
       "startingXP": 100,
-      "specialAbility": null,
+      "specialAbility": "expert_tracker",
+      "abilities": [
+        {
+          "id": "expert_tracker",
+          "name": "Expert Tracker",
+          "description": "+1 Ability die on the first attack each activation. Born hunters, Rodians have an innate sense for lining up the perfect shot.",
+          "type": "passive",
+          "effect": { "type": "first_attack_bonus", "value": 1 }
+        }
+      ],
       "description": "Quick and perceptive. Rodians are born hunters with excellent reflexes."
     },
     "trandoshan": {
@@ -96,7 +139,16 @@
       "strainBase": 9,
       "speed": 4,
       "startingXP": 90,
-      "specialAbility": null,
+      "specialAbility": "regeneration",
+      "abilities": [
+        {
+          "id": "regeneration",
+          "name": "Regeneration",
+          "description": "Recover 1 wound at the start of each activation (if wounded). Trandoshans can regrow lost limbs over time; in combat, minor wounds close rapidly.",
+          "type": "passive",
+          "effect": { "type": "regeneration", "value": 1 }
+        }
+      ],
       "description": "Brutal and relentless. Trandoshans worship the Scorekeeper and live for the hunt."
     },
     "bothan": {
@@ -115,7 +167,16 @@
       "strainBase": 11,
       "speed": 4,
       "startingXP": 100,
-      "specialAbility": null,
+      "specialAbility": "convincing_demeanor",
+      "abilities": [
+        {
+          "id": "convincing_demeanor",
+          "name": "Convincing Demeanor",
+          "description": "+1 Ability die on Deception and Streetwise checks. Many Bothans died to bring us this information -- but these ones are very good at not dying.",
+          "type": "passive",
+          "effect": { "type": "skill_bonus", "skills": ["deception", "streetwise"], "value": 1 }
+        }
+      ],
       "description": "Shrewd and resourceful. Bothans are master spies and information brokers."
     },
     "droid": {
@@ -135,7 +196,23 @@
       "speed": 4,
       "startingXP": 175,
       "specialAbility": "droid_chassis",
-      "description": "Immune to Poison and Fear. Vulnerable to Ion damage. Stats vary by chassis model."
+      "abilities": [
+        {
+          "id": "droid_systems",
+          "name": "Inorganic",
+          "description": "Immune to Poison and Fear conditions. Droids lack biological vulnerabilities but cannot benefit from stimpacks (use repair patches instead).",
+          "type": "passive",
+          "effect": { "type": "condition_immunity", "condition": "Poison" }
+        },
+        {
+          "id": "droid_endurance",
+          "name": "Enduring Chassis",
+          "description": "+1 soak from reinforced plating. Droids are built to take punishment.",
+          "type": "passive",
+          "effect": { "type": "soak_bonus", "value": 1 }
+        }
+      ],
+      "description": "Immune to Poison and Fear. Droids are built for purpose with reinforced chassis plating."
     }
   }
 }
