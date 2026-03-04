@@ -126,7 +126,7 @@ function HeroStatusCard({
 // ============================================================================
 
 export default function PostMission() {
-  const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState } = useGameStore()
+  const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState, activeMissionDef, campaignMissions } = useGameStore()
   const { isMobile } = useIsMobile()
 
   if (!lastMissionResult) {
@@ -175,9 +175,37 @@ export default function PostMission() {
         }}>
           {outcomeText}
         </h1>
-        <div style={{ textAlign: 'center', color: '#888', marginBottom: isMobile ? '16px' : '24px', fontSize: isMobile ? '13px' : '14px' }}>
+        <div style={{ textAlign: 'center', color: '#888', marginBottom: '12px', fontSize: isMobile ? '13px' : '14px' }}>
           Completed in {result.roundsPlayed} rounds
         </div>
+
+        {/* Narrative outcome text */}
+        {(() => {
+          const missionDef = activeMissionDef ?? campaignMissions?.[result.missionId]
+          const narrativeText = missionDef
+            ? (isVictory ? missionDef.narrativeSuccess : missionDef.narrativeFailure)
+            : null
+          if (!narrativeText) return null
+          return (
+            <div style={{
+              padding: isMobile ? '12px' : '16px',
+              marginBottom: isMobile ? '16px' : '24px',
+              backgroundColor: '#0a0a12',
+              borderRadius: '8px',
+              borderLeft: `3px solid ${outcomeColor}`,
+            }}>
+              <p style={{
+                color: '#ccbb88',
+                fontSize: isMobile ? '13px' : '14px',
+                lineHeight: '1.6',
+                fontStyle: 'italic',
+                margin: 0,
+              }}>
+                {narrativeText}
+              </p>
+            </div>
+          )
+        })()}
 
         {/* XP Breakdown */}
         <div style={{ marginBottom: isMobile ? '16px' : '24px' }}>

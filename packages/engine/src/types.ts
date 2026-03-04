@@ -1125,6 +1125,11 @@ export interface CampaignState {
   credits: number;
   narrativeItems: string[];
 
+  /** Equipment inventory: unequipped weapon/armor item IDs available for heroes to equip.
+   *  Each entry is a weapon or armor ID (e.g., 'dl-44', 'blast-vest').
+   *  Duplicates allowed (buying 2 of same item = 2 entries). */
+  inventory?: string[];
+
   /** Threat escalation: increases each mission to scale difficulty */
   threatLevel: number;
   /** Base threat multiplier (affected by campaign difficulty) */

@@ -11,6 +11,7 @@ import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult } f
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
 import { usePortraitStore } from '../../store/portrait-store'
+import { listSaveSlots, MAX_SLOTS, findEmptySlot, type SaveSlotMeta } from '../../services/save-slots'
 
 // ============================================================================
 // STYLES
@@ -253,11 +254,15 @@ export default function MissionSelect() {
     campaignMissions,
     startCampaignMission,
     saveCampaignToStorage,
+    saveCampaignToSlot,
+    activeSaveSlot,
     loadImportedCampaign,
     exitCampaign,
     openSocialPhase,
     openHeroProgression,
     openPortraitManager,
+    openCampaignStats,
+    openCampaignJournal,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -265,6 +270,7 @@ export default function MissionSelect() {
   const [saveFlash, setSaveFlash] = useState(false)
   const [exportFlash, setExportFlash] = useState(false)
   const [importStatus, setImportStatus] = useState<string | null>(null)
+  const [showSaveSlotPicker, setShowSaveSlotPicker] = useState(false)
   const importInputRef = useRef<HTMLInputElement>(null)
 
   // Auto-select first available mission
@@ -413,17 +419,101 @@ export default function MissionSelect() {
             PORTRAITS
           </button>
           <button
-            style={{
-              ...buttonStyle,
-              backgroundColor: saveFlash ? '#44ff44' : '#2a4a2a',
-              color: saveFlash ? '#000' : '#44ff44',
-              transition: 'all 0.3s',
-              flex: isMobile ? '1 1 auto' : undefined,
-            }}
-            onClick={handleSave}
+            style={{ ...buttonStyle, backgroundColor: '#1a2a3a', color: '#cc8800', flex: isMobile ? '1 1 auto' : undefined }}
+            onClick={openCampaignJournal}
           >
-            {saveFlash ? '\u2714 SAVED!' : 'SAVE CAMPAIGN'}
+            JOURNAL
           </button>
+          <button
+            style={{ ...buttonStyle, backgroundColor: '#1a2a3a', color: '#4a9eff', flex: isMobile ? '1 1 auto' : undefined }}
+            onClick={openCampaignStats}
+          >
+            STATS
+          </button>
+          <div style={{ position: 'relative', flex: isMobile ? '1 1 auto' : undefined, display: 'flex', gap: '2px' }}>
+            <button
+              style={{
+                ...buttonStyle,
+                backgroundColor: saveFlash ? '#44ff44' : '#2a4a2a',
+                color: saveFlash ? '#000' : '#44ff44',
+                transition: 'all 0.3s',
+                flex: 1,
+                borderTopRightRadius: '0',
+                borderBottomRightRadius: '0',
+              }}
+              onClick={handleSave}
+            >
+              {saveFlash ? '\u2714 SAVED!' : activeSaveSlot != null ? `SAVE (SLOT ${activeSaveSlot})` : 'SAVE'}
+            </button>
+            <button
+              style={{
+                ...buttonStyle,
+                backgroundColor: '#2a4a2a',
+                color: '#44ff44',
+                borderTopLeftRadius: '0',
+                borderBottomLeftRadius: '0',
+                padding: '10px 8px',
+                fontSize: '10px',
+              }}
+              onClick={() => setShowSaveSlotPicker(!showSaveSlotPicker)}
+            >
+              {'\u25BC'}
+            </button>
+            {showSaveSlotPicker && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '4px',
+                backgroundColor: '#131320',
+                border: '1px solid #333355',
+                borderRadius: '6px',
+                padding: '6px',
+                zIndex: 100,
+                minWidth: '180px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+              }}>
+                {Array.from({ length: MAX_SLOTS }, (_, i) => i).map(slotId => {
+                  const existing = listSaveSlots().find(s => s.slotId === slotId)
+                  return (
+                    <button
+                      key={slotId}
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        padding: '8px 10px',
+                        backgroundColor: activeSaveSlot === slotId ? '#1a2a1a' : 'transparent',
+                        border: 'none',
+                        borderRadius: '4px',
+                        color: '#ccc',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '11px',
+                      }}
+                      onClick={() => {
+                        saveCampaignToSlot(slotId)
+                        setShowSaveSlotPicker(false)
+                        setSaveFlash(true)
+                        setTimeout(() => setSaveFlash(false), 2000)
+                      }}
+                    >
+                      <span style={{ color: '#44ff44', fontWeight: 'bold' }}>
+                        {slotId === 0 ? 'Auto' : `Slot ${slotId}`}
+                      </span>
+                      {existing && (
+                        <span style={{ color: '#666', marginLeft: '8px' }}>
+                          {existing.campaignName} (Act {existing.currentAct})
+                        </span>
+                      )}
+                      {!existing && (
+                        <span style={{ color: '#555', marginLeft: '8px' }}>Empty</span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
           <button
             style={{
               ...buttonStyle,

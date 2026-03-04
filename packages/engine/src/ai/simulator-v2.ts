@@ -127,7 +127,7 @@ export function generateTestHeroes(gameData: GameData): HeroCharacter[] {
   }, gameData);
   vex.id = 'hero-vex-dorin';
   vex.equipment.primaryWeapon = 'dl-44';
-  vex.equipment.armor = 'blast-vest';
+  vex.equipment.armor = 'padded-armor';
   heroes.push(vex);
 
   // Hero 3: Twi'lek Commander / Tactician -- support/leader

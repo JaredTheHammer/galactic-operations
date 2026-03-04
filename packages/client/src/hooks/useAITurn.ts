@@ -26,6 +26,7 @@ import {
   getProfileForFigure,
   determineActions,
 } from '@engine/ai/index.js'
+import { combatAnimations } from '../canvas/animation-manager'
 import {
   advancePhaseV2,
   executeActionV2,
@@ -309,6 +310,10 @@ export function useAITurn(): UseAITurnReturn {
 
             useGameStore.setState({ aiMovePath: null, aiAttackTarget: null })
 
+            // Capture pre-execution state for animations
+            const figBefore = gs.figures.find(f => f.id === activeFig.id)
+            const figBeforePos = figBefore ? { x: figBefore.position.x, y: figBefore.position.y } : null
+
             try {
               gs = executeActionV2(gs, action, gameData)
               executedActions.push(action)
@@ -316,6 +321,28 @@ export function useAITurn(): UseAITurnReturn {
               console.error(`Action execution error:`, err)
               addCombatLog(`  !! Action failed: ${err}`)
               continue
+            }
+
+            // Spawn animations based on action type
+            const ownerSide = activeFig.owner === 0 ? 'imperial' : 'operative'
+            if (action.type === 'Move' && figBeforePos) {
+              const dest = action.payload.path[action.payload.path.length - 1]
+              combatAnimations.spawnMoveTrail(figBeforePos, dest, ownerSide)
+            } else if (action.type === 'Attack') {
+              const targetFig = gs.figures.find(f => f.id === action.payload.targetId)
+              const attackerFig = gs.figures.find(f => f.id === activeFig.id)
+              if (targetFig && attackerFig) {
+                const resolution = gs.activeCombat?.resolution
+                const isHit = resolution?.isHit ?? false
+                const defSide = targetFig.owner === 0 ? 'imperial' : 'operative'
+                combatAnimations.spawnProjectile(attackerFig.position, targetFig.position, isHit, ownerSide)
+                if (resolution) {
+                  combatAnimations.spawnDamageNumber(targetFig.position, resolution.woundsDealt, resolution.isHit)
+                  if (resolution.isDefeated) {
+                    combatAnimations.spawnDeathParticles(targetFig.position, defSide)
+                  }
+                }
+              }
             }
 
             const actionLabel = describeActionV2(action, gs)
