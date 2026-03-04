@@ -453,6 +453,10 @@ export interface GameStore {
   hoveredFigureId: string | null
   figureTooltipPos: { x: number; y: number } | null
 
+  // Cinematic banners
+  roundBanner: { round: number; roundLimit?: number; roundsLeft?: number } | null
+  gameOverBanner: { outcome: 'victory' | 'defeat'; condition?: string; rounds?: number } | null
+
   // Imperial AI state (campaign combat)
   imperialAIPhase: 'thinking' | 'executing' | null
 
@@ -529,6 +533,8 @@ export interface GameStore {
   removeNotification: (id: string) => void
   setHoveredObjective: (id: string | null, screenPos?: { x: number; y: number }) => void
   setHoveredFigure: (id: string | null, screenPos?: { x: number; y: number }) => void
+  clearRoundBanner: () => void
+  clearGameOverBanner: () => void
 
   // Helpers
   getGameData: () => GameData | null
@@ -594,6 +600,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // UI overlay state
   notifications: [],
   threatFlash: false,
+  roundBanner: null,
+  gameOverBanner: null,
   hoveredObjectiveId: null,
   tooltipScreenPos: null,
   hoveredFigureId: null,
@@ -1336,6 +1344,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState], selectedFigureId: null, validMoves: [], validTargets: [] })
       addCombatLog(`${currentFigure.id} activation ended`)
 
+      // Build activation summary for player-controlled figures
+      if (currentFigure.playerId === 0) {
+        const parts: string[] = []
+        if (currentFigure.hasMovedThisActivation) parts.push('Moved')
+        if (currentFigure.hasAttackedThisActivation) parts.push('Attacked')
+        if (currentFigure.aimTokens > 0) parts.push(`Aim x${currentFigure.aimTokens}`)
+        if (currentFigure.hasStandby) parts.push('Standby')
+        if (currentFigure.hasUsedStrainForManeuver) parts.push('+Maneuver')
+        const summary = parts.length > 0 ? parts.join(', ') : 'No actions taken'
+        get().addNotification({
+          type: 'info',
+          title: `${currentFigure.id} Done`,
+          message: summary,
+          duration: 2000,
+        })
+      }
+
       if (allDone) {
         addCombatLog('All units activated. Advance phase to continue.')
       }
@@ -1574,6 +1599,27 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
     addCombatLog(`Phase advanced to ${newPhase} (Round ${newRound})`)
+
+    // Trigger round banner on new round
+    if (newPhase === 'Setup' && newRound > 1) {
+      const roundLimit = activeMission?.roundLimit
+      const roundsLeft = roundLimit ? roundLimit - newRound : undefined
+      set({
+        roundBanner: { round: newRound, roundLimit: roundLimit ?? undefined, roundsLeft },
+      })
+    }
+
+    // Trigger game over banner on victory/defeat
+    if (newGameState.winner) {
+      const isVictory = newGameState.winner === 'Operative'
+      set({
+        gameOverBanner: {
+          outcome: isVictory ? 'victory' : 'defeat',
+          condition: newGameState.victoryCondition ?? undefined,
+          rounds: newGameState.roundNumber,
+        },
+      })
+    }
   },
 
   setHighlightedTile: (coord: GridCoordinate | null) => {
@@ -1680,6 +1726,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       figureTooltipPos: screenPos ?? null,
     })
   },
+
+  clearRoundBanner: () => set({ roundBanner: null }),
+  clearGameOverBanner: () => set({ gameOverBanner: null }),
 
   // ========================================================================
   // CAMPAIGN ACTIONS

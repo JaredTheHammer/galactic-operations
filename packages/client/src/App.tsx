@@ -16,6 +16,8 @@ import { ThreatTracker } from './components/HUD/ThreatTracker'
 import { ObjectiveTooltip } from './components/HUD/ObjectiveTooltip'
 import { FigureTooltip } from './components/HUD/FigureTooltip'
 import { NotificationCenter } from './components/HUD/NotificationCenter'
+import { RoundBanner } from './components/HUD/RoundBanner'
+import { GameOverBanner } from './components/HUD/GameOverBanner'
 import MissionSelect from './components/Campaign/MissionSelect'
 import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
@@ -226,8 +228,10 @@ function App() {
         <ObjectiveTooltip />
         <FigureTooltip />
 
-        {/* Notification popups */}
+        {/* Notification popups + cinematic banners */}
         <NotificationCenter />
+        <RoundBanner />
+        <GameOverBanner />
 
         {/* Combat panel overlay */}
         {gameState.activeCombat && (
@@ -300,8 +304,10 @@ function App() {
       <ObjectiveTooltip />
       <FigureTooltip />
 
-      {/* Notification popups (reinforcements, narrative events) */}
+      {/* Notification popups + cinematic banners */}
       <NotificationCenter />
+      <RoundBanner />
+      <GameOverBanner />
 
       {/* Top Right: Selected Figure Info */}
       {selectedFigure && (
