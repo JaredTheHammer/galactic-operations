@@ -397,6 +397,8 @@ export interface GameStore {
   lastMissionResult: MissionResult | null
   showMissionSelect: boolean
   showPostMission: boolean
+  showMissionBriefing: boolean
+  showCampaignJournal: boolean
   showSocialPhase: boolean
   showHeroProgression: boolean
   showPortraitManager: boolean
@@ -464,6 +466,15 @@ export interface GameStore {
   openHeroProgression: () => void
   closeHeroProgression: () => void
 
+  // Mission briefing actions
+  openMissionBriefing: (missionId: string) => void
+  closeMissionBriefing: () => void
+  deployFromBriefing: () => void
+
+  // Campaign journal actions
+  openCampaignJournal: () => void
+  closeCampaignJournal: () => void
+
   // Campaign stats actions
   openCampaignStats: () => void
   closeCampaignStats: () => void
@@ -521,6 +532,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   lastMissionResult: null,
   showMissionSelect: false,
   showPostMission: false,
+  showMissionBriefing: false,
+  showCampaignJournal: false,
   showSocialPhase: false,
   showHeroProgression: false,
   showPortraitManager: false,
@@ -1465,103 +1478,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Launch a campaign mission: set up game state and start playing.
    */
   startCampaignMission: (missionId: string) => {
-    const { campaignState, campaignMissions } = get()
-    if (!campaignState) return
-
-    const mission = campaignMissions[missionId]
-    if (!mission) return
-
-    const gameData = loadGameDataV2()
-    const mapConfig: MapConfig = {
-      preset: mission.mapPreset as any,
-      boardsWide: mission.boardsWide,
-      boardsTall: mission.boardsTall,
-    }
-    const generatedMap = generateMap(mapConfig, BOARD_TEMPLATES)
-
-    // Prepare heroes from campaign roster
-    const heroes = prepareHeroesForMission(campaignState)
-    const heroesRegistry: Record<string, HeroCharacter> = {}
-    for (const hero of heroes) {
-      heroesRegistry[hero.id] = hero
-    }
-
-    // Create players
-    const players: Player[] = [
-      { id: 0, name: 'Imperial AI', role: 'Imperial', isLocal: true, isAI: true },
-      { id: 1, name: 'Operative', role: 'Operative', isLocal: true, isAI: false },
-    ]
-
-    // Build a mission object compatible with createInitialGameStateV2
-    const gameMission = {
-      id: mission.id,
-      name: mission.name,
-      description: mission.description,
-      mapId: mission.mapId,
-      roundLimit: mission.roundLimit,
-      imperialThreat: mission.imperialThreat,
-      imperialReinforcementPoints: mission.threatPerRound,
-      victoryConditions: mission.victoryConditions.map(vc => ({
-        side: vc.side,
-        description: vc.description,
-        condition: vc.requiredObjectiveIds.join(','),
-      })),
-    }
-
-    // Create game state with objective point templates from mission definition
-    let gameState = createInitialGameStateV2(
-      gameMission,
-      players,
-      gameData,
-      generatedMap,
-      {
-        heroes: heroesRegistry,
-        npcProfiles: gameData.npcProfiles,
-        objectivePointTemplates: mission.objectivePoints,
-        lootTokens: mission.lootTokens,
-      },
-    )
-
-    // Store the active mission ID for victory condition checks
-    gameState.activeMissionId = mission.id
-
-    // Override operative deploy zone with mission-specific positions if provided
-    if (mission.operativeDeployZone && mission.operativeDeployZone.length > 0) {
-      gameState.map.deploymentZones.operative = mission.operativeDeployZone
-    }
-
-    // Deploy heroes as operative army
-    const army: ArmyCompositionV2 = {
-      imperial: mission.initialEnemies.map(g => ({
-        npcId: g.npcProfileId,
-        count: g.count,
-      })),
-      operative: heroes.map(h => ({
-        entityType: 'hero' as const,
-        entityId: h.id,
-        count: 1,
-      })),
-    }
-    gameState = deployFiguresV2(gameState, army, gameData)
-
-    // Build activation order
-    gameState.activationOrder = gameState.figures
-      .filter(f => !f.isDefeated)
-      .map(f => f.id)
-    gameState.currentActivationIndex = 0
-    gameState.turnPhase = 'Activation'
-
-    set({
-      gameState,
-      gameData,
-      isInitialized: true,
-      showMissionSelect: false,
-      showPostMission: false,
-      isAIBattle: false,
-      activeMissionDef: mission,
-      triggeredWaveIds: [],
-      combatLog: [`Mission started: ${mission.name}`],
-    })
+    // Show mission briefing first, then deploy on confirmation
+    get().openMissionBriefing(missionId)
   },
 
   /**
@@ -1660,6 +1578,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showSetup: false,
       showMissionSelect: true,
       showPostMission: false,
+      showMissionBriefing: false,
+      showCampaignJournal: false,
       showSocialPhase: false,
       showHeroProgression: false,
       showPortraitManager: false,
@@ -1682,6 +1602,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       lastMissionResult: null,
       showMissionSelect: false,
       showPostMission: false,
+      showMissionBriefing: false,
+      showCampaignJournal: false,
       showSocialPhase: false,
       showHeroProgression: false,
       showPortraitManager: false,
@@ -1770,6 +1692,139 @@ export const useGameStore = create<GameStore>((set, get) => ({
   closeCampaignStats: () => {
     set({
       showCampaignStats: false,
+      showMissionSelect: true,
+    })
+  },
+
+  // ---- Mission Briefing ----
+
+  openMissionBriefing: (missionId: string) => {
+    const { campaignState, campaignMissions } = get()
+    if (!campaignState) return
+
+    const mission = campaignMissions[missionId]
+    if (!mission) return
+
+    const gameData = loadGameDataV2()
+    const mapConfig: MapConfig = {
+      preset: mission.mapPreset as any,
+      boardsWide: mission.boardsWide,
+      boardsTall: mission.boardsTall,
+    }
+    const generatedMap = generateMap(mapConfig, BOARD_TEMPLATES)
+
+    const heroes = prepareHeroesForMission(campaignState)
+    const heroesRegistry: Record<string, HeroCharacter> = {}
+    for (const hero of heroes) {
+      heroesRegistry[hero.id] = hero
+    }
+
+    const players: Player[] = [
+      { id: 0, name: 'Imperial AI', role: 'Imperial', isLocal: true, isAI: true },
+      { id: 1, name: 'Operative', role: 'Operative', isLocal: true, isAI: false },
+    ]
+
+    const gameMission = {
+      id: mission.id,
+      name: mission.name,
+      description: mission.description,
+      mapId: mission.mapId,
+      roundLimit: mission.roundLimit,
+      imperialThreat: mission.imperialThreat,
+      imperialReinforcementPoints: mission.threatPerRound,
+      victoryConditions: mission.victoryConditions.map(vc => ({
+        side: vc.side,
+        description: vc.description,
+        condition: vc.requiredObjectiveIds.join(','),
+      })),
+    }
+
+    let gameState = createInitialGameStateV2(
+      gameMission,
+      players,
+      gameData,
+      generatedMap,
+      {
+        heroes: heroesRegistry,
+        npcProfiles: gameData.npcProfiles,
+        objectivePointTemplates: mission.objectivePoints,
+        lootTokens: mission.lootTokens,
+      },
+    )
+
+    gameState.activeMissionId = mission.id
+
+    if (mission.operativeDeployZone && mission.operativeDeployZone.length > 0) {
+      gameState.map.deploymentZones.operative = mission.operativeDeployZone
+    }
+
+    const army: ArmyCompositionV2 = {
+      imperial: mission.initialEnemies.map(g => ({
+        npcId: g.npcProfileId,
+        count: g.count,
+      })),
+      operative: heroes.map(h => ({
+        entityType: 'hero' as const,
+        entityId: h.id,
+        count: 1,
+      })),
+    }
+    gameState = deployFiguresV2(gameState, army, gameData)
+
+    gameState.activationOrder = gameState.figures
+      .filter(f => !f.isDefeated)
+      .map(f => f.id)
+    gameState.currentActivationIndex = 0
+    gameState.turnPhase = 'Activation'
+
+    // Store prepared game state but show briefing first
+    set({
+      gameState,
+      gameData,
+      isInitialized: false, // Don't start combat yet
+      showMissionSelect: false,
+      showMissionBriefing: true,
+      showPostMission: false,
+      isAIBattle: false,
+      activeMissionDef: mission,
+      triggeredWaveIds: [],
+      combatLog: [],
+    })
+  },
+
+  closeMissionBriefing: () => {
+    // Cancel briefing, return to mission select
+    set({
+      showMissionBriefing: false,
+      showMissionSelect: true,
+      gameState: null,
+      isInitialized: false,
+      activeMissionDef: null,
+    })
+  },
+
+  deployFromBriefing: () => {
+    const { activeMissionDef } = get()
+    if (!activeMissionDef) return
+    set({
+      showMissionBriefing: false,
+      isInitialized: true,
+      combatLog: [`Mission started: ${activeMissionDef.name}`],
+    })
+  },
+
+  // ---- Campaign Journal ----
+
+  openCampaignJournal: () => {
+    set({
+      showMissionSelect: false,
+      showCampaignJournal: true,
+    })
+  },
+
+  closeCampaignJournal: () => {
+    set({
+      showCampaignJournal: false,
       showMissionSelect: true,
     })
   },

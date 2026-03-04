@@ -21,6 +21,8 @@ import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
 import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgression'
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
+import MissionBriefing from './components/Campaign/MissionBriefing'
+const CampaignJournal = React.lazy(() => import('./components/Campaign/CampaignJournal'))
 const CampaignStats = React.lazy(() => import('./components/Campaign/CampaignStats'))
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
@@ -43,6 +45,8 @@ function App() {
     showHeroProgression,
     showPortraitManager,
     showCampaignStats,
+    showMissionBriefing,
+    showCampaignJournal,
     showMapEditor,
     showCombatArena,
   } = useGameStore()
@@ -83,6 +87,11 @@ function App() {
     return <><AudioControls /><HeroCreation /></>
   }
 
+  // Campaign: mission briefing (shown before combat begins)
+  if (showMissionBriefing) {
+    return <><AudioControls /><MissionBriefing /></>
+  }
+
   // Campaign: mission select screen
   if (showMissionSelect) {
     return <><AudioControls /><MissionSelect /></>
@@ -101,6 +110,20 @@ function App() {
   // Campaign: portrait & faction visual manager
   if (showPortraitManager) {
     return <><AudioControls /><PortraitManagerPage /></>
+  }
+
+  // Campaign: mission journal (lazy-loaded)
+  if (showCampaignJournal) {
+    return (
+      <React.Suspense fallback={
+        <div style={{ width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a0f' }}>
+          <div style={{ color: '#cc8800', fontSize: '16px' }}>Loading journal...</div>
+        </div>
+      }>
+        <AudioControls />
+        <CampaignJournal />
+      </React.Suspense>
+    )
   }
 
   // Campaign: stats dashboard (lazy-loaded with Plotly)

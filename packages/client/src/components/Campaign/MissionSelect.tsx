@@ -259,6 +259,7 @@ export default function MissionSelect() {
     openHeroProgression,
     openPortraitManager,
     openCampaignStats,
+    openCampaignJournal,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -412,6 +413,12 @@ export default function MissionSelect() {
             onClick={openPortraitManager}
           >
             PORTRAITS
+          </button>
+          <button
+            style={{ ...buttonStyle, backgroundColor: '#1a2a3a', color: '#cc8800', flex: isMobile ? '1 1 auto' : undefined }}
+            onClick={openCampaignJournal}
+          >
+            JOURNAL
           </button>
           <button
             style={{ ...buttonStyle, backgroundColor: '#1a2a3a', color: '#4a9eff', flex: isMobile ? '1 1 auto' : undefined }}
