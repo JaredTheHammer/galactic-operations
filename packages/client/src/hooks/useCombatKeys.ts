@@ -15,6 +15,7 @@ import { useGameStore } from '../store/game-store'
  *   N = Next Phase (advance phase)
  *   Tab = Cycle to next friendly figure
  *   Escape = Deselect figure
+ *   Ctrl+Z = Undo last action
  */
 export function useCombatKeys(enabled: boolean) {
   const store = useGameStore
@@ -37,9 +38,18 @@ export function useCombatKeys(enabled: boolean) {
         guardedStance,
         endActivation,
         advancePhase,
+        undoLastAction,
+        gameStateHistory,
       } = store.getState()
 
       if (!gameState) return
+
+      // Ctrl+Z = Undo (handle before other keys)
+      if (e.key === 'z' && (e.ctrlKey || e.metaKey) && gameStateHistory.length > 0) {
+        e.preventDefault()
+        undoLastAction()
+        return
+      }
 
       const selectedFigure = selectedFigureId
         ? gameState.figures.find(f => f.id === selectedFigureId) ?? null

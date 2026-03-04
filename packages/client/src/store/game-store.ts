@@ -405,6 +405,9 @@ export interface GameStore {
   aiMovePath: GridCoordinate[] | null
   aiAttackTarget: { from: GridCoordinate; to: GridCoordinate } | null
 
+  // Undo history (stores previous game states for undo)
+  gameStateHistory: GameState[]
+
   // Autosave state
   lastAutosaveTime: number | null
 
@@ -520,6 +523,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   aiMovePath: null,
   aiAttackTarget: null,
 
+  // Undo history
+  gameStateHistory: [],
+
   // Autosave state
   lastAutosaveTime: null,
 
@@ -629,6 +635,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       pendingPlayers: null,
       pendingMapConfig: null,
       combatLog: ['Mission started! Heroes deployed.'],
+      gameStateHistory: [],
     })
   },
 
@@ -826,6 +833,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       isAIBattle,
       activeMission: mission as Mission,
       combatLog: [isAIBattle ? 'AI Battle started!' : 'Game started!'],
+      gameStateHistory: [],
     })
   },
 
@@ -849,7 +857,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   moveFigure: (destination: GridCoordinate) => {
-    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
 
     const figure = gameState.figures.find(f => f.id === selectedFigureId)
@@ -863,7 +871,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         payload: { path: [destination] },
       }
       const newGameState = executeActionV2(gameState, moveAction, gameData)
-      set({ gameState: newGameState })
+      set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
       addCombatLog(`${figure.id} moved to (${destination.x}, ${destination.y})`)
 
       // Re-select to update valid moves/targets
@@ -881,7 +889,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   startAttack: (targetId: string) => {
-    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
 
     const attacker = gameState.figures.find(f => f.id === selectedFigureId)
@@ -898,7 +906,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         payload: { targetId, weaponId },
       }
       const newGameState = executeActionV2(gameState, attackAction, gameData)
-      set({ gameState: newGameState })
+      set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
 
       const resolution = newGameState.activeCombat?.resolution
       if (resolution) {
@@ -920,7 +928,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   rallyFigure: () => {
-    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
 
     const figure = gameState.figures.find(f => f.id === selectedFigureId)
@@ -932,7 +940,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       payload: {},
     }
     const newGameState = executeActionV2(gameState, rallyAction, gameData)
-    set({ gameState: newGameState })
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
 
     const updated = newGameState.figures.find(f => f.id === selectedFigureId)
     const recovered = figure.strainCurrent - (updated?.strainCurrent ?? 0)
@@ -943,7 +951,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   aimFigure: () => {
-    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
 
     const figure = gameState.figures.find(f => f.id === selectedFigureId)
@@ -955,14 +963,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       payload: {},
     }
     const newGameState = executeActionV2(gameState, aimAction, gameData)
-    set({ gameState: newGameState })
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
 
     const updatedFig = newGameState.figures.find(f => f.id === selectedFigureId)
     addCombatLog(`${selectedFigureId} aimed (${updatedFig?.aimTokens ?? 0} aim tokens)`)
   },
 
   dodgeFigure: () => {
-    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
 
     const figure = gameState.figures.find(f => f.id === selectedFigureId)
@@ -974,12 +982,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       payload: {},
     }
     const newGameState = executeActionV2(gameState, dodgeAction, gameData)
-    set({ gameState: newGameState })
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
     addCombatLog(`${selectedFigureId} braced for dodge (1 dodge token)`)
   },
 
   guardedStance: () => {
-    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
 
     const guardAction = {
@@ -988,12 +996,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       payload: {},
     }
     const newGameState = executeActionV2(gameState, guardAction, gameData)
-    set({ gameState: newGameState })
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
     addCombatLog(`${selectedFigureId} took guarded stance`)
   },
 
   useTalent: (talentId: string) => {
-    const { gameState, gameData, selectedFigureId, addCombatLog } = get()
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
 
     const figure = gameState.figures.find(f => f.id === selectedFigureId)
@@ -1009,7 +1017,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         payload: { talentId, weaponId },
       }
       const newGameState = executeActionV2(gameState, talentAction, gameData)
-      set({ gameState: newGameState })
+      set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
 
       // Find talent name for log
       const hero = gameState.heroes[figure.entityId]
@@ -1041,7 +1049,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   endActivation: () => {
-    const { gameState, addCombatLog } = get()
+    const { gameState, addCombatLog, gameStateHistory } = get()
     if (!gameState) return
 
     const currentFigureId = gameState.activationOrder[gameState.currentActivationIndex]
@@ -1076,7 +1084,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         })
       }
 
-      set({ gameState: newGameState, selectedFigureId: null, validMoves: [], validTargets: [] })
+      set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState], selectedFigureId: null, validMoves: [], validTargets: [] })
       addCombatLog(`${currentFigure.id} activation ended`)
 
       if (allDone) {
@@ -1086,7 +1094,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   advancePhase: () => {
-    const { gameState, gameData, campaignState, campaignMissions, activeMissionDef, activeMission, triggeredWaveIds, addCombatLog } = get()
+    const { gameState, gameData, campaignState, campaignMissions, activeMissionDef, activeMission, triggeredWaveIds, addCombatLog, gameStateHistory } = get()
     if (!gameState) return
 
     const phases: Array<typeof gameState.turnPhase> = [
@@ -1289,7 +1297,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    set({ gameState: newGameState })
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
     addCombatLog(`Phase advanced to ${newPhase} (Round ${newRound})`)
   },
 
@@ -1319,8 +1327,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   undoLastAction: () => {
-    const { addCombatLog } = get()
-    addCombatLog('Undo not fully implemented')
+    const { gameStateHistory, gameData, addCombatLog } = get()
+    if (gameStateHistory.length === 0) {
+      addCombatLog('Nothing to undo')
+      return
+    }
+    const previous = gameStateHistory[gameStateHistory.length - 1]
+    const newHistory = gameStateHistory.slice(0, -1)
+
+    // Recompute valid moves/targets for restored state
+    const currentActivatingId = previous.activationOrder[previous.currentActivationIndex]
+    const activatingFigure = previous.figures.find(f => f.id === currentActivatingId)
+    let validMoves: GridCoordinate[] = []
+    let validTargets: string[] = []
+    if (activatingFigure && gameData) {
+      if (activatingFigure.maneuversRemaining > 0) {
+        validMoves = getValidMoves(activatingFigure, previous)
+      }
+      if (activatingFigure.actionsRemaining > 0) {
+        validTargets = getValidTargetsV2(activatingFigure, activatingFigure.position, previous, gameData).map(t => t.id)
+      }
+    }
+
+    set({
+      gameState: previous,
+      gameStateHistory: newHistory,
+      selectedFigureId: currentActivatingId ?? null,
+      validMoves,
+      validTargets,
+    })
+    addCombatLog('Action undone')
   },
 
   // ========================================================================
@@ -1530,6 +1566,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       activeMissionDef: mission,
       triggeredWaveIds: [],
       combatLog: [`Mission started: ${mission.name}`],
+      gameStateHistory: [],
     })
   },
 
