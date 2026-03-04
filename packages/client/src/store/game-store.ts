@@ -451,6 +451,9 @@ export interface GameStore {
   hoveredObjectiveId: string | null
   tooltipScreenPos: { x: number; y: number } | null
 
+  // Imperial AI state (campaign combat)
+  imperialAIPhase: 'thinking' | 'executing' | null
+
   // Actions
   initGame: (players: Player[], mapConfig?: MapConfig) => void
   startHeroCreation: (players: Player[], mapConfig?: MapConfig) => void
@@ -564,6 +567,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // AI visualization state
   aiMovePath: null,
   aiAttackTarget: null,
+
+  // Imperial AI state (campaign combat)
+  imperialAIPhase: null,
 
   // Undo history
   gameStateHistory: [],
@@ -1884,6 +1890,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       activeMissionDef: null,
       activeMission: null,
       triggeredWaveIds: [],
+      imperialAIPhase: null,
       showSetup: true,
       gameState: null,
       isInitialized: false,

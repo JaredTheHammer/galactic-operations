@@ -23,6 +23,7 @@ import MissionBriefing from './components/Campaign/MissionBriefing'
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useCombatKeys } from './hooks/useCombatKeys'
+import { useImperialAI } from './hooks/useImperialAI'
 import { AutosaveToast } from './components/HUD/AutosaveToast'
 
 function App() {
@@ -51,6 +52,9 @@ function App() {
     && !showMissionSelect && !showPostMission && !showSocialPhase && !showHeroProgression
     && !showPortraitManager && !showCombatArena && !showMissionBriefing
   useCombatKeys(inTacticalCombat && !isMobile)
+
+  // Auto-execute Imperial AI turns in campaign combat (not AI Battle mode)
+  const { isImperialTurn } = useImperialAI(inTacticalCombat && !isAIBattle)
 
   const selectedFigure = gameState?.figures.find(f => f.id === selectedFigureId) || null
   const currentActivatingId = gameState?.activationOrder[gameState?.currentActivationIndex]
@@ -160,8 +164,8 @@ function App() {
           <TacticalGrid gameState={gameState} />
         </div>
 
-        {/* Action buttons strip */}
-        {currentActivatingFigure?.id === selectedFigureId && (
+        {/* Action buttons strip (hidden during Imperial AI turns) */}
+        {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
           <ActionButtons selectedFigure={selectedFigure} compact />
         )}
 
@@ -249,8 +253,8 @@ function App() {
         <InfoPanel selectedFigure={selectedFigure} gameState={gameState} />
       )}
 
-      {/* Bottom Center: Action Buttons (shown during activation) */}
-      {currentActivatingFigure?.id === selectedFigureId && (
+      {/* Bottom Center: Action Buttons (hidden during Imperial AI turns) */}
+      {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
         <ActionButtons selectedFigure={selectedFigure} />
       )}
 

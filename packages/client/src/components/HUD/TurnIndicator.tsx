@@ -1,5 +1,6 @@
 import React from 'react'
 import { useGameStore } from '../../store/game-store'
+import { getFigureName } from '@engine/turn-machine-v2.js'
 import type { GameState } from '@engine/types.js'
 
 interface TurnIndicatorProps {
@@ -18,13 +19,15 @@ const PHASE_COLORS: Record<string, string> = {
 }
 
 export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideControls = false, compact = false }) => {
-  const { advancePhase } = useGameStore()
+  const { advancePhase, imperialAIPhase } = useGameStore()
 
   if (!gameState) return null
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex]
   const currentFigureId = gameState.activationOrder[gameState.currentActivationIndex]
   const currentFigure = gameState.figures.find(f => f.id === currentFigureId)
+  const isAITurn = currentFigure && gameState.players.find(p => p.id === currentFigure.playerId)?.isAI
+  const figureName = currentFigure ? getFigureName(currentFigure, gameState) : currentFigure?.id
 
   const phaseColor = PHASE_COLORS[gameState.turnPhase] || '#999999'
 
@@ -33,6 +36,11 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideCon
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
         <span style={{ color: '#ffd700', fontWeight: 'bold' }}>R{gameState.roundNumber}</span>
         <span style={{ color: phaseColor, fontWeight: 'bold' }}>{gameState.turnPhase}</span>
+        {isAITurn && imperialAIPhase && (
+          <span style={{ color: '#ff4444', fontWeight: 'bold', animation: 'pulse 1.5s ease-in-out infinite' }}>
+            ENEMY
+          </span>
+        )}
       </div>
     )
   }
@@ -97,12 +105,25 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideCon
       <div style={roundStyle}>ROUND {gameState.roundNumber}</div>
       <div style={phaseStyle}>{gameState.turnPhase}</div>
       <div style={playerStyle}>
-        {currentPlayer.role === 'Imperial' ? '⚔️' : '🎯'} {currentPlayer.name}
+        {currentPlayer.role === 'Imperial' ? '// ' : ':: '}{currentPlayer.name}
       </div>
       {gameState.turnPhase === 'Activation' && currentFigure && (
-        <div style={figureStyle}>Activating: {currentFigure.id}</div>
+        <div style={figureStyle}>Activating: {figureName}</div>
       )}
-      {!hideControls && (
+      {isAITurn && imperialAIPhase && (
+        <div style={{
+          fontSize: '12px',
+          fontWeight: 'bold',
+          color: '#ff4444',
+          padding: '4px 12px',
+          backgroundColor: 'rgba(255, 68, 68, 0.15)',
+          borderRadius: '4px',
+          marginBottom: '4px',
+        }}>
+          ENEMY TURN{imperialAIPhase === 'thinking' ? ' - Analyzing...' : ' - Executing...'}
+        </div>
+      )}
+      {!hideControls && !isAITurn && (
         <button style={buttonStyle} onClick={() => advancePhase()}>
           Next Phase
         </button>
