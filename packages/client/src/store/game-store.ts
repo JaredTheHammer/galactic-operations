@@ -68,6 +68,7 @@ import {
   evaluateObjective,
 } from '@engine/campaign-v2.js'
 import type { MissionCompletionInput } from '@engine/campaign-v2.js'
+import { combatAnimations } from '../canvas/animation-manager'
 
 // v2 data imports
 import diceD6Data from '@data/dice-d6.json'
@@ -868,9 +869,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         figureId: selectedFigureId,
         payload: { path: [destination] },
       }
+      const fromPos = { x: figure.position.x, y: figure.position.y }
       const newGameState = executeActionV2(gameState, moveAction, gameData)
       set({ gameState: newGameState })
       addCombatLog(`${figure.id} moved to (${destination.x}, ${destination.y})`)
+
+      // Spawn movement trail animation
+      const side = figure.owner === 0 ? 'imperial' : 'operative'
+      combatAnimations.spawnMoveTrail(fromPos, destination, side)
 
       // Re-select to update valid moves/targets
       const updatedFigure = newGameState.figures.find(f => f.id === selectedFigureId)
@@ -907,7 +913,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ gameState: newGameState })
 
       const resolution = newGameState.activeCombat?.resolution
+      const attackerSide = attacker.owner === 0 ? 'imperial' : 'operative'
+      const defenderSide = defender.owner === 0 ? 'imperial' : 'operative'
+
+      // Spawn combat animations
+      const isHit = resolution?.isHit ?? false
+      combatAnimations.spawnProjectile(attacker.position, defender.position, isHit, attackerSide)
+
       if (resolution) {
+        // Delayed damage number (appears when bolt arrives)
+        setTimeout(() => {
+          combatAnimations.spawnDamageNumber(defender.position, resolution.woundsDealt, resolution.isHit)
+          if (resolution.isDefeated) {
+            combatAnimations.spawnDeathParticles(defender.position, defenderSide)
+          }
+        }, 280) // Synced with 70% of 400ms projectile travel
+
         addCombatLog(
           `${attacker.id} attacks ${defender.id}: ` +
           (resolution.isHit
