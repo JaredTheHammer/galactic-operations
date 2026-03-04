@@ -35,7 +35,7 @@ export const GameSetup: React.FC = () => {
   const [selectedMissionId, setSelectedMissionId] = useState<string>(ALL_MISSIONS[0]?.id ?? '')
 
   const { isMobile } = useIsMobile()
-  const { initGame, startHeroCreation, startCampaign, loadCampaignFromStorage, openCombatArena } = useGameStore()
+  const { initGame, startHeroCreation, startCampaign, loadCampaignFromStorage, openCombatArena, openMapEditor } = useGameStore()
 
   // When AI Battle is selected, force skirmish path
   useEffect(() => {
@@ -475,12 +475,12 @@ export const GameSetup: React.FC = () => {
         {renderPathTabs()}
         {playPath === 'campaign' ? renderCampaignPath() : renderSkirmishPath()}
 
-        {/* Tutorial button */}
-        <div style={{ marginTop: '16px', borderTop: '1px solid #2a2a3f', paddingTop: '16px' }}>
+        {/* Tutorial & Map Editor buttons */}
+        <div style={{ marginTop: '16px', borderTop: '1px solid #2a2a3f', paddingTop: '16px', display: 'flex', gap: t.spaceSm, flexDirection: isMobile ? 'column' : 'row' }}>
           <button
             style={{
               ...mixins.buttonPrimary,
-              width: '100%',
+              flex: 1,
               backgroundColor: '#1a2a3a',
               color: '#4a9eff',
               border: '1px solid #333355',
@@ -488,7 +488,20 @@ export const GameSetup: React.FC = () => {
             }}
             onClick={handleStartTutorial}
           >
-            TUTORIAL - Learn the Basics
+            TUTORIAL
+          </button>
+          <button
+            style={{
+              ...mixins.buttonPrimary,
+              flex: 1,
+              backgroundColor: '#1a2a3a',
+              color: '#ff9944',
+              border: '1px solid #333355',
+              fontSize: t.textSm,
+            }}
+            onClick={openMapEditor}
+          >
+            MAP EDITOR
           </button>
         </div>
       </div>

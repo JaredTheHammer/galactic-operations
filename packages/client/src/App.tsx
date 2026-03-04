@@ -26,6 +26,7 @@ import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
 import { AudioControls } from './components/HUD/AudioControls'
 import { TutorialOverlay } from './components/Tutorial/TutorialOverlay'
+import MapEditor from './components/MapEditor/MapEditor'
 
 function App() {
   const {
@@ -42,6 +43,7 @@ function App() {
     showHeroProgression,
     showPortraitManager,
     showCampaignStats,
+    showMapEditor,
     showCombatArena,
   } = useGameStore()
 
@@ -60,6 +62,11 @@ function App() {
   const selectedFigure = gameState?.figures.find(f => f.id === selectedFigureId) || null
   const currentActivatingId = gameState?.activationOrder[gameState?.currentActivationIndex]
   const currentActivatingFigure = currentActivatingId ? gameState?.figures.find(f => f.id === currentActivatingId) || null : null
+
+  // Map Editor (standalone tool, accessible from setup)
+  if (showMapEditor) {
+    return <><AudioControls /><MapEditor onClose={useGameStore.getState().closeMapEditor} /></>
+  }
 
   // If not initialized, show setup
   if (showSetup) {

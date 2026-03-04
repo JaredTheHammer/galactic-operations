@@ -397,6 +397,7 @@ export interface GameStore {
   showHeroProgression: boolean
   showPortraitManager: boolean
   showCampaignStats: boolean
+  showMapEditor: boolean
   campaignHeroCreation: boolean // true when creating heroes for a new campaign
   activeMissionDef: MissionDefinition | null // current mission definition for reinforcement waves
   triggeredWaveIds: string[] // mission reinforcement waves already deployed
@@ -463,6 +464,10 @@ export interface GameStore {
   openCampaignStats: () => void
   closeCampaignStats: () => void
 
+  // Map editor actions
+  openMapEditor: () => void
+  closeMapEditor: () => void
+
   // Portrait manager actions
   openPortraitManager: () => void
   closePortraitManager: () => void
@@ -514,6 +519,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   showHeroProgression: false,
   showPortraitManager: false,
   showCampaignStats: false,
+  showMapEditor: false,
   campaignHeroCreation: false,
   activeMissionDef: null,
   triggeredWaveIds: [],
@@ -1632,6 +1638,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showHeroProgression: false,
       showPortraitManager: false,
       showCampaignStats: false,
+      showMapEditor: false,
     })
 
     // Persist to localStorage immediately
@@ -1653,6 +1660,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showHeroProgression: false,
       showPortraitManager: false,
       showCampaignStats: false,
+      showMapEditor: false,
       campaignHeroCreation: false,
       activeMissionDef: null,
       activeMission: null,
@@ -1737,6 +1745,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       showCampaignStats: false,
       showMissionSelect: true,
+    })
+  },
+
+  // ---- Map Editor ----
+
+  openMapEditor: () => {
+    set({
+      showSetup: false,
+      showMapEditor: true,
+    })
+  },
+
+  closeMapEditor: () => {
+    set({
+      showMapEditor: false,
+      showSetup: true,
     })
   },
 
