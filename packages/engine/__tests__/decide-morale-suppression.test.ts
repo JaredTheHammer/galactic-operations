@@ -366,6 +366,113 @@ describe('Suppressed decision', () => {
 });
 
 // ============================================================================
+// BROKEN MORALE: SUCCESSFUL RETREAT PATH
+// ============================================================================
+
+describe('Broken morale successful retreat', () => {
+  it('retreats to cover when broken morale, low health, and cover reachable', () => {
+    (getMoraleState as any).mockReturnValue('Broken');
+    // Cover tile is reachable at (6,5)
+    (getValidMoves as any).mockReturnValue([{ x: 6, y: 5 }]);
+
+    const heroFig = makeFigure({
+      playerId: 1,
+      woundsCurrent: 8, // 8/14 = 43% health remaining (below 50%)
+    });
+    const npcFig = makeNPCFigure();
+    const gs = makeGameState(
+      [heroFig, npcFig],
+      { 'hero-1': makeHero({ wounds: { current: 0, threshold: 14 } }) },
+      { stormtrooper: makeNPC() },
+      { operativeMorale: { value: 0, max: 12, state: 'Broken' } },
+    );
+
+    // Place cover tile at retreat destination
+    gs.map.tiles[5][6] = { terrain: 'LightCover', elevation: 0, cover: 'Light', occupied: null, objective: null };
+
+    const gd = makeGameData();
+    const profiles = makeProfilesData();
+
+    const result = determineActions(heroFig, gs, gd, profiles);
+    expect(result.reasoning).toContain('MORALE BROKEN');
+    expect(result.reasoning).toContain('Retreating to cover');
+    const hasMove = result.actions.some(a => a.type === 'Move');
+    expect(hasMove).toBe(true);
+  });
+});
+
+// ============================================================================
+// PANICKED: SUCCESSFUL FLEE PATH
+// ============================================================================
+
+describe('Panicked successful flee', () => {
+  it('flees to cover when panicked and cover reachable', () => {
+    (getValidMoves as any).mockReturnValue([{ x: 6, y: 5 }]);
+
+    const heroFig = makeFigure({
+      playerId: 1,
+      suppressionTokens: 4,
+      courage: 2,
+      woundsCurrent: 8,
+    });
+    const npcFig = makeNPCFigure();
+    const gs = makeGameState(
+      [heroFig, npcFig],
+      { 'hero-1': makeHero({ wounds: { current: 0, threshold: 14 } }) },
+      { stormtrooper: makeNPC() },
+    );
+
+    gs.map.tiles[5][6] = { terrain: 'LightCover', elevation: 0, cover: 'Light', occupied: null, objective: null };
+
+    const gd = makeGameData();
+    const profiles = makeProfilesData();
+
+    const result = determineActions(heroFig, gs, gd, profiles);
+    expect(result.reasoning).toContain('PANICKED');
+    expect(result.reasoning).toContain('Fleeing to cover');
+    // Panicked filters to move-only actions
+    result.actions.forEach(a => {
+      expect(['Move', 'TakeCover']).toContain(a.type);
+    });
+  });
+});
+
+// ============================================================================
+// SUPPRESSED: SUCCESSFUL COVER PATH
+// ============================================================================
+
+describe('Suppressed successful cover move', () => {
+  it('moves to cover when suppressed and cover reachable', () => {
+    (getValidMoves as any).mockReturnValue([{ x: 6, y: 5 }]);
+
+    const heroFig = makeFigure({
+      playerId: 1,
+      suppressionTokens: 2,
+      courage: 2,
+      woundsCurrent: 8,
+    });
+    const npcFig = makeNPCFigure();
+    const gs = makeGameState(
+      [heroFig, npcFig],
+      { 'hero-1': makeHero({ wounds: { current: 0, threshold: 14 } }) },
+      { stormtrooper: makeNPC() },
+    );
+
+    gs.map.tiles[5][6] = { terrain: 'LightCover', elevation: 0, cover: 'Light', occupied: null, objective: null };
+
+    const gd = makeGameData();
+    const profiles = makeProfilesData();
+
+    const result = determineActions(heroFig, gs, gd, profiles);
+    expect(result.reasoning).toContain('SUPPRESSED');
+    expect(result.reasoning).toContain('Moving to cover');
+    result.actions.forEach(a => {
+      expect(['Move', 'TakeCover']).toContain(a.type);
+    });
+  });
+});
+
+// ============================================================================
 // IMPERIAL NPC MORALE EXEMPTION
 // ============================================================================
 
