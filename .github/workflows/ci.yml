@@ -1,22 +1,14 @@
-name: Deploy to GitHub Pages
+name: CI
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
   test:
-    name: Pre-deploy checks
+    name: Test & Validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,12 +30,10 @@ jobs:
       - name: Run engine tests
         run: pnpm test
 
-  build-and-deploy:
-    needs: test
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    needs: test
     steps:
       - uses: actions/checkout@v4
 
@@ -58,13 +48,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm --filter @galactic-ops/client build
+      - name: Build client
+        run: pnpm --filter @galactic-ops/client build
 
-      - uses: actions/configure-pages@v5
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: packages/client/dist
-
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Report build size
+        run: |
+          echo "## Build output" >> $GITHUB_STEP_SUMMARY
+          du -sh packages/client/dist/ >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          find packages/client/dist -name '*.js' -o -name '*.css' | head -20 | xargs ls -lh >> $GITHUB_STEP_SUMMARY
