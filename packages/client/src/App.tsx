@@ -15,6 +15,7 @@ import { ObjectiveProgress } from './components/HUD/ObjectiveProgress'
 import { ThreatTracker } from './components/HUD/ThreatTracker'
 import { ObjectiveTooltip } from './components/HUD/ObjectiveTooltip'
 import { FigureTooltip } from './components/HUD/FigureTooltip'
+import { TileTooltip } from './components/HUD/TileTooltip'
 import { NotificationCenter } from './components/HUD/NotificationCenter'
 import { RoundBanner } from './components/HUD/RoundBanner'
 import { GameOverBanner } from './components/HUD/GameOverBanner'
@@ -309,6 +310,7 @@ function App() {
       {/* Hover tooltips */}
       <ObjectiveTooltip />
       <FigureTooltip />
+      <TileTooltip />
 
       {/* Notification popups + cinematic banners */}
       <NotificationCenter />

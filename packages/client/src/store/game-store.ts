@@ -452,6 +452,8 @@ export interface GameStore {
   tooltipScreenPos: { x: number; y: number } | null
   hoveredFigureId: string | null
   figureTooltipPos: { x: number; y: number } | null
+  hoveredTileCoord: { x: number; y: number } | null
+  tileTooltipPos: { x: number; y: number } | null
 
   // Cinematic banners
   roundBanner: { round: number; roundLimit?: number; roundsLeft?: number } | null
@@ -533,6 +535,7 @@ export interface GameStore {
   removeNotification: (id: string) => void
   setHoveredObjective: (id: string | null, screenPos?: { x: number; y: number }) => void
   setHoveredFigure: (id: string | null, screenPos?: { x: number; y: number }) => void
+  setHoveredTile: (coord: { x: number; y: number } | null, screenPos?: { x: number; y: number }) => void
   clearRoundBanner: () => void
   clearGameOverBanner: () => void
 
@@ -606,6 +609,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   tooltipScreenPos: null,
   hoveredFigureId: null,
   figureTooltipPos: null,
+  hoveredTileCoord: null,
+  tileTooltipPos: null,
 
   // Combat Arena
   openCombatArena: () => {
@@ -1724,6 +1729,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       hoveredFigureId: id,
       figureTooltipPos: screenPos ?? null,
+    })
+  },
+
+  setHoveredTile: (coord: { x: number; y: number } | null, screenPos?: { x: number; y: number }) => {
+    set({
+      hoveredTileCoord: coord,
+      tileTooltipPos: screenPos ?? null,
     })
   },
 

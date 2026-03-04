@@ -260,6 +260,19 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
           hoveredFig ? { x: e.clientX, y: e.clientY } : undefined,
         )
       }
+
+      // Set hovered tile for terrain tooltip (only when no figure is hovered)
+      const hasFigure = figures?.some(
+        (f: any) => f.position.x === gridCoord.x && f.position.y === gridCoord.y && !f.isDefeated
+      )
+      if (!hasFigure) {
+        useGameStore.getState().setHoveredTile(
+          gridCoord,
+          { x: e.clientX, y: e.clientY },
+        )
+      } else {
+        useGameStore.getState().setHoveredTile(null)
+      }
     },
     [setHighlightedTile, gameState?.objectivePoints, gameState?.figures]
   )
@@ -268,6 +281,7 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
     setHighlightedTile(null)
     useGameStore.getState().setHoveredObjective(null)
     useGameStore.getState().setHoveredFigure(null)
+    useGameStore.getState().setHoveredTile(null)
   }, [setHighlightedTile])
 
   // Handle wheel zoom
