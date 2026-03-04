@@ -370,6 +370,18 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
             )}
           </span>
         )}
+        {gameState?.tacticDeck && (() => {
+          const operativePlayer = gameState.players.find(p => p.role === 'Operative')
+          const isOperative = selectedFigure.playerId === operativePlayer?.id
+          if (!isOperative) return null
+          const handSize = gameState.tacticDeck!.operativeHand.length
+          if (handSize === 0) return null
+          return (
+            <span style={{ borderLeft: '1px solid #555', paddingLeft: '8px', color: '#bb99ff' }} title="Tactic cards in hand">
+              Cards:{handSize}
+            </span>
+          )
+        })()}
       </div>
     </div>
   )

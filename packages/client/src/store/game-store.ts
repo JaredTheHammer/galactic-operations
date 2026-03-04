@@ -32,6 +32,7 @@ import type {
   MissionResult,
   ObjectivePointTemplate,
   ConsumableItem,
+  TacticCard,
 } from '@engine/types.js'
 import { MAP_PRESETS, computeGameScale } from '@engine/types.js'
 import {
@@ -56,6 +57,7 @@ import {
 import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization } from '@engine/character-v2.js'
 import type { HeroCreationInput } from '@engine/character-v2.js'
 import { getEquippedTalents, canActivateTalent } from '@engine/talent-v2.js'
+import { initializeTacticDeck, drawCardsForBothSides, playCard } from '@engine/tactic-cards.js'
 import {
   createCampaign,
   getAvailableMissions,
@@ -81,6 +83,7 @@ import speciesData from '@data/species.json'
 import careersData from '@data/careers.json'
 import aiProfilesRaw from '@data/ai-profiles.json'
 import consumablesData from '@data/consumables.json'
+import tacticsData from '@data/cards/tactics.json'
 import mercenarySpecData from '@data/specializations/mercenary.json'
 import smugglerSpecData from '@data/specializations/smuggler.json'
 import droidTechSpecData from '@data/specializations/droid-tech.json'
@@ -203,6 +206,13 @@ function loadGameDataV2(): GameData {
     consumables[item.id] = item
   }
 
+  // Tactic cards
+  const tacticCards: Record<string, TacticCard> = {}
+  const tacticsRaw = Array.isArray(tacticsData) ? tacticsData : (tacticsData as any).cards ?? []
+  for (const card of tacticsRaw) {
+    tacticCards[card.id] = card as TacticCard
+  }
+
   return {
     dice,
     species,
@@ -212,6 +222,7 @@ function loadGameDataV2(): GameData {
     armor,
     npcProfiles,
     consumables,
+    tacticCards,
   }
 }
 
@@ -443,6 +454,7 @@ export interface GameStore {
   useTalent: (talentId: string) => void
   useConsumable: (itemId: string, targetId?: string) => void
   getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
+  playTacticCard: (cardId: string, role: 'attacker' | 'defender') => void
   endActivation: () => void
   advancePhase: () => void
   setHighlightedTile: (coord: GridCoordinate | null) => void
@@ -628,6 +640,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ? heroArmyV2(createdHeroes)
       : defaultArmyV2()
     gameState = deployFiguresV2(gameState, army, gameData)
+
+    // Initialize tactic card deck
+    if (gameData.tacticCards && Object.keys(gameData.tacticCards).length > 0) {
+      gameState.tacticDeck = initializeTacticDeck(gameData)
+    }
 
     // Build activation order
     gameState.activationOrder = gameState.figures
@@ -835,6 +852,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         gameState.currentActivationIndex = 0
         gameState.turnPhase = 'Activation'
       }
+    }
+
+    // Initialize tactic card deck
+    if (gameData.tacticCards && Object.keys(gameData.tacticCards).length > 0) {
+      gameState.tacticDeck = initializeTacticDeck(gameData)
     }
 
     set({
@@ -1109,6 +1131,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return results
   },
 
+  playTacticCard: (cardId: string, role: 'attacker' | 'defender') => {
+    const { gameState, addCombatLog } = get()
+    if (!gameState?.tacticDeck) return
+
+    // Determine which side is playing based on combat context
+    // The player (Operative) plays cards; role indicates attack or defense timing
+    const side = role === 'attacker' ? 'Operative' : 'Operative'
+    const updatedDeck = playCard(gameState.tacticDeck, side, cardId)
+    if (!updatedDeck) {
+      addCombatLog(`Card ${cardId} not found in hand`)
+      return
+    }
+
+    set({
+      gameState: {
+        ...gameState,
+        tacticDeck: updatedDeck,
+      },
+    })
+    addCombatLog(`Played tactic card: ${cardId}`)
+  },
+
   endActivation: () => {
     const { gameState, addCombatLog, gameStateHistory } = get()
     if (!gameState) return
@@ -1175,6 +1219,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       newRound += 1
     }
 
+    // Draw tactic cards at the start of each new round (Setup phase = new round)
+    let newTacticDeck = gameState.tacticDeck
+    if (newPhase === 'Setup' && newTacticDeck && gameData?.tacticCards) {
+      newTacticDeck = drawCardsForBothSides(newTacticDeck)
+      addCombatLog(`Tactic cards drawn for Round ${newRound}`)
+    }
+
     // Reset figures for new activation phase (v2: 1 Action + 1 Maneuver)
     let newFigures = gameState.figures
     if (newPhase === 'Activation') {
@@ -1187,6 +1238,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       roundNumber: newRound,
       currentActivationIndex: 0,
       figures: newFigures,
+      ...(newTacticDeck ? { tacticDeck: newTacticDeck } : {}),
     }
 
     // ===== REINFORCEMENT PHASE: spawn new Imperial units =====
@@ -1611,6 +1663,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       })),
     }
     gameState = deployFiguresV2(gameState, army, gameData)
+
+    // Initialize tactic card deck
+    if (gameData.tacticCards && Object.keys(gameData.tacticCards).length > 0) {
+      gameState.tacticDeck = initializeTacticDeck(gameData)
+    }
 
     // Build activation order
     gameState.activationOrder = gameState.figures

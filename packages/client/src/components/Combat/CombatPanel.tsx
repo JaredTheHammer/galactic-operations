@@ -1,7 +1,9 @@
 import React from 'react'
 import { DiceDisplay } from './DiceDisplay'
+import { TacticCardHand } from './TacticCardHand'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import type { CombatScenario, GameState } from '@engine/types.js'
+import { useGameStore } from '../../store/game-store'
+import type { CombatScenario, GameState, TacticCard } from '@engine/types.js'
 import { getWoundThresholdV2 } from '@engine/turn-machine-v2.js'
 
 interface CombatPanelProps {
@@ -11,6 +13,7 @@ interface CombatPanelProps {
 
 export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) => {
   const { isMobile } = useIsMobile()
+  const { gameData } = useGameStore()
 
   if (!combat || !gameState) return null
 
@@ -234,6 +237,27 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
           )}
         </div>
       )}
+
+      {/* Tactic Card Hand (Operative) */}
+      {gameState.tacticDeck && gameData?.tacticCards && (() => {
+        const operativePlayer = gameState.players.find(p => p.role === 'Operative')
+        const isAttacker = attacker.playerId === operativePlayer?.id
+        const hand = gameState.tacticDeck.operativeHand
+        const cards = hand
+          .map(id => gameData.tacticCards![id])
+          .filter((c): c is TacticCard => !!c)
+        if (cards.length === 0) return null
+        return (
+          <div style={{ ...sectionStyle, borderTop: '1px solid #333355', paddingTop: '12px' }}>
+            <div style={sideHeaderStyle('#bb99ff')}>Your Tactic Cards ({cards.length})</div>
+            <TacticCardHand
+              cards={cards}
+              side={isAttacker ? 'attacker' : 'defender'}
+              isActive={combat.state === 'Rolling'}
+            />
+          </div>
+        )
+      })()}
 
       <button
         style={{ ...buttonStyle('primary'), marginTop: '0', ...(isMobile ? { width: '100%' } : {}) }}

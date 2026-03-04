@@ -763,6 +763,11 @@ export interface CombatResolution {
   advantagesSpent: string[];
   threatsSpent: string[];
 
+  // Tactic cards played during this combat
+  tacticCardsPlayed?: string[];
+  tacticSuppression?: number;
+  tacticRecover?: number;
+
   // Outcome
   isHit: boolean;
   isDefeated: boolean;
@@ -786,6 +791,10 @@ export interface CombatScenario {
   defensePool: DefensePool | null;
 
   resolution: CombatResolution | null;
+
+  /** Tactic cards played during this combat (attacker + defender) */
+  attackerTacticCards?: string[];
+  defenderTacticCards?: string[];
 }
 
 // ============================================================================
@@ -914,6 +923,9 @@ export interface GameState {
 
   // Consumable inventory for this mission (decremented on use, initialized from CampaignState)
   consumableInventory?: Record<string, number>;
+
+  // Tactic card deck state (hands, draw pile, discard)
+  tacticDeck?: TacticDeckState;
 }
 
 // ============================================================================
@@ -929,6 +941,7 @@ export interface GameData {
   armor: Record<string, ArmorDefinition>;
   npcProfiles: Record<string, NPCProfile>;
   consumables?: Record<string, ConsumableItem>;
+  tacticCards?: Record<string, TacticCard>;
 }
 
 // ============================================================================
@@ -1417,6 +1430,53 @@ export interface ConsumableItem {
  */
 export function computeDiminishedHealing(baseValue: number, priorUses: number): number {
   return Math.max(1, baseValue - (priorUses * 2));
+}
+
+// ============================================================================
+// TACTIC CARDS
+// ============================================================================
+
+/** When a tactic card can be played */
+export type TacticCardTiming = 'Attack' | 'Defense' | 'Any';
+
+/** Which side can use a tactic card */
+export type TacticCardSide = 'Universal' | 'Operative' | 'Imperial';
+
+/** Effect types for tactic cards */
+export type TacticCardEffectType =
+  | 'AddHit'
+  | 'AddBlock'
+  | 'Pierce'
+  | 'Reroll'
+  | 'Recover'
+  | 'Suppress'
+  | 'ConvertMiss'
+  | 'Counter';
+
+/** A single effect on a tactic card */
+export interface TacticCardEffect {
+  type: TacticCardEffectType;
+  value: number;
+  condition?: string;
+}
+
+/** A tactic card definition (loaded from JSON) */
+export interface TacticCard {
+  id: string;
+  name: string;
+  timing: TacticCardTiming;
+  side: TacticCardSide;
+  effects: TacticCardEffect[];
+  text: string;
+  cost: number;
+}
+
+/** State of a tactic card deck during a mission */
+export interface TacticDeckState {
+  drawPile: string[];
+  discardPile: string[];
+  operativeHand: string[];
+  imperialHand: string[];
 }
 
 /** A social phase location (the "hub" between missions) */

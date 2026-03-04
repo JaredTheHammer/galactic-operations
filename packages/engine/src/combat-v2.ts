@@ -22,10 +22,13 @@ import type {
   HeroCharacter,
   NPCProfile,
   OpposedRollResult,
+  TacticCard,
   WeaponDefinition,
   WeaponQuality,
   YahtzeeCombo,
 } from './types';
+
+import { applyTacticCards, aiSelectTacticCards, playCard } from './tactic-cards.js';
 
 import {
   buildAttackPool,
@@ -751,6 +754,41 @@ export function resolveCombatV2(
     };
   }
 
+  // 3d. Apply tactic cards (if deck is active)
+  let tacticPierce = 0;
+  let tacticSuppression = 0;
+  let tacticRecover = 0;
+  let tacticCardsPlayedAll: string[] = [];
+  if (gameState.tacticDeck && gameData.tacticCards) {
+    // Determine sides
+    const attackerPlayer = gameState.players.find(p => p.id === attacker.playerId);
+    const defenderPlayer = gameState.players.find(p => p.id === defender.playerId);
+    const attackerSide = attackerPlayer?.role ?? 'Imperial';
+    const defenderSide = defenderPlayer?.role ?? 'Imperial';
+
+    // AI selects cards for both sides (player cards come from scenario.attackerTacticCards/defenderTacticCards)
+    const attackerCardIds = scenario.attackerTacticCards
+      ?? aiSelectTacticCards(gameState.tacticDeck, gameData, attackerSide, 'attacker', rollResult);
+    const defenderCardIds = scenario.defenderTacticCards
+      ?? aiSelectTacticCards(gameState.tacticDeck, gameData, defenderSide, 'defender', rollResult);
+
+    const attackerCards = attackerCardIds
+      .map(id => gameData.tacticCards![id])
+      .filter((c): c is TacticCard => !!c);
+    const defenderCards = defenderCardIds
+      .map(id => gameData.tacticCards![id])
+      .filter((c): c is TacticCard => !!c);
+
+    if (attackerCards.length > 0 || defenderCards.length > 0) {
+      const tacticResult = applyTacticCards(rollResult, [...attackerCards], [...defenderCards]);
+      rollResult = tacticResult.rollResult;
+      tacticPierce = tacticResult.tacticPierce;
+      tacticSuppression = tacticResult.tacticSuppression;
+      tacticRecover = tacticResult.tacticRecover;
+      tacticCardsPlayedAll = [...attackerCardIds, ...defenderCardIds];
+    }
+  }
+
   // 4. Get attacker brawn for melee damage bonus
   const attackerEntity = getEntity(attacker, gameState);
   const attackerBrawn = isHero(attackerEntity)
@@ -761,7 +799,7 @@ export function resolveCombatV2(
   const damageResult = calculateDamage(
     rollResult,
     poolCtx.weapon,
-    poolCtx.soak,
+    poolCtx.soak - tacticPierce, // Apply tactic card pierce to soak reduction
     attackerBrawn,
   );
 
@@ -825,6 +863,9 @@ export function resolveCombatV2(
     criticalResult,
     advantagesSpent: spending.advantagesSpent,
     threatsSpent: spending.threatsSpent,
+    tacticCardsPlayed: tacticCardsPlayedAll.length > 0 ? tacticCardsPlayedAll : undefined,
+    tacticSuppression: tacticSuppression > 0 ? tacticSuppression : undefined,
+    tacticRecover: tacticRecover > 0 ? tacticRecover : undefined,
     isHit: rollResult.isHit,
     isDefeated,
     isNewlyWounded,
@@ -1003,10 +1044,22 @@ export function applyCombatResult(
     resolution,
   };
 
+  // Update tactic deck: move played cards from hands to discard pile
+  let updatedTacticDeck = gameState.tacticDeck;
+  if (updatedTacticDeck && resolution.tacticCardsPlayed && resolution.tacticCardsPlayed.length > 0) {
+    let deck = { ...updatedTacticDeck };
+    for (const cardId of resolution.tacticCardsPlayed) {
+      const result = playCard(deck, 'Operative', cardId) ?? playCard(deck, 'Imperial', cardId);
+      if (result) deck = result;
+    }
+    updatedTacticDeck = deck;
+  }
+
   return {
     ...gameState,
     figures: newFigures,
     activeCombat: completedScenario,
+    ...(updatedTacticDeck ? { tacticDeck: updatedTacticDeck } : {}),
   };
 }
 
