@@ -26,6 +26,9 @@ const VALID_MOVE_OVERLAY = '#4a9eff'
 const VALID_TARGET_OVERLAY = '#ff4444'
 const SELECTED_GLOW = '#ffd700'
 const HOVER_OUTLINE = '#ffffff'
+const ACTIVATED_DIM_ALPHA = 0.35
+const NAME_LABEL_COLOR = '#e0e0e0'
+const STRAIN_BAR_COLOR = '#6699ff'
 
 interface UIState {
   selectedFigureId: string | null
@@ -521,6 +524,33 @@ export class TacticalGridRenderer {
     this.ctx.restore()
   }
 
+  /** Get wound threshold for a figure from its backing data. */
+  private getWoundThreshold(figure: Figure, gameState: GameState): number {
+    if (figure.entityType === 'hero') {
+      const hero = gameState.heroes[figure.entityId]
+      return hero?.wounds.threshold ?? 10
+    }
+    const npc = gameState.npcProfiles[figure.entityId]
+    return npc?.woundThreshold ?? 4
+  }
+
+  /** Get short display name for a figure. */
+  private getFigureLabel(figure: Figure, gameState: GameState): string {
+    if (figure.entityType === 'hero') {
+      const hero = gameState.heroes[figure.entityId]
+      return hero?.name ?? figure.entityId
+    }
+    const npc = gameState.npcProfiles[figure.entityId]
+    // For NPCs, use profile name but strip "Imperial" prefix for brevity
+    const name = npc?.name ?? figure.entityId
+    // Add suffix number if ID has one (e.g. "stormtrooper-2" -> "Stormtrooper 2")
+    const numMatch = figure.id.match(/-(\d+)$/)
+    if (numMatch) {
+      return `${name} ${numMatch[1]}`
+    }
+    return name
+  }
+
   private drawFigures(gameState: GameState, uiState: UIState) {
     if (!this.ctx) return
 
@@ -539,6 +569,13 @@ export class TacticalGridRenderer {
       const player = gameState.players.find(p => p.id === figure.playerId)
       const isOperative = player?.role === 'Operative'
       const factionColor = isOperative ? OPERATIVE_COLOR : IMPERIAL_COLOR
+
+      // --- Activation dimming: reduce alpha for figures that have already activated ---
+      const isDimmed = figure.isActivated
+      if (isDimmed) {
+        this.ctx.save()
+        this.ctx.globalAlpha = ACTIVATED_DIM_ALPHA
+      }
 
       // --- Selection glow ---
       if (figure.id === uiState.selectedFigureId) {
@@ -614,7 +651,7 @@ export class TacticalGridRenderer {
       this.ctx.fillStyle = '#333333'
       this.ctx.fillRect(barX, barY, barWidth, barHeight)
 
-      const woundThreshold = (figure as any).woundThreshold ?? 5
+      const woundThreshold = this.getWoundThreshold(figure, gameState)
       const woundsRemaining = Math.max(0, woundThreshold - figure.woundsCurrent)
       const healthPercent = woundThreshold > 0 ? woundsRemaining / woundThreshold : 1
       const healthBarWidth = barWidth * healthPercent
@@ -628,6 +665,57 @@ export class TacticalGridRenderer {
       }
 
       this.ctx.fillRect(barX, barY, healthBarWidth, barHeight)
+
+      // --- Strain bar for heroes (thin blue bar below health bar) ---
+      if (figure.entityType === 'hero') {
+        const hero = gameState.heroes[figure.entityId]
+        if (hero && hero.strain && hero.strain.threshold > 0) {
+          const strainBarY = barY + barHeight + 1
+          const strainHeight = 2
+
+          this.ctx.fillStyle = '#222233'
+          this.ctx.fillRect(barX, strainBarY, barWidth, strainHeight)
+
+          const strainRemaining = Math.max(0, hero.strain.threshold - figure.strainCurrent)
+          const strainPercent = strainRemaining / hero.strain.threshold
+          this.ctx.fillStyle = STRAIN_BAR_COLOR
+          this.ctx.fillRect(barX, strainBarY, barWidth * strainPercent, strainHeight)
+        }
+      }
+
+      // --- Restore alpha after dimming ---
+      if (isDimmed) {
+        this.ctx.restore()
+      }
+
+      // --- Name label above figure (rendered at full alpha, outside dimming) ---
+      const label = this.getFigureLabel(figure, gameState)
+      if (label) {
+        const labelY = screenY - radius - 10
+        this.ctx.save()
+        this.ctx.font = '8px sans-serif'
+        this.ctx.textAlign = 'center'
+        this.ctx.textBaseline = 'bottom'
+
+        // Background pill for readability
+        const measured = this.ctx.measureText(label)
+        const pillW = Math.min(measured.width + 6, TILE_SIZE * 1.2)
+        const pillH = 10
+        const pillX = screenX - pillW / 2
+        const pillY = labelY - pillH
+
+        this.ctx.fillStyle = 'rgba(10, 10, 15, 0.75)'
+        this.ctx.beginPath()
+        this.ctx.roundRect(pillX, pillY, pillW, pillH, 3)
+        this.ctx.fill()
+
+        this.ctx.fillStyle = isDimmed ? '#777777' : NAME_LABEL_COLOR
+        // Truncate if too long
+        const maxChars = 12
+        const displayLabel = label.length > maxChars ? label.slice(0, maxChars - 1) + '\u2026' : label
+        this.ctx.fillText(displayLabel, screenX, labelY)
+        this.ctx.restore()
+      }
     })
   }
 
