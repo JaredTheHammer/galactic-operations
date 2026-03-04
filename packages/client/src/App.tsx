@@ -19,6 +19,7 @@ import { NotificationCenter } from './components/HUD/NotificationCenter'
 import { RoundBanner } from './components/HUD/RoundBanner'
 import { GameOverBanner } from './components/HUD/GameOverBanner'
 import { Minimap } from './components/HUD/Minimap'
+import { TerrainLegend } from './components/HUD/TerrainLegend'
 import MissionSelect from './components/Campaign/MissionSelect'
 import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
@@ -301,7 +302,8 @@ function App() {
       {/* Top Left (below morale): Threat Pool */}
       <ThreatTracker gameState={gameState} />
 
-      {/* Bottom Left: Minimap */}
+      {/* Bottom Left: Terrain Legend + Minimap */}
+      <TerrainLegend />
       <Minimap />
 
       {/* Hover tooltips */}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react'
+import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react'
 
 // ============================================================================
 // Event type detection from log message strings
@@ -22,26 +22,25 @@ type LogEventType =
   | 'info'
 
 const EVENT_COLORS: Record<LogEventType, string> = {
-  attack:        '#ff6b6b',  // red
-  defeat:        '#ff4444',  // bright red
-  movement:      '#8bc6fc',  // light blue
-  defense:       '#66d9ef',  // cyan
-  talent:        '#e6c84c',  // gold
-  consumable:    '#a3e635',  // lime
-  tacticCard:    '#c084fc',  // purple
-  reinforcement: '#f97316',  // orange
-  phaseChange:   '#6b7280',  // gray
-  victory:       '#22c55e',  // green
-  missionFail:   '#ef4444',  // red
-  aiDecision:    '#a78bfa',  // violet
-  aiAction:      '#93a0b4',  // muted
-  roundEnd:      '#6b7280',  // gray
-  info:          '#d1d5db',  // light gray
+  attack:        '#ff6b6b',
+  defeat:        '#ff4444',
+  movement:      '#8bc6fc',
+  defense:       '#66d9ef',
+  talent:        '#e6c84c',
+  consumable:    '#a3e635',
+  tacticCard:    '#c084fc',
+  reinforcement: '#f97316',
+  phaseChange:   '#6b7280',
+  victory:       '#22c55e',
+  missionFail:   '#ef4444',
+  aiDecision:    '#a78bfa',
+  aiAction:      '#93a0b4',
+  roundEnd:      '#6b7280',
+  info:          '#d1d5db',
 }
 
 /** Match patterns to classify log messages by event type */
 function classifyMessage(msg: string): LogEventType {
-  // Strip round prefix for pattern matching
   const text = msg.replace(/^\[R\d+\]\s*/, '')
 
   if (/\*\*\s*VICTORY/i.test(text)) return 'victory'
@@ -76,6 +75,29 @@ function stripRoundPrefix(msg: string): string {
 }
 
 // ============================================================================
+// Filter categories (grouped event types)
+// ============================================================================
+
+type FilterCategory = 'combat' | 'movement' | 'defense' | 'abilities' | 'ai' | 'system'
+
+const FILTER_CATEGORIES: { key: FilterCategory; label: string; color: string; types: LogEventType[] }[] = [
+  { key: 'combat',    label: 'Combat',   color: '#ff6b6b', types: ['attack', 'defeat'] },
+  { key: 'movement',  label: 'Move',     color: '#8bc6fc', types: ['movement'] },
+  { key: 'defense',   label: 'Defense',  color: '#66d9ef', types: ['defense'] },
+  { key: 'abilities', label: 'Abilities', color: '#e6c84c', types: ['talent', 'consumable', 'tacticCard'] },
+  { key: 'ai',        label: 'AI',       color: '#a78bfa', types: ['aiDecision', 'aiAction'] },
+  { key: 'system',    label: 'System',   color: '#6b7280', types: ['phaseChange', 'roundEnd', 'reinforcement', 'info', 'victory', 'missionFail'] },
+]
+
+// Build lookup: eventType -> category key
+const TYPE_TO_CATEGORY: Record<LogEventType, FilterCategory> = {} as any
+for (const cat of FILTER_CATEGORIES) {
+  for (const t of cat.types) {
+    TYPE_TO_CATEGORY[t] = cat.key
+  }
+}
+
+// ============================================================================
 // Structured entry used for rendering
 // ============================================================================
 
@@ -85,6 +107,7 @@ interface ParsedEntry {
   round: number | null
   type: LogEventType
   color: string
+  category: FilterCategory
 }
 
 function parseEntries(messages: string[]): ParsedEntry[] {
@@ -96,8 +119,51 @@ function parseEntries(messages: string[]): ParsedEntry[] {
       round: extractRound(msg),
       type,
       color: EVENT_COLORS[type],
+      category: TYPE_TO_CATEGORY[type] ?? 'system',
     }
   })
+}
+
+// ============================================================================
+// Inline text formatting: bold **text**, damage numbers, unit names
+// ============================================================================
+
+function formatLogText(text: string): React.ReactNode[] {
+  const parts: React.ReactNode[] = []
+  // Split on bold markers, damage numbers, and keywords
+  const regex = /(\*\*[^*]+\*\*)|(\d+ wounds?)|(\d+ strain)|(defeated!)|(\d+ damage)/gi
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+
+  const r = new RegExp(regex)
+  while ((match = r.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index))
+    }
+
+    const m = match[0]
+    if (m.startsWith('**') && m.endsWith('**')) {
+      parts.push(<strong key={match.index} style={{ color: '#ffffff' }}>{m.slice(2, -2)}</strong>)
+    } else if (/defeated!/i.test(m)) {
+      parts.push(<strong key={match.index} style={{ color: '#ff4444' }}>{m}</strong>)
+    } else if (/wounds?/i.test(m)) {
+      parts.push(<span key={match.index} style={{ color: '#ff8888', fontWeight: 'bold' }}>{m}</span>)
+    } else if (/strain/i.test(m)) {
+      parts.push(<span key={match.index} style={{ color: '#6699ff', fontWeight: 'bold' }}>{m}</span>)
+    } else if (/damage/i.test(m)) {
+      parts.push(<span key={match.index} style={{ color: '#ff8888', fontWeight: 'bold' }}>{m}</span>)
+    } else {
+      parts.push(m)
+    }
+
+    lastIndex = match.index + m.length
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex))
+  }
+
+  return parts.length > 0 ? parts : [text]
 }
 
 // ============================================================================
@@ -113,22 +179,75 @@ interface CombatLogProps {
 
 export const CombatLog: React.FC<CombatLogProps> = ({ messages, compact = false, visible, onClose }) => {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [disabledCategories, setDisabledCategories] = useState<Set<FilterCategory>>(new Set())
 
   const entries = useMemo(() => parseEntries(messages), [messages])
+
+  const filteredEntries = useMemo(() => {
+    if (disabledCategories.size === 0) return entries
+    return entries.filter(e => !disabledCategories.has(e.category))
+  }, [entries, disabledCategories])
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [messages])
+  }, [filteredEntries])
+
+  const toggleCategory = useCallback((cat: FilterCategory) => {
+    setDisabledCategories(prev => {
+      const next = new Set(prev)
+      if (next.has(cat)) next.delete(cat)
+      else next.add(cat)
+      return next
+    })
+  }, [])
+
+  /** Render filter chips */
+  const renderFilters = () => (
+    <div style={{
+      display: 'flex',
+      gap: '3px',
+      flexWrap: 'wrap',
+      marginBottom: '6px',
+    }}>
+      {FILTER_CATEGORIES.map(cat => {
+        const active = !disabledCategories.has(cat.key)
+        return (
+          <button
+            key={cat.key}
+            onClick={() => toggleCategory(cat.key)}
+            style={{
+              background: active ? `${cat.color}20` : 'transparent',
+              border: `1px solid ${active ? cat.color + '60' : '#333355'}`,
+              borderRadius: '3px',
+              color: active ? cat.color : '#555',
+              padding: '1px 5px',
+              fontSize: '9px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              letterSpacing: '0.3px',
+              transition: 'all 0.15s',
+            }}
+          >
+            {cat.label}
+          </button>
+        )
+      })}
+    </div>
+  )
 
   /** Render a single log entry with color and optional round separator */
   const renderEntry = (entry: ParsedEntry, idx: number) => {
+    // Find previous visible entry for round separator logic
+    const prevIdx = filteredEntries.indexOf(entry) - 1
+    const prevEntry = prevIdx >= 0 ? filteredEntries[prevIdx] : null
     const showRoundSeparator =
       entry.round !== null &&
-      idx > 0 &&
-      entries[idx - 1].round !== null &&
-      entries[idx - 1].round !== entry.round
+      prevEntry !== null &&
+      prevEntry.round !== null &&
+      prevEntry.round !== entry.round
 
     const isHighlight =
       entry.type === 'victory' ||
@@ -150,7 +269,7 @@ export const CombatLog: React.FC<CombatLogProps> = ({ messages, compact = false,
           borderLeft: `2px solid ${entry.color}33`,
           paddingLeft: '6px',
         }}>
-          {entry.text}
+          {formatLogText(entry.text)}
         </div>
       </React.Fragment>
     )
@@ -162,13 +281,16 @@ export const CombatLog: React.FC<CombatLogProps> = ({ messages, compact = false,
       <div style={compactOverlayStyle}>
         <div style={compactHeaderRow}>
           <span style={{ color: '#ffd700', fontWeight: 'bold', fontSize: '14px' }}>Combat Log</span>
-          <button onClick={onClose} style={closeButtonStyle}>✕</button>
+          <button onClick={onClose} style={closeButtonStyle}>&#x2715;</button>
         </div>
+        {renderFilters()}
         <div ref={scrollRef} style={compactScrollStyle}>
-          {entries.length === 0 ? (
-            <div style={emptyStyle}>No events yet</div>
+          {filteredEntries.length === 0 ? (
+            <div style={emptyStyle}>
+              {entries.length === 0 ? 'No events yet' : 'All events filtered out'}
+            </div>
           ) : (
-            entries.map(renderEntry)
+            filteredEntries.map(renderEntry)
           )}
         </div>
       </div>
@@ -177,12 +299,20 @@ export const CombatLog: React.FC<CombatLogProps> = ({ messages, compact = false,
 
   return (
     <div style={containerStyle}>
-      <div style={headerStyle}>Combat Log</div>
+      <div style={headerStyle}>
+        <span>Combat Log</span>
+        <span style={{ color: '#555', fontSize: '9px', fontWeight: 'normal' }}>
+          {filteredEntries.length}/{entries.length}
+        </span>
+      </div>
+      {renderFilters()}
       <div ref={scrollRef} style={logStyle}>
-        {entries.length === 0 ? (
-          <div style={emptyStyle}>No events yet</div>
+        {filteredEntries.length === 0 ? (
+          <div style={emptyStyle}>
+            {entries.length === 0 ? 'No events yet' : 'All events filtered out'}
+          </div>
         ) : (
-          entries.map(renderEntry)
+          filteredEntries.map(renderEntry)
         )}
       </div>
     </div>
@@ -229,12 +359,12 @@ const containerStyle: React.CSSProperties = {
   position: 'fixed',
   bottom: '20px',
   right: '20px',
-  width: '320px',
-  maxHeight: '240px',
+  width: '340px',
+  maxHeight: '280px',
   backgroundColor: 'rgba(19, 19, 32, 0.9)',
   border: '2px solid #4a9eff',
   borderRadius: '8px',
-  padding: '12px',
+  padding: '10px',
   zIndex: 80,
   backdropFilter: 'blur(4px)',
   color: '#ffffff',
@@ -256,7 +386,10 @@ const headerStyle: React.CSSProperties = {
   color: '#4a9eff',
   textTransform: 'uppercase',
   fontWeight: 'bold',
-  marginBottom: '8px',
+  marginBottom: '4px',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
 }
 
 const msgBaseStyle: React.CSSProperties = {
