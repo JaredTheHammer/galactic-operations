@@ -13,7 +13,7 @@ interface CombatPanelProps {
 
 export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) => {
   const { isMobile } = useIsMobile()
-  const { gameData } = useGameStore()
+  const { gameData, dismissCombat } = useGameStore()
 
   if (!combat || !gameState) return null
 
@@ -166,7 +166,7 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
       </div>
 
       {/* Resolution */}
-      {combat.state === 'Resolving' && combat.resolution && (
+      {(combat.state === 'Resolving' || combat.state === 'Complete') && combat.resolution && (
         <div style={sectionStyle}>
           <div style={sideHeaderStyle('#ffd700')}>Resolution</div>
 
@@ -235,6 +235,48 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
               DEFENDER DEFEATED
             </div>
           )}
+          {combat.resolution.isNewlyWounded && !combat.resolution.isDefeated && (
+            <div style={{ fontSize: '12px', color: '#ff8844', fontWeight: 'bold', marginTop: '8px' }}>
+              HERO WOUNDED
+            </div>
+          )}
+          {/* Tactic cards played */}
+          {combat.resolution.tacticCardsPlayed && combat.resolution.tacticCardsPlayed.length > 0 && gameData?.tacticCards && (
+            <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #333355' }}>
+              <div style={{ fontSize: '10px', color: '#bb99ff', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '4px' }}>
+                Tactic Cards Played
+              </div>
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                {combat.resolution.tacticCardsPlayed.map(cardId => {
+                  const card = gameData.tacticCards![cardId]
+                  if (!card) return null
+                  const color = card.timing === 'Attack' ? '#ff4444' : card.timing === 'Defense' ? '#4a9eff' : '#ffd700'
+                  return (
+                    <span key={cardId} style={{
+                      padding: '2px 8px',
+                      backgroundColor: 'rgba(187, 153, 255, 0.1)',
+                      border: `1px solid ${color}`,
+                      borderRadius: '3px',
+                      fontSize: '10px',
+                      color,
+                    }}>
+                      {card.name}
+                    </span>
+                  )
+                })}
+              </div>
+              {combat.resolution.tacticSuppression != null && combat.resolution.tacticSuppression > 0 && (
+                <div style={{ fontSize: '10px', color: '#ff8844', marginTop: '4px' }}>
+                  Tactic Suppression: +{combat.resolution.tacticSuppression}
+                </div>
+              )}
+              {combat.resolution.tacticRecover != null && combat.resolution.tacticRecover > 0 && (
+                <div style={{ fontSize: '10px', color: '#44ff44', marginTop: '4px' }}>
+                  Tactic Recovery: {combat.resolution.tacticRecover} wounds
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -261,7 +303,7 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
 
       <button
         style={{ ...buttonStyle('primary'), marginTop: '0', ...(isMobile ? { width: '100%' } : {}) }}
-        onClick={() => {}}
+        onClick={dismissCombat}
       >
         Continue
       </button>

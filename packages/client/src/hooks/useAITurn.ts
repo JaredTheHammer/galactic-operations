@@ -356,6 +356,10 @@ export function useAITurn(): UseAITurnReturn {
               }
             }
 
+            // Clear activeCombat overlay after AI actions so it doesn't block the UI
+            if (gs.activeCombat) {
+              gs = { ...gs, activeCombat: null }
+            }
             useGameStore.setState({ gameState: gs })
           }
 

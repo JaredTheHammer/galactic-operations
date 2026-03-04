@@ -468,6 +468,7 @@ export interface GameStore {
   useConsumable: (itemId: string, targetId?: string) => void
   getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => void
+  dismissCombat: () => void
   endActivation: () => void
   advancePhase: () => void
   setHighlightedTile: (coord: GridCoordinate | null) => void
@@ -970,6 +971,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (resolution.isDefeated) {
           addCombatLog(`  !! ${defender.id} defeated!`)
         }
+        if (resolution.tacticCardsPlayed && resolution.tacticCardsPlayed.length > 0 && gameData.tacticCards) {
+          const names = resolution.tacticCardsPlayed
+            .map(id => gameData.tacticCards?.[id]?.name ?? id)
+            .join(', ')
+          addCombatLog(`  Tactic cards: ${names}`)
+        }
       } else {
         addCombatLog(`Combat: ${attacker.id} vs ${defender.id}`)
       }
@@ -1152,9 +1159,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { gameState, addCombatLog } = get()
     if (!gameState?.tacticDeck) return
 
-    // Determine which side is playing based on combat context
-    // The player (Operative) plays cards; role indicates attack or defense timing
-    const side = role === 'attacker' ? 'Operative' : 'Operative'
+    // The player (Operative) always plays from the Operative hand
+    const side: 'Operative' | 'Imperial' = 'Operative'
     const updatedDeck = playCard(gameState.tacticDeck, side, cardId)
     if (!updatedDeck) {
       addCombatLog(`Card ${cardId} not found in hand`)
@@ -1168,6 +1174,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
     })
     addCombatLog(`Played tactic card: ${cardId}`)
+  },
+
+  dismissCombat: () => {
+    const { gameState } = get()
+    if (!gameState) return
+    set({ gameState: { ...gameState, activeCombat: null } })
   },
 
   endActivation: () => {
