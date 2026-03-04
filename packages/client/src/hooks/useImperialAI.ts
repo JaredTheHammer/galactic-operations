@@ -156,6 +156,9 @@ export function useImperialAI(enabled: boolean): { isImperialTurn: boolean } {
           const profile = getProfileForFigure(fig, gs, profiles)
           const figureName = getFigureName(fig, gs)
 
+          // Pan camera to the activating figure
+          useGameStore.getState().setCameraTarget(fig.position)
+
           // Set the imperial AI phase indicator
           useGameStore.setState({ imperialAIPhase: 'thinking' })
 

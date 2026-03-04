@@ -454,6 +454,9 @@ export interface GameStore {
   // Imperial AI state (campaign combat)
   imperialAIPhase: 'thinking' | 'executing' | null
 
+  // Camera control: set to pan the tactical grid camera to a grid position
+  cameraTarget: GridCoordinate | null
+
   // Actions
   initGame: (players: Player[], mapConfig?: MapConfig) => void
   startHeroCreation: (players: Player[], mapConfig?: MapConfig) => void
@@ -478,6 +481,7 @@ export interface GameStore {
   setAIMovePath: (path: GridCoordinate[] | null) => void
   setAIAttackTarget: (target: { from: GridCoordinate; to: GridCoordinate } | null) => void
   clearAIVisualization: () => void
+  setCameraTarget: (target: GridCoordinate | null) => void
   addCombatLog: (message: string) => void
   undoLastAction: () => void
 
@@ -570,6 +574,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // Imperial AI state (campaign combat)
   imperialAIPhase: null,
+
+  // Camera control
+  cameraTarget: null,
 
   // Undo history
   gameStateHistory: [],
@@ -1483,6 +1490,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ aiMovePath: null, aiAttackTarget: null })
   },
 
+  setCameraTarget: (target: GridCoordinate | null) => {
+    set({ cameraTarget: target })
+  },
+
   addCombatLog: (message: string) => {
     set(state => ({
       combatLog: [
@@ -1909,6 +1920,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       activeMission: null,
       triggeredWaveIds: [],
       imperialAIPhase: null,
+      cameraTarget: null,
       showSetup: true,
       gameState: null,
       isInitialized: false,

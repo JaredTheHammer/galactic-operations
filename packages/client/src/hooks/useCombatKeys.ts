@@ -40,6 +40,7 @@ export function useCombatKeys(enabled: boolean) {
         advancePhase,
         undoLastAction,
         gameStateHistory,
+        setCameraTarget,
       } = store.getState()
 
       if (!gameState) return
@@ -111,7 +112,9 @@ export function useCombatKeys(enabled: boolean) {
             ? friendlyFigures.findIndex(f => f.id === selectedFigureId)
             : -1
           const nextIdx = (currentIdx + 1) % friendlyFigures.length
-          selectFigure(friendlyFigures[nextIdx].id)
+          const nextFig = friendlyFigures[nextIdx]
+          selectFigure(nextFig.id)
+          setCameraTarget(nextFig.position)
           break
         }
 

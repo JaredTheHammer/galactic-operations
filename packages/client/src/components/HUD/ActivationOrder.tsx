@@ -16,7 +16,7 @@ interface ActivationOrderProps {
 }
 
 export const ActivationOrder: React.FC<ActivationOrderProps> = ({ gameState }) => {
-  const { selectFigure } = useGameStore()
+  const { selectFigure, setCameraTarget } = useGameStore()
 
   if (!gameState || gameState.turnPhase !== 'Activation') return null
   if (gameState.activationOrder.length === 0) return null
@@ -63,7 +63,11 @@ export const ActivationOrder: React.FC<ActivationOrderProps> = ({ gameState }) =
         return (
           <div
             key={fig.id}
-            onClick={() => !isDefeated && selectFigure(fig.id)}
+            onClick={() => {
+              if (isDefeated) return
+              selectFigure(fig.id)
+              setCameraTarget(fig.position)
+            }}
             title={`${name}${isDefeated ? ' (defeated)' : isActivated ? ' (done)' : isCurrent ? ' (activating)' : ''}`}
             style={{
               ...pipStyle,

@@ -27,6 +27,8 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
     highlightedTile,
     aiMovePath,
     aiAttackTarget,
+    cameraTarget,
+    setCameraTarget,
   } = useGameStore()
 
   // Initialize renderer and camera
@@ -51,6 +53,14 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
 
     setIsInitialized(true)
   }, [isInitialized])
+
+  // Pan camera to target when cameraTarget changes
+  useEffect(() => {
+    if (!cameraTarget || !cameraRef.current) return
+    cameraRef.current.centerOn(cameraTarget, TILE_SIZE, true)
+    // Clear the target so it doesn't re-trigger
+    setCameraTarget(null)
+  }, [cameraTarget, setCameraTarget])
 
   // Handle window resize
   useEffect(() => {
