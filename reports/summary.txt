@@ -9,41 +9,42 @@
 ----------------------------------------------------
   WIN RATES
 ----------------------------------------------------
-  Imperial:   56.0%  (28 wins)
-  Operative:  44.0%  (22 wins)
+  Imperial:   40.0%  (20 wins)
+  Operative:  60.0%  (30 wins)
   Draw:       0.0%  (0 draws)
 
 ----------------------------------------------------
   AVERAGES PER GAME
 ----------------------------------------------------
-  Rounds played:    10.5
-  Imp damage dealt: 46.9
-  Op  damage dealt: 48.4
-  Imp figs defeated:11.6
-  Op  figs defeated:1.5
-  Objectives done:  1.26 / 3
+  Rounds played:    6.9
+  Imp damage dealt: 42.2
+  Op  damage dealt: 28.8
+  Imp figs defeated:5.6
+  Op  figs defeated:1.0
+  Objectives done:  1.54 / 3
 
 ----------------------------------------------------
   VICTORY CONDITIONS
 ----------------------------------------------------
-  Objectives completed (2/3)   22 (44.0%)
-  All heroes wounded           16 (32.0%)
-  Round limit reached - mission failed 12 (24.0%)
+  Objectives completed (2/3)   30 (60.0%)
+  All heroes wounded           13 (26.0%)
+  Round limit reached - mission failed 7 (14.0%)
 
 ----------------------------------------------------
   UNIT PERFORMANCE
 ----------------------------------------------------
   Unit                   Survival  AvgDmgTaken
-  Stormtrooper               23%         3.1
-  Stormtrooper Elite         88%         1.2
-  Imperial Officer           16%         4.2
-  Korrga                     82%         7.1
-  Vex Dorin                  40%         8.4
-  Ashara Nev                 48%         6.0
-  Ssorku                     82%         4.7
-  Syndicate Thug             19%         3.2
-  IG-Series Assassin Droid     99%         0.1
-  Syndicate Crime Lord      100%         0.0
-  Syndicate Enforcer        100%         0.0
+  Stormtrooper               28%         2.9
+  Stormtrooper Elite         86%         1.7
+  Imperial Officer           14%         4.3
+  Korrga                     92%         4.5
+  Vex Dorin                  62%         6.4
+  Ashara Nev                 60%         5.0
+  Ssorku                     82%         3.8
+  Nikto Gunner               67%         1.7
+  War Droid Mk-I             76%         2.9
+  Inquisitor                100%         0.7
+  Syndicate Lieutenant       66%         2.1
+  Trandoshan Hunter          67%         5.0
 
 ====================================================

@@ -1,0 +1,311 @@
+[
+  {
+    "faction": "Act 1: Imperials",
+    "imperialWinRate": 0.57,
+    "operativeWinRate": 0.43,
+    "avgRoundsPlayed": 7.26,
+    "avgObjectivesCompleted": 1.22,
+    "avgDamage": {
+      "imperial": 57.31,
+      "operative": 27.34
+    },
+    "avgDefeated": {
+      "imperial": 6.15,
+      "operative": 1.66
+    },
+    "victoryConditions": {
+      "Objectives completed (2/3)": 43,
+      "All heroes wounded": 53,
+      "Round limit reached - mission failed": 4
+    },
+    "unitPerformance": {
+      "stormtrooper": {
+        "unitId": "stormtrooper",
+        "unitName": "Stormtrooper",
+        "gamesAppeared": 912,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 2.1359649122807016,
+        "survivalRate": 0.46600877192982454,
+        "avgActivations": 0
+      },
+      "stormtrooper-elite": {
+        "unitId": "stormtrooper-elite",
+        "unitName": "Stormtrooper Elite",
+        "gamesAppeared": 195,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 0.9179487179487179,
+        "survivalRate": 0.9487179487179487,
+        "avgActivations": 0
+      },
+      "imperial-officer": {
+        "unitId": "imperial-officer",
+        "unitName": "Imperial Officer",
+        "gamesAppeared": 188,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 3.1382978723404253,
+        "survivalRate": 0.3723404255319149,
+        "avgActivations": 0
+      },
+      "hero-hero-korrga": {
+        "unitId": "hero-hero-korrga",
+        "unitName": "Korrga",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 4.94,
+        "survivalRate": 0.91,
+        "avgActivations": 0
+      },
+      "hero-hero-vex-dorin": {
+        "unitId": "hero-hero-vex-dorin",
+        "unitName": "Vex Dorin",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 8.98,
+        "survivalRate": 0.39,
+        "avgActivations": 0
+      },
+      "hero-hero-ashara-nev": {
+        "unitId": "hero-hero-ashara-nev",
+        "unitName": "Ashara Nev",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 6.63,
+        "survivalRate": 0.43,
+        "avgActivations": 0
+      },
+      "hero-hero-ssorku": {
+        "unitId": "hero-hero-ssorku",
+        "unitName": "Ssorku",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 7.69,
+        "survivalRate": 0.61,
+        "avgActivations": 0
+      },
+      "inquisitor": {
+        "unitId": "inquisitor",
+        "unitName": "Inquisitor",
+        "gamesAppeared": 26,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 0.6538461538461539,
+        "survivalRate": 1,
+        "avgActivations": 0
+      }
+    }
+  },
+  {
+    "faction": "Act 2: Shadow Syndicate",
+    "imperialWinRate": 0.47,
+    "operativeWinRate": 0.53,
+    "avgRoundsPlayed": 7.2,
+    "avgObjectivesCompleted": 1.48,
+    "avgDamage": {
+      "imperial": 22.87,
+      "operative": 34.67
+    },
+    "avgDefeated": {
+      "imperial": 6.1,
+      "operative": 0.68
+    },
+    "victoryConditions": {
+      "Objectives completed (2/3)": 53,
+      "Round limit reached - mission failed": 46,
+      "All heroes wounded": 1
+    },
+    "unitPerformance": {
+      "nikto-gunner": {
+        "unitId": "nikto-gunner",
+        "unitName": "Nikto Gunner",
+        "gamesAppeared": 894,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 2.6577181208053693,
+        "survivalRate": 0.4720357941834452,
+        "avgActivations": 0
+      },
+      "gamorrean-brute": {
+        "unitId": "gamorrean-brute",
+        "unitName": "Gamorrean Brute",
+        "gamesAppeared": 200,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 1.665,
+        "survivalRate": 0.78,
+        "avgActivations": 0
+      },
+      "syndicate-lieutenant": {
+        "unitId": "syndicate-lieutenant",
+        "unitName": "Syndicate Lieutenant",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 5.04,
+        "survivalRate": 0.16,
+        "avgActivations": 0
+      },
+      "hero-hero-korrga": {
+        "unitId": "hero-hero-korrga",
+        "unitName": "Korrga",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 2.73,
+        "survivalRate": 0.98,
+        "avgActivations": 0
+      },
+      "hero-hero-vex-dorin": {
+        "unitId": "hero-hero-vex-dorin",
+        "unitName": "Vex Dorin",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 5.36,
+        "survivalRate": 0.76,
+        "avgActivations": 0
+      },
+      "hero-hero-ashara-nev": {
+        "unitId": "hero-hero-ashara-nev",
+        "unitName": "Ashara Nev",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 4.81,
+        "survivalRate": 0.67,
+        "avgActivations": 0
+      },
+      "hero-hero-ssorku": {
+        "unitId": "hero-hero-ssorku",
+        "unitName": "Ssorku",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 3.08,
+        "survivalRate": 0.91,
+        "avgActivations": 0
+      },
+      "trandoshan-hunter": {
+        "unitId": "trandoshan-hunter",
+        "unitName": "Trandoshan Hunter",
+        "gamesAppeared": 54,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 3.7777777777777777,
+        "survivalRate": 0.8148148148148148,
+        "avgActivations": 0
+      },
+      "the-broker": {
+        "unitId": "the-broker",
+        "unitName": "The Broker",
+        "gamesAppeared": 30,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 1.6666666666666667,
+        "survivalRate": 1,
+        "avgActivations": 0
+      }
+    }
+  },
+  {
+    "faction": "Act 3: Warlord Forces",
+    "imperialWinRate": 0.59,
+    "operativeWinRate": 0.41,
+    "avgRoundsPlayed": 9.82,
+    "avgObjectivesCompleted": 1.21,
+    "avgDamage": {
+      "imperial": 30.45,
+      "operative": 48.9
+    },
+    "avgDefeated": {
+      "imperial": 13.42,
+      "operative": 0.84
+    },
+    "victoryConditions": {
+      "Objectives completed (2/3)": 41,
+      "Round limit reached - mission failed": 57,
+      "All heroes wounded": 2
+    },
+    "unitPerformance": {
+      "conscript-militia": {
+        "unitId": "conscript-militia",
+        "unitName": "Conscript Militia",
+        "gamesAppeared": 1085,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 2.8672811059907835,
+        "survivalRate": 0.04423963133640553,
+        "avgActivations": 0
+      },
+      "defector-trooper": {
+        "unitId": "defector-trooper",
+        "unitName": "Defector Trooper",
+        "gamesAppeared": 200,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 3.675,
+        "survivalRate": 0.265,
+        "avgActivations": 0
+      },
+      "rebel-turncoat": {
+        "unitId": "rebel-turncoat",
+        "unitName": "Rebel Turncoat",
+        "gamesAppeared": 383,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 2.1305483028720626,
+        "survivalRate": 0.6449086161879896,
+        "avgActivations": 0
+      },
+      "hero-hero-korrga": {
+        "unitId": "hero-hero-korrga",
+        "unitName": "Korrga",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 3.5,
+        "survivalRate": 0.98,
+        "avgActivations": 0
+      },
+      "hero-hero-vex-dorin": {
+        "unitId": "hero-hero-vex-dorin",
+        "unitName": "Vex Dorin",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 6.87,
+        "survivalRate": 0.68,
+        "avgActivations": 0
+      },
+      "hero-hero-ashara-nev": {
+        "unitId": "hero-hero-ashara-nev",
+        "unitName": "Ashara Nev",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 6.47,
+        "survivalRate": 0.54,
+        "avgActivations": 0
+      },
+      "hero-hero-ssorku": {
+        "unitId": "hero-hero-ssorku",
+        "unitName": "Ssorku",
+        "gamesAppeared": 100,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 2.87,
+        "survivalRate": 0.96,
+        "avgActivations": 0
+      },
+      "war-droid-mk1": {
+        "unitId": "war-droid-mk1",
+        "unitName": "War Droid Mk-I",
+        "gamesAppeared": 45,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 3.422222222222222,
+        "survivalRate": 0.6666666666666666,
+        "avgActivations": 0
+      },
+      "shock-commando": {
+        "unitId": "shock-commando",
+        "unitName": "Shock Commando",
+        "gamesAppeared": 33,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 1.6666666666666667,
+        "survivalRate": 0.7878787878787878,
+        "avgActivations": 0
+      },
+      "warlord-drayen": {
+        "unitId": "warlord-drayen",
+        "unitName": "Warlord Kael Drayen",
+        "gamesAppeared": 57,
+        "avgDamageDealt": 0,
+        "avgDamageTaken": 0.3333333333333333,
+        "survivalRate": 1,
+        "avgActivations": 0
+      }
+    }
+  }
+]

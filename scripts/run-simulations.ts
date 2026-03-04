@@ -76,9 +76,9 @@ const SIMULATION_MISSION: Mission = {
   name: 'Balance Test v2',
   description: 'Standard balance simulation with wounded mechanic and objectives',
   mapId: 'generated',
-  roundLimit: 15,
-  imperialThreat: 4,
-  imperialReinforcementPoints: 5,
+  roundLimit: 12,
+  imperialThreat: 6,
+  imperialReinforcementPoints: 3,
   victoryConditions: [
     { side: 'Imperial', description: 'Wound all heroes', condition: 'allHeroesWounded' },
     {
