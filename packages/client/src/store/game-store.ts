@@ -405,6 +405,9 @@ export interface GameStore {
   aiMovePath: GridCoordinate[] | null
   aiAttackTarget: { from: GridCoordinate; to: GridCoordinate } | null
 
+  // Autosave state
+  lastAutosaveTime: number | null
+
   // UI overlay state
   notifications: GameNotification[]
   threatFlash: boolean
@@ -516,6 +519,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // AI visualization state
   aiMovePath: null,
   aiAttackTarget: null,
+
+  // Autosave state
+  lastAutosaveTime: null,
 
   // UI overlay state
   notifications: [],
@@ -1421,6 +1427,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       pendingPlayers: null,
       combatLog: ['Campaign started! Select your first mission.'],
     })
+    get().saveCampaignToStorage()
   },
 
   /**
@@ -1546,6 +1553,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       isInitialized: false,
       gameState: null,
     })
+    get().saveCampaignToStorage()
   },
 
   /**
@@ -1562,6 +1570,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameState: null,
       isInitialized: false,
     })
+    get().saveCampaignToStorage()
   },
 
   /**
@@ -1574,6 +1583,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     try {
       const json = campaignToJSON(campaignState)
       localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
+      set({ lastAutosaveTime: Date.now() })
     } catch (e) {
       console.error('Failed to save campaign:', e)
     }
@@ -1675,6 +1685,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showMissionSelect: true,
       lastMissionResult: null,
     })
+    get().saveCampaignToStorage()
   },
 
   /**
@@ -1682,6 +1693,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
    */
   updateCampaignState: (cs: CampaignState) => {
     set({ campaignState: cs })
+    get().saveCampaignToStorage()
   },
 
   // ---- Hero Progression ----
@@ -1698,6 +1710,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showHeroProgression: false,
       showMissionSelect: true,
     })
+    get().saveCampaignToStorage()
   },
 
   // ---- Portrait Manager ----
@@ -1729,6 +1742,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         heroes: { ...campaignState.heroes, [heroId]: updatedHero },
       },
     })
+    get().saveCampaignToStorage()
   },
 
   purchaseHeroSkillRank: (heroId: string, skillId: string) => {
@@ -1744,6 +1758,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         heroes: { ...campaignState.heroes, [heroId]: updatedHero },
       },
     })
+    get().saveCampaignToStorage()
   },
 
   unlockHeroSpecialization: (heroId: string, specializationId: string) => {
@@ -1759,6 +1774,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         heroes: { ...campaignState.heroes, [heroId]: updatedHero },
       },
     })
+    get().saveCampaignToStorage()
   },
 
   getGameData: () => {
