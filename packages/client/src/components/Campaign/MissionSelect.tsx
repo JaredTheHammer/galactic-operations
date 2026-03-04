@@ -251,6 +251,7 @@ export default function MissionSelect() {
   const {
     campaignState,
     campaignMissions,
+    gameData,
     showMissionBriefingScreen,
     saveCampaignToStorage,
     loadImportedCampaign,
@@ -577,6 +578,88 @@ export default function MissionSelect() {
                       )
                     })}
 
+                    {/* Enemy composition intel */}
+                    {selectedMission.initialEnemies.length > 0 && (
+                      <div style={{ marginTop: '16px' }}>
+                        <div style={{ fontSize: '12px', color: '#888', marginBottom: '6px' }}>
+                          <strong style={{ color: '#ff6b6b' }}>Enemy Intel:</strong>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {selectedMission.initialEnemies.map((group, idx) => {
+                            const profile = gameData?.npcProfiles?.[group.npcProfileId]
+                            const name = profile?.name ?? group.npcProfileId
+                            const tier = profile?.tier
+                            const tierColor = tier === 'Nemesis' ? '#ff4444'
+                              : tier === 'Rival' ? '#ffaa00'
+                              : tier === 'Elite' ? '#cc77ff'
+                              : '#888'
+                            return (
+                              <span key={idx} style={{
+                                padding: '3px 8px',
+                                backgroundColor: '#1a0a0a',
+                                border: `1px solid ${tierColor}40`,
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                color: tierColor,
+                              }}>
+                                {group.count > 1 ? `${group.count}x ` : ''}{name}
+                                {tier && tier !== 'Minion' && (
+                                  <span style={{ fontSize: '9px', opacity: 0.7, marginLeft: '3px' }}>
+                                    [{tier}]
+                                  </span>
+                                )}
+                              </span>
+                            )
+                          })}
+                        </div>
+                        {selectedMission.reinforcements.length > 0 && (
+                          <div style={{
+                            fontSize: '10px',
+                            color: '#f97316',
+                            marginTop: '4px',
+                            fontStyle: 'italic',
+                          }}>
+                            + {selectedMission.reinforcements.length} reinforcement wave{selectedMission.reinforcements.length > 1 ? 's' : ''} (threat-based)
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Loot preview */}
+                    {selectedMission.lootTokens.length > 0 && (
+                      <div style={{ marginTop: '12px' }}>
+                        <div style={{ fontSize: '12px', color: '#888', marginBottom: '6px' }}>
+                          <strong style={{ color: '#ffd700' }}>Loot Available:</strong>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {selectedMission.lootTokens.map((loot, idx) => {
+                            const r = loot.reward
+                            const label = r.type === 'xp' ? `${r.value} XP`
+                              : r.type === 'credits' ? `${r.value} Cr`
+                              : r.type === 'equipment' ? r.itemId.replace(/-/g, ' ')
+                              : r.type === 'narrative' ? r.description
+                              : '???'
+                            const color = r.type === 'xp' ? '#44ff44'
+                              : r.type === 'credits' ? '#ffd700'
+                              : r.type === 'equipment' ? '#ff6644'
+                              : '#cc77ff'
+                            return (
+                              <span key={idx} style={{
+                                padding: '2px 7px',
+                                backgroundColor: '#0a0a1a',
+                                border: `1px solid ${color}30`,
+                                borderRadius: '3px',
+                                fontSize: '11px',
+                                color,
+                              }}>
+                                {label}
+                              </span>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     <div style={{ marginTop: '16px', fontSize: '12px', color: '#888' }}>
                       <div style={{ marginBottom: '4px' }}>
                         Recommended heroes: {selectedMission.recommendedHeroCount}
@@ -591,8 +674,9 @@ export default function MissionSelect() {
                         )}
                       </div>
                       <div>
-                        Map: {selectedMission.boardsWide}x{selectedMission.boardsTall} boards \u2022
-                        Threat: {selectedMission.imperialThreat}
+                        Map: {selectedMission.boardsWide}x{selectedMission.boardsTall} boards {'\u2022'}
+                        Threat: {selectedMission.imperialThreat} {'\u2022'}
+                        Base XP: {selectedMission.baseXP}
                       </div>
                     </div>
 

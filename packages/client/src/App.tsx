@@ -26,6 +26,7 @@ import { useCombatKeys } from './hooks/useCombatKeys'
 import { useImperialAI } from './hooks/useImperialAI'
 import { useAutoPhase } from './hooks/useAutoPhase'
 import { AutosaveToast } from './components/HUD/AutosaveToast'
+import { ShortcutHelp } from './components/HUD/ShortcutHelp'
 
 /** Brief victory/defeat overlay shown on the tactical grid before PostMission transition */
 const MissionOutcomeOverlay: React.FC<{ winner: string; victoryCondition?: string }> = ({ winner, victoryCondition }) => {
@@ -303,6 +304,9 @@ function App() {
 
       {/* Bottom Right: Combat Log */}
       <CombatLog messages={combatLog} />
+
+      {/* Keyboard shortcut help overlay (? to toggle) */}
+      <ShortcutHelp enabled={inTacticalCombat && !isMobile} />
 
       {/* Centered Overlay: Combat Panel (shown during combat) */}
       {gameState.activeCombat && (
