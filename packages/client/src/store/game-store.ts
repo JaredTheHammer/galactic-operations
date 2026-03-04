@@ -52,8 +52,8 @@ import {
 import {
   getValidTargetsV2,
 } from '@engine/ai/evaluate-v2.js'
-import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization } from '@engine/character-v2.js'
-import type { HeroCreationInput } from '@engine/character-v2.js'
+import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization, equipItem, unequipItem } from '@engine/character-v2.js'
+import type { HeroCreationInput, EquipmentSlot } from '@engine/character-v2.js'
 import { getEquippedTalents, canActivateTalent } from '@engine/talent-v2.js'
 import {
   createCampaign,
@@ -66,6 +66,9 @@ import {
   campaignFromJSON,
   checkVictoryConditions,
   evaluateObjective,
+  getInventory,
+  addToInventory,
+  removeFromInventory,
 } from '@engine/campaign-v2.js'
 import type { MissionCompletionInput } from '@engine/campaign-v2.js'
 import { combatAnimations } from '../canvas/animation-manager'
@@ -475,6 +478,8 @@ export interface GameStore {
   purchaseHeroTalent: (heroId: string, talentId: string, tier: 1 | 2 | 3 | 4 | 5, position: number) => void
   purchaseHeroSkillRank: (heroId: string, skillId: string) => void
   unlockHeroSpecialization: (heroId: string, specializationId: string) => void
+  equipHeroItem: (heroId: string, slot: EquipmentSlot, itemId: string) => void
+  unequipHeroItem: (heroId: string, slot: EquipmentSlot) => void
 
   // UI overlay actions
   addNotification: (notif: Omit<GameNotification, 'id' | 'createdAt'>) => void
@@ -1826,6 +1831,55 @@ export const useGameStore = create<GameStore>((set, get) => ({
       campaignState: {
         ...campaignState,
         heroes: { ...campaignState.heroes, [heroId]: updatedHero },
+      },
+    })
+  },
+
+  equipHeroItem: (heroId: string, slot: EquipmentSlot, itemId: string) => {
+    const { campaignState } = get()
+    if (!campaignState) return
+    const hero = campaignState.heroes[heroId]
+    if (!hero) return
+    const gameData = loadGameDataV2()
+
+    // Remove item from inventory
+    let updatedCampaign = removeFromInventory(campaignState, itemId)
+
+    // Equip the item (may return a previously equipped item)
+    const { hero: updatedHero, previousItemId } = equipItem(hero, slot, itemId, gameData)
+
+    // Return previous item to inventory
+    if (previousItemId) {
+      updatedCampaign = addToInventory(updatedCampaign, previousItemId)
+    }
+
+    set({
+      campaignState: {
+        ...updatedCampaign,
+        heroes: { ...updatedCampaign.heroes, [heroId]: updatedHero },
+      },
+    })
+  },
+
+  unequipHeroItem: (heroId: string, slot: EquipmentSlot) => {
+    const { campaignState } = get()
+    if (!campaignState) return
+    const hero = campaignState.heroes[heroId]
+    if (!hero) return
+    const gameData = loadGameDataV2()
+
+    const { hero: updatedHero, removedItemId } = unequipItem(hero, slot, gameData)
+
+    // Add removed item back to inventory
+    let updatedCampaign: CampaignState = campaignState
+    if (removedItemId) {
+      updatedCampaign = addToInventory(campaignState, removedItemId)
+    }
+
+    set({
+      campaignState: {
+        ...updatedCampaign,
+        heroes: { ...updatedCampaign.heroes, [heroId]: updatedHero },
       },
     })
   },

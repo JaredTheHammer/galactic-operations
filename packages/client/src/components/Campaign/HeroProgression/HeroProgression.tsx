@@ -6,8 +6,9 @@ import { HeroProgressionSidebar } from './HeroProgressionSidebar'
 import { TalentPyramidEditor } from './TalentPyramidEditor'
 import { SkillRankEditor } from './SkillRankEditor'
 import { SpecializationPanel } from './SpecializationPanel'
+import { EquipmentPanel } from './EquipmentPanel'
 
-type Tab = 'talents' | 'skills' | 'specializations'
+type Tab = 'talents' | 'skills' | 'specializations' | 'equipment'
 
 export function HeroProgression() {
   const { campaignState, closeHeroProgression } = useGameStore()
@@ -118,6 +119,9 @@ export function HeroProgression() {
               <button style={mobileTabStyle(activeTab === 'specializations')} onClick={() => setActiveTab('specializations')}>
                 Specs
               </button>
+              <button style={mobileTabStyle(activeTab === 'equipment')} onClick={() => setActiveTab('equipment')}>
+                Equip
+              </button>
             </div>
 
             {/* Active panel */}
@@ -125,6 +129,7 @@ export function HeroProgression() {
               {activeTab === 'talents' && <TalentPyramidEditor hero={selectedHero} />}
               {activeTab === 'skills' && <SkillRankEditor hero={selectedHero} />}
               {activeTab === 'specializations' && <SpecializationPanel hero={selectedHero} />}
+              {activeTab === 'equipment' && <EquipmentPanel hero={selectedHero} />}
             </div>
           </>
         ) : (
@@ -204,7 +209,7 @@ export function HeroProgression() {
         <div>
           <h1 style={{ color: '#bb99ff', margin: 0, fontSize: '20px' }}>Hero Advancement</h1>
           <div style={{ color: '#888', fontSize: '12px', marginTop: '2px' }}>
-            Spend XP to upgrade talents, skills, and specializations
+            Spend XP to upgrade talents, skills, and specializations. Manage equipment loadouts.
           </div>
         </div>
         <button
@@ -239,6 +244,9 @@ export function HeroProgression() {
                 <button style={tabStyle(activeTab === 'specializations')} onClick={() => setActiveTab('specializations')}>
                   Specializations
                 </button>
+                <button style={tabStyle(activeTab === 'equipment')} onClick={() => setActiveTab('equipment')}>
+                  Equipment
+                </button>
               </div>
 
               {/* Tab Content */}
@@ -251,6 +259,9 @@ export function HeroProgression() {
                 )}
                 {activeTab === 'specializations' && (
                   <SpecializationPanel hero={selectedHero} />
+                )}
+                {activeTab === 'equipment' && (
+                  <EquipmentPanel hero={selectedHero} />
                 )}
               </div>
             </>
