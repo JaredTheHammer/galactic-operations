@@ -84,6 +84,7 @@ import careersData from '@data/careers.json'
 import aiProfilesRaw from '@data/ai-profiles.json'
 import consumablesData from '@data/consumables.json'
 import tacticsData from '@data/cards/tactics.json'
+import companionsNpcData from '@data/npcs/companions.json'
 import mercenarySpecData from '@data/specializations/mercenary.json'
 import smugglerSpecData from '@data/specializations/smuggler.json'
 import droidTechSpecData from '@data/specializations/droid-tech.json'
@@ -139,12 +140,21 @@ const BOARD_TEMPLATES: BoardTemplate[] = [
 function loadGameDataV2(): GameData {
   // NPC profiles (merge all faction files)
   const npcProfiles: Record<string, NPCProfile> = {}
-  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData]
+  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData]
   for (const npcFile of npcDataFiles) {
     const npcsRaw = (npcFile as any).npcs ?? npcFile
     for (const [id, npc] of Object.entries(npcsRaw)) {
       npcProfiles[id] = npc as NPCProfile
     }
+  }
+
+  // Companion profiles: map social companion IDs to their combat NPC profile IDs
+  const companionProfiles: Record<string, string> = {}
+  const companionNpcsRaw = (companionsNpcData as any).npcs ?? {}
+  for (const [id, npc] of Object.entries(companionNpcsRaw)) {
+    // Convention: combat profile 'companion-drez-venn' maps to social ID 'drez-venn'
+    const socialId = id.replace(/^companion-/, '')
+    companionProfiles[socialId] = id
   }
 
   // Weapons
@@ -223,6 +233,7 @@ function loadGameDataV2(): GameData {
     npcProfiles,
     consumables,
     tacticCards,
+    companionProfiles,
   }
 }
 
@@ -413,6 +424,8 @@ export interface GameStore {
   campaignMissions: Record<string, MissionDefinition>
   lastMissionResult: MissionResult | null
   showMissionSelect: boolean
+  showMissionBriefing: boolean
+  pendingMissionId: string | null
   showPostMission: boolean
   showSocialPhase: boolean
   showHeroProgression: boolean
@@ -471,6 +484,8 @@ export interface GameStore {
   // Campaign actions
   startCampaign: (difficulty: CampaignDifficulty) => void
   finishCampaignHeroCreation: () => void
+  showMissionBriefingScreen: (missionId: string) => void
+  dismissMissionBriefing: () => void
   startCampaignMission: (missionId: string) => void
   completeCampaignMission: (input: MissionCompletionInput) => void
   returnToMissionSelect: () => void
@@ -534,6 +549,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   campaignMissions: {},
   lastMissionResult: null,
   showMissionSelect: false,
+  showMissionBriefing: false,
+  pendingMissionId: null,
   showPostMission: false,
   showSocialPhase: false,
   showHeroProgression: false,
@@ -1580,6 +1597,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
     get().saveCampaignToStorage()
   },
 
+  showMissionBriefingScreen: (missionId: string) => {
+    set({
+      showMissionSelect: false,
+      showMissionBriefing: true,
+      pendingMissionId: missionId,
+    })
+  },
+
+  dismissMissionBriefing: () => {
+    const { pendingMissionId } = get()
+    if (!pendingMissionId) return
+    set({ showMissionBriefing: false, pendingMissionId: null })
+    get().startCampaignMission(pendingMissionId)
+  },
+
   /**
    * Launch a campaign mission: set up game state and start playing.
    */
@@ -1650,17 +1682,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameState.map.deploymentZones.operative = mission.operativeDeployZone
     }
 
-    // Deploy heroes as operative army
+    // Deploy heroes + companions as operative army
+    const operativeUnits: ArmyCompositionV2['operative'] = heroes.map(h => ({
+      entityType: 'hero' as const,
+      entityId: h.id,
+      count: 1,
+    }))
+
+    // Add recruited companions as NPC allies on the operative side
+    const companions = campaignState.companions ?? []
+    for (const companionId of companions) {
+      const combatProfileId = gameData.companionProfiles?.[companionId]
+      if (combatProfileId && gameData.npcProfiles[combatProfileId]) {
+        operativeUnits.push({
+          entityType: 'npc' as const,
+          entityId: combatProfileId,
+          count: 1,
+        })
+      }
+    }
+
     const army: ArmyCompositionV2 = {
       imperial: mission.initialEnemies.map(g => ({
         npcId: g.npcProfileId,
         count: g.count,
       })),
-      operative: heroes.map(h => ({
-        entityType: 'hero' as const,
-        entityId: h.id,
-        count: 1,
-      })),
+      operative: operativeUnits,
     }
     gameState = deployFiguresV2(gameState, army, gameData)
 
@@ -1793,6 +1840,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameData,
       showSetup: false,
       showMissionSelect: true,
+      showMissionBriefing: false,
+      pendingMissionId: null,
       showPostMission: false,
       showSocialPhase: false,
       showHeroProgression: false,
@@ -1813,6 +1862,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       campaignMissions: {},
       lastMissionResult: null,
       showMissionSelect: false,
+      showMissionBriefing: false,
+      pendingMissionId: null,
       showPostMission: false,
       showSocialPhase: false,
       showHeroProgression: false,

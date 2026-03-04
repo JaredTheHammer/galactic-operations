@@ -19,6 +19,7 @@ import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
 import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgression'
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
+import MissionBriefing from './components/Campaign/MissionBriefing'
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useCombatKeys } from './hooks/useCombatKeys'
@@ -39,6 +40,7 @@ function App() {
     showHeroProgression,
     showPortraitManager,
     showCombatArena,
+    showMissionBriefing,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -47,7 +49,7 @@ function App() {
   // Keyboard shortcuts for tactical combat (disabled on non-combat screens and mobile)
   const inTacticalCombat = !!gameState && isInitialized && !isAIBattle && !showSetup && !showHeroCreation
     && !showMissionSelect && !showPostMission && !showSocialPhase && !showHeroProgression
-    && !showPortraitManager && !showCombatArena
+    && !showPortraitManager && !showCombatArena && !showMissionBriefing
   useCombatKeys(inTacticalCombat && !isMobile)
 
   const selectedFigure = gameState?.figures.find(f => f.id === selectedFigureId) || null
@@ -72,6 +74,11 @@ function App() {
   // Campaign: mission select screen
   if (showMissionSelect) {
     return <><MissionSelect /><AutosaveToast /></>
+  }
+
+  // Campaign: mission briefing (between select and combat)
+  if (showMissionBriefing) {
+    return <><MissionBriefing /><AutosaveToast /></>
   }
 
   // Campaign: social phase (between missions)

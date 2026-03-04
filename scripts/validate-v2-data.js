@@ -40,6 +40,7 @@ const npcFiles = [
   'data/npcs/imperials.json',
   'data/npcs/bounty-hunters.json',
   'data/npcs/warlord-forces.json',
+  'data/npcs/companions.json',
 ];
 
 const missionFiles = [

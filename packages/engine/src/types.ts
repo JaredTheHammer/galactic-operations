@@ -942,6 +942,8 @@ export interface GameData {
   npcProfiles: Record<string, NPCProfile>;
   consumables?: Record<string, ConsumableItem>;
   tacticCards?: Record<string, TacticCard>;
+  /** Maps social companion IDs (e.g. 'drez-venn') to combat NPC profile IDs (e.g. 'companion-drez-venn') */
+  companionProfiles?: Record<string, string>;
 }
 
 // ============================================================================

@@ -251,7 +251,7 @@ export default function MissionSelect() {
   const {
     campaignState,
     campaignMissions,
-    startCampaignMission,
+    showMissionBriefingScreen,
     saveCampaignToStorage,
     loadImportedCampaign,
     exitCampaign,
@@ -300,7 +300,7 @@ export default function MissionSelect() {
 
   const handleLaunchMission = () => {
     if (!selectedMissionId) return
-    startCampaignMission(selectedMissionId)
+    showMissionBriefingScreen(selectedMissionId)
   }
 
   const handleSave = () => {
@@ -595,6 +595,28 @@ export default function MissionSelect() {
                         Threat: {selectedMission.imperialThreat}
                       </div>
                     </div>
+
+                    {/* Companion deployment info */}
+                    {campaignState.companions && campaignState.companions.length > 0 && (
+                      <div style={{ marginTop: '12px', fontSize: '12px' }}>
+                        <strong style={{ color: '#44ff44' }}>Companions deploying:</strong>
+                        <div style={{ marginTop: '4px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          {campaignState.companions.map(id => (
+                            <span key={id} style={{
+                              padding: '3px 8px',
+                              backgroundColor: '#0a2a1a',
+                              border: '1px solid #44ff4440',
+                              borderRadius: '4px',
+                              color: '#44ff44',
+                              fontSize: '11px',
+                              fontWeight: 'bold',
+                            }}>
+                              {id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <button
                       style={{

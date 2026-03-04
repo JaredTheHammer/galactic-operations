@@ -213,6 +213,7 @@ export function SocialEncounter({ encounter, npc, campaign, onCheckResolved, onB
                     isAvailable={isAvailable}
                     isSelected={isSelected}
                     npc={npc}
+                    hero={selectedHero}
                     onClick={() => isAvailable && setSelectedOptionId(option.id)}
                   />
                 )
@@ -240,12 +241,34 @@ export function SocialEncounter({ encounter, npc, campaign, onCheckResolved, onB
   )
 }
 
+/** Maps social skill IDs to hero characteristic keys */
+const socialSkillCharacteristic: Record<string, keyof HeroCharacter['characteristics']> = {
+  charm: 'presence',
+  negotiation: 'presence',
+  coercion: 'willpower',
+  deception: 'cunning',
+  leadership: 'presence',
+}
+
+/** Compute hero's positive dice pool for a social skill */
+function computeHeroPool(hero: HeroCharacter, skillId: string): { ability: number; proficiency: number } {
+  const charKey = socialSkillCharacteristic[skillId]
+  if (!charKey) return { ability: 0, proficiency: 0 }
+  let charValue = hero.characteristics[charKey]
+  if (hero.isWounded) charValue = Math.max(1, charValue - 1)
+  const skillRank = hero.skills[skillId] ?? 0
+  const poolSize = Math.max(charValue, skillRank)
+  const upgrades = Math.min(charValue, skillRank)
+  return { ability: poolSize - upgrades, proficiency: upgrades }
+}
+
 function DialogueOptionCard({
   option,
   effectiveDifficulty,
   isAvailable,
   isSelected,
   npc,
+  hero,
   onClick,
 }: {
   option: SocialDialogueOption
@@ -253,6 +276,7 @@ function DialogueOptionCard({
   isAvailable: boolean
   isSelected: boolean
   npc: SocialNPC
+  hero: HeroCharacter | null
   onClick: () => void
 }) {
   const skillColor = skillColors[option.skillId] ?? '#888'
@@ -279,7 +303,7 @@ function DialogueOptionCard({
         {option.text}
       </div>
 
-      {/* Skill + difficulty row */}
+      {/* Skill + dice pool row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         {/* Skill badge */}
         <span style={{
@@ -290,26 +314,49 @@ function DialogueOptionCard({
           {option.skillId}
         </span>
 
-        {/* Difficulty dots */}
-        <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
+        {/* Hero positive dice pool */}
+        {hero && (() => {
+          const pool = computeHeroPool(hero, option.skillId)
+          return (
+            <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }} title={`${pool.proficiency}Y + ${pool.ability}G`}>
+              {Array.from({ length: pool.proficiency }).map((_, i) => (
+                <div key={`y-${i}`} style={{
+                  width: '12px', height: '12px', borderRadius: '2px',
+                  backgroundColor: '#ffd700', border: '1px solid #ccaa00',
+                }} />
+              ))}
+              {Array.from({ length: pool.ability }).map((_, i) => (
+                <div key={`g-${i}`} style={{
+                  width: '12px', height: '12px', borderRadius: '2px',
+                  backgroundColor: '#44cc44', border: '1px solid #339933',
+                }} />
+              ))}
+            </div>
+          )
+        })()}
+
+        <span style={{ color: '#555', fontSize: '12px' }}>vs</span>
+
+        {/* Difficulty dice pool */}
+        <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }} title={`${effectiveDifficulty}P${option.challengeDice ? ` + ${option.challengeDice}R` : ''}`}>
           {Array.from({ length: effectiveDifficulty }).map((_, i) => (
             <div key={`d-${i}`} style={{
-              width: '10px', height: '10px', borderRadius: '50%',
-              backgroundColor: '#9966ff',
+              width: '12px', height: '12px', borderRadius: '2px',
+              backgroundColor: '#9966ff', border: '1px solid #7744dd',
             }} />
           ))}
           {option.challengeDice && Array.from({ length: option.challengeDice }).map((_, i) => (
             <div key={`c-${i}`} style={{
-              width: '10px', height: '10px', borderRadius: '50%',
-              backgroundColor: '#ff4444',
+              width: '12px', height: '12px', borderRadius: '2px',
+              backgroundColor: '#ff4444', border: '1px solid #cc2222',
             }} />
           ))}
         </div>
 
         {/* Opposed indicator */}
         {option.isOpposed && (
-          <span style={{ fontSize: '10px', color: '#ffaa00' }}>
-            Opposed ({option.opposedSkillId})
+          <span style={{ fontSize: '10px', color: '#ffaa00', fontWeight: 'bold' }}>
+            OPPOSED ({option.opposedSkillId})
           </span>
         )}
 

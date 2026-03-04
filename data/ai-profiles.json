@@ -290,7 +290,9 @@
     "shock-commando": "elite",
     "rebel-turncoat": "elite",
     "siege-droid-mk2": "sniper",
-    "warlord-drayen": "hero"
+    "warlord-drayen": "hero",
+    "companion-drez-venn": "elite",
+    "companion-krrssk": "melee"
   },
   "defaultArchetype": "trooper"
 }
