@@ -19,7 +19,8 @@ const PHASE_COLORS: Record<string, string> = {
 }
 
 export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideControls = false, compact = false }) => {
-  const { advancePhase, imperialAIPhase } = useGameStore()
+  const { advancePhase, imperialAIPhase, activeMission } = useGameStore()
+  const roundLimit = activeMission?.roundLimit ?? 0
 
   if (!gameState) return null
 
@@ -36,9 +37,13 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideCon
     && gameState.currentActivationIndex + 1 >= gameState.activationOrder.length
 
   if (compact) {
+    const roundsLeft = roundLimit > 0 ? roundLimit - gameState.roundNumber : -1
+    const compactRoundColor = roundsLeft >= 0 && roundsLeft <= 2 ? '#ff4444' : '#ffd700'
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
-        <span style={{ color: '#ffd700', fontWeight: 'bold' }}>R{gameState.roundNumber}</span>
+        <span style={{ color: compactRoundColor, fontWeight: 'bold' }}>
+          R{gameState.roundNumber}{roundLimit > 0 ? `/${roundLimit}` : ''}
+        </span>
         <span style={{ color: phaseColor, fontWeight: 'bold' }}>{gameState.turnPhase}</span>
         {isAITurn && imperialAIPhase && (
           <span style={{ color: '#ff4444', fontWeight: 'bold', animation: 'pulse 1.5s ease-in-out infinite' }}>
@@ -104,9 +109,27 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideCon
     minWidth: '120px',
   }
 
+  const roundsRemaining = roundLimit > 0 ? roundLimit - gameState.roundNumber : -1
+  const urgencyColor = roundsRemaining >= 0 && roundsRemaining <= 2 ? '#ff4444'
+    : roundsRemaining >= 0 && roundsRemaining <= 4 ? '#ffaa00'
+    : '#ffd700'
+
   return (
     <div style={containerStyle}>
-      <div style={roundStyle}>ROUND {gameState.roundNumber}</div>
+      <div style={{ ...roundStyle, color: urgencyColor }}>
+        ROUND {gameState.roundNumber}{roundLimit > 0 ? ` / ${roundLimit}` : ''}
+      </div>
+      {roundsRemaining >= 0 && roundsRemaining <= 4 && (
+        <div style={{
+          fontSize: '10px',
+          fontWeight: 'bold',
+          color: urgencyColor,
+          marginBottom: '4px',
+          letterSpacing: '1px',
+        }}>
+          {roundsRemaining === 0 ? 'FINAL ROUND' : `${roundsRemaining} ROUND${roundsRemaining > 1 ? 'S' : ''} LEFT`}
+        </div>
+      )}
       <div style={phaseStyle}>{gameState.turnPhase}</div>
       <div style={playerStyle}>
         {currentPlayer.role === 'Imperial' ? '// ' : ':: '}{currentPlayer.name}

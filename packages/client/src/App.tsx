@@ -5,6 +5,7 @@ import { GameSetup } from './components/Setup/GameSetup'
 import HeroCreation from './components/HeroCreation/HeroCreation'
 import { AIBattle } from './components/AIBattle/AIBattle'
 import { TurnIndicator } from './components/HUD/TurnIndicator'
+import { ActivationOrder } from './components/HUD/ActivationOrder'
 import { MoraleTracker } from './components/HUD/MoraleTracker'
 import { InfoPanel } from './components/HUD/InfoPanel'
 import { ActionButtons } from './components/HUD/ActionButtons'
@@ -276,6 +277,9 @@ function App() {
 
       {/* Top Center: Turn Indicator */}
       <TurnIndicator gameState={gameState} />
+
+      {/* Top Center (below turn indicator): Activation Order */}
+      <ActivationOrder gameState={gameState} />
 
       {/* Top Left: Morale Tracker */}
       <MoraleTracker gameState={gameState} />
