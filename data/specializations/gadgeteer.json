@@ -1,0 +1,318 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Gadgeteer specialization (Bounty Hunter career). 30 talent cards: 10 Tier 1, 8 Tier 2, 6 Tier 3, 4 Tier 4, 2 Tier 5. Players draft 15 into a pyramid (5/4/3/2/1)."
+  },
+  "specialization": {
+    "id": "gadgeteer",
+    "name": "Gadgeteer",
+    "career": "bounty-hunter",
+    "description": "A tech-savvy combatant who modifies weapons and armor for maximum lethality. The Gadgeteer turns credits and spare parts into tactical superiority through custom modifications and jury-rigged solutions.",
+    "bonusCareerSkills": ["brawl", "mechanics", "ranged-light", "coercion"],
+    "capstoneCharacteristics": ["agility", "intellect"]
+  },
+  "talents": [
+    {
+      "id": "gdgt-t1-01",
+      "name": "Toughened",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Wound Threshold by 2 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "woundThreshold", "value": 2, "perRank": true }
+    },
+    {
+      "id": "gdgt-t1-02",
+      "name": "Grit",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Strain Threshold by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "strainThreshold", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gdgt-t1-03",
+      "name": "Tinkerer",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 additional hard point to one item per rank. Each rank must be applied to a different item.",
+      "mechanicalEffect": { "type": "modify_weapon_quality", "quality": "hard_points", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gdgt-t1-04",
+      "name": "Second Wind",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Once per encounter, recover strain equal to ranks in Second Wind.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gdgt-t1-05",
+      "name": "Quick Draw",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per round, draw or holster a weapon as an incidental instead of a maneuver.",
+      "mechanicalEffect": { "type": "free_maneuver" }
+    },
+    {
+      "id": "gdgt-t1-06",
+      "name": "Durable",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Subtract 10 per rank from critical injury rolls against you (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "gdgt-t1-07",
+      "name": "Brace",
+      "tier": 1,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from next ranged attack. Requires a maneuver to activate.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gdgt-t1-08",
+      "name": "Intimidating",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from Coercion checks. Opponents add 1 Setback die per rank to Discipline checks to resist your Coercion.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "skill": "coercion" }
+    },
+    {
+      "id": "gdgt-t1-09",
+      "name": "Defensive Stance",
+      "tier": 1,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, as a maneuver, upgrade the difficulty of all melee attacks targeting you by 1 per rank until the start of your next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "perRank": true, "condition": "melee_only" }
+    },
+    {
+      "id": "gdgt-t1-10",
+      "name": "Spare Clip",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Weapons with Limited Ammo quality gain +1 ammo.",
+      "mechanicalEffect": { "type": "modify_weapon_quality", "quality": "Limited Ammo", "value": 1 }
+    },
+    {
+      "id": "gdgt-t2-01",
+      "name": "Jury Rigged",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Choose one weapon or armor. Permanently reduce its Advantage cost for one quality by 1 (minimum 1).",
+      "mechanicalEffect": { "type": "modify_weapon_quality", "quality": "any", "value": -1 }
+    },
+    {
+      "id": "gdgt-t2-02",
+      "name": "Point Blank",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one attack per round when firing a ranged weapon at Short range or closer.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "short_range" }
+    },
+    {
+      "id": "gdgt-t2-03",
+      "name": "Enduring",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Soak by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gdgt-t2-04",
+      "name": "Bought Time",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "On your turn, suffer 2 strain to perform an additional maneuver.",
+      "mechanicalEffect": { "type": "extra_maneuver" }
+    },
+    {
+      "id": "gdgt-t2-05",
+      "name": "Lethal Blows",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add +10 per rank to critical injury rolls inflicted on opponents.",
+      "mechanicalEffect": { "type": "increase_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "gdgt-t2-06",
+      "name": "Side Step",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, as a maneuver, upgrade the difficulty of ranged attacks targeting you by 1 per rank until the start of your next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gdgt-t2-07",
+      "name": "Disorient",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "After hitting with a Brawl or Melee attack, spend 2 Advantage to disorient target for 1 round per rank.",
+      "mechanicalEffect": { "type": "impose_condition", "condition": "disoriented", "duration": 1, "perRank": true }
+    },
+    {
+      "id": "gdgt-t2-08",
+      "name": "Barrage",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one attack per round when using a weapon with a range of Short or greater.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "ranged_short_or_greater" }
+    },
+    {
+      "id": "gdgt-t3-01",
+      "name": "Armor Master",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor, increase total Soak by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "condition": "wearing_armor" }
+    },
+    {
+      "id": "gdgt-t3-02",
+      "name": "True Aim",
+      "tier": 3,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, use a maneuver to gain +1 Boost die per rank on your next ranged attack this turn.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gdgt-t3-03",
+      "name": "Heroic Resilience",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, when you would be incapacitated by wounds, make a Hard Resilience check. On success, remain conscious with 1 wound remaining.",
+      "mechanicalEffect": { "type": "prevent_incapacitation" }
+    },
+    {
+      "id": "gdgt-t3-04",
+      "name": "Crippling Blow",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Increase the difficulty of your next combat check by 1. If you deal a critical, add +10 to the roll.",
+      "mechanicalEffect": { "type": "empowered_critical", "bonus": 10 }
+    },
+    {
+      "id": "gdgt-t3-05",
+      "name": "Feral Strength",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage to one Brawl or Melee attack per round.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "melee_or_brawl" }
+    },
+    {
+      "id": "gdgt-t3-06",
+      "name": "Improved Tinkerer",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When modifying a weapon, reduce the difficulty of the Mechanics check by 1.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "condition": "weapon_modification" },
+      "prerequisite": "gdgt-t1-03"
+    },
+    {
+      "id": "gdgt-t4-01",
+      "name": "Deadly Accuracy",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When making a ranged attack, add ranks in the weapon's skill as bonus damage to one hit.",
+      "mechanicalEffect": { "type": "skill_damage_bonus", "skill": "ranged-light" }
+    },
+    {
+      "id": "gdgt-t4-02",
+      "name": "Unstoppable",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, perform a bonus action during your turn. Suffer 4 strain.",
+      "mechanicalEffect": { "type": "extra_action" }
+    },
+    {
+      "id": "gdgt-t4-03",
+      "name": "Armor Master (Improved)",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor with a Defense rating, increase defense by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "defense", "value": 1, "condition": "wearing_armor_with_defense" },
+      "prerequisite": "gdgt-t3-01"
+    },
+    {
+      "id": "gdgt-t4-04",
+      "name": "Iron Body",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Reduce strain suffered from voluntary maneuvers and actions by 1 per rank (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_strain_suffered", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gdgt-t5-01",
+      "name": "Dedication (Agility)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Agility by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "agility" }
+    },
+    {
+      "id": "gdgt-t5-02",
+      "name": "Dedication (Intellect)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Intellect by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "intellect" }
+    }
+  ]
+}

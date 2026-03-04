@@ -1,0 +1,318 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Gunslinger specialization (Scoundrel career). 30 talent cards: 10 Tier 1, 8 Tier 2, 6 Tier 3, 4 Tier 4, 2 Tier 5. Players draft 15 into a pyramid (5/4/3/2/1)."
+  },
+  "specialization": {
+    "id": "gunslinger",
+    "name": "Gunslinger",
+    "career": "scoundrel",
+    "description": "A fast-draw pistol specialist who wins fights before the opposition can blink. The Gunslinger combines lightning reflexes with deadly accuracy, preferring blaster pistols and close-range shootouts.",
+    "bonusCareerSkills": ["coercion", "cool", "ranged-light", "vigilance"],
+    "capstoneCharacteristics": ["agility", "cunning"]
+  },
+  "talents": [
+    {
+      "id": "gnsl-t1-01",
+      "name": "Grit",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Strain Threshold by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "strainThreshold", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gnsl-t1-02",
+      "name": "Quick Strike",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 Boost die per rank to combat checks against targets that have not yet acted this encounter.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "condition": "target_has_not_acted" }
+    },
+    {
+      "id": "gnsl-t1-03",
+      "name": "Quick Draw",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per round, draw or holster a weapon as an incidental instead of a maneuver.",
+      "mechanicalEffect": { "type": "free_maneuver" }
+    },
+    {
+      "id": "gnsl-t1-04",
+      "name": "Toughened",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Wound Threshold by 2 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "woundThreshold", "value": 2, "perRank": true }
+    },
+    {
+      "id": "gnsl-t1-05",
+      "name": "Dodge",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "When targeted by a combat check, suffer strain up to ranks in Dodge to upgrade the difficulty of the attack by that number.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gnsl-t1-06",
+      "name": "Second Wind",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Once per encounter, recover strain equal to ranks in Second Wind.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gnsl-t1-07",
+      "name": "Point Blank",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one attack per round when firing a ranged weapon at Short range or closer.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "short_range" }
+    },
+    {
+      "id": "gnsl-t1-08",
+      "name": "Shortcut",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from Athletics and Coordination checks during chases.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "skill": "coordination" }
+    },
+    {
+      "id": "gnsl-t1-09",
+      "name": "Sorry About the Mess",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase damage of first attack in an encounter by 1 per rank.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "first_attack_in_encounter" }
+    },
+    {
+      "id": "gnsl-t1-10",
+      "name": "Durable",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Subtract 10 per rank from critical injury rolls against you (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "gnsl-t2-01",
+      "name": "Side Step",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, as a maneuver, upgrade the difficulty of ranged attacks targeting you by 1 per rank until the start of your next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gnsl-t2-02",
+      "name": "Lethal Blows",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add +10 per rank to critical injury rolls inflicted on opponents.",
+      "mechanicalEffect": { "type": "increase_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "gnsl-t2-03",
+      "name": "Bought Time",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "On your turn, suffer 2 strain to perform an additional maneuver.",
+      "mechanicalEffect": { "type": "extra_maneuver" }
+    },
+    {
+      "id": "gnsl-t2-04",
+      "name": "Guns Blazing",
+      "tier": 2,
+      "type": "active",
+      "activation": "action",
+      "ranked": false,
+      "description": "As an action, make a Ranged (Light) attack and add 2 Advantage to the result. Add 2 Threat as well.",
+      "mechanicalEffect": { "type": "area_attack", "advantage_bonus": 2, "threat_penalty": 2 }
+    },
+    {
+      "id": "gnsl-t2-05",
+      "name": "Rapid Reaction",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Suffer strain up to ranks to add equal number of Successes to Initiative checks.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "condition": "initiative" }
+    },
+    {
+      "id": "gnsl-t2-06",
+      "name": "Targeted Blow",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "After making a successful attack, spend a Destiny Point to add Agility to the damage dealt.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 0, "condition": "add_agility_to_damage" }
+    },
+    {
+      "id": "gnsl-t2-07",
+      "name": "Enduring",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Soak by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gnsl-t2-08",
+      "name": "Convincing Demeanor",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from Deception and Skulduggery checks.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "skill": "deception" }
+    },
+    {
+      "id": "gnsl-t3-01",
+      "name": "Natural Marksman",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Once per session, reroll one ranged combat check.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "session_reroll" }
+    },
+    {
+      "id": "gnsl-t3-02",
+      "name": "Heroic Resilience",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, when you would be incapacitated by wounds, make a Hard Resilience check. On success, remain conscious with 1 wound remaining.",
+      "mechanicalEffect": { "type": "prevent_incapacitation" }
+    },
+    {
+      "id": "gnsl-t3-03",
+      "name": "Improved Dodge",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When you use Dodge, attacker also suffers 1 Setback die per rank of Dodge.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "condition": "dodge_counterattack" },
+      "prerequisite": "gnsl-t1-05"
+    },
+    {
+      "id": "gnsl-t3-04",
+      "name": "Crippling Blow",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Increase the difficulty of your next combat check by 1. If you deal a critical, add +10 to the roll.",
+      "mechanicalEffect": { "type": "empowered_critical", "bonus": 10 }
+    },
+    {
+      "id": "gnsl-t3-05",
+      "name": "True Aim",
+      "tier": 3,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, use a maneuver to gain +1 Boost die per rank on your next ranged attack this turn.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gnsl-t3-06",
+      "name": "Feral Strength",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage to one Brawl or Melee attack per round.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "melee_or_brawl" }
+    },
+    {
+      "id": "gnsl-t4-01",
+      "name": "Deadly Accuracy",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When making a ranged attack, add ranks in the weapon's skill as bonus damage to one hit.",
+      "mechanicalEffect": { "type": "skill_damage_bonus", "skill": "ranged-light" }
+    },
+    {
+      "id": "gnsl-t4-02",
+      "name": "Unstoppable",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, perform a bonus action during your turn. Suffer 4 strain.",
+      "mechanicalEffect": { "type": "extra_action" }
+    },
+    {
+      "id": "gnsl-t4-03",
+      "name": "Supreme Dodge",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When using Dodge, if the attacker misses, they suffer strain equal to ranks in Dodge.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "condition": "dodge_strain_reflection" },
+      "prerequisite": "gnsl-t3-03"
+    },
+    {
+      "id": "gnsl-t4-04",
+      "name": "Iron Body",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Reduce strain suffered from voluntary maneuvers and actions by 1 per rank (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_strain_suffered", "value": 1, "perRank": true }
+    },
+    {
+      "id": "gnsl-t5-01",
+      "name": "Dedication (Agility)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Agility by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "agility" }
+    },
+    {
+      "id": "gnsl-t5-02",
+      "name": "Dedication (Cunning)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Cunning by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "cunning" }
+    }
+  ]
+}

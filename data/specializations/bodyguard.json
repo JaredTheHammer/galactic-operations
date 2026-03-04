@@ -1,0 +1,318 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Bodyguard specialization (Hired Gun career). 30 talent cards: 10 Tier 1, 8 Tier 2, 6 Tier 3, 4 Tier 4, 2 Tier 5. Players draft 15 into a pyramid (5/4/3/2/1)."
+  },
+  "specialization": {
+    "id": "bodyguard",
+    "name": "Bodyguard",
+    "career": "hired-gun",
+    "description": "A professional protector who shields allies from harm. The Bodyguard excels at interposing themselves between danger and their charges, absorbing punishment that would fell lesser warriors.",
+    "bonusCareerSkills": ["ranged-heavy", "perception", "resilience", "vigilance"],
+    "capstoneCharacteristics": ["brawn", "willpower"]
+  },
+  "talents": [
+    {
+      "id": "bdgd-t1-01",
+      "name": "Toughened",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Wound Threshold by 2 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "woundThreshold", "value": 2, "perRank": true }
+    },
+    {
+      "id": "bdgd-t1-02",
+      "name": "Grit",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Strain Threshold by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "strainThreshold", "value": 1, "perRank": true }
+    },
+    {
+      "id": "bdgd-t1-03",
+      "name": "Body Guard",
+      "tier": 1,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, perform a Body Guard maneuver to protect an engaged ally. Upgrade the difficulty of attacks targeting that ally by 1 per rank until the start of your next turn. Suffer strain equal to ranks.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "perRank": true, "target": "ally" }
+    },
+    {
+      "id": "bdgd-t1-04",
+      "name": "Barrage",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one attack per round when using a weapon with a range of Short or greater.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "ranged_short_or_greater" }
+    },
+    {
+      "id": "bdgd-t1-05",
+      "name": "Second Wind",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Once per encounter, recover strain equal to ranks in Second Wind.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 1, "perRank": true }
+    },
+    {
+      "id": "bdgd-t1-06",
+      "name": "Durable",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Subtract 10 per rank from critical injury rolls against you (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "bdgd-t1-07",
+      "name": "Quick Draw",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per round, draw or holster a weapon as an incidental instead of a maneuver.",
+      "mechanicalEffect": { "type": "free_maneuver" }
+    },
+    {
+      "id": "bdgd-t1-08",
+      "name": "Brace",
+      "tier": 1,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from next ranged attack. Requires a maneuver to activate.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true }
+    },
+    {
+      "id": "bdgd-t1-09",
+      "name": "Hard Headed",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "When staggered or disoriented, perform a Hard Headed action (Discipline check, difficulty 3 minus ranks) to remove the condition.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "condition": "staggered_or_disoriented" }
+    },
+    {
+      "id": "bdgd-t1-10",
+      "name": "Heroic Fortitude",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "May spend a Destiny Point to ignore effects of critical injuries on checks until end of encounter.",
+      "mechanicalEffect": { "type": "ignore_critical_penalties" }
+    },
+    {
+      "id": "bdgd-t2-01",
+      "name": "Side Step",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, as a maneuver, upgrade the difficulty of ranged attacks targeting you by 1 per rank until the start of your next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "perRank": true }
+    },
+    {
+      "id": "bdgd-t2-02",
+      "name": "Enduring",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Soak by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "perRank": true }
+    },
+    {
+      "id": "bdgd-t2-03",
+      "name": "Bought Time",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "On your turn, suffer 2 strain to perform an additional maneuver.",
+      "mechanicalEffect": { "type": "extra_maneuver" }
+    },
+    {
+      "id": "bdgd-t2-04",
+      "name": "Defensive Stance",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, as a maneuver, upgrade the difficulty of all melee attacks targeting you by 1 per rank until the start of your next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "perRank": true, "condition": "melee_only" }
+    },
+    {
+      "id": "bdgd-t2-05",
+      "name": "Lethal Blows",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add +10 per rank to critical injury rolls inflicted on opponents.",
+      "mechanicalEffect": { "type": "increase_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "bdgd-t2-06",
+      "name": "Point Blank",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one attack per round when firing a ranged weapon at Short range or closer.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "short_range" }
+    },
+    {
+      "id": "bdgd-t2-07",
+      "name": "Spare Clip",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Weapons with Limited Ammo quality gain +1 ammo.",
+      "mechanicalEffect": { "type": "modify_weapon_quality", "quality": "Limited Ammo", "value": 1 }
+    },
+    {
+      "id": "bdgd-t2-08",
+      "name": "Suppressing Fire",
+      "tier": 2,
+      "type": "active",
+      "activation": "action",
+      "ranked": false,
+      "description": "Use an action to make an attack. On a hit, the target also adds 2 Setback dice to their next check.",
+      "mechanicalEffect": { "type": "impose_condition", "condition": "suppressed", "setback": 2 }
+    },
+    {
+      "id": "bdgd-t3-01",
+      "name": "Armor Master",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor, increase total Soak by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "condition": "wearing_armor" }
+    },
+    {
+      "id": "bdgd-t3-02",
+      "name": "True Aim",
+      "tier": 3,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, use a maneuver to gain +1 Boost die per rank on your next ranged attack this turn.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true }
+    },
+    {
+      "id": "bdgd-t3-03",
+      "name": "Heroic Resilience",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, when you would be incapacitated by wounds, make a Hard Resilience check. On success, remain conscious with 1 wound remaining.",
+      "mechanicalEffect": { "type": "prevent_incapacitation" }
+    },
+    {
+      "id": "bdgd-t3-04",
+      "name": "Body Guard (Improved)",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "When an ally protected by Body Guard is hit, suffer the wounds instead of the ally (after soak is applied).",
+      "mechanicalEffect": { "type": "absorb_damage", "target": "protected_ally" },
+      "prerequisite": "bdgd-t1-03"
+    },
+    {
+      "id": "bdgd-t3-05",
+      "name": "Crippling Blow",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Increase the difficulty of your next combat check by 1. If you deal a critical, add +10 to the roll.",
+      "mechanicalEffect": { "type": "empowered_critical", "bonus": 10 }
+    },
+    {
+      "id": "bdgd-t3-06",
+      "name": "Last One Standing",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Add 1 Boost die to combat checks for each ally that has been incapacitated this encounter.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "per_incapacitated_ally" }
+    },
+    {
+      "id": "bdgd-t4-01",
+      "name": "Armor Master (Improved)",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor with a Defense rating, increase defense by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "defense", "value": 1, "condition": "wearing_armor_with_defense" },
+      "prerequisite": "bdgd-t3-01"
+    },
+    {
+      "id": "bdgd-t4-02",
+      "name": "Deadly Accuracy",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When making a ranged attack, add ranks in the weapon's skill as bonus damage to one hit.",
+      "mechanicalEffect": { "type": "skill_damage_bonus", "skill": "ranged-heavy" }
+    },
+    {
+      "id": "bdgd-t4-03",
+      "name": "Unstoppable",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, perform a bonus action during your turn. Suffer 4 strain.",
+      "mechanicalEffect": { "type": "extra_action" }
+    },
+    {
+      "id": "bdgd-t4-04",
+      "name": "Iron Body",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Reduce strain suffered from voluntary maneuvers and actions by 1 per rank (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_strain_suffered", "value": 1, "perRank": true }
+    },
+    {
+      "id": "bdgd-t5-01",
+      "name": "Dedication (Brawn)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Brawn by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "brawn" }
+    },
+    {
+      "id": "bdgd-t5-02",
+      "name": "Dedication (Willpower)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Willpower by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "willpower" }
+    }
+  ]
+}
