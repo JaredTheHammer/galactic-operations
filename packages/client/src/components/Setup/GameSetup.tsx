@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useGameStore } from '../../store/game-store'
+import { useTutorialStore } from '../../store/tutorial-store'
 import type { Player, MapConfig, MapSizePreset, CampaignDifficulty, MissionDefinition } from '@engine/types.js'
 import { MAP_PRESETS, BOARD_SIZE } from '@engine/types.js'
 import { t, mixins } from '../../styles/theme'
@@ -90,6 +91,17 @@ export const GameSetup: React.FC = () => {
   const handleCreateHeroes = () => {
     startHeroCreation(buildPlayers(), getMapConfig())
   }
+
+  const handleStartTutorial = useCallback(() => {
+    // Start a quick skirmish game with default units, then activate the tutorial
+    const players: Player[] = [
+      { id: 0, name: 'Empire', side: 'imperial', isAI: true },
+      { id: 1, name: 'You', side: 'operative', isAI: false },
+    ]
+    const tutorialMap: MapConfig = { preset: 'skirmish', boardsWide: 3, boardsTall: 3 }
+    initGame(players, tutorialMap)
+    useTutorialStore.getState().startTutorial()
+  }, [initGame])
 
   // Mini board preview
   const previewWidth = 160
@@ -462,6 +474,23 @@ export const GameSetup: React.FC = () => {
         {renderGameModeSelector()}
         {renderPathTabs()}
         {playPath === 'campaign' ? renderCampaignPath() : renderSkirmishPath()}
+
+        {/* Tutorial button */}
+        <div style={{ marginTop: '16px', borderTop: '1px solid #2a2a3f', paddingTop: '16px' }}>
+          <button
+            style={{
+              ...mixins.buttonPrimary,
+              width: '100%',
+              backgroundColor: '#1a2a3a',
+              color: '#4a9eff',
+              border: '1px solid #333355',
+              fontSize: t.textSm,
+            }}
+            onClick={handleStartTutorial}
+          >
+            TUTORIAL - Learn the Basics
+          </button>
+        </div>
       </div>
     </div>
   )

@@ -25,6 +25,7 @@ const CampaignStats = React.lazy(() => import('./components/Campaign/CampaignSta
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
 import { AudioControls } from './components/HUD/AudioControls'
+import { TutorialOverlay } from './components/Tutorial/TutorialOverlay'
 
 function App() {
   const {
@@ -132,6 +133,7 @@ function App() {
     return (
       <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0a0a0f', overflow: 'hidden' }}>
         <AudioControls />
+        <TutorialOverlay />
         {/* Compact top bar */}
         <div style={{
           display: 'flex',
@@ -234,6 +236,7 @@ function App() {
   return (
     <div style={appStyle}>
       <AudioControls />
+      <TutorialOverlay />
       {/* Tactical Grid (main canvas) */}
       <div style={canvasContainerStyle}>
         <TacticalGrid gameState={gameState} />
