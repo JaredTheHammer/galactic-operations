@@ -29,6 +29,7 @@ import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgr
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
 import MissionBriefing from './components/Campaign/MissionBriefing'
 import { ActTransition } from './components/Campaign/ActTransition'
+import { FloatingCombatTextOverlay } from './components/HUD/FloatingCombatText'
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useCombatKeys } from './hooks/useCombatKeys'
@@ -220,6 +221,7 @@ function App() {
         {/* Canvas fills remaining space */}
         <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
           <TacticalGrid gameState={gameState} />
+          <FloatingCombatTextOverlay />
         </div>
 
         {/* Action buttons strip (hidden during Imperial AI turns) */}
@@ -292,6 +294,7 @@ function App() {
       {/* Tactical Grid (main canvas) */}
       <div style={canvasContainerStyle}>
         <TacticalGrid gameState={gameState} />
+        <FloatingCombatTextOverlay />
       </div>
 
       {/* HUD Overlays */}

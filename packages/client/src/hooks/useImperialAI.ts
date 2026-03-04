@@ -220,6 +220,30 @@ export function useImperialAI(enabled: boolean): { isImperialTurn: boolean } {
             const actionLabel = describeAction(action, gs)
             addCombatLog(`  -> ${actionLabel}`)
 
+            // Floating combat text for attacks
+            if (action.type === 'Attack') {
+              const resolution = gs.activeCombat?.resolution
+              const target = gs.figures.find(tf => tf.id === action.payload.targetId)
+              if (resolution && target) {
+                const addFCT = useGameStore.getState().addFloatingText
+                if (resolution.isHit && resolution.woundsDealt > 0) {
+                  addFCT({
+                    gridX: target.position.x, gridY: target.position.y,
+                    text: `-${resolution.woundsDealt}`,
+                    color: '#ff4444',
+                    type: resolution.criticalTriggered ? 'critical' : 'damage',
+                  })
+                } else if (!resolution.isHit) {
+                  addFCT({
+                    gridX: target.position.x, gridY: target.position.y,
+                    text: 'MISS',
+                    color: '#888888',
+                    type: 'miss',
+                  })
+                }
+              }
+            }
+
             // Check for combat results (wounds, defeats)
             for (const f of gs.figures) {
               // Detect newly wounded heroes
@@ -247,6 +271,12 @@ export function useImperialAI(enabled: boolean): { isImperialTurn: boolean } {
 
                 const victimName = getFigureName(f, gs)
                 addCombatLog(`  !! ${victimName} defeated!`)
+                useGameStore.getState().addFloatingText({
+                  gridX: f.position.x, gridY: f.position.y,
+                  text: 'DEFEATED',
+                  color: '#ff2222',
+                  type: 'defeat',
+                })
               }
             }
 

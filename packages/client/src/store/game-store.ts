@@ -399,6 +399,19 @@ export interface ActivatableTalent {
   strainCost?: number
 }
 
+/** Floating combat text displayed on the tactical canvas */
+export interface FloatingCombatText {
+  id: string
+  gridX: number
+  gridY: number
+  text: string
+  color: string
+  type: 'damage' | 'heal' | 'miss' | 'defeat' | 'critical' | 'token' | 'status'
+  createdAt: number
+}
+
+let fctCounter = 0
+
 export interface GameStore {
   // State
   gameState: GameState | null
@@ -456,6 +469,10 @@ export interface GameStore {
   figureTooltipPos: { x: number; y: number } | null
   hoveredTileCoord: { x: number; y: number } | null
   tileTooltipPos: { x: number; y: number } | null
+
+  // Floating combat text
+  floatingTexts: FloatingCombatText[]
+  addFloatingText: (text: Omit<FloatingCombatText, 'id' | 'createdAt'>) => void
 
   // Cinematic banners
   roundBanner: { round: number; roundLimit?: number; roundsLeft?: number } | null
@@ -611,6 +628,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // UI overlay state
   notifications: [],
+  floatingTexts: [],
   threatFlash: false,
   roundBanner: null,
   gameOverBanner: null,
@@ -1022,7 +1040,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
             ? `Hit! ${resolution.woundsDealt} wounds dealt`
             : 'Miss!')
         )
+
+        // Floating combat text
+        const { addFloatingText } = get()
+        if (resolution.isHit && resolution.woundsDealt > 0) {
+          addFloatingText({
+            gridX: defender.position.x, gridY: defender.position.y,
+            text: `-${resolution.woundsDealt}`,
+            color: '#ff4444',
+            type: resolution.criticalTriggered ? 'critical' : 'damage',
+          })
+        } else if (!resolution.isHit) {
+          addFloatingText({
+            gridX: defender.position.x, gridY: defender.position.y,
+            text: 'MISS',
+            color: '#888888',
+            type: 'miss',
+          })
+        }
         if (resolution.isDefeated) {
+          setTimeout(() => get().addFloatingText({
+            gridX: defender.position.x, gridY: defender.position.y,
+            text: 'DEFEATED',
+            color: '#ff2222',
+            type: 'defeat',
+          }), 300)
           addCombatLog(`  !! ${defender.id} defeated!`)
         }
         if (resolution.tacticCardsPlayed && resolution.tacticCardsPlayed.length > 0 && gameData.tacticCards) {
@@ -1672,6 +1714,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
         ...state.combatLog.slice(-49),
         `[R${state.gameState?.roundNumber ?? 0}] ${message}`,
       ],
+    }))
+  },
+
+  addFloatingText: (fct) => {
+    const entry: FloatingCombatText = {
+      ...fct,
+      id: `fct-${++fctCounter}`,
+      createdAt: Date.now(),
+    }
+    set(state => ({
+      floatingTexts: [...state.floatingTexts.slice(-19), entry],
     }))
   },
 
