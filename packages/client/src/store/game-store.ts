@@ -72,6 +72,7 @@ import {
 } from '@engine/campaign-v2.js'
 import type { MissionCompletionInput } from '@engine/campaign-v2.js'
 import { combatAnimations } from '../canvas/animation-manager'
+import { saveToSlot, loadFromSlot, deleteSlot, AUTO_SAVE_SLOT, findEmptySlot, migrateLegacySave } from '../services/save-slots'
 
 // v2 data imports
 import diceD6Data from '@data/dice-d6.json'
@@ -405,6 +406,7 @@ export interface GameStore {
   showCampaignStats: boolean
   showMapEditor: boolean
   campaignHeroCreation: boolean // true when creating heroes for a new campaign
+  activeSaveSlot: number | null // which save slot this campaign is using
   activeMissionDef: MissionDefinition | null // current mission definition for reinforcement waves
   triggeredWaveIds: string[] // mission reinforcement waves already deployed
   activeMission: Mission | null // lightweight mission object for victory checking (useAITurn reads this)
@@ -453,7 +455,10 @@ export interface GameStore {
   completeCampaignMission: (input: MissionCompletionInput) => void
   returnToMissionSelect: () => void
   saveCampaignToStorage: () => void
+  saveCampaignToSlot: (slotId: number) => void
   loadCampaignFromStorage: () => boolean
+  loadCampaignFromSlot: (slotId: number) => boolean
+  deleteSaveSlot: (slotId: number) => void
   loadImportedCampaign: (campaign: CampaignState) => void
   exitCampaign: () => void
 
@@ -540,6 +545,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   showCampaignStats: false,
   showMapEditor: false,
   campaignHeroCreation: false,
+  activeSaveSlot: null,
   activeMissionDef: null,
   triggeredWaveIds: [],
   activeMission: null,
@@ -1463,8 +1469,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       startingCredits: (campaignData as any).startingCredits ?? 0,
     })
 
+    // Find an empty slot for the new campaign
+    const newSlot = findEmptySlot() ?? 1
+
     set({
       campaignState: campaign,
+      activeSaveSlot: newSlot,
       showHeroCreation: false,
       showMissionSelect: true,
       campaignHeroCreation: false,
@@ -1472,6 +1482,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       pendingPlayers: null,
       combatLog: ['Campaign started! Select your first mission.'],
     })
+
+    // Auto-save new campaign
+    try {
+      saveToSlot(newSlot, campaign)
+      saveToSlot(AUTO_SAVE_SLOT, campaign)
+    } catch (e) {
+      console.error('Failed to auto-save new campaign:', e)
+    }
   },
 
   /**
@@ -1486,7 +1504,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Process a completed campaign mission and show the post-mission screen.
    */
   completeCampaignMission: (input: MissionCompletionInput) => {
-    const { campaignState, campaignMissions } = get()
+    const { campaignState, campaignMissions, activeSaveSlot } = get()
     if (!campaignState) return
 
     const { campaign: newCampaign, result } = completeMission(
@@ -1502,6 +1520,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
       isInitialized: false,
       gameState: null,
     })
+
+    // Auto-save after mission completion
+    try {
+      saveToSlot(AUTO_SAVE_SLOT, newCampaign)
+      if (activeSaveSlot != null && activeSaveSlot !== AUTO_SAVE_SLOT) {
+        saveToSlot(activeSaveSlot, newCampaign)
+      }
+    } catch (e) {
+      console.error('Auto-save after mission failed:', e)
+    }
   },
 
   /**
@@ -1521,13 +1549,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   /**
-   * Save campaign state to localStorage.
+   * Save campaign to the active slot (or legacy key as fallback).
    */
   saveCampaignToStorage: () => {
-    const { campaignState } = get()
+    const { campaignState, activeSaveSlot } = get()
     if (!campaignState) return
 
     try {
+      const slot = activeSaveSlot ?? AUTO_SAVE_SLOT
+      saveToSlot(slot, campaignState)
+      // Also keep legacy key updated for backward compat
       const json = campaignToJSON(campaignState)
       localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
     } catch (e) {
@@ -1536,10 +1567,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   /**
-   * Load campaign state from localStorage.
-   * Returns true if a save was found and loaded.
+   * Save campaign to a specific slot.
+   */
+  saveCampaignToSlot: (slotId: number) => {
+    const { campaignState } = get()
+    if (!campaignState) return
+
+    try {
+      saveToSlot(slotId, campaignState)
+      set({ activeSaveSlot: slotId })
+      // Also keep legacy key updated
+      const json = campaignToJSON(campaignState)
+      localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
+    } catch (e) {
+      console.error('Failed to save campaign to slot:', e)
+    }
+  },
+
+  /**
+   * Load campaign from localStorage (legacy single-key).
+   * Migrates to slot system if needed.
    */
   loadCampaignFromStorage: (): boolean => {
+    // Try migration first
+    migrateLegacySave()
+
     try {
       const json = localStorage.getItem(CAMPAIGN_STORAGE_KEY)
       if (!json) return false
@@ -1552,6 +1604,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         campaignState: campaign,
         campaignMissions: missions,
         gameData,
+        activeSaveSlot: null,
         showSetup: false,
         showMissionSelect: true,
       })
@@ -1563,18 +1616,54 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   /**
+   * Load campaign from a specific save slot.
+   */
+  loadCampaignFromSlot: (slotId: number): boolean => {
+    try {
+      const campaign = loadFromSlot(slotId)
+      if (!campaign) return false
+
+      const missions = loadCampaignMissions()
+      const gameData = loadGameDataV2()
+
+      set({
+        campaignState: campaign,
+        campaignMissions: missions,
+        gameData,
+        activeSaveSlot: slotId,
+        showSetup: false,
+        showMissionSelect: true,
+      })
+      return true
+    } catch (e) {
+      console.error(`Failed to load save slot ${slotId}:`, e)
+      return false
+    }
+  },
+
+  /**
+   * Delete a save slot.
+   */
+  deleteSaveSlot: (slotId: number) => {
+    deleteSlot(slotId)
+  },
+
+  /**
    * Load an imported campaign state directly (from export bundle).
-   * Skips localStorage read -- the CampaignState comes from the import parser.
-   * Also persists to localStorage so the imported save sticks.
+   * Persists to a new save slot.
    */
   loadImportedCampaign: (campaign: CampaignState) => {
     const missions = loadCampaignMissions()
     const gameData = loadGameDataV2()
 
+    // Find an empty slot for the import, or use slot 1
+    const slot = findEmptySlot() ?? 1
+
     set({
       campaignState: campaign,
       campaignMissions: missions,
       gameData,
+      activeSaveSlot: slot,
       showSetup: false,
       showMissionSelect: true,
       showPostMission: false,
@@ -1587,19 +1676,35 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showMapEditor: false,
     })
 
-    // Persist to localStorage immediately
+    // Persist to slot and legacy key
+    saveToSlot(slot, campaign)
     const json = campaignToJSON(campaign)
     localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
   },
 
   /**
    * Exit campaign mode and return to setup.
+   * Auto-saves before exiting.
    */
   exitCampaign: () => {
+    // Auto-save before exiting
+    const { campaignState, activeSaveSlot } = get()
+    if (campaignState) {
+      try {
+        const slot = activeSaveSlot ?? AUTO_SAVE_SLOT
+        saveToSlot(slot, campaignState)
+        const json = campaignToJSON(campaignState)
+        localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
+      } catch (e) {
+        console.error('Failed to auto-save on exit:', e)
+      }
+    }
+
     set({
       campaignState: null,
       campaignMissions: {},
       lastMissionResult: null,
+      activeSaveSlot: null,
       showMissionSelect: false,
       showPostMission: false,
       showMissionBriefing: false,
@@ -1634,11 +1739,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Close social phase and return to mission select.
    */
   closeSocialPhase: () => {
+    const { campaignState, activeSaveSlot } = get()
     set({
       showSocialPhase: false,
       showMissionSelect: true,
       lastMissionResult: null,
     })
+    // Auto-save after social phase
+    if (campaignState) {
+      try {
+        saveToSlot(AUTO_SAVE_SLOT, campaignState)
+        if (activeSaveSlot != null && activeSaveSlot !== AUTO_SAVE_SLOT) {
+          saveToSlot(activeSaveSlot, campaignState)
+        }
+      } catch (e) {
+        console.error('Auto-save after social phase failed:', e)
+      }
+    }
   },
 
   /**
@@ -1658,10 +1775,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   closeHeroProgression: () => {
+    const { campaignState, activeSaveSlot } = get()
     set({
       showHeroProgression: false,
       showMissionSelect: true,
     })
+    // Auto-save after hero progression
+    if (campaignState) {
+      try {
+        saveToSlot(AUTO_SAVE_SLOT, campaignState)
+        if (activeSaveSlot != null && activeSaveSlot !== AUTO_SAVE_SLOT) {
+          saveToSlot(activeSaveSlot, campaignState)
+        }
+      } catch (e) {
+        console.error('Auto-save after hero progression failed:', e)
+      }
+    }
   },
 
   // ---- Portrait Manager ----
