@@ -6,6 +6,8 @@ import HeroCreation from './components/HeroCreation/HeroCreation'
 import { AIBattle } from './components/AIBattle/AIBattle'
 import { TurnIndicator } from './components/HUD/TurnIndicator'
 import { MoraleTracker } from './components/HUD/MoraleTracker'
+import { useGameSounds } from './hooks/useGameSounds'
+import { useAudioStore } from './store/audio-store'
 import { InfoPanel } from './components/HUD/InfoPanel'
 import { ActionButtons } from './components/HUD/ActionButtons'
 import { CombatPanel } from './components/Combat/CombatPanel'
@@ -21,6 +23,7 @@ import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgr
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useIsMobile } from './hooks/useIsMobile'
+import { AudioControls } from './components/HUD/AudioControls'
 
 function App() {
   const {
@@ -42,48 +45,57 @@ function App() {
   const { isMobile } = useIsMobile()
   const [showCombatLog, setShowCombatLog] = useState(false)
 
+  // Sound system: watch game state and trigger sounds
+  useGameSounds()
+  const unlockAudio = useAudioStore(s => s.unlock)
+  useEffect(() => {
+    const handler = () => { unlockAudio(); window.removeEventListener('click', handler); }
+    window.addEventListener('click', handler)
+    return () => window.removeEventListener('click', handler)
+  }, [unlockAudio])
+
   const selectedFigure = gameState?.figures.find(f => f.id === selectedFigureId) || null
   const currentActivatingId = gameState?.activationOrder[gameState?.currentActivationIndex]
   const currentActivatingFigure = currentActivatingId ? gameState?.figures.find(f => f.id === currentActivatingId) || null : null
 
   // If not initialized, show setup
   if (showSetup) {
-    return <GameSetup />
+    return <><AudioControls /><GameSetup /></>
   }
 
   // Combat Arena (interactive force builder + visual replay)
   if (showCombatArena) {
-    return <CombatArena />
+    return <><AudioControls /><CombatArena /></>
   }
 
   // Hero creation flow (between setup and game)
   if (showHeroCreation) {
-    return <HeroCreation />
+    return <><AudioControls /><HeroCreation /></>
   }
 
   // Campaign: mission select screen
   if (showMissionSelect) {
-    return <MissionSelect />
+    return <><AudioControls /><MissionSelect /></>
   }
 
   // Campaign: social phase (between missions)
   if (showSocialPhase) {
-    return <SocialPhase />
+    return <><AudioControls /><SocialPhase /></>
   }
 
   // Campaign: hero progression (XP spending)
   if (showHeroProgression) {
-    return <HeroProgression />
+    return <><AudioControls /><HeroProgression /></>
   }
 
   // Campaign: portrait & faction visual manager
   if (showPortraitManager) {
-    return <PortraitManagerPage />
+    return <><AudioControls /><PortraitManagerPage /></>
   }
 
   // Campaign: post-mission results screen
   if (showPostMission) {
-    return <PostMission />
+    return <><AudioControls /><PostMission /></>
   }
 
   if (!gameState || !isInitialized) {
@@ -96,13 +108,14 @@ function App() {
 
   // AI Battle mode: use the dedicated watch mode UI
   if (isAIBattle) {
-    return <AIBattle />
+    return <><AudioControls /><AIBattle /></>
   }
 
   // ---- Mobile Combat Layout ----
   if (isMobile) {
     return (
       <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0a0a0f', overflow: 'hidden' }}>
+        <AudioControls />
         {/* Compact top bar */}
         <div style={{
           display: 'flex',
@@ -204,6 +217,7 @@ function App() {
 
   return (
     <div style={appStyle}>
+      <AudioControls />
       {/* Tactical Grid (main canvas) */}
       <div style={canvasContainerStyle}>
         <TacticalGrid gameState={gameState} />
