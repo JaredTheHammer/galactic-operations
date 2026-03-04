@@ -249,8 +249,8 @@ for (const sf of socialFiles) {
 console.log('OK: All social hubs structurally valid');
 
 // 14. Consumables: required fields and valid effect types
-const validEffects = ['heal_wounds', 'recover_strain'];
-const validTargetTypes = ['organic', 'droid'];
+const validEffects = ['heal_wounds', 'recover_strain', 'boost'];
+const validTargetTypes = ['organic', 'droid', 'any'];
 for (const [id, con] of Object.entries(consumables)) {
   if (!con.id || con.id !== id) fail('Consumable ' + id + ' has mismatched id');
   if (!con.name) fail('Consumable ' + id + ' missing name');

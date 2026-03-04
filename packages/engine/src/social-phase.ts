@@ -444,11 +444,21 @@ export function purchaseItem(
     return i;
   });
 
+  // Track consumable inventory (stackable quantities)
+  const isConsumable = shopItem.category === 'consumable';
+  const consumableInventory = isConsumable
+    ? {
+        ...(campaign.consumableInventory ?? {}),
+        [itemId]: ((campaign.consumableInventory ?? {})[itemId] ?? 0) + 1,
+      }
+    : (campaign.consumableInventory ?? {});
+
   return {
     campaign: {
       ...campaign,
       credits: campaign.credits - price,
       narrativeItems,
+      consumableInventory,
     },
     price,
   };
@@ -473,10 +483,18 @@ export function sellItem(
 
   const revenue = Math.floor(basePrice * shop.sellRate);
 
+  // Decrement consumable inventory if applicable
+  const inv = campaign.consumableInventory ?? {};
+  const isConsumable = (inv[itemId] ?? 0) > 0;
+  const consumableInventory = isConsumable
+    ? { ...inv, [itemId]: inv[itemId] - 1 }
+    : inv;
+
   return {
     campaign: {
       ...campaign,
       credits: campaign.credits + revenue,
+      consumableInventory,
       narrativeItems: campaign.narrativeItems.filter(item => item !== itemKey),
     },
     revenue,

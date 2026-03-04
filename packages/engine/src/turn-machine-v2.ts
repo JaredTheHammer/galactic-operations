@@ -98,6 +98,8 @@ export function createInitialGameStateV2(
     objectivePointTemplates?: ObjectivePointTemplate[];
     /** Loot tokens from mission definition. Placed on the map for collection. */
     lootTokens?: LootToken[];
+    /** Consumable inventory from campaign state. Maps item ID to quantity. */
+    consumableInventory?: Record<string, number>;
   },
 ): GameState {
   let map: GameMap;
@@ -175,6 +177,9 @@ export function createInitialGameStateV2(
 
     // Loot tokens from mission definition (placed on map for collection)
     lootTokens: options?.lootTokens ?? [],
+
+    // Consumable inventory (initialized from campaign state or empty for standalone)
+    consumableInventory: options?.consumableInventory ?? {},
   };
 }
 
@@ -1603,6 +1608,13 @@ export function executeActionV2(
 
       if (!consumable) break;
 
+      // Validate inventory (Operative side only -- Imperial NPCs have unlimited consumables)
+      const consumePlayer = newState.players.find(p => p.id === figure.playerId);
+      if (consumePlayer?.role === 'Operative' && newState.consumableInventory) {
+        const available = newState.consumableInventory[itemId] ?? 0;
+        if (available <= 0) break;
+      }
+
       // Determine target (self if no targetId)
       const targetFigureId = targetId ?? figure.id;
       const targetIdx = newState.figures.findIndex(f => f.id === targetFigureId);
@@ -1652,6 +1664,18 @@ export function executeActionV2(
       }
 
       newState.figures[targetIdx] = updatedTarget;
+
+      // Deplete from inventory (Operative side)
+      if (consumePlayer?.role === 'Operative' && newState.consumableInventory) {
+        const currentCount = newState.consumableInventory[itemId] ?? 0;
+        newState = {
+          ...newState,
+          consumableInventory: {
+            ...newState.consumableInventory,
+            [itemId]: Math.max(0, currentCount - 1),
+          },
+        };
+      }
 
       // Consume action
       newState.figures[figIdx] = {

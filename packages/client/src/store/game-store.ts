@@ -31,6 +31,7 @@ import type {
   Mission,
   MissionResult,
   ObjectivePointTemplate,
+  ConsumableItem,
 } from '@engine/types.js'
 import { MAP_PRESETS, computeGameScale } from '@engine/types.js'
 import {
@@ -79,6 +80,7 @@ import armorData from '@data/armor.json'
 import speciesData from '@data/species.json'
 import careersData from '@data/careers.json'
 import aiProfilesRaw from '@data/ai-profiles.json'
+import consumablesData from '@data/consumables.json'
 import mercenarySpecData from '@data/specializations/mercenary.json'
 import smugglerSpecData from '@data/specializations/smuggler.json'
 import droidTechSpecData from '@data/specializations/droid-tech.json'
@@ -194,6 +196,13 @@ function loadGameDataV2(): GameData {
   // Dice (d6 system)
   const dice = (diceD6Data as any).dieTypes ?? diceD6Data
 
+  // Consumables
+  const consumables: Record<string, any> = {}
+  const consumablesRaw = Array.isArray(consumablesData) ? consumablesData : (consumablesData as any).consumables ?? []
+  for (const item of consumablesRaw) {
+    consumables[item.id] = item
+  }
+
   return {
     dice,
     species,
@@ -202,6 +211,7 @@ function loadGameDataV2(): GameData {
     weapons,
     armor,
     npcProfiles,
+    consumables,
   }
 }
 
@@ -431,6 +441,8 @@ export interface GameStore {
   dodgeFigure: () => void
   guardedStance: () => void
   useTalent: (talentId: string) => void
+  useConsumable: (itemId: string, targetId?: string) => void
+  getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
   endActivation: () => void
   advancePhase: () => void
   setHighlightedTile: (coord: GridCoordinate | null) => void
@@ -1048,6 +1060,55 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
+  useConsumable: (itemId: string, targetId?: string) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure || figure.actionsRemaining <= 0) return
+
+    const consumable = gameData.consumables?.[itemId]
+    if (!consumable) return
+
+    const consumeAction = {
+      type: 'UseConsumable' as const,
+      figureId: selectedFigureId,
+      payload: { itemId, targetId },
+    }
+    const newGameState = executeActionV2(gameState, consumeAction, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+
+    const targetName = targetId ?? selectedFigureId
+    addCombatLog(`${selectedFigureId} used ${consumable.name} on ${targetName}`)
+
+    // Re-select to update valid moves/targets
+    const updatedFigure = newGameState.figures.find(f => f.id === selectedFigureId)
+    if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
+      const moves = getValidMoves(updatedFigure, newGameState)
+      const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
+      set({ validMoves: moves, validTargets: targets.map(t => t.id) })
+    } else {
+      set({ validMoves: [], validTargets: [] })
+    }
+  },
+
+  getAvailableConsumables: (figure: Figure) => {
+    const { gameState, gameData } = get()
+    if (!gameState || !gameData?.consumables) return []
+
+    const inv = gameState.consumableInventory ?? {}
+    const results: Array<{ item: ConsumableItem; count: number }> = []
+
+    for (const [id, item] of Object.entries(gameData.consumables)) {
+      const count = inv[id] ?? 0
+      // In campaign mode (inventory tracked), must have items; in standalone, always show
+      const hasItem = gameState.consumableInventory ? count > 0 : true
+      if (!hasItem) continue
+      results.push({ item: item as ConsumableItem, count })
+    }
+    return results
+  },
+
   endActivation: () => {
     const { gameState, addCombatLog, gameStateHistory } = get()
     if (!gameState) return
@@ -1431,6 +1492,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         availableMissionIds: [],
         credits: 0,
         narrativeItems: [],
+        consumableInventory: {},
         threatLevel: 0,
         threatMultiplier: 1,
         missionsPlayed: 0,
@@ -1524,6 +1586,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         npcProfiles: gameData.npcProfiles,
         objectivePointTemplates: mission.objectivePoints,
         lootTokens: mission.lootTokens,
+        consumableInventory: { ...(campaignState.consumableInventory ?? {}) },
       },
     )
 
@@ -1574,11 +1637,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Process a completed campaign mission and show the post-mission screen.
    */
   completeCampaignMission: (input: MissionCompletionInput) => {
-    const { campaignState, campaignMissions } = get()
+    const { campaignState, campaignMissions, gameState } = get()
     if (!campaignState) return
 
+    // Sync depleted consumable inventory from mission back to campaign
+    const updatedCampaign = gameState?.consumableInventory
+      ? { ...campaignState, consumableInventory: { ...gameState.consumableInventory } }
+      : campaignState
+
     const { campaign: newCampaign, result } = completeMission(
-      campaignState,
+      updatedCampaign,
       input,
       campaignMissions,
     )

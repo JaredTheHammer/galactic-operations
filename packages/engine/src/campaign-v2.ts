@@ -64,6 +64,7 @@ export function createCampaign(input: CampaignCreationInput): CampaignState {
     availableMissionIds: [input.startingMissionId],
     credits: input.startingCredits ?? 0,
     narrativeItems: [],
+    consumableInventory: {},
     threatLevel: 0,
     threatMultiplier: scaling.baseMultiplier,
     missionsPlayed: 0,

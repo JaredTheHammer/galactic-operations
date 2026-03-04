@@ -212,36 +212,42 @@
         },
         {
           "rank": 3,
+          "condition": "should-use-consumable",
+          "action": "use-consumable",
+          "cardText": "If wounded and have a stim pack or repair patch: Use it to heal."
+        },
+        {
+          "rank": 4,
           "condition": "can-interact-objective",
           "action": "move-to-objective-interact",
           "cardText": "If you can reach an uncompleted objective: Move adjacent and attempt skill check."
         },
         {
-          "rank": 4,
+          "rank": 5,
           "condition": "enemy-in-range",
           "action": "attack-best-target",
           "cardText": "If an enemy is in range: Attack the highest-threat enemy."
         },
         {
-          "rank": 5,
+          "rank": 6,
           "condition": "should-aim-before-attack",
           "action": "aim-then-attack",
           "cardText": "If enemies are tough and aim would help: Aim for bonus dice, then reposition."
         },
         {
-          "rank": 6,
+          "rank": 7,
           "condition": "should-dodge-for-defense",
           "action": "dodge-and-hold",
           "cardText": "If wounded and under fire: Dodge and seek cover."
         },
         {
-          "rank": 7,
+          "rank": 8,
           "condition": "can-attack-from-cover",
           "action": "move-to-cover-then-attack",
           "cardText": "If you can reach cover and attack: Move to cover, then Attack."
         },
         {
-          "rank": 8,
+          "rank": 9,
           "condition": "default",
           "action": "advance-with-cover",
           "cardText": "Otherwise: Advance toward nearest objective or highest-threat enemy."

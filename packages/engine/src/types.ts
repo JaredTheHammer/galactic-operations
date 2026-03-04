@@ -911,6 +911,9 @@ export interface GameState {
 
   // Loot tokens on the map (collectible items with rewards)
   lootTokens: LootToken[];
+
+  // Consumable inventory for this mission (decremented on use, initialized from CampaignState)
+  consumableInventory?: Record<string, number>;
 }
 
 // ============================================================================
@@ -1145,6 +1148,9 @@ export interface CampaignState {
   /** Accumulated resources */
   credits: number;
   narrativeItems: string[];
+
+  /** Consumable inventory: maps consumable ID to quantity available */
+  consumableInventory: Record<string, number>;
 
   /** Threat escalation: increases each mission to scale difficulty */
   threatLevel: number;
