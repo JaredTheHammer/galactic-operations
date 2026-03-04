@@ -12,6 +12,7 @@ const SHORTCUTS = [
   { key: 'Tab', action: 'Cycle friendly figures' },
   { key: 'Esc', action: 'Deselect figure' },
   { key: 'Ctrl+Z', action: 'Undo last action' },
+  { key: '`', action: 'Cycle speed (1x/3x/MAX)' },
   { key: '?', action: 'Toggle this help' },
 ]
 

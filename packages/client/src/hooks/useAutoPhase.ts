@@ -12,12 +12,17 @@
 import { useEffect, useRef } from 'react'
 import { useGameStore } from '../store/game-store'
 
-// Delay before auto-advancing non-interactive phases (ms)
-const PHASE_ADVANCE_DELAY = 1200
-// Shorter delay after all activations are done
-const ALL_DONE_DELAY = 800
-// Brief delay before skipping defeated player figures
-const DEFEATED_SKIP_DELAY = 200
+// Base delays (ms)
+const BASE_PHASE_ADVANCE = 1200
+const BASE_ALL_DONE = 800
+const BASE_DEFEATED_SKIP = 200
+
+function getPhaseDelays() {
+  const speed = useGameStore.getState().combatSpeed
+  if (speed === 'instant') return { phase: 50, allDone: 50, skip: 0 }
+  if (speed === 'fast') return { phase: 400, allDone: 250, skip: 50 }
+  return { phase: BASE_PHASE_ADVANCE, allDone: BASE_ALL_DONE, skip: BASE_DEFEATED_SKIP }
+}
 
 export function useAutoPhase(enabled: boolean) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -43,7 +48,7 @@ export function useAutoPhase(enabled: boolean) {
             useGameStore.getState().advancePhase()
           }
           timerRef.current = null
-        }, PHASE_ADVANCE_DELAY)
+        }, getPhaseDelays().phase)
         return
       }
 
@@ -63,7 +68,7 @@ export function useAutoPhase(enabled: boolean) {
               useGameStore.getState().advancePhase()
             }
             timerRef.current = null
-          }, ALL_DONE_DELAY)
+          }, getPhaseDelays().allDone)
           return
         }
 
@@ -82,7 +87,7 @@ export function useAutoPhase(enabled: boolean) {
                 useGameStore.getState().endActivation()
               }
               skipTimerRef.current = null
-            }, DEFEATED_SKIP_DELAY)
+            }, getPhaseDelays().skip)
           }
         }
       }

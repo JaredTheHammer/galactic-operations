@@ -138,6 +138,11 @@ export function useCombatKeys(enabled: boolean) {
             selectFigure(null)
           }
           break
+
+        case '`': // Cycle combat speed
+          e.preventDefault()
+          store.getState().cycleCombatSpeed()
+          break
       }
     }
 

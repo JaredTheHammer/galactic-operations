@@ -29,11 +29,18 @@ import { getMoraleChangeForEvent, applyMoraleChange } from '@engine/morale.js'
 import aiProfilesRaw from '@data/ai-profiles.json'
 
 // Timing delays for AI visualization (campaign feels deliberate, not rushed)
-const DELAYS = {
+const BASE_DELAYS = {
   thinkMs: 600,
   actionMs: 500,
   combatResultMs: 1800,
   postActivationMs: 300,
+}
+
+function getDelays(): typeof BASE_DELAYS {
+  const speed = useGameStore.getState().combatSpeed
+  if (speed === 'instant') return { thinkMs: 0, actionMs: 0, combatResultMs: 50, postActivationMs: 0 }
+  if (speed === 'fast') return { thinkMs: 200, actionMs: 150, combatResultMs: 600, postActivationMs: 100 }
+  return BASE_DELAYS
 }
 
 function describeAction(action: GameAction, gs: GameState): string {
@@ -162,7 +169,7 @@ export function useImperialAI(enabled: boolean): { isImperialTurn: boolean } {
           // Set the imperial AI phase indicator
           useGameStore.setState({ imperialAIPhase: 'thinking' })
 
-          await delay(DELAYS.thinkMs)
+          await delay(getDelays().thinkMs)
 
           // Run AI decision engine
           let decision
@@ -196,7 +203,7 @@ export function useImperialAI(enabled: boolean): { isImperialTurn: boolean } {
               }
             }
 
-            await delay(DELAYS.actionMs)
+            await delay(getDelays().actionMs)
 
             // Clear visualization
             useGameStore.setState({ aiMovePath: null, aiAttackTarget: null })
@@ -246,7 +253,7 @@ export function useImperialAI(enabled: boolean): { isImperialTurn: boolean } {
             // Show combat results panel briefly for attacks so player sees dice
             if (gs.activeCombat && action.type === 'Attack') {
               useGameStore.setState({ gameState: gs })
-              await delay(DELAYS.combatResultMs)
+              await delay(getDelays().combatResultMs)
               gs = { ...gs, activeCombat: null }
             } else if (gs.activeCombat) {
               gs = { ...gs, activeCombat: null }
@@ -255,7 +262,7 @@ export function useImperialAI(enabled: boolean): { isImperialTurn: boolean } {
           }
 
           // Brief pause before ending activation
-          await delay(DELAYS.postActivationMs)
+          await delay(getDelays().postActivationMs)
 
           // End the activation (advances to next figure)
           useGameStore.setState({ imperialAIPhase: null })

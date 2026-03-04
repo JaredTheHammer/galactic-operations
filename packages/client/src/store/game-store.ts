@@ -459,6 +459,10 @@ export interface GameStore {
   roundBanner: { round: number; roundLimit?: number; roundsLeft?: number } | null
   gameOverBanner: { outcome: 'victory' | 'defeat'; condition?: string; rounds?: number } | null
 
+  // Combat speed: 'normal' = 1x, 'fast' = 3x, 'instant' = skip delays
+  combatSpeed: 'normal' | 'fast' | 'instant'
+  cycleCombatSpeed: () => void
+
   // Imperial AI state (campaign combat)
   imperialAIPhase: 'thinking' | 'executing' | null
 
@@ -611,6 +615,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   figureTooltipPos: null,
   hoveredTileCoord: null,
   tileTooltipPos: null,
+  combatSpeed: 'normal',
+
+  cycleCombatSpeed: () => {
+    set(state => {
+      const next = state.combatSpeed === 'normal' ? 'fast'
+        : state.combatSpeed === 'fast' ? 'instant'
+        : 'normal'
+      return { combatSpeed: next }
+    })
+  },
 
   // Combat Arena
   openCombatArena: () => {

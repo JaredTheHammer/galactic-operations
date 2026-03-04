@@ -21,6 +21,7 @@ import { RoundBanner } from './components/HUD/RoundBanner'
 import { GameOverBanner } from './components/HUD/GameOverBanner'
 import { Minimap } from './components/HUD/Minimap'
 import { TerrainLegend } from './components/HUD/TerrainLegend'
+import { SpeedToggle } from './components/HUD/SpeedToggle'
 import MissionSelect from './components/Campaign/MissionSelect'
 import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
@@ -290,6 +291,9 @@ function App() {
 
       {/* Top Center: Turn Indicator */}
       <TurnIndicator gameState={gameState} />
+
+      {/* Top Right: Speed Toggle */}
+      <SpeedToggle />
 
       {/* Top Center (below turn indicator): Activation Order */}
       <ActivationOrder gameState={gameState} />
