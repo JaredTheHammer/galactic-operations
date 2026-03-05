@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { TacticalGridRenderer, TILE_SIZE } from './renderer'
 import { Camera } from './camera'
+import { combatAnimations } from './animation-manager'
 import { useGameStore } from '../store/game-store'
 import { usePortraitStore } from '../store/portrait-store'
 import type { GridCoordinate } from '@engine/types.js'
@@ -46,6 +47,7 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
     const camera = new Camera()
 
     renderer.init(canvas)
+    renderer.setAnimationManager(combatAnimations)
     if (gameState?.map) {
       const mapWidthPx = gameState.map.width * TILE_SIZE
       const mapHeightPx = gameState.map.height * TILE_SIZE

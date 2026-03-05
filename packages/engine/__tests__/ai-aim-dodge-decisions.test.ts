@@ -507,7 +507,7 @@ describe('evalShouldAimBeforeAttack', () => {
 // ============================================================================
 
 describe('evalShouldDodgeForDefense', () => {
-  it('triggers when wounded + 2+ threats and dodgeValue >= 3', () => {
+  it('triggers when wounded + 2+ threats and dodgeValue >= 5', () => {
     const fig = makeNPCFigure({
       position: { x: 5, y: 5 },
       woundsCurrent: 3,
@@ -526,7 +526,7 @@ describe('evalShouldDodgeForDefense', () => {
 
     (hasLineOfSight as any).mockReturnValue(true);
 
-    const weights = { ...defaultWeights(), dodgeValue: 3, selfPreservation: 5 };
+    const weights = { ...defaultWeights(), dodgeValue: 5, selfPreservation: 5 };
     const result = evaluateCondition('should-dodge-for-defense', fig, gs, gd, weights);
     expect(result.satisfied).toBe(true);
     expect(result.context.reasoning).toContain('dodging');
@@ -630,7 +630,7 @@ describe('evalShouldDodgeForDefense', () => {
     expect(result.satisfied).toBe(false);
   });
 
-  it('triggers when no offensive option + 1+ threats and dodgeValue >= 2', () => {
+  it('triggers when no offensive option + 1+ threats and dodgeValue >= 4', () => {
     // NPC figure with short-range weapon: can't attack distant enemy
     // But the enemy hero has Long-range weapon and CAN threaten the NPC
     const shortRangeNPC = makeNPC({
@@ -664,11 +664,11 @@ describe('evalShouldDodgeForDefense', () => {
     // LOS exists (enemy can see us and threaten us)
     (hasLineOfSight as any).mockReturnValue(true);
 
-    const weights = { ...defaultWeights(), dodgeValue: 2, selfPreservation: 5 };
+    const weights = { ...defaultWeights(), dodgeValue: 4, selfPreservation: 5 };
     const result = evaluateCondition('should-dodge-for-defense', fig, gs, gd, weights);
     // NPC has Engaged weapon (1 tile range), enemy is 7 tiles away: no offensive option
     // Enemy hero has Long weapon (16 tiles), distance 7: CAN threaten NPC
-    // With dodgeValue >= 2, no offensive option, 1 threat: auto-dodge triggers
+    // With dodgeValue >= 4, no offensive option, 1 threat: auto-dodge triggers
     expect(result.satisfied).toBe(true);
   });
 

@@ -288,6 +288,22 @@ function getPrimaryWeapon(
   return null;
 }
 
+/** Legacy v1 weapon IDs that map to v2 equivalents (for old campaign saves). */
+const LEGACY_WEAPON_MAP: Record<string, string> = {
+  'blaster-pistol': 'heavy-blaster-pistol',
+  'blaster-rifle': 'e-11',
+  'vibroaxe': 'vibro-axe',
+  'vibroknife': 'vibro-knife',
+};
+
+/** Resolve weapon ID, trying v2 registry first then legacy v1 mapping. */
+function resolveWeaponId(id: string, gameData: GameData): string | null {
+  if (gameData.weapons[id]) return id;
+  const v2Id = LEGACY_WEAPON_MAP[id];
+  if (v2Id && gameData.weapons[v2Id]) return v2Id;
+  return null;
+}
+
 /**
  * Resolve a specific weapon for a hero, or fall back to primary.
  */
@@ -296,11 +312,13 @@ function resolveWeaponForHero(
   weaponId: string | undefined,
   gameData: GameData,
 ): WeaponDefinition | null {
-  if (weaponId && gameData.weapons[weaponId]) {
-    return gameData.weapons[weaponId];
+  if (weaponId) {
+    const resolved = resolveWeaponId(weaponId, gameData);
+    if (resolved) return gameData.weapons[resolved];
   }
   if (hero.equipment.primaryWeapon) {
-    return gameData.weapons[hero.equipment.primaryWeapon] ?? null;
+    const resolved = resolveWeaponId(hero.equipment.primaryWeapon, gameData);
+    return resolved ? gameData.weapons[resolved] : null;
   }
   return null;
 }
@@ -1454,19 +1472,21 @@ function evalCanInteractObjective(
 
   const best = candidates[0];
 
-  // If hero needs to MOVE to the objective, only trigger when no enemies are
-  // within close range (distance <= 3). Heroes should disengage from distant
-  // firefights to pursue objectives (objectives win the game), but should not
-  // ignore adjacent threats that could get free attacks.
+  // If hero needs to MOVE to the objective, only block when enemies are
+  // adjacent (distance <= 1) which represents immediate melee threats.
+  // Heroes SHOULD disengage from ranged firefights to pursue objectives
+  // since objectives are how you win the mission. The objectiveValue weight
+  // already biases movement toward objectives when in "advance" mode, but
+  // this condition is the primary driver for dedicated objective pursuit.
   if (best.needsMove) {
     const enemies = getEnemies(figure, gameState);
-    const closeEnemies = enemies.filter(
-      e => getDistance(figure.position, e.position) <= 3
+    const adjacentEnemies = enemies.filter(
+      e => getDistance(figure.position, e.position) <= 1
     );
-    if (closeEnemies.length > 0) {
+    if (adjacentEnemies.length > 0) {
       return {
         satisfied: false,
-        context: { reasoning: `${closeEnemies.length} enemies within close range (<=3 tiles), too dangerous to disengage for objective` },
+        context: { reasoning: `${adjacentEnemies.length} adjacent enemies, cannot disengage for objective` },
       };
     }
   }
@@ -1726,8 +1746,8 @@ function evalShouldDodgeForDefense(
   // Check if figure has offensive options
   const hasOffensiveOption = getValidTargetsV2(figure, figure.position, gameState, gameData).length > 0;
 
-  // Auto-dodge: wounded + multiple threats
-  if (figure.isWounded && threateningEnemies >= 2 && dodgeW >= 3) {
+  // Auto-dodge: wounded + multiple threats (only for high-dodge archetypes like snipers)
+  if (figure.isWounded && threateningEnemies >= 2 && dodgeW >= 5) {
     return {
       satisfied: true,
       context: {
@@ -1736,8 +1756,8 @@ function evalShouldDodgeForDefense(
     };
   }
 
-  // Auto-dodge: no offensive option + threatened
-  if (!hasOffensiveOption && threateningEnemies >= 1 && dodgeW >= 2) {
+  // Auto-dodge: no offensive option + threatened (only for dedicated dodge archetypes)
+  if (!hasOffensiveOption && threateningEnemies >= 1 && dodgeW >= 4) {
     return {
       satisfied: true,
       context: {

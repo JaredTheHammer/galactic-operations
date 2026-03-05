@@ -172,7 +172,7 @@ describe('Full Campaign Playthrough: Path A (Cache)', () => {
     expect(m3a.prerequisites).toEqual(['act1-m2-intel']);
     expect(m3a.unlocksNext).toEqual(['act1-m4-finale']);
     expect(m4.prerequisites).toEqual(['act1-m3-cache', 'act1-m3-ambush']);
-    expect(m4.unlocksNext).toEqual([]);
+    expect(m4.unlocksNext).toEqual(['act2-m1-crossroads']);
   });
 
   it('creates campaign with 2 heroes, only M1 available', () => {

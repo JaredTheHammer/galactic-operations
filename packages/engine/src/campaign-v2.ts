@@ -300,6 +300,7 @@ export function completeMission(
   // Process loot rewards
   let credits = campaign.credits;
   const narrativeItems = [...campaign.narrativeItems];
+  const inventory = [...(campaign.inventory ?? [])];
   for (const lootId of lootCollected) {
     const lootToken = mission.lootTokens.find(l => l.id === lootId);
     if (!lootToken) continue;
@@ -313,23 +314,41 @@ export function completeMission(
           narrativeItems.push(reward.itemId);
         }
         break;
+      case 'equipment':
+        inventory.push(reward.itemId);
+        break;
       // XP loot is already counted in lootCollected -> lootTokens XP
-      // Equipment loot requires separate handling (future: add to hero inventory)
     }
   }
 
   // Determine newly available missions
   const completedMissions = [...campaign.completedMissions, result];
   const completedIds = new Set(completedMissions.map(r => r.missionId));
+  const alreadyAvailable = new Set(campaign.availableMissionIds);
 
   const newAvailable: string[] = [];
+
+  // First check missions explicitly listed in unlocksNext
   for (const nextId of mission.unlocksNext) {
     const nextMission = allMissions[nextId];
     if (!nextMission) continue;
     if (completedIds.has(nextId)) continue;
-    // Check prerequisites (OR logic for branching)
     if (nextMission.prerequisites.length === 0 || nextMission.prerequisites.some(p => completedIds.has(p))) {
       newAvailable.push(nextId);
+    }
+  }
+
+  // Also scan ALL missions for newly-satisfied prerequisites (handles cross-act transitions
+  // where Act N+1 M1 lists Act N finale as a prerequisite but isn't in unlocksNext)
+  const newAvailableSet = new Set(newAvailable);
+  for (const [mId, mDef] of Object.entries(allMissions)) {
+    if (completedIds.has(mId)) continue;
+    if (alreadyAvailable.has(mId)) continue;
+    if (newAvailableSet.has(mId)) continue;
+    if (mDef.prerequisites.length === 0) continue;
+    if (mDef.prerequisites.every(p => completedIds.has(p))) {
+      newAvailable.push(mId);
+      newAvailableSet.add(mId);
     }
   }
 
@@ -359,6 +378,7 @@ export function completeMission(
     availableMissionIds,
     credits,
     narrativeItems,
+    inventory,
     currentAct,
     threatLevel: campaign.threatLevel + scaling.perMission,
     missionsPlayed: campaign.missionsPlayed + 1,
@@ -772,4 +792,66 @@ export function getCampaignStats(campaign: CampaignState): {
     heroCount: Object.keys(campaign.heroes).length,
     averageMissionXP: campaign.missionsPlayed > 0 ? Math.round(totalXPEarned / campaign.missionsPlayed) : 0,
   };
+}
+
+// ============================================================================
+// EQUIPMENT INVENTORY MANAGEMENT
+// ============================================================================
+
+/**
+ * Get the campaign's equipment inventory, handling backward compatibility
+ * for campaigns created before the inventory system. For legacy campaigns,
+ * derives inventory from narrativeItems (item: prefixed entries) minus
+ * items currently equipped on heroes.
+ */
+export function getInventory(campaign: CampaignState): string[] {
+  if (campaign.inventory !== undefined) return campaign.inventory;
+
+  // Legacy migration: derive from narrativeItems
+  const allOwnedItems = campaign.narrativeItems
+    .filter(n => n.startsWith('item:'))
+    .map(n => n.slice(5)); // strip 'item:' prefix
+
+  // Subtract items currently equipped on heroes
+  const equippedItems: string[] = [];
+  for (const hero of Object.values(campaign.heroes)) {
+    if (hero.equipment.primaryWeapon) equippedItems.push(hero.equipment.primaryWeapon);
+    if (hero.equipment.secondaryWeapon) equippedItems.push(hero.equipment.secondaryWeapon);
+    if (hero.equipment.armor) equippedItems.push(hero.equipment.armor);
+  }
+
+  // Remove equipped items from pool (handle duplicates correctly)
+  const remaining = [...allOwnedItems];
+  for (const eq of equippedItems) {
+    const idx = remaining.indexOf(eq);
+    if (idx !== -1) remaining.splice(idx, 1);
+  }
+
+  return remaining;
+}
+
+/**
+ * Add an item to the campaign's equipment inventory.
+ */
+export function addToInventory(
+  campaign: CampaignState,
+  itemId: string,
+): CampaignState {
+  const inventory = [...getInventory(campaign), itemId];
+  return { ...campaign, inventory };
+}
+
+/**
+ * Remove one instance of an item from the campaign's equipment inventory.
+ * Returns the updated campaign, or the same campaign if the item wasn't found.
+ */
+export function removeFromInventory(
+  campaign: CampaignState,
+  itemId: string,
+): CampaignState {
+  const inventory = [...getInventory(campaign)];
+  const idx = inventory.indexOf(itemId);
+  if (idx === -1) return campaign;
+  inventory.splice(idx, 1);
+  return { ...campaign, inventory };
 }

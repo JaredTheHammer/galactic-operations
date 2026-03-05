@@ -10,6 +10,7 @@
  */
 
 import type {
+  ArmorDefinition,
   AttackPool,
   CareerDefinition,
   Characteristics,
@@ -24,6 +25,7 @@ import type {
   SpeciesDefinition,
   TalentCard,
   TalentSlot,
+  WeaponDefinition,
 } from './types';
 
 import {
@@ -865,6 +867,111 @@ export function unlockSpecialization(
     specializations: [...hero.specializations, specializationId],
     xp: { total: hero.xp.total, available: hero.xp.available - cost },
   };
+}
+
+// ============================================================================
+// EQUIPMENT MANAGEMENT
+// ============================================================================
+
+export type EquipmentSlot = 'primaryWeapon' | 'secondaryWeapon' | 'armor';
+
+/**
+ * Equip an item to a hero's equipment slot. Returns the updated hero with
+ * recomputed soak (if armor changed) and the ID of any item that was
+ * previously in that slot (null if the slot was empty).
+ *
+ * Validates that the item exists in gameData and that the slot/item type match:
+ * - primaryWeapon / secondaryWeapon slots accept weapon IDs
+ * - armor slot accepts armor IDs
+ */
+export function equipItem(
+  hero: HeroCharacter,
+  slot: EquipmentSlot,
+  itemId: string,
+  gameData: GameData,
+): { hero: HeroCharacter; previousItemId: string | null } {
+  if (slot === 'armor') {
+    const armorDef = gameData.armor[itemId];
+    if (!armorDef) throw new Error(`Armor not found: ${itemId}`);
+    return equipArmor(hero, itemId, armorDef, gameData);
+  }
+
+  // Weapon slot
+  const weaponDef = gameData.weapons[itemId];
+  if (!weaponDef) throw new Error(`Weapon not found: ${itemId}`);
+  return equipWeapon(hero, slot, itemId, gameData);
+}
+
+function equipWeapon(
+  hero: HeroCharacter,
+  slot: 'primaryWeapon' | 'secondaryWeapon',
+  weaponId: string,
+  gameData: GameData,
+): { hero: HeroCharacter; previousItemId: string | null } {
+  const previousItemId = hero.equipment[slot];
+  return {
+    hero: {
+      ...hero,
+      equipment: {
+        ...hero.equipment,
+        [slot]: weaponId,
+      },
+    },
+    previousItemId,
+  };
+}
+
+function equipArmor(
+  hero: HeroCharacter,
+  armorId: string,
+  armorDef: ArmorDefinition,
+  gameData: GameData,
+): { hero: HeroCharacter; previousItemId: string | null } {
+  const previousItemId = hero.equipment.armor;
+  const newHero: HeroCharacter = {
+    ...hero,
+    equipment: {
+      ...hero.equipment,
+      armor: armorId,
+    },
+  };
+  // Recompute soak with new armor
+  const derived = computeDerivedStats(newHero, gameData);
+  return {
+    hero: { ...newHero, soak: derived.soak },
+    previousItemId,
+  };
+}
+
+/**
+ * Remove the item from a hero's equipment slot, returning it to inventory.
+ * Returns the updated hero and the unequipped item ID (null if slot was empty).
+ */
+export function unequipItem(
+  hero: HeroCharacter,
+  slot: EquipmentSlot,
+  gameData: GameData,
+): { hero: HeroCharacter; removedItemId: string | null } {
+  const removedItemId = hero.equipment[slot];
+  if (!removedItemId) {
+    return { hero, removedItemId: null };
+  }
+
+  const newHero: HeroCharacter = {
+    ...hero,
+    equipment: {
+      ...hero.equipment,
+      [slot]: null,
+    },
+  };
+
+  // Recompute soak if armor was removed
+  if (slot === 'armor') {
+    const derived = computeDerivedStats(newHero, gameData);
+    return { hero: { ...newHero, soak: derived.soak }, removedItemId };
+  }
+
+  return { hero: newHero, removedItemId };
 }
 
 // ============================================================================

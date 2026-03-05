@@ -1166,6 +1166,10 @@ export interface CampaignState {
 
   /** Consumable inventory: maps consumable ID to quantity available */
   consumableInventory: Record<string, number>;
+  /** Equipment inventory: unequipped weapon/armor item IDs available for heroes to equip.
+   *  Each entry is a weapon or armor ID (e.g., 'dl-44', 'blast-vest').
+   *  Duplicates allowed (buying 2 of same item = 2 entries). */
+  inventory?: string[];
 
   /** Threat escalation: increases each mission to scale difficulty */
   threatLevel: number;

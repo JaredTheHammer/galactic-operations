@@ -11,10 +11,10 @@
       "tier": "Minion",
       "attackPool": { "ability": 2, "proficiency": 0 },
       "defensePool": { "difficulty": 1, "challenge": 0 },
-      "woundThreshold": 5,
+      "woundThreshold": 7,
       "strainThreshold": null,
-      "soak": 3,
-      "speed": 3,
+      "soak": 4,
+      "speed": 4,
       "weapons": [
         {
           "weaponId": "vibro-axe",
@@ -32,18 +32,18 @@
       "keywords": ["Syndicate", "Brute", "Melee"],
       "mechanicalKeywords": [],
       "abilities": [],
-      "threatCost": 2
+      "threatCost": 3
     },
     "nikto-gunner": {
       "id": "nikto-gunner",
       "name": "Nikto Gunner",
       "side": "imperial",
       "tier": "Minion",
-      "attackPool": { "ability": 1, "proficiency": 1 },
+      "attackPool": { "ability": 2, "proficiency": 1 },
       "defensePool": { "difficulty": 1, "challenge": 0 },
-      "woundThreshold": 4,
+      "woundThreshold": 5,
       "strainThreshold": null,
-      "soak": 2,
+      "soak": 3,
       "speed": 4,
       "weapons": [
         {
@@ -113,7 +113,7 @@
       "keywords": ["Syndicate", "Droid", "Assassin"],
       "mechanicalKeywords": [{"name": "Armor", "value": 1}],
       "abilities": [],
-      "threatCost": 5
+      "threatCost": 4
     },
     "syndicate-lieutenant": {
       "id": "syndicate-lieutenant",

@@ -2,6 +2,7 @@ import type { GameState, GridCoordinate, Figure, ObjectivePoint, BaseSize } from
 import { BOARD_SIZE } from '@engine/types.js'
 import type { SilhouetteType } from '../types/portrait'
 import { drawSilhouetteOnContext, inferSilhouetteType } from './silhouettes'
+import type { AnimationManager } from './animation-manager'
 
 export const TILE_SIZE = 56
 const GRID_COLOR = '#1a2a4a'
@@ -109,6 +110,12 @@ export class TacticalGridRenderer {
     this.centerOn({ x: 5, y: 5 })
   }
 
+  private animationManager: AnimationManager | null = null
+
+  setAnimationManager(manager: AnimationManager): void {
+    this.animationManager = manager
+  }
+
   render(gameState: GameState, uiState: UIState) {
     if (!this.ctx || !this.canvas) return
 
@@ -119,10 +126,12 @@ export class TacticalGridRenderer {
     // Save context state
     this.ctx.save()
 
-    // Apply camera transform
+    // Apply camera transform with screen shake offset
+    const shakeX = this.animationManager?.shakeOffsetX ?? 0
+    const shakeY = this.animationManager?.shakeOffsetY ?? 0
     this.ctx.translate(
-      this.canvas.width / 2 - this.cameraX * this.zoom,
-      this.canvas.height / 2 - this.cameraY * this.zoom
+      this.canvas.width / 2 - this.cameraX * this.zoom + shakeX,
+      this.canvas.height / 2 - this.cameraY * this.zoom + shakeY
     )
     this.ctx.scale(this.zoom, this.zoom)
 
@@ -152,6 +161,11 @@ export class TacticalGridRenderer {
 
     // Draw effects (animations, status, etc)
     this.drawEffects(gameState, uiState)
+
+    // Draw combat animations (projectiles, damage numbers, particles)
+    if (this.animationManager) {
+      this.animationManager.drawAnimations(this.ctx)
+    }
 
     this.ctx.restore()
   }

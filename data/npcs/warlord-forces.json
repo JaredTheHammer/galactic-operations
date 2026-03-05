@@ -29,7 +29,7 @@
       "keywords": ["Warlord", "Conscript", "Expendable"],
       "mechanicalKeywords": [],
       "abilities": [],
-      "threatCost": 1
+      "threatCost": 2
     },
     "defector-trooper": {
       "id": "defector-trooper",
@@ -40,7 +40,7 @@
       "defensePool": { "difficulty": 1, "challenge": 0 },
       "woundThreshold": 5,
       "strainThreshold": null,
-      "soak": 3,
+      "soak": 2,
       "speed": 4,
       "weapons": [
         {
@@ -65,9 +65,9 @@
       "tier": "Rival",
       "attackPool": { "ability": 1, "proficiency": 2 },
       "defensePool": { "difficulty": 1, "challenge": 1 },
-      "woundThreshold": 10,
+      "woundThreshold": 8,
       "strainThreshold": null,
-      "soak": 5,
+      "soak": 3,
       "speed": 3,
       "weapons": [
         {
@@ -84,12 +84,12 @@
       ],
       "aiArchetype": "trooper",
       "keywords": ["Warlord", "Droid", "Prototype"],
-      "mechanicalKeywords": [{"name": "Armor", "value": 1}],
+      "mechanicalKeywords": [],
       "abilities": [
         "Droid Resilience: Immune to Strain damage and Fear effects.",
         "Armored Chassis: Reduce Critical Injury severity by 10."
       ],
-      "threatCost": 5
+      "threatCost": 6
     },
     "shock-commando": {
       "id": "shock-commando",
@@ -98,9 +98,9 @@
       "tier": "Rival",
       "attackPool": { "ability": 1, "proficiency": 2 },
       "defensePool": { "difficulty": 2, "challenge": 0 },
-      "woundThreshold": 8,
+      "woundThreshold": 7,
       "strainThreshold": 5,
-      "soak": 4,
+      "soak": 3,
       "speed": 5,
       "weapons": [
         {

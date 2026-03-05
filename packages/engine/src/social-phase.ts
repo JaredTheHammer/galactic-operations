@@ -452,6 +452,11 @@ export function purchaseItem(
         [itemId]: ((campaign.consumableInventory ?? {})[itemId] ?? 0) + 1,
       }
     : (campaign.consumableInventory ?? {});
+  // Add weapon/armor items to equipment inventory for equipping on heroes
+  const isEquipment = shopItem.category === 'weapon' || shopItem.category === 'armor';
+  const equipmentInventory = isEquipment
+    ? [...(campaign.inventory ?? []), itemId]
+    : (campaign.inventory ?? []);
 
   return {
     campaign: {
@@ -459,6 +464,7 @@ export function purchaseItem(
       credits: campaign.credits - price,
       narrativeItems,
       consumableInventory,
+      inventory: equipmentInventory,
     },
     price,
   };
@@ -489,6 +495,10 @@ export function sellItem(
   const consumableInventory = isConsumable
     ? { ...inv, [itemId]: inv[itemId] - 1 }
     : inv;
+  // Also remove from equipment inventory if present
+  const inventory = [...(campaign.inventory ?? [])];
+  const invIdx = inventory.indexOf(itemId);
+  if (invIdx !== -1) inventory.splice(invIdx, 1);
 
   return {
     campaign: {
@@ -496,6 +506,7 @@ export function sellItem(
       credits: campaign.credits + revenue,
       consumableInventory,
       narrativeItems: campaign.narrativeItems.filter(item => item !== itemKey),
+      inventory,
     },
     revenue,
   };
