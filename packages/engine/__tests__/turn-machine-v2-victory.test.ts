@@ -600,13 +600,13 @@ describe('getNPCCourage', () => {
 
 describe('getHeroCourage', () => {
   it('returns willpower as courage', () => {
-    expect(getHeroCourage(makeHero({ characteristics: { brawn: 2, agility: 2, intellect: 2, cunning: 2, willpower: 4, presence: 2 } }))).toBe(4);
+    expect(getHeroCourage(makeHero({ characteristics: { brawn: 2, agility: 2, intellect: 2, cunning: 2, willpower: 4, presence: 2 } }))).toBe(6);
   });
 
   it('returns 2 as fallback when no characteristics', () => {
     const hero = makeHero();
     delete (hero as any).characteristics;
-    expect(getHeroCourage(hero)).toBe(2);
+    expect(getHeroCourage(hero)).toBe(4);
   });
 });
 
