@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#0a0a0f" rx="76.8"/>
+  <text x="50%" y="38%" dominant-baseline="central" text-anchor="middle" fill="#ffd700" font-family="system-ui" font-weight="bold" font-size="112.64">GO</text>
+  <text x="50%" y="62%" dominant-baseline="central" text-anchor="middle" fill="#4a9eff" font-family="system-ui" font-size="46.08">GALACTIC OPS</text>
+</svg>
