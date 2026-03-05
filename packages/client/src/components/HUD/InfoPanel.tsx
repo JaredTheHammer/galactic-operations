@@ -3,6 +3,31 @@ import type { Figure, GameState, HeroCharacter, TalentCard, TalentSlot } from '@
 import { getWoundThresholdV2 } from '@engine/turn-machine-v2.js'
 import { useGameStore } from '../../store/game-store'
 
+const ThreatCount: React.FC = () => {
+  const threateningEnemies = useGameStore(s => s.threateningEnemies)
+  if (threateningEnemies.length === 0) return null
+
+  const color = threateningEnemies.length >= 3 ? '#ff3333' : threateningEnemies.length >= 2 ? '#ff8844' : '#ffaa00'
+
+  return (
+    <div style={{
+      padding: '4px 8px',
+      marginBottom: '4px',
+      backgroundColor: 'rgba(255, 50, 50, 0.08)',
+      border: '1px solid rgba(255, 50, 50, 0.2)',
+      borderRadius: '4px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+    }}>
+      <span style={{ color, fontSize: '12px', fontWeight: 'bold' }}>!</span>
+      <span style={{ color: '#cc9999', fontSize: '10px' }}>
+        {threateningEnemies.length} {threateningEnemies.length === 1 ? 'enemy' : 'enemies'} in range
+      </span>
+    </div>
+  )
+}
+
 interface InfoPanelProps {
   selectedFigure: Figure | null
   gameState: GameState | null
@@ -279,6 +304,9 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState,
           })()}
         </div>
       )}
+
+      {/* Threat Assessment */}
+      <ThreatCount />
 
       {/* Combat Tokens */}
       {(selectedFigure.aimTokens > 0 || selectedFigure.dodgeTokens > 0 || selectedFigure.hasStandby) && (

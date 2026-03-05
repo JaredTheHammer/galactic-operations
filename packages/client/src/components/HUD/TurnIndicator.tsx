@@ -19,7 +19,7 @@ const PHASE_COLORS: Record<string, string> = {
 }
 
 export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideControls = false, compact = false }) => {
-  const { advancePhase, imperialAIPhase, activeMission } = useGameStore()
+  const { advancePhase, imperialAIPhase, activeMission, campaignState } = useGameStore()
   const roundLimit = activeMission?.roundLimit ?? 0
 
   if (!gameState) return null
@@ -118,6 +118,24 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideCon
     <div style={containerStyle}>
       <div style={{ ...roundStyle, color: urgencyColor }}>
         ROUND {gameState.roundNumber}{roundLimit > 0 ? ` / ${roundLimit}` : ''}
+        {campaignState && (
+          <span style={{
+            fontSize: '9px',
+            fontWeight: 'normal',
+            marginLeft: '8px',
+            padding: '1px 6px',
+            borderRadius: '3px',
+            backgroundColor: campaignState.difficulty === 'standard' ? 'rgba(68, 255, 68, 0.15)'
+              : campaignState.difficulty === 'veteran' ? 'rgba(255, 170, 0, 0.15)'
+              : 'rgba(255, 68, 68, 0.15)',
+            color: campaignState.difficulty === 'standard' ? '#44ff44'
+              : campaignState.difficulty === 'veteran' ? '#ffaa00'
+              : '#ff4444',
+            verticalAlign: 'middle',
+          }}>
+            {campaignState.difficulty.toUpperCase()}
+          </span>
+        )}
       </div>
       {roundsRemaining >= 0 && roundsRemaining <= 4 && (
         <div style={{

@@ -1884,3 +1884,24 @@ export function getAttackRangeInTiles(
   const weapon = getPrimaryWeapon(figure, gameState, gameData);
   return getMaxRangeInTiles(weapon);
 }
+
+/**
+ * Get IDs of enemy figures that can attack a given figure (threat assessment).
+ * Checks each enemy's weapon range + LOS to the target position.
+ */
+export function getThreateningEnemies(
+  figure: Figure,
+  gameState: GameState,
+  gameData: GameData,
+): string[] {
+  const enemies = getEnemies(figure, gameState);
+  return enemies
+    .filter(enemy => {
+      const weapon = getPrimaryWeapon(enemy, gameState, gameData);
+      const maxRange = getMaxRangeInTiles(weapon);
+      const dist = getDistance(enemy.position, figure.position);
+      if (dist > maxRange) return false;
+      return hasLineOfSight(enemy.position, figure.position, gameState.map);
+    })
+    .map(e => e.id);
+}

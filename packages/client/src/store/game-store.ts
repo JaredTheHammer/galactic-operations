@@ -56,6 +56,7 @@ import {
 import {
   getValidTargetsV2,
   getAttackRangeInTiles,
+  getThreateningEnemies,
 } from '@engine/ai/evaluate-v2.js'
 import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization } from '@engine/character-v2.js'
 import type { HeroCreationInput } from '@engine/character-v2.js'
@@ -467,6 +468,9 @@ export interface GameStore {
   // Targets reachable from hovered move destination (LOS preview)
   movePreviewTargets: string[] | null
 
+  // Enemies that can attack the selected figure (threat assessment)
+  threateningEnemies: string[]
+
   // Undo history (stores previous game states for undo)
   gameStateHistory: GameState[]
 
@@ -630,6 +634,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   playerMovePath: null,
   playerMovePathCost: null,
   movePreviewTargets: null,
+  threateningEnemies: [],
 
   // Imperial AI state (campaign combat)
   imperialAIPhase: null,
@@ -982,7 +987,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { gameState, gameData } = get()
     if (!gameState || !gameData) return
 
-    set({ selectedFigureId: figureId, validMoves: [], validTargets: [], attackRange: null, playerMovePath: null, playerMovePathCost: null, movePreviewTargets: null })
+    set({ selectedFigureId: figureId, validMoves: [], validTargets: [], attackRange: null, playerMovePath: null, playerMovePathCost: null, movePreviewTargets: null, threateningEnemies: [] })
 
     if (figureId) {
       const figure = gameState.figures.find(f => f.id === figureId)
@@ -997,6 +1002,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         // Attack range overlay
         const range = getAttackRangeInTiles(figure, gameState, gameData)
         set({ attackRange: { center: figure.position, radius: range } })
+
+        // Threat assessment: which enemies can hit this figure
+        const threats = getThreateningEnemies(figure, gameState, gameData)
+        set({ threateningEnemies: threats })
       }
     }
   },

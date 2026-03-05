@@ -42,6 +42,7 @@ interface UIState {
   playerMovePath: GridCoordinate[] | null
   playerMovePathCost: number | null
   movePreviewTargets: string[] | null
+  threateningEnemies: string[]
 }
 
 // ============================================================================
@@ -504,6 +505,38 @@ export class TacticalGridRenderer {
           ctx.textAlign = 'right'
           ctx.textBaseline = 'top'
           ctx.fillText('\u2316', fx + TILE_SIZE - 3, fy + 2)
+        }
+      })
+      ctx.restore()
+    }
+
+    // Threat indicators: enemies that can attack the selected figure
+    if (uiState.threateningEnemies.length > 0) {
+      const ctx = this.ctx!
+      ctx.save()
+      gameState.figures.forEach(figure => {
+        if (uiState.threateningEnemies.includes(figure.id)) {
+          const fx = figure.position.x * TILE_SIZE
+          const fy = figure.position.y * TILE_SIZE
+
+          // Small red warning triangle at bottom-left of tile
+          ctx.globalAlpha = 0.85
+          ctx.fillStyle = '#ff3333'
+          ctx.beginPath()
+          const tx = fx + 4
+          const ty = fy + TILE_SIZE - 4
+          ctx.moveTo(tx, ty)
+          ctx.lineTo(tx + 5, ty - 9)
+          ctx.lineTo(tx + 10, ty)
+          ctx.closePath()
+          ctx.fill()
+
+          // Exclamation mark
+          ctx.fillStyle = '#000000'
+          ctx.font = 'bold 7px monospace'
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'bottom'
+          ctx.fillText('!', tx + 5, ty - 1)
         }
       })
       ctx.restore()

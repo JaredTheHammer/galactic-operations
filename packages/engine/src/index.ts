@@ -209,6 +209,7 @@ export {
   getWoundThreshold,
   getRemainingHealth,
   getAttackRangeInTiles,
+  getThreateningEnemies,
   findAttackPositions,
   findMeleePositions,
   buildMoveAction,
