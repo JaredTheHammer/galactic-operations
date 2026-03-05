@@ -2166,8 +2166,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Process a completed campaign mission and show the post-mission screen.
    */
   completeCampaignMission: (input: MissionCompletionInput) => {
-    const { campaignState, campaignMissions, gameState } = get()
-    const { campaignState, campaignMissions, activeSaveSlot } = get()
+    const { campaignState, campaignMissions, gameState, activeSaveSlot } = get()
     if (!campaignState) return
 
     // Sync depleted consumable inventory from mission back to campaign

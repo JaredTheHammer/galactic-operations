@@ -126,7 +126,6 @@ function HeroStatusCard({
 // ============================================================================
 
 export default function PostMission() {
-  const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState, campaignMissions } = useGameStore()
   const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState, activeMissionDef, campaignMissions } = useGameStore()
   const { isMobile } = useIsMobile()
 
@@ -223,18 +222,11 @@ export default function PostMission() {
           )}
         </div>
 
-        {/* Mission narrative debriefing */}
-        {(() => {
-          const missionDef = campaignMissions?.[result.missionId]
-        <div style={{ textAlign: 'center', color: '#888', marginBottom: '12px', fontSize: isMobile ? '13px' : '14px' }}>
-          Completed in {result.roundsPlayed} rounds
-        </div>
-
         {/* Narrative outcome text */}
         {(() => {
-          const missionDef = activeMissionDef ?? campaignMissions?.[result.missionId]
-          const narrativeText = missionDef
-            ? (isVictory ? missionDef.narrativeSuccess : missionDef.narrativeFailure)
+          const narrativeMission = activeMissionDef ?? campaignMissions?.[result.missionId]
+          const narrativeText = narrativeMission
+            ? (isVictory ? narrativeMission.narrativeSuccess : narrativeMission.narrativeFailure)
             : null
           if (!narrativeText) return null
           return (
@@ -251,21 +243,6 @@ export default function PostMission() {
               lineHeight: '1.7',
             }}>
               {narrativeText}
-              padding: isMobile ? '12px' : '16px',
-              marginBottom: isMobile ? '16px' : '24px',
-              backgroundColor: '#0a0a12',
-              borderRadius: '8px',
-              borderLeft: `3px solid ${outcomeColor}`,
-            }}>
-              <p style={{
-                color: '#ccbb88',
-                fontSize: isMobile ? '13px' : '14px',
-                lineHeight: '1.6',
-                fontStyle: 'italic',
-                margin: 0,
-              }}>
-                {narrativeText}
-              </p>
             </div>
           )
         })()}

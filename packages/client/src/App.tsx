@@ -100,7 +100,6 @@ function App() {
     showCampaignJournal,
     showMapEditor,
     showCombatArena,
-    showMissionBriefing,
     showActTransition,
   } = useGameStore()
 
@@ -163,24 +162,16 @@ function App() {
   // Campaign: mission select screen
   if (showMissionSelect) {
     return <><AudioControls /><MissionSelect /></>
-    return <><MissionSelect /><AutosaveToast /></>
-  }
-
-  // Campaign: mission briefing (between select and combat)
-  if (showMissionBriefing) {
-    return <><MissionBriefing /><AutosaveToast /></>
   }
 
   // Campaign: social phase (between missions)
   if (showSocialPhase) {
     return <><AudioControls /><SocialPhase /></>
-    return <><SocialPhase /><AutosaveToast /></>
   }
 
   // Campaign: hero progression (XP spending)
   if (showHeroProgression) {
     return <><AudioControls /><HeroProgression /></>
-    return <><HeroProgression /><AutosaveToast /></>
   }
 
   // Campaign: portrait & faction visual manager
@@ -214,13 +205,11 @@ function App() {
         <CampaignStats />
       </React.Suspense>
     )
-    return <><PortraitManagerPage /><AutosaveToast /></>
   }
 
   // Campaign: post-mission results screen
   if (showPostMission) {
     return <><AudioControls /><PostMission /></>
-    return <><PostMission /><AutosaveToast /></>
   }
 
   // Campaign: act transition cinematic (between acts)
