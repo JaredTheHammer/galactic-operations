@@ -308,9 +308,12 @@ export function getNPCCourage(npc: NPCProfile): number {
 
 /**
  * Derive courage value for a hero from Willpower characteristic.
+ * Heroes get willpower + 2 (floor 3) to prevent the suppression death spiral
+ * where low-willpower heroes get permanently locked out of attacking by
+ * sustained imperial fire (6+ enemies each adding +1 token per hit).
  */
 export function getHeroCourage(hero: HeroCharacter): number {
-  return hero.characteristics?.willpower ?? 2;
+  return Math.max((hero.characteristics?.willpower ?? 2) + 2, 3);
 }
 
 function createNPCFigure(
@@ -968,18 +971,31 @@ export function applyMissionReinforcements(
 }
 
 /**
- * Build activation order using NPC speed from profiles, hero speed from species.
+ * Build activation order using alternating activations between sides.
+ * This mirrors the tabletop game: Imperial activates one figure, then
+ * Operative activates one, alternating until all figures have gone.
+ * Within each side, figures are sorted by speed (fastest first).
+ * If one side has more figures, their extras go at the end.
  */
-function buildActivationOrderV2(gameState: GameState): string[] {
-  return gameState.figures
-    .filter(f => !f.isDefeated)
-    .sort((a, b) => {
-      const aSpeed = getFigureSpeed(a, gameState);
-      const bSpeed = getFigureSpeed(b, gameState);
-      if (aSpeed !== bSpeed) return bSpeed - aSpeed;
-      return Math.random() - 0.5;
-    })
-    .map(f => f.id);
+export function buildActivationOrderV2(gameState: GameState): string[] {
+  const alive = gameState.figures.filter(f => !f.isDefeated);
+
+  const imperials = alive
+    .filter(f => gameState.players.find(p => p.id === f.playerId)?.role === 'Imperial')
+    .sort((a, b) => getFigureSpeed(b, gameState) - getFigureSpeed(a, gameState));
+
+  const operatives = alive
+    .filter(f => gameState.players.find(p => p.id === f.playerId)?.role === 'Operative')
+    .sort((a, b) => getFigureSpeed(b, gameState) - getFigureSpeed(a, gameState));
+
+  // Interleave: Imperial first (they won initiative in canon), then alternate
+  const order: string[] = [];
+  const maxLen = Math.max(imperials.length, operatives.length);
+  for (let i = 0; i < maxLen; i++) {
+    if (i < imperials.length) order.push(imperials[i].id);
+    if (i < operatives.length) order.push(operatives[i].id);
+  }
+  return order;
 }
 
 function getFigureSpeed(figure: Figure, gameState: GameState): number {
@@ -987,8 +1003,6 @@ function getFigureSpeed(figure: Figure, gameState: GameState): number {
     const npc = gameState.npcProfiles[figure.entityId];
     return npc?.speed ?? 4;
   }
-  // Heroes don't have a speed on HeroCharacter directly; use default
-  // (In full implementation, speed would come from species data)
   return 4;
 }
 

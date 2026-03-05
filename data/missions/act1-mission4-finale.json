@@ -215,7 +215,7 @@
   "campaignAct": 1,
   "missionIndex": 4,
   "prerequisites": ["act1-m3-cache", "act1-m3-ambush"],
-  "unlocksNext": [],
+  "unlocksNext": ["act2-m1-crossroads"],
 
   "baseXP": 15,
   "bonusXPPerLoot": 2,

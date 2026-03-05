@@ -25,6 +25,7 @@ import MissionBriefing from './components/Campaign/MissionBriefing'
 const CampaignJournal = React.lazy(() => import('./components/Campaign/CampaignJournal'))
 const CampaignStats = React.lazy(() => import('./components/Campaign/CampaignStats'))
 import { CombatArena } from './components/CombatArena/CombatArena'
+import { useCampaignAI } from './hooks/useCampaignAI'
 import { useIsMobile } from './hooks/useIsMobile'
 import { AudioControls } from './components/HUD/AudioControls'
 import { TutorialOverlay } from './components/Tutorial/TutorialOverlay'
@@ -52,6 +53,7 @@ function App() {
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
+  const campaignAIState = useCampaignAI()
   const [showCombatLog, setShowCombatLog] = useState(false)
 
   // Sound system: watch game state and trigger sounds

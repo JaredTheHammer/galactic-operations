@@ -230,15 +230,15 @@
         },
         {
           "rank": 6,
-          "condition": "should-dodge-for-defense",
-          "action": "dodge-and-hold",
-          "cardText": "If wounded and under fire: Dodge and seek cover."
-        },
-        {
-          "rank": 7,
           "condition": "can-attack-from-cover",
           "action": "move-to-cover-then-attack",
           "cardText": "If you can reach cover and attack: Move to cover, then Attack."
+        },
+        {
+          "rank": 7,
+          "condition": "should-dodge-for-defense",
+          "action": "dodge-and-hold",
+          "cardText": "If critically wounded and overwhelmed: Dodge and seek cover."
         },
         {
           "rank": 8,
@@ -248,15 +248,15 @@
         }
       ],
       "weights": {
-        "killPotential": 9,
+        "killPotential": 10,
         "coverValue": 5,
-        "proximity": 6,
+        "proximity": 7,
         "threatLevel": 10,
         "elevation": 3,
-        "selfPreservation": 7,
+        "selfPreservation": 4,
         "objectiveValue": 8,
         "aimValue": 5,
-        "dodgeValue": 5
+        "dodgeValue": 2
       }
     }
   },

@@ -42,6 +42,7 @@ import {
   applyReinforcementPhase,
   applyMissionReinforcements,
   objectivePointsFromTemplates,
+  buildActivationOrderV2,
 } from '@engine/turn-machine-v2.js'
 import type { ArmyCompositionV2, ReinforcementResult, MissionReinforcementResult } from '@engine/turn-machine-v2.js'
 import { generateMap } from '@engine/map-generator.js'
@@ -655,9 +656,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     gameState = deployFiguresV2(gameState, army, gameData)
 
     // Build activation order
-    gameState.activationOrder = gameState.figures
-      .filter(f => !f.isDefeated)
-      .map(f => f.id)
+    gameState.activationOrder = buildActivationOrderV2(gameState)
     gameState.currentActivationIndex = 0
     gameState.turnPhase = 'Activation'
 
@@ -778,10 +777,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         },
       ]
 
-      // Build activation order
-      gameState.activationOrder = gameState.figures
-        .filter(f => !f.isDefeated)
-        .map(f => f.id)
+      // Build activation order (interleaved Imperial/Operative)
+      gameState.activationOrder = buildActivationOrderV2(gameState)
       gameState.currentActivationIndex = 0
       gameState.turnPhase = 'Initiative'
     } else {
@@ -1127,7 +1124,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const newGameState: GameState = {
         ...gameState,
         figures: newFigures,
-        currentActivationIndex: allDone ? gameState.currentActivationIndex : nextIndex,
+        // Always advance the index so the campaign AI's exhaustion check works
+        currentActivationIndex: nextIndex,
       }
 
       // Reset next figure for activation
@@ -1472,7 +1470,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       createdHeroes: [],
       pendingPlayers: [
         { id: 0, name: 'Imperial AI', role: 'Imperial' as const, isLocal: true, isAI: true },
-        { id: 1, name: 'Operative', role: 'Operative' as const, isLocal: true, isAI: false },
+        { id: 1, name: 'Operative AI', role: 'Operative' as const, isLocal: true, isAI: true },
       ],
       pendingMapConfig: null,
       // Store difficulty for campaign creation after heroes are made
@@ -1562,10 +1560,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       heroesRegistry[hero.id] = hero
     }
 
-    // Create players
+    // Create players (both AI for automated campaign simulation)
     const players: Player[] = [
       { id: 0, name: 'Imperial AI', role: 'Imperial', isLocal: true, isAI: true },
-      { id: 1, name: 'Operative', role: 'Operative', isLocal: true, isAI: false },
+      { id: 1, name: 'Operative AI', role: 'Operative', isLocal: true, isAI: true },
     ]
 
     // Build a mission object compatible with createInitialGameStateV2
@@ -1621,9 +1619,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     gameState = deployFiguresV2(gameState, army, gameData)
 
     // Build activation order
-    gameState.activationOrder = gameState.figures
-      .filter(f => !f.isDefeated)
-      .map(f => f.id)
+    gameState.activationOrder = buildActivationOrderV2(gameState)
     gameState.currentActivationIndex = 0
     gameState.turnPhase = 'Activation'
 
@@ -2288,4 +2284,10 @@ function resolveWeaponId(
   }
 
   return 'fists'
+}
+
+// Debug: expose store + helpers on window for dev tooling
+if (typeof window !== 'undefined') {
+  ;(window as any).__store = useGameStore
+  ;(window as any).__createHero = createHero
 }
