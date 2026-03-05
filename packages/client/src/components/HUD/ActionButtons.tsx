@@ -94,6 +94,14 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
     maxWidth: '90vw',
   }
 
+  const actionTypeLabel: React.CSSProperties = {
+    fontSize: '7px',
+    letterSpacing: '0.5px',
+    color: '#aaaaaa',
+    textTransform: 'uppercase',
+    marginBottom: '1px',
+  }
+
   const buttonStyle = (bgColor: string, disabled: boolean = false): React.CSSProperties => ({
     minWidth: '60px',
     minHeight: '44px',
@@ -142,6 +150,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Move: Use valid move tiles (M)"
         disabled={!canMove}
       >
+        <span style={actionTypeLabel}>maneuver</span>
         <span>Move</span>
         <span style={{ fontSize: '10px', marginTop: '2px' }}>
           {validMoves.length}
@@ -154,6 +163,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Attack: Click target (A)"
         disabled={!canAttack}
       >
+        <span style={actionTypeLabel}>action</span>
         <span>Atk</span>
         <span style={{ fontSize: '10px', marginTop: '2px' }}>
           {validTargets.length}
@@ -166,6 +176,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Aim: Gain aim token (+1 die on next attack, max 2)"
         disabled={!canAim}
       >
+        <span style={actionTypeLabel}>maneuver</span>
         <span>Aim</span>
         {selectedFigure.aimTokens > 0 && (
           <span style={{ fontSize: '10px', marginTop: '2px' }}>
@@ -180,6 +191,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Rally: Recover strain (R)"
         disabled={!canRally}
       >
+        <span style={actionTypeLabel}>action</span>
         <span>Rally</span>
       </button>
 
@@ -189,6 +201,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Dodge: Gain dodge token (cancel 1 hit when attacked)"
         disabled={!canDodge}
       >
+        <span style={actionTypeLabel}>maneuver</span>
         <span>Dodge</span>
         {selectedFigure.dodgeTokens > 0 && (
           <span style={{ fontSize: '10px', marginTop: '2px' }}>
@@ -203,6 +216,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Standby: Set overwatch, interrupt enemy movement with attack"
         disabled={!canGuardedStance}
       >
+        <span style={actionTypeLabel}>action</span>
         <span>Guard</span>
       </button>
 
@@ -212,6 +226,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Take Cover: Use maneuver to gain +1 ranged defense this round"
         disabled={!canTakeCover}
       >
+        <span style={actionTypeLabel}>maneuver</span>
         <span>Cover</span>
       </button>
 
@@ -222,6 +237,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
           title="Stand Up: Remove Prone condition (maneuver)"
           disabled={!canStandUp}
         >
+          <span style={actionTypeLabel}>maneuver</span>
           <span>Stand</span>
         </button>
       )}
@@ -232,6 +248,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Strain for Maneuver: Suffer 2 strain to gain extra maneuver (once per turn) (S)"
         disabled={!canStrainForManeuver}
       >
+        <span style={actionTypeLabel}>special</span>
         <span>+Man</span>
         <span style={{ fontSize: '9px', marginTop: '1px' }}>2 strain</span>
       </button>

@@ -31,6 +31,7 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
     attackRange,
     playerMovePath,
     playerMovePathCost,
+    movePreviewTargets,
     cameraTarget,
     setCameraTarget,
   } = useGameStore()
@@ -148,6 +149,7 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
         attackRange,
         playerMovePath,
         playerMovePathCost,
+        movePreviewTargets,
       })
 
       animationId = requestAnimationFrame(animate)
@@ -155,7 +157,7 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
 
     animationId = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(animationId)
-  }, [gameState, selectedFigureId, validMoves, validTargets, highlightedTile, aiMovePath, aiAttackTarget, attackRange, playerMovePath, playerMovePathCost])
+  }, [gameState, selectedFigureId, validMoves, validTargets, highlightedTile, aiMovePath, aiAttackTarget, attackRange, playerMovePath, playerMovePathCost, movePreviewTargets])
 
   // Async portrait loading: when game state changes, ensure thumbnails
   // are loaded into the LRU cache. Once cached, the synchronous getThumbnail()

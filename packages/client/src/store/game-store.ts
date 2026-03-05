@@ -464,6 +464,9 @@ export interface GameStore {
   playerMovePath: GridCoordinate[] | null
   playerMovePathCost: number | null
 
+  // Targets reachable from hovered move destination (LOS preview)
+  movePreviewTargets: string[] | null
+
   // Undo history (stores previous game states for undo)
   gameStateHistory: GameState[]
 
@@ -626,6 +629,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   attackRange: null,
   playerMovePath: null,
   playerMovePathCost: null,
+  movePreviewTargets: null,
 
   // Imperial AI state (campaign combat)
   imperialAIPhase: null,
@@ -978,7 +982,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { gameState, gameData } = get()
     if (!gameState || !gameData) return
 
-    set({ selectedFigureId: figureId, validMoves: [], validTargets: [], attackRange: null, playerMovePath: null, playerMovePathCost: null })
+    set({ selectedFigureId: figureId, validMoves: [], validTargets: [], attackRange: null, playerMovePath: null, playerMovePathCost: null, movePreviewTargets: null })
 
     if (figureId) {
       const figure = gameState.figures.find(f => f.id === figureId)
@@ -988,7 +992,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         // v2 valid targets using evaluate-v2
         const targets = getValidTargetsV2(figure, figure.position, gameState, gameData)
-        set({ validTargets: targets.map(t => t.id) })
+        set({ validTargets: targets })
 
         // Attack range overlay
         const range = getAttackRangeInTiles(figure, gameState, gameData)
@@ -1021,7 +1025,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const moves = getValidMoves(updatedFigure, newGameState)
         const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
         const range = getAttackRangeInTiles(updatedFigure, newGameState, gameData)
-        set({ validMoves: moves, validTargets: targets.map(t => t.id), attackRange: { center: updatedFigure.position, radius: range } })
+        set({ validMoves: moves, validTargets: targets, attackRange: { center: updatedFigure.position, radius: range } })
       } else {
         set({ validMoves: [], validTargets: [] })
       }
@@ -1304,7 +1308,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
         const moves = getValidMoves(updatedFigure, newGameState)
         const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
-        set({ validMoves: moves, validTargets: targets.map(t => t.id) })
+        set({ validMoves: moves, validTargets: targets })
       } else {
         set({ validMoves: [], validTargets: [] })
       }
@@ -1339,7 +1343,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
       const moves = getValidMoves(updatedFigure, newGameState)
       const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
-      set({ validMoves: moves, validTargets: targets.map(t => t.id) })
+      set({ validMoves: moves, validTargets: targets })
     } else {
       set({ validMoves: [], validTargets: [] })
     }
@@ -1707,10 +1711,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   setHighlightedTile: (coord: GridCoordinate | null) => {
-    const { gameState, selectedFigureId, validMoves } = get()
+    const { gameState, gameData, selectedFigureId, validMoves } = get()
 
-    // Compute player move path when hovering a valid move tile
-    if (coord && gameState && selectedFigureId) {
+    // Compute player move path + targets from destination when hovering a valid move tile
+    if (coord && gameState && gameData && selectedFigureId) {
       const isValidMove = validMoves.some(m => m.x === coord.x && m.y === coord.y)
       if (isValidMove) {
         const figure = gameState.figures.find(f => f.id === selectedFigureId)
@@ -1722,14 +1726,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
             for (let i = 0; i < path.length - 1; i++) {
               totalCost += getMovementCost(path[i], path[i + 1], gameState.map)
             }
-            set({ highlightedTile: coord, playerMovePath: path, playerMovePathCost: totalCost })
+            // Compute which enemies would be targetable from this position
+            const previewTargets = getValidTargetsV2(figure, coord, gameState, gameData)
+            set({
+              highlightedTile: coord,
+              playerMovePath: path,
+              playerMovePathCost: totalCost,
+              movePreviewTargets: previewTargets.length > 0 ? previewTargets : null,
+            })
             return
           }
         }
       }
     }
 
-    set({ highlightedTile: coord, playerMovePath: null, playerMovePathCost: null })
+    set({ highlightedTile: coord, playerMovePath: null, playerMovePathCost: null, movePreviewTargets: null })
   },
 
   setAIMovePath: (path: GridCoordinate[] | null) => {

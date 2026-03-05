@@ -41,6 +41,7 @@ interface UIState {
   attackRange: { center: GridCoordinate; radius: number } | null
   playerMovePath: GridCoordinate[] | null
   playerMovePathCost: number | null
+  movePreviewTargets: string[] | null
 }
 
 // ============================================================================
@@ -477,7 +478,35 @@ export class TacticalGridRenderer {
 
     // Player move path preview
     if (uiState.playerMovePath && uiState.playerMovePath.length >= 2) {
-      this.drawPlayerMovePath(uiState.playerMovePath, uiState.playerMovePathCost)
+      this.drawPlayerMovePath(uiState.playerMovePath, uiState.playerMovePathCost, uiState.movePreviewTargets?.length ?? 0)
+    }
+
+    // Move preview targets: show which enemies are targetable from hovered move destination
+    if (uiState.movePreviewTargets && uiState.movePreviewTargets.length > 0) {
+      const ctx = this.ctx!
+      ctx.save()
+      gameState.figures.forEach(figure => {
+        if (uiState.movePreviewTargets!.includes(figure.id)) {
+          const fx = figure.position.x * TILE_SIZE
+          const fy = figure.position.y * TILE_SIZE
+
+          // Amber/orange pulsing border to distinguish from current valid targets (red)
+          const pulse = Math.sin(Date.now() / 300) * 0.15 + 0.55
+          ctx.strokeStyle = '#ffaa22'
+          ctx.lineWidth = 2
+          ctx.globalAlpha = pulse
+          ctx.strokeRect(fx + 1, fy + 1, TILE_SIZE - 2, TILE_SIZE - 2)
+
+          // Small crosshair icon at top-right corner
+          ctx.globalAlpha = pulse + 0.15
+          ctx.fillStyle = '#ffaa22'
+          ctx.font = 'bold 10px monospace'
+          ctx.textAlign = 'right'
+          ctx.textBaseline = 'top'
+          ctx.fillText('\u2316', fx + TILE_SIZE - 3, fy + 2)
+        }
+      })
+      ctx.restore()
     }
 
     // AI move path visualization
@@ -560,7 +589,7 @@ export class TacticalGridRenderer {
     this.ctx.restore()
   }
 
-  private drawPlayerMovePath(pathCoords: GridCoordinate[], cost: number | null) {
+  private drawPlayerMovePath(pathCoords: GridCoordinate[], cost: number | null, targetCount: number) {
     if (!this.ctx || pathCoords.length < 2) return
 
     const ctx = this.ctx
@@ -597,31 +626,44 @@ export class TacticalGridRenderer {
     ctx.arc(dx, dy, TILE_SIZE / 3, 0, Math.PI * 2)
     ctx.stroke()
 
-    // Movement cost badge at destination
+    // Info badge at destination: movement cost + target count
     if (cost != null) {
-      const label = `${cost}`
       ctx.globalAlpha = 1.0
-      ctx.font = 'bold 11px monospace'
-      const tw = ctx.measureText(label).width
-      const bw = tw + 8
+      ctx.font = 'bold 10px monospace'
+
+      // Build label parts
+      const costLabel = `${cost}mp`
+      const targetLabel = targetCount > 0 ? `${targetCount}\u2316` : ''
+      const fullLabel = targetLabel ? `${costLabel} ${targetLabel}` : costLabel
+
+      const tw = ctx.measureText(fullLabel).width
+      const bw = tw + 10
       const bh = 16
       const bx = dx - bw / 2
       const by = dy - TILE_SIZE / 2 - bh - 2
 
       // Badge background
-      ctx.fillStyle = 'rgba(10, 10, 20, 0.85)'
+      ctx.fillStyle = 'rgba(10, 10, 20, 0.88)'
       ctx.beginPath()
       ctx.roundRect(bx, by, bw, bh, 3)
       ctx.fill()
-      ctx.strokeStyle = VALID_MOVE_OVERLAY
+      ctx.strokeStyle = targetCount > 0 ? '#ffaa22' : VALID_MOVE_OVERLAY
       ctx.lineWidth = 1
       ctx.stroke()
 
       // Cost text
-      ctx.fillStyle = '#ffffff'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(label, dx, by + bh / 2)
+      ctx.fillStyle = '#ffffff'
+      ctx.fillText(costLabel, dx - (targetLabel ? ctx.measureText(` ${targetLabel}`).width / 2 : 0), by + bh / 2)
+
+      // Target count in amber
+      if (targetLabel) {
+        const costW = ctx.measureText(`${costLabel} `).width
+        ctx.fillStyle = '#ffaa22'
+        ctx.textAlign = 'left'
+        ctx.fillText(targetLabel, bx + (bw - tw) / 2 + costW, by + bh / 2)
+      }
     }
 
     ctx.restore()
