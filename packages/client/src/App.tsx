@@ -5,6 +5,7 @@ import { GameSetup } from './components/Setup/GameSetup'
 import HeroCreation from './components/HeroCreation/HeroCreation'
 import { AIBattle } from './components/AIBattle/AIBattle'
 import { TurnIndicator } from './components/HUD/TurnIndicator'
+import { ActivationOrder } from './components/HUD/ActivationOrder'
 import { MoraleTracker } from './components/HUD/MoraleTracker'
 import { useGameSounds } from './hooks/useGameSounds'
 import { useAudioStore } from './store/audio-store'
@@ -15,18 +16,67 @@ import { CombatLog } from './components/Combat/CombatLog'
 import { ObjectiveProgress } from './components/HUD/ObjectiveProgress'
 import { ThreatTracker } from './components/HUD/ThreatTracker'
 import { ObjectiveTooltip } from './components/HUD/ObjectiveTooltip'
+import { FigureTooltip } from './components/HUD/FigureTooltip'
+import { TileTooltip } from './components/HUD/TileTooltip'
 import { NotificationCenter } from './components/HUD/NotificationCenter'
+import { RoundBanner } from './components/HUD/RoundBanner'
+import { GameOverBanner } from './components/HUD/GameOverBanner'
+import { Minimap } from './components/HUD/Minimap'
+import { TerrainLegend } from './components/HUD/TerrainLegend'
+import { SpeedToggle } from './components/HUD/SpeedToggle'
 import MissionSelect from './components/Campaign/MissionSelect'
 import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
 import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgression'
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
 import MissionBriefing from './components/Campaign/MissionBriefing'
+import { ActTransition } from './components/Campaign/ActTransition'
+import { FloatingCombatTextOverlay } from './components/HUD/FloatingCombatText'
 const CampaignJournal = React.lazy(() => import('./components/Campaign/CampaignJournal'))
 const CampaignStats = React.lazy(() => import('./components/Campaign/CampaignStats'))
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useCampaignAI } from './hooks/useCampaignAI'
 import { useIsMobile } from './hooks/useIsMobile'
+import { useCombatKeys } from './hooks/useCombatKeys'
+import { useImperialAI } from './hooks/useImperialAI'
+import { useAutoPhase } from './hooks/useAutoPhase'
+import { useAutosave } from './hooks/useAutosave'
+import { AutosaveToast } from './components/HUD/AutosaveToast'
+import { ShortcutHelp } from './components/HUD/ShortcutHelp'
+
+/** Brief victory/defeat overlay shown on the tactical grid before PostMission transition */
+const MissionOutcomeOverlay: React.FC<{ winner: string; victoryCondition?: string }> = ({ winner, victoryCondition }) => {
+  const isVictory = winner === 'Operative'
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: isVictory ? 'rgba(0, 40, 0, 0.85)' : 'rgba(40, 0, 0, 0.85)',
+      zIndex: 500,
+      pointerEvents: 'none',
+    }}>
+      <div style={{
+        fontSize: '42px',
+        fontWeight: 'bold',
+        color: isVictory ? '#44ff44' : '#ff4444',
+        textShadow: `0 0 30px ${isVictory ? 'rgba(68, 255, 68, 0.6)' : 'rgba(255, 68, 68, 0.6)'}`,
+        letterSpacing: '4px',
+        marginBottom: '16px',
+      }}>
+        {isVictory ? 'MISSION COMPLETE' : 'MISSION FAILED'}
+      </div>
+      {victoryCondition && (
+        <div style={{ fontSize: '16px', color: '#cccccc', maxWidth: '400px', textAlign: 'center' }}>
+          {victoryCondition}
+        </div>
+      )}
+    </div>
+  )
+}
 import { AudioControls } from './components/HUD/AudioControls'
 import { TutorialOverlay } from './components/Tutorial/TutorialOverlay'
 import MapEditor from './components/MapEditor/MapEditor'
@@ -50,6 +100,8 @@ function App() {
     showCampaignJournal,
     showMapEditor,
     showCombatArena,
+    showMissionBriefing,
+    showActTransition,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -67,8 +119,17 @@ function App() {
   // Keyboard shortcuts for tactical combat (disabled on non-combat screens and mobile)
   const inTacticalCombat = !!gameState && isInitialized && !isAIBattle && !showSetup && !showHeroCreation
     && !showMissionSelect && !showPostMission && !showSocialPhase && !showHeroProgression
-    && !showPortraitManager && !showCombatArena
+    && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition
   useCombatKeys(inTacticalCombat && !isMobile)
+
+  // Auto-execute Imperial AI turns in campaign combat (not AI Battle mode)
+  const { isImperialTurn } = useImperialAI(inTacticalCombat && !isAIBattle)
+
+  // Auto-advance non-interactive phases + auto-skip defeated player figures
+  useAutoPhase(inTacticalCombat && !isAIBattle)
+
+  // Periodic campaign autosave (every 60s when campaign is active)
+  useAutosave()
 
   const selectedFigure = gameState?.figures.find(f => f.id === selectedFigureId) || null
   const currentActivatingId = gameState?.activationOrder[gameState?.currentActivationIndex]
@@ -103,6 +164,11 @@ function App() {
   if (showMissionSelect) {
     return <><AudioControls /><MissionSelect /></>
     return <><MissionSelect /><AutosaveToast /></>
+  }
+
+  // Campaign: mission briefing (between select and combat)
+  if (showMissionBriefing) {
+    return <><MissionBriefing /><AutosaveToast /></>
   }
 
   // Campaign: social phase (between missions)
@@ -155,6 +221,11 @@ function App() {
   if (showPostMission) {
     return <><AudioControls /><PostMission /></>
     return <><PostMission /><AutosaveToast /></>
+  }
+
+  // Campaign: act transition cinematic (between acts)
+  if (showActTransition) {
+    return <ActTransition />
   }
 
   if (!gameState || !isInitialized) {
@@ -216,10 +287,11 @@ function App() {
         {/* Canvas fills remaining space */}
         <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
           <TacticalGrid gameState={gameState} />
+          <FloatingCombatTextOverlay />
         </div>
 
-        {/* Action buttons strip */}
-        {currentActivatingFigure?.id === selectedFigureId && (
+        {/* Action buttons strip (hidden during Imperial AI turns) */}
+        {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
           <ActionButtons selectedFigure={selectedFigure} compact />
         )}
 
@@ -231,11 +303,14 @@ function App() {
         {/* Combat log overlay */}
         <CombatLog messages={combatLog} compact visible={showCombatLog} onClose={() => setShowCombatLog(false)} />
 
-        {/* Objective hover tooltip */}
+        {/* Hover tooltips */}
         <ObjectiveTooltip />
+        <FigureTooltip />
 
-        {/* Notification popups */}
+        {/* Notification popups + cinematic banners */}
         <NotificationCenter />
+        <RoundBanner />
+        <GameOverBanner />
 
         {/* Combat panel overlay */}
         {gameState.activeCombat && (
@@ -256,6 +331,11 @@ function App() {
               pointerEvents: 'none',
             }}
           />
+        )}
+
+        {/* Campaign mission outcome overlay */}
+        {gameState.winner && (
+          <MissionOutcomeOverlay winner={gameState.winner} victoryCondition={gameState.victoryCondition} />
         )}
       </div>
     )
@@ -282,12 +362,19 @@ function App() {
       {/* Tactical Grid (main canvas) */}
       <div style={canvasContainerStyle}>
         <TacticalGrid gameState={gameState} />
+        <FloatingCombatTextOverlay />
       </div>
 
       {/* HUD Overlays */}
 
       {/* Top Center: Turn Indicator */}
       <TurnIndicator gameState={gameState} />
+
+      {/* Top Right: Speed Toggle */}
+      <SpeedToggle />
+
+      {/* Top Center (below turn indicator): Activation Order */}
+      <ActivationOrder gameState={gameState} />
 
       {/* Top Left: Morale Tracker */}
       <MoraleTracker gameState={gameState} />
@@ -298,24 +385,35 @@ function App() {
       {/* Top Left (below morale): Threat Pool */}
       <ThreatTracker gameState={gameState} />
 
-      {/* Objective hover tooltip */}
-      <ObjectiveTooltip />
+      {/* Bottom Left: Terrain Legend + Minimap */}
+      <TerrainLegend />
+      <Minimap />
 
-      {/* Notification popups (reinforcements, narrative events) */}
+      {/* Hover tooltips */}
+      <ObjectiveTooltip />
+      <FigureTooltip />
+      <TileTooltip />
+
+      {/* Notification popups + cinematic banners */}
       <NotificationCenter />
+      <RoundBanner />
+      <GameOverBanner />
 
       {/* Top Right: Selected Figure Info */}
       {selectedFigure && (
         <InfoPanel selectedFigure={selectedFigure} gameState={gameState} />
       )}
 
-      {/* Bottom Center: Action Buttons (shown during activation) */}
-      {currentActivatingFigure?.id === selectedFigureId && (
+      {/* Bottom Center: Action Buttons (hidden during Imperial AI turns) */}
+      {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
         <ActionButtons selectedFigure={selectedFigure} />
       )}
 
       {/* Bottom Right: Combat Log */}
       <CombatLog messages={combatLog} />
+
+      {/* Keyboard shortcut help overlay (? to toggle) */}
+      <ShortcutHelp enabled={inTacticalCombat && !isMobile} />
 
       {/* Centered Overlay: Combat Panel (shown during combat) */}
       {gameState.activeCombat && (
@@ -336,6 +434,11 @@ function App() {
             pointerEvents: 'none',
           }}
         />
+      )}
+
+      {/* Campaign mission outcome overlay */}
+      {gameState.winner && (
+        <MissionOutcomeOverlay winner={gameState.winner} victoryCondition={gameState.victoryCondition} />
       )}
     </div>
   )

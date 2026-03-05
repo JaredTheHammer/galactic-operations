@@ -281,6 +281,26 @@ export interface Characteristics {
 
 export type CharacteristicName = keyof Characteristics;
 
+/** Species ability effect types */
+export type SpeciesAbilityEffect =
+  | { type: 'bonus_strain_recovery'; value: number }
+  | { type: 'social_skill_upgrade'; value: number }
+  | { type: 'wounded_melee_bonus'; value: number }
+  | { type: 'condition_immunity'; condition: string }
+  | { type: 'first_attack_bonus'; value: number }
+  | { type: 'regeneration'; value: number }
+  | { type: 'skill_bonus'; skills: string[]; value: number }
+  | { type: 'soak_bonus'; value: number };
+
+/** A single species ability (passive mechanical effect) */
+export interface SpeciesAbility {
+  id: string;
+  name: string;
+  description: string;
+  type: 'passive';
+  effect: SpeciesAbilityEffect;
+}
+
 /** Species definition loaded from species.json */
 export interface SpeciesDefinition {
   id: string;
@@ -292,6 +312,7 @@ export interface SpeciesDefinition {
   speed: number;
   startingXP: number;
   specialAbility: string | null;
+  abilities?: SpeciesAbility[];
   description: string;
 }
 
@@ -742,6 +763,11 @@ export interface CombatResolution {
   advantagesSpent: string[];
   threatsSpent: string[];
 
+  // Tactic cards played during this combat
+  tacticCardsPlayed?: string[];
+  tacticSuppression?: number;
+  tacticRecover?: number;
+
   // Outcome
   isHit: boolean;
   isDefeated: boolean;
@@ -765,6 +791,10 @@ export interface CombatScenario {
   defensePool: DefensePool | null;
 
   resolution: CombatResolution | null;
+
+  /** Tactic cards played during this combat (attacker + defender) */
+  attackerTacticCards?: string[];
+  defenderTacticCards?: string[];
 }
 
 // ============================================================================
@@ -890,6 +920,12 @@ export interface GameState {
 
   // Loot tokens on the map (collectible items with rewards)
   lootTokens: LootToken[];
+
+  // Consumable inventory for this mission (decremented on use, initialized from CampaignState)
+  consumableInventory?: Record<string, number>;
+
+  // Tactic card deck state (hands, draw pile, discard)
+  tacticDeck?: TacticDeckState;
 }
 
 // ============================================================================
@@ -905,6 +941,9 @@ export interface GameData {
   armor: Record<string, ArmorDefinition>;
   npcProfiles: Record<string, NPCProfile>;
   consumables?: Record<string, ConsumableItem>;
+  tacticCards?: Record<string, TacticCard>;
+  /** Maps social companion IDs (e.g. 'drez-venn') to combat NPC profile IDs (e.g. 'companion-drez-venn') */
+  companionProfiles?: Record<string, string>;
 }
 
 // ============================================================================
@@ -1125,6 +1164,8 @@ export interface CampaignState {
   credits: number;
   narrativeItems: string[];
 
+  /** Consumable inventory: maps consumable ID to quantity available */
+  consumableInventory: Record<string, number>;
   /** Equipment inventory: unequipped weapon/armor item IDs available for heroes to equip.
    *  Each entry is a weapon or armor ID (e.g., 'dl-44', 'blast-vest').
    *  Duplicates allowed (buying 2 of same item = 2 entries). */
@@ -1395,6 +1436,53 @@ export interface ConsumableItem {
  */
 export function computeDiminishedHealing(baseValue: number, priorUses: number): number {
   return Math.max(1, baseValue - (priorUses * 2));
+}
+
+// ============================================================================
+// TACTIC CARDS
+// ============================================================================
+
+/** When a tactic card can be played */
+export type TacticCardTiming = 'Attack' | 'Defense' | 'Any';
+
+/** Which side can use a tactic card */
+export type TacticCardSide = 'Universal' | 'Operative' | 'Imperial';
+
+/** Effect types for tactic cards */
+export type TacticCardEffectType =
+  | 'AddHit'
+  | 'AddBlock'
+  | 'Pierce'
+  | 'Reroll'
+  | 'Recover'
+  | 'Suppress'
+  | 'ConvertMiss'
+  | 'Counter';
+
+/** A single effect on a tactic card */
+export interface TacticCardEffect {
+  type: TacticCardEffectType;
+  value: number;
+  condition?: string;
+}
+
+/** A tactic card definition (loaded from JSON) */
+export interface TacticCard {
+  id: string;
+  name: string;
+  timing: TacticCardTiming;
+  side: TacticCardSide;
+  effects: TacticCardEffect[];
+  text: string;
+  cost: number;
+}
+
+/** State of a tactic card deck during a mission */
+export interface TacticDeckState {
+  drawPile: string[];
+  discardPile: string[];
+  operativeHand: string[];
+  imperialHand: string[];
 }
 
 /** A social phase location (the "hub" between missions) */

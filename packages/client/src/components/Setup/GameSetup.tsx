@@ -347,24 +347,34 @@ export const GameSetup: React.FC = () => {
             Liberation of the Tangrene Sector (4 missions)
           </div>
           <div style={{ display: 'flex', gap: '6px' }}>
-            {(['standard', 'veteran', 'legendary'] as CampaignDifficulty[]).map(diff => (
-              <button
-                key={diff}
-                style={{
-                  ...mixins.buttonPrimary,
-                  flex: 1,
-                  backgroundColor: diff === 'standard' ? t.accentGreen : diff === 'veteran' ? '#ffaa00' : t.accentRed,
-                  color: '#000',
-                  fontSize: '11px',
-                }}
-                onClick={() => {
-                  setShowCampaignDifficulty(false)
-                  startCampaign(diff)
-                }}
-              >
-                {diff.toUpperCase()}
-              </button>
-            ))}
+            {(['standard', 'veteran', 'legendary'] as CampaignDifficulty[]).map(diff => {
+              const desc: Record<string, string> = {
+                standard: 'Base threat, forgiving economy',
+                veteran: '+2 threat/round, tougher enemies',
+                legendary: '+4 threat/round, elite scaling',
+              }
+              return (
+                <button
+                  key={diff}
+                  style={{
+                    ...mixins.buttonPrimary,
+                    flex: 1,
+                    backgroundColor: diff === 'standard' ? t.accentGreen : diff === 'veteran' ? '#ffaa00' : t.accentRed,
+                    color: '#000',
+                    fontSize: '11px',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                  onClick={() => {
+                    setShowCampaignDifficulty(false)
+                    startCampaign(diff)
+                  }}
+                >
+                  <span style={{ fontWeight: 'bold' }}>{diff.toUpperCase()}</span>
+                  <span style={{ fontSize: '8px', opacity: 0.7 }}>{desc[diff]}</span>
+                </button>
+              )
+            })}
           </div>
           <button
             style={{

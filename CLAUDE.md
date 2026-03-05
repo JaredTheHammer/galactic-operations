@@ -56,7 +56,7 @@ Jared (jared.m.hamm@gmail.com). PhD-level synthetic biology, data science, autom
 - Prompt generator: `packages/client/src/services/prompt-generator.ts` (Star Wars taxonomy-driven AI prompt composition)
 - Campaign export bundles portraits as Base64 in JSON: `packages/client/src/services/campaign-export.ts`
 - Portrait types: `packages/client/src/types/portrait.ts` (PortraitEntry, CropState, FactionVisualConfig)
-- Silhouette fallback: `packages/client/src/components/Portrait/SilhouetteRenderer.ts` (species-aware SVG fallbacks)
+- Silhouette fallback: `packages/client/src/canvas/silhouettes.ts` (species-aware canvas fallbacks)
 
 ## Adding New Data Files
 New NPC/mission/hub JSON files must be registered in:

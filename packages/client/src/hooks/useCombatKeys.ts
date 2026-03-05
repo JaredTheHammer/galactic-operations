@@ -40,6 +40,7 @@ export function useCombatKeys(enabled: boolean) {
         advancePhase,
         undoLastAction,
         gameStateHistory,
+        setCameraTarget,
       } = store.getState()
 
       if (!gameState) return
@@ -87,6 +88,20 @@ export function useCombatKeys(enabled: boolean) {
           }
           break
 
+        case 'c': // Take Cover
+          if (isActivating && selectedFigure.maneuversRemaining > 0) {
+            e.preventDefault()
+            store.getState().takeCover()
+          }
+          break
+
+        case 's': // Strain for Maneuver
+          if (isActivating && !selectedFigure.hasUsedStrainForManeuver) {
+            e.preventDefault()
+            store.getState().strainForManeuver()
+          }
+          break
+
         case 'e': // End Activation
           if (isActivating) {
             e.preventDefault()
@@ -111,7 +126,9 @@ export function useCombatKeys(enabled: boolean) {
             ? friendlyFigures.findIndex(f => f.id === selectedFigureId)
             : -1
           const nextIdx = (currentIdx + 1) % friendlyFigures.length
-          selectFigure(friendlyFigures[nextIdx].id)
+          const nextFig = friendlyFigures[nextIdx]
+          selectFigure(nextFig.id)
+          setCameraTarget(nextFig.position)
           break
         }
 
@@ -120,6 +137,11 @@ export function useCombatKeys(enabled: boolean) {
             e.preventDefault()
             selectFigure(null)
           }
+          break
+
+        case '`': // Cycle combat speed
+          e.preventDefault()
+          store.getState().cycleCombatSpeed()
           break
       }
     }

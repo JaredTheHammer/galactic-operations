@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Companion NPC combat profiles. These are ally NPCs recruited through social encounters who fight alongside heroes on the Operative side. Rival-tier with moderate stats, AI-controlled."
+  },
+  "npcs": {
+    "companion-drez-venn": {
+      "id": "companion-drez-venn",
+      "name": "Drez Venn",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": 8,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "mandalorian-blaster",
+          "name": "Mandalorian Heavy Blaster",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Companion", "Mandalorian", "Bounty Hunter"],
+      "mechanicalKeywords": [
+        { "name": "Armor", "value": 1 }
+      ],
+      "abilities": ["Mandalorian Training: May spend 1 strain to add 1 success to combat checks"],
+      "courage": 3,
+      "defaultPortraitId": "drez-venn"
+    },
+    "companion-krrssk": {
+      "id": "companion-krrssk",
+      "name": "Krrssk",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 2, "challenge": 0 },
+      "woundThreshold": 14,
+      "strainThreshold": 6,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "trandoshan-claws",
+          "name": "Trandoshan Claws",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Vicious", "value": 2 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "scattergun",
+          "name": "Scattergun",
+          "baseDamage": 9,
+          "range": "Short",
+          "critical": 4,
+          "qualities": [
+            { "name": "Knockdown", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Companion", "Trandoshan", "Fighter"],
+      "mechanicalKeywords": [],
+      "abilities": ["Regeneration: Recovers 1 wound at the start of each round"],
+      "courage": 3,
+      "defaultPortraitId": "krrssk"
+    }
+  }
+}

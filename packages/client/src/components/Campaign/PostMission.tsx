@@ -126,6 +126,7 @@ function HeroStatusCard({
 // ============================================================================
 
 export default function PostMission() {
+  const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState, campaignMissions } = useGameStore()
   const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState, activeMissionDef, campaignMissions } = useGameStore()
   const { isMobile } = useIsMobile()
 
@@ -154,6 +155,34 @@ export default function PostMission() {
     ? (Object.values(campaignState.heroes) as HeroCharacter[])
     : []
 
+  // Compute credit rewards from loot tokens
+  const missionDef = campaignMissions?.[result.missionId]
+  let creditsEarned = 0
+  const lootDetails: { label: string; color: string }[] = []
+  if (missionDef && result.lootCollected.length > 0) {
+    for (const lootId of result.lootCollected) {
+      const token = missionDef.lootTokens.find((l: any) => l.id === lootId)
+      if (!token) {
+        lootDetails.push({ label: lootId, color: '#888' })
+        continue
+      }
+      const r = token.reward
+      if (r.type === 'credits') {
+        creditsEarned += r.value
+        lootDetails.push({ label: `${r.value} Credits`, color: '#ffd700' })
+      } else if (r.type === 'xp') {
+        lootDetails.push({ label: `${r.value} XP`, color: '#44ff44' })
+      } else if (r.type === 'equipment') {
+        lootDetails.push({ label: (r as any).itemId?.replace(/-/g, ' ') ?? 'Equipment', color: '#ff6644' })
+      } else if (r.type === 'narrative') {
+        lootDetails.push({ label: (r as any).description ?? 'Narrative Item', color: '#cc77ff' })
+      }
+    }
+  }
+
+  // Enemy casualty summary
+  const totalKills = Object.values(result.heroKills).reduce((sum, k) => sum + k, 0)
+
   return (
     <div style={containerStyle}>
       <div style={{
@@ -175,6 +204,28 @@ export default function PostMission() {
         }}>
           {outcomeText}
         </h1>
+        <div style={{
+          textAlign: 'center',
+          color: '#888',
+          marginBottom: isMobile ? '12px' : '16px',
+          fontSize: isMobile ? '13px' : '14px',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '16px',
+          flexWrap: 'wrap',
+        }}>
+          <span>{result.roundsPlayed} rounds</span>
+          {totalKills > 0 && (
+            <span style={{ color: '#ff6b6b' }}>{totalKills} enem{totalKills === 1 ? 'y' : 'ies'} defeated</span>
+          )}
+          {creditsEarned > 0 && (
+            <span style={{ color: '#ffd700' }}>+{creditsEarned} credits</span>
+          )}
+        </div>
+
+        {/* Mission narrative debriefing */}
+        {(() => {
+          const missionDef = campaignMissions?.[result.missionId]
         <div style={{ textAlign: 'center', color: '#888', marginBottom: '12px', fontSize: isMobile ? '13px' : '14px' }}>
           Completed in {result.roundsPlayed} rounds
         </div>
@@ -188,6 +239,18 @@ export default function PostMission() {
           if (!narrativeText) return null
           return (
             <div style={{
+              backgroundColor: '#12121f',
+              border: '1px solid #2a2a3f',
+              borderLeft: `3px solid ${outcomeColor}`,
+              borderRadius: '8px',
+              padding: isMobile ? '12px' : '16px',
+              marginBottom: isMobile ? '16px' : '24px',
+              fontStyle: 'italic',
+              color: '#ccc',
+              fontSize: '13px',
+              lineHeight: '1.7',
+            }}>
+              {narrativeText}
               padding: isMobile ? '12px' : '16px',
               marginBottom: isMobile ? '16px' : '24px',
               backgroundColor: '#0a0a12',
@@ -288,8 +351,33 @@ export default function PostMission() {
           </div>
         )}
 
-        {/* Loot collected */}
-        {result.lootCollected.length > 0 && (
+        {/* Loot collected (enhanced with reward details) */}
+        {lootDetails.length > 0 && (
+          <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
+            <h3 style={{ ...sectionHeaderStyle, color: '#ffaa00' }}>
+              Loot Secured ({lootDetails.length})
+            </h3>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              flexDirection: isMobile ? 'column' : 'row',
+            }}>
+              {lootDetails.map((item, i) => (
+                <span key={i} style={{
+                  ...pillStyle,
+                  color: item.color,
+                  borderColor: `${item.color}30`,
+                  ...(isMobile ? { width: '100%', marginRight: 0 } : {}),
+                }}>
+                  <span style={{ fontSize: '14px' }}>{'\u2B50'}</span>
+                  {item.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* Fallback: raw loot IDs when no mission definition available */}
+        {lootDetails.length === 0 && result.lootCollected.length > 0 && (
           <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
             <h3 style={{ ...sectionHeaderStyle, color: '#ffaa00' }}>
               Loot Secured ({result.lootCollected.length})

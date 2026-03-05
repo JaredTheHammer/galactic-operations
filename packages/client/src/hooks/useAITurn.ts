@@ -292,23 +292,21 @@ export function useAITurn(): UseAITurnReturn {
           for (const action of decision.actions) {
             if (cancelRef.current) return
 
-            // Visualize
+            // Visualize + auto-pan camera
             if (action.type === 'Move') {
-              useGameStore.setState({ aiMovePath: action.payload.path })
+              useGameStore.getState().setAIMovePath(action.payload.path)
             } else if (action.type === 'Attack') {
               const targetFig = gs.figures.find(f => f.id === action.payload.targetId)
               const currentFig = gs.figures.find(f => f.id === activeFig.id)
               if (targetFig && currentFig) {
-                useGameStore.setState({
-                  aiAttackTarget: { from: currentFig.position, to: targetFig.position },
-                })
+                useGameStore.getState().setAIAttackTarget({ from: currentFig.position, to: targetFig.position })
               }
             }
 
             await delay(speeds.actionMs)
             if (cancelRef.current) return
 
-            useGameStore.setState({ aiMovePath: null, aiAttackTarget: null })
+            useGameStore.getState().clearAIVisualization()
 
             // Capture pre-execution state for animations
             const figBefore = gs.figures.find(f => f.id === activeFig.id)
@@ -383,6 +381,10 @@ export function useAITurn(): UseAITurnReturn {
               }
             }
 
+            // Clear activeCombat overlay after AI actions so it doesn't block the UI
+            if (gs.activeCombat) {
+              gs = { ...gs, activeCombat: null }
+            }
             useGameStore.setState({ gameState: gs })
           }
 

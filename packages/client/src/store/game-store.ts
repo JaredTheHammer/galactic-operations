@@ -31,6 +31,8 @@ import type {
   Mission,
   MissionResult,
   ObjectivePointTemplate,
+  ConsumableItem,
+  TacticCard,
 } from '@engine/types.js'
 import { MAP_PRESETS, computeGameScale } from '@engine/types.js'
 import {
@@ -49,13 +51,18 @@ import { generateMap } from '@engine/map-generator.js'
 import {
   getValidMoves,
   moveFigure,
+  getPath,
+  getMovementCost,
 } from '@engine/movement.js'
 import {
   getValidTargetsV2,
+  getAttackRangeInTiles,
+  getThreateningEnemies,
 } from '@engine/ai/evaluate-v2.js'
 import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization, equipItem, unequipItem } from '@engine/character-v2.js'
 import type { HeroCreationInput, EquipmentSlot } from '@engine/character-v2.js'
 import { getEquippedTalents, canActivateTalent } from '@engine/talent-v2.js'
+import { initializeTacticDeck, drawCardsForBothSides, playCard } from '@engine/tactic-cards.js'
 import {
   createCampaign,
   getAvailableMissions,
@@ -85,6 +92,9 @@ import armorData from '@data/armor.json'
 import speciesData from '@data/species.json'
 import careersData from '@data/careers.json'
 import aiProfilesRaw from '@data/ai-profiles.json'
+import consumablesData from '@data/consumables.json'
+import tacticsData from '@data/cards/tactics.json'
+import companionsNpcData from '@data/npcs/companions.json'
 import mercenarySpecData from '@data/specializations/mercenary.json'
 import smugglerSpecData from '@data/specializations/smuggler.json'
 import droidTechSpecData from '@data/specializations/droid-tech.json'
@@ -140,12 +150,21 @@ const BOARD_TEMPLATES: BoardTemplate[] = [
 function loadGameDataV2(): GameData {
   // NPC profiles (merge all faction files)
   const npcProfiles: Record<string, NPCProfile> = {}
-  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData]
+  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData]
   for (const npcFile of npcDataFiles) {
     const npcsRaw = (npcFile as any).npcs ?? npcFile
     for (const [id, npc] of Object.entries(npcsRaw)) {
       npcProfiles[id] = npc as NPCProfile
     }
+  }
+
+  // Companion profiles: map social companion IDs to their combat NPC profile IDs
+  const companionProfiles: Record<string, string> = {}
+  const companionNpcsRaw = (companionsNpcData as any).npcs ?? {}
+  for (const [id, npc] of Object.entries(companionNpcsRaw)) {
+    // Convention: combat profile 'companion-drez-venn' maps to social ID 'drez-venn'
+    const socialId = id.replace(/^companion-/, '')
+    companionProfiles[socialId] = id
   }
 
   // Weapons
@@ -200,6 +219,20 @@ function loadGameDataV2(): GameData {
   // Dice (d6 system)
   const dice = (diceD6Data as any).dieTypes ?? diceD6Data
 
+  // Consumables
+  const consumables: Record<string, any> = {}
+  const consumablesRaw = Array.isArray(consumablesData) ? consumablesData : (consumablesData as any).consumables ?? []
+  for (const item of consumablesRaw) {
+    consumables[item.id] = item
+  }
+
+  // Tactic cards
+  const tacticCards: Record<string, TacticCard> = {}
+  const tacticsRaw = Array.isArray(tacticsData) ? tacticsData : (tacticsData as any).cards ?? []
+  for (const card of tacticsRaw) {
+    tacticCards[card.id] = card as TacticCard
+  }
+
   return {
     dice,
     species,
@@ -208,6 +241,9 @@ function loadGameDataV2(): GameData {
     weapons,
     armor,
     npcProfiles,
+    consumables,
+    tacticCards,
+    companionProfiles,
   }
 }
 
@@ -373,6 +409,19 @@ export interface ActivatableTalent {
   strainCost?: number
 }
 
+/** Floating combat text displayed on the tactical canvas */
+export interface FloatingCombatText {
+  id: string
+  gridX: number
+  gridY: number
+  text: string
+  color: string
+  type: 'damage' | 'heal' | 'miss' | 'defeat' | 'critical' | 'token' | 'status'
+  createdAt: number
+}
+
+let fctCounter = 0
+
 export interface GameStore {
   // State
   gameState: GameState | null
@@ -398,10 +447,14 @@ export interface GameStore {
   campaignMissions: Record<string, MissionDefinition>
   lastMissionResult: MissionResult | null
   showMissionSelect: boolean
+  showMissionBriefing: boolean
+  pendingMissionId: string | null
   showPostMission: boolean
   showMissionBriefing: boolean
   showCampaignJournal: boolean
   showSocialPhase: boolean
+  showActTransition: boolean
+  actTransitionData: { fromAct: number; toAct: number } | null
   showHeroProgression: boolean
   showPortraitManager: boolean
   showCampaignStats: boolean
@@ -416,6 +469,19 @@ export interface GameStore {
   aiMovePath: GridCoordinate[] | null
   aiAttackTarget: { from: GridCoordinate; to: GridCoordinate } | null
 
+  // Attack range overlay for selected figure
+  attackRange: { center: GridCoordinate; radius: number } | null
+
+  // Player move path preview (computed on hover)
+  playerMovePath: GridCoordinate[] | null
+  playerMovePathCost: number | null
+
+  // Targets reachable from hovered move destination (LOS preview)
+  movePreviewTargets: string[] | null
+
+  // Enemies that can attack the selected figure (threat assessment)
+  threateningEnemies: string[]
+
   // Undo history (stores previous game states for undo)
   gameStateHistory: GameState[]
 
@@ -427,6 +493,28 @@ export interface GameStore {
   threatFlash: boolean
   hoveredObjectiveId: string | null
   tooltipScreenPos: { x: number; y: number } | null
+  hoveredFigureId: string | null
+  figureTooltipPos: { x: number; y: number } | null
+  hoveredTileCoord: { x: number; y: number } | null
+  tileTooltipPos: { x: number; y: number } | null
+
+  // Floating combat text
+  floatingTexts: FloatingCombatText[]
+  addFloatingText: (text: Omit<FloatingCombatText, 'id' | 'createdAt'>) => void
+
+  // Cinematic banners
+  roundBanner: { round: number; roundLimit?: number; roundsLeft?: number } | null
+  gameOverBanner: { outcome: 'victory' | 'defeat'; condition?: string; rounds?: number } | null
+
+  // Combat speed: 'normal' = 1x, 'fast' = 3x, 'instant' = skip delays
+  combatSpeed: 'normal' | 'fast' | 'instant'
+  cycleCombatSpeed: () => void
+
+  // Imperial AI state (campaign combat)
+  imperialAIPhase: 'thinking' | 'executing' | null
+
+  // Camera control: set to pan the tactical grid camera to a grid position
+  cameraTarget: GridCoordinate | null
 
   // Actions
   initGame: (players: Player[], mapConfig?: MapConfig) => void
@@ -440,14 +528,23 @@ export interface GameStore {
   rallyFigure: () => void
   aimFigure: () => void
   dodgeFigure: () => void
+  takeCover: () => void
+  standUp: () => void
+  strainForManeuver: () => void
+  drawHolster: () => void
   guardedStance: () => void
   useTalent: (talentId: string) => void
+  useConsumable: (itemId: string, targetId?: string) => void
+  getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
+  playTacticCard: (cardId: string, role: 'attacker' | 'defender') => void
+  dismissCombat: () => void
   endActivation: () => void
   advancePhase: () => void
   setHighlightedTile: (coord: GridCoordinate | null) => void
   setAIMovePath: (path: GridCoordinate[] | null) => void
   setAIAttackTarget: (target: { from: GridCoordinate; to: GridCoordinate } | null) => void
   clearAIVisualization: () => void
+  setCameraTarget: (target: GridCoordinate | null) => void
   addCombatLog: (message: string) => void
   undoLastAction: () => void
 
@@ -458,9 +555,12 @@ export interface GameStore {
   // Campaign actions
   startCampaign: (difficulty: CampaignDifficulty) => void
   finishCampaignHeroCreation: () => void
+  showMissionBriefingScreen: (missionId: string) => void
+  dismissMissionBriefing: () => void
   startCampaignMission: (missionId: string) => void
   completeCampaignMission: (input: MissionCompletionInput) => void
   returnToMissionSelect: () => void
+  dismissActTransition: () => void
   saveCampaignToStorage: () => void
   saveCampaignToSlot: (slotId: number) => void
   loadCampaignFromStorage: () => boolean
@@ -508,6 +608,10 @@ export interface GameStore {
   addNotification: (notif: Omit<GameNotification, 'id' | 'createdAt'>) => void
   removeNotification: (id: string) => void
   setHoveredObjective: (id: string | null, screenPos?: { x: number; y: number }) => void
+  setHoveredFigure: (id: string | null, screenPos?: { x: number; y: number }) => void
+  setHoveredTile: (coord: { x: number; y: number } | null, screenPos?: { x: number; y: number }) => void
+  clearRoundBanner: () => void
+  clearGameOverBanner: () => void
 
   // Helpers
   getGameData: () => GameData | null
@@ -543,10 +647,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   campaignMissions: {},
   lastMissionResult: null,
   showMissionSelect: false,
+  showMissionBriefing: false,
+  pendingMissionId: null,
   showPostMission: false,
   showMissionBriefing: false,
   showCampaignJournal: false,
   showSocialPhase: false,
+  showActTransition: false,
+  actTransitionData: null,
   showHeroProgression: false,
   showPortraitManager: false,
   showCampaignStats: false,
@@ -560,6 +668,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // AI visualization state
   aiMovePath: null,
   aiAttackTarget: null,
+  attackRange: null,
+  playerMovePath: null,
+  playerMovePathCost: null,
+  movePreviewTargets: null,
+  threateningEnemies: [],
+
+  // Imperial AI state (campaign combat)
+  imperialAIPhase: null,
+
+  // Camera control
+  cameraTarget: null,
 
   // Undo history
   gameStateHistory: [],
@@ -569,9 +688,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // UI overlay state
   notifications: [],
+  floatingTexts: [],
   threatFlash: false,
+  roundBanner: null,
+  gameOverBanner: null,
   hoveredObjectiveId: null,
   tooltipScreenPos: null,
+  hoveredFigureId: null,
+  figureTooltipPos: null,
+  hoveredTileCoord: null,
+  tileTooltipPos: null,
+  combatSpeed: 'normal',
+
+  cycleCombatSpeed: () => {
+    set(state => {
+      const next = state.combatSpeed === 'normal' ? 'fast'
+        : state.combatSpeed === 'fast' ? 'instant'
+        : 'normal'
+      return { combatSpeed: next }
+    })
+  },
 
   // Combat Arena
   openCombatArena: () => {
@@ -654,6 +790,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ? heroArmyV2(createdHeroes)
       : defaultArmyV2()
     gameState = deployFiguresV2(gameState, army, gameData)
+
+    // Initialize tactic card deck
+    if (gameData.tacticCards && Object.keys(gameData.tacticCards).length > 0) {
+      gameState.tacticDeck = initializeTacticDeck(gameData)
+    }
 
     // Build activation order
     gameState.activationOrder = buildActivationOrderV2(gameState)
@@ -859,6 +1000,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
+    // Initialize tactic card deck
+    if (gameData.tacticCards && Object.keys(gameData.tacticCards).length > 0) {
+      gameState.tacticDeck = initializeTacticDeck(gameData)
+    }
+
     set({
       gameState,
       gameData,
@@ -875,7 +1021,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { gameState, gameData } = get()
     if (!gameState || !gameData) return
 
-    set({ selectedFigureId: figureId, validMoves: [], validTargets: [] })
+    set({ selectedFigureId: figureId, validMoves: [], validTargets: [], attackRange: null, playerMovePath: null, playerMovePathCost: null, movePreviewTargets: null, threateningEnemies: [] })
 
     if (figureId) {
       const figure = gameState.figures.find(f => f.id === figureId)
@@ -885,7 +1031,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         // v2 valid targets using evaluate-v2
         const targets = getValidTargetsV2(figure, figure.position, gameState, gameData)
-        set({ validTargets: targets.map(t => t.id) })
+        set({ validTargets: targets })
+
+        // Attack range overlay
+        const range = getAttackRangeInTiles(figure, gameState, gameData)
+        set({ attackRange: { center: figure.position, radius: range } })
+
+        // Threat assessment: which enemies can hit this figure
+        const threats = getThreateningEnemies(figure, gameState, gameData)
+        set({ threateningEnemies: threats })
       }
     }
   },
@@ -909,6 +1063,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
       addCombatLog(`${figure.id} moved to (${destination.x}, ${destination.y})`)
 
+      // Re-select to update valid moves/targets + range overlay
       // Spawn movement trail animation
       const side = figure.owner === 0 ? 'imperial' : 'operative'
       combatAnimations.spawnMoveTrail(fromPos, destination, side)
@@ -918,7 +1073,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
         const moves = getValidMoves(updatedFigure, newGameState)
         const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
-        set({ validMoves: moves, validTargets: targets.map(t => t.id) })
+        const range = getAttackRangeInTiles(updatedFigure, newGameState, gameData)
+        set({ validMoves: moves, validTargets: targets, attackRange: { center: updatedFigure.position, radius: range } })
       } else {
         set({ validMoves: [], validTargets: [] })
       }
@@ -970,8 +1126,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
             ? `Hit! ${resolution.woundsDealt} wounds dealt`
             : 'Miss!')
         )
+
+        // Floating combat text
+        const { addFloatingText } = get()
+        if (resolution.isHit && resolution.woundsDealt > 0) {
+          addFloatingText({
+            gridX: defender.position.x, gridY: defender.position.y,
+            text: `-${resolution.woundsDealt}`,
+            color: '#ff4444',
+            type: resolution.criticalTriggered ? 'critical' : 'damage',
+          })
+        } else if (!resolution.isHit) {
+          addFloatingText({
+            gridX: defender.position.x, gridY: defender.position.y,
+            text: 'MISS',
+            color: '#888888',
+            type: 'miss',
+          })
+        }
         if (resolution.isDefeated) {
+          setTimeout(() => get().addFloatingText({
+            gridX: defender.position.x, gridY: defender.position.y,
+            text: 'DEFEATED',
+            color: '#ff2222',
+            type: 'defeat',
+          }), 300)
           addCombatLog(`  !! ${defender.id} defeated!`)
+        }
+        if (resolution.tacticCardsPlayed && resolution.tacticCardsPlayed.length > 0 && gameData.tacticCards) {
+          const names = resolution.tacticCardsPlayed
+            .map(id => gameData.tacticCards?.[id]?.name ?? id)
+            .join(', ')
+          addCombatLog(`  Tactic cards: ${names}`)
         }
       } else {
         addCombatLog(`Combat: ${attacker.id} vs ${defender.id}`)
@@ -1040,6 +1226,99 @@ export const useGameStore = create<GameStore>((set, get) => ({
     addCombatLog(`${selectedFigureId} braced for dodge (1 dodge token)`)
   },
 
+  takeCover: () => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure || figure.maneuversRemaining <= 0) return
+
+    const action = {
+      type: 'TakeCover' as const,
+      figureId: selectedFigureId,
+      payload: {},
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+    addCombatLog(`${selectedFigureId} took cover (+1 defense)`)
+  },
+
+  standUp: () => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure || figure.maneuversRemaining <= 0) return
+    if (!figure.conditions?.includes('Prone')) return
+
+    const action = {
+      type: 'StandUp' as const,
+      figureId: selectedFigureId,
+      payload: {},
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+    addCombatLog(`${selectedFigureId} stood up`)
+  },
+
+  strainForManeuver: () => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure || figure.hasUsedStrainForManeuver) return
+
+    const action = {
+      type: 'StrainForManeuver' as const,
+      figureId: selectedFigureId,
+      payload: {},
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+    addCombatLog(`${selectedFigureId} suffered 2 strain for extra maneuver`)
+  },
+
+  drawHolster: () => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure || figure.entityType !== 'hero' || figure.maneuversRemaining <= 0) return
+
+    const hero = gameState.heroes[figure.entityId]
+    if (!hero?.equipment.secondaryWeapon) return
+
+    // Swap primary and secondary weapons
+    const newPrimary = hero.equipment.secondaryWeapon
+    const newSecondary = hero.equipment.primaryWeapon
+
+    const action = {
+      type: 'DrawHolster' as const,
+      figureId: selectedFigureId,
+      payload: { weaponId: newPrimary },
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+
+    // Update hero equipment in the new state
+    const updatedHeroes = { ...newGameState.heroes }
+    updatedHeroes[figure.entityId] = {
+      ...updatedHeroes[figure.entityId],
+      equipment: {
+        ...updatedHeroes[figure.entityId].equipment,
+        primaryWeapon: newPrimary,
+        secondaryWeapon: newSecondary,
+      },
+    }
+
+    set({
+      gameState: { ...newGameState, heroes: updatedHeroes },
+      gameStateHistory: [...gameStateHistory.slice(-19), gameState],
+    })
+
+    const weaponName = gameData.weapons?.[newPrimary]?.name ?? newPrimary
+    addCombatLog(`${selectedFigureId} drew ${weaponName}`)
+  },
+
   guardedStance: () => {
     const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
@@ -1093,13 +1372,89 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
         const moves = getValidMoves(updatedFigure, newGameState)
         const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
-        set({ validMoves: moves, validTargets: targets.map(t => t.id) })
+        set({ validMoves: moves, validTargets: targets })
       } else {
         set({ validMoves: [], validTargets: [] })
       }
     } catch (error) {
       addCombatLog(`Talent error: ${error}`)
     }
+  },
+
+  useConsumable: (itemId: string, targetId?: string) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure || figure.actionsRemaining <= 0) return
+
+    const consumable = gameData.consumables?.[itemId]
+    if (!consumable) return
+
+    const consumeAction = {
+      type: 'UseConsumable' as const,
+      figureId: selectedFigureId,
+      payload: { itemId, targetId },
+    }
+    const newGameState = executeActionV2(gameState, consumeAction, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+
+    const targetName = targetId ?? selectedFigureId
+    addCombatLog(`${selectedFigureId} used ${consumable.name} on ${targetName}`)
+
+    // Re-select to update valid moves/targets
+    const updatedFigure = newGameState.figures.find(f => f.id === selectedFigureId)
+    if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
+      const moves = getValidMoves(updatedFigure, newGameState)
+      const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
+      set({ validMoves: moves, validTargets: targets })
+    } else {
+      set({ validMoves: [], validTargets: [] })
+    }
+  },
+
+  getAvailableConsumables: (figure: Figure) => {
+    const { gameState, gameData } = get()
+    if (!gameState || !gameData?.consumables) return []
+
+    const inv = gameState.consumableInventory ?? {}
+    const results: Array<{ item: ConsumableItem; count: number }> = []
+
+    for (const [id, item] of Object.entries(gameData.consumables)) {
+      const count = inv[id] ?? 0
+      // In campaign mode (inventory tracked), must have items; in standalone, always show
+      const hasItem = gameState.consumableInventory ? count > 0 : true
+      if (!hasItem) continue
+      results.push({ item: item as ConsumableItem, count })
+    }
+    return results
+  },
+
+  playTacticCard: (cardId: string, role: 'attacker' | 'defender') => {
+    const { gameState, addCombatLog } = get()
+    if (!gameState?.tacticDeck) return
+
+    // The player (Operative) always plays from the Operative hand
+    const side: 'Operative' | 'Imperial' = 'Operative'
+    const updatedDeck = playCard(gameState.tacticDeck, side, cardId)
+    if (!updatedDeck) {
+      addCombatLog(`Card ${cardId} not found in hand`)
+      return
+    }
+
+    set({
+      gameState: {
+        ...gameState,
+        tacticDeck: updatedDeck,
+      },
+    })
+    addCombatLog(`Played tactic card: ${cardId}`)
+  },
+
+  dismissCombat: () => {
+    const { gameState } = get()
+    if (!gameState) return
+    set({ gameState: { ...gameState, activeCombat: null } })
   },
 
   endActivation: () => {
@@ -1142,6 +1497,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState], selectedFigureId: null, validMoves: [], validTargets: [] })
       addCombatLog(`${currentFigure.id} activation ended`)
 
+      // Build activation summary for player-controlled figures
+      if (currentFigure.playerId === 0) {
+        const parts: string[] = []
+        if (currentFigure.hasMovedThisActivation) parts.push('Moved')
+        if (currentFigure.hasAttackedThisActivation) parts.push('Attacked')
+        if (currentFigure.aimTokens > 0) parts.push(`Aim x${currentFigure.aimTokens}`)
+        if (currentFigure.hasStandby) parts.push('Standby')
+        if (currentFigure.hasUsedStrainForManeuver) parts.push('+Maneuver')
+        const summary = parts.length > 0 ? parts.join(', ') : 'No actions taken'
+        get().addNotification({
+          type: 'info',
+          title: `${currentFigure.id} Done`,
+          message: summary,
+          duration: 2000,
+        })
+      }
+
       if (allDone) {
         addCombatLog('All units activated. Advance phase to continue.')
       }
@@ -1169,6 +1541,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       newRound += 1
     }
 
+    // Draw tactic cards at the start of each new round (Setup phase = new round)
+    let newTacticDeck = gameState.tacticDeck
+    if (newPhase === 'Setup' && newTacticDeck && gameData?.tacticCards) {
+      newTacticDeck = drawCardsForBothSides(newTacticDeck)
+      addCombatLog(`Tactic cards drawn for Round ${newRound}`)
+    }
+
     // Reset figures for new activation phase (v2: 1 Action + 1 Maneuver)
     let newFigures = gameState.figures
     if (newPhase === 'Activation') {
@@ -1181,6 +1560,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       roundNumber: newRound,
       currentActivationIndex: 0,
       figures: newFigures,
+      ...(newTacticDeck ? { tacticDeck: newTacticDeck } : {}),
     }
 
     // ===== REINFORCEMENT PHASE: spawn new Imperial units =====
@@ -1268,12 +1648,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
           newGameState.interactedTerminals,
         )
 
-        if (winningSide) {
-          newGameState.winner = winningSide
-          newGameState.victoryCondition = `${winningSide} wins!`
+        // Round limit defeat: if we've exceeded the mission's round limit, Imperial wins
+        const roundLimitWinner = !winningSide && activeMission?.roundLimit && newRound > activeMission.roundLimit
+          ? 'Imperial' as const
+          : winningSide
 
-          const outcome = winningSide === 'Operative' ? 'victory' : 'defeat'
-          addCombatLog(`** MISSION ${outcome.toUpperCase()}: ${winningSide} wins! **`)
+        if (roundLimitWinner) {
+          newGameState.winner = roundLimitWinner
+          const isRoundLimit = !winningSide && roundLimitWinner === 'Imperial'
+          newGameState.victoryCondition = isRoundLimit
+            ? `Time ran out! Imperial wins after ${activeMission!.roundLimit} rounds.`
+            : `${roundLimitWinner} wins!`
+
+          const outcome = roundLimitWinner === 'Operative' ? 'victory' : 'defeat'
+          if (isRoundLimit) {
+            addCombatLog(`** MISSION FAILED: Round limit (${activeMission!.roundLimit}) exceeded! **`)
+          } else {
+            addCombatLog(`** MISSION ${outcome.toUpperCase()}: ${roundLimitWinner} wins! **`)
+          }
 
           // Calculate kill counts
           const heroKills: Record<string, number> = {}
@@ -1299,10 +1691,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
             }
           }
 
-          // Check if leader killed
+          // Check if leader killed (Act 1: imperial-officer, inquisitor; Act 2: the-broker)
+          const leaderNpcIds = ['imperial-officer', 'the-broker']
           const leaderKilled = newGameState.figures.some(
             f => f.entityType === 'npc' &&
-              (f.entityId === 'imperial-officer' || f.entityId.includes('inquisitor')) &&
+              (leaderNpcIds.includes(f.entityId) || f.entityId.includes('inquisitor')) &&
               f.isDefeated,
           )
 
@@ -1311,19 +1704,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
             .filter(f => f.entityType === 'hero' && f.isDefeated)
             .map(f => f.entityId)
 
-          // Complete the campaign mission
-          get().completeCampaignMission({
-            mission,
-            outcome: outcome as 'victory' | 'defeat',
-            roundsPlayed: newGameState.roundNumber,
-            completedObjectiveIds,
-            heroKills,
-            lootCollected: newGameState.lootCollected,
-            heroesIncapacitated,
-            leaderKilled,
-            narrativeBonus: outcome === 'victory' ? 2 : 0,
-          })
-          return // Don't set gameState; completeCampaignMission handles the transition
+          // Show the victory/defeat state on the tactical grid briefly before transitioning
+          set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+
+          // Delayed transition to PostMission (gives player time to see the result)
+          setTimeout(() => {
+            get().completeCampaignMission({
+              mission,
+              outcome: outcome as 'victory' | 'defeat',
+              roundsPlayed: newGameState.roundNumber,
+              completedObjectiveIds,
+              heroKills,
+              lootCollected: newGameState.lootCollected,
+              heroesIncapacitated,
+              leaderKilled,
+              narrativeBonus: outcome === 'victory' ? 2 : 0,
+            })
+          }, 3000)
+          return
         }
       }
     }
@@ -1354,22 +1752,84 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
     addCombatLog(`Phase advanced to ${newPhase} (Round ${newRound})`)
+
+    // Trigger round banner on new round
+    if (newPhase === 'Setup' && newRound > 1) {
+      const roundLimit = activeMission?.roundLimit
+      const roundsLeft = roundLimit ? roundLimit - newRound : undefined
+      set({
+        roundBanner: { round: newRound, roundLimit: roundLimit ?? undefined, roundsLeft },
+      })
+    }
+
+    // Trigger game over banner on victory/defeat
+    if (newGameState.winner) {
+      const isVictory = newGameState.winner === 'Operative'
+      set({
+        gameOverBanner: {
+          outcome: isVictory ? 'victory' : 'defeat',
+          condition: newGameState.victoryCondition ?? undefined,
+          rounds: newGameState.roundNumber,
+        },
+      })
+    }
   },
 
   setHighlightedTile: (coord: GridCoordinate | null) => {
-    set({ highlightedTile: coord })
+    const { gameState, gameData, selectedFigureId, validMoves } = get()
+
+    // Compute player move path + targets from destination when hovering a valid move tile
+    if (coord && gameState && gameData && selectedFigureId) {
+      const isValidMove = validMoves.some(m => m.x === coord.x && m.y === coord.y)
+      if (isValidMove) {
+        const figure = gameState.figures.find(f => f.id === selectedFigureId)
+        if (figure) {
+          const path = getPath(figure.position, coord, gameState.map, gameState.figures)
+          if (path.length > 0) {
+            // Calculate total movement cost along the path
+            let totalCost = 0
+            for (let i = 0; i < path.length - 1; i++) {
+              totalCost += getMovementCost(path[i], path[i + 1], gameState.map)
+            }
+            // Compute which enemies would be targetable from this position
+            const previewTargets = getValidTargetsV2(figure, coord, gameState, gameData)
+            set({
+              highlightedTile: coord,
+              playerMovePath: path,
+              playerMovePathCost: totalCost,
+              movePreviewTargets: previewTargets.length > 0 ? previewTargets : null,
+            })
+            return
+          }
+        }
+      }
+    }
+
+    set({ highlightedTile: coord, playerMovePath: null, playerMovePathCost: null, movePreviewTargets: null })
   },
 
   setAIMovePath: (path: GridCoordinate[] | null) => {
     set({ aiMovePath: path })
+    // Auto-pan camera to AI move destination
+    if (path && path.length > 0) {
+      set({ cameraTarget: path[path.length - 1] })
+    }
   },
 
   setAIAttackTarget: (target: { from: GridCoordinate; to: GridCoordinate } | null) => {
     set({ aiAttackTarget: target })
+    // Auto-pan camera to AI attack origin
+    if (target) {
+      set({ cameraTarget: target.from })
+    }
   },
 
   clearAIVisualization: () => {
     set({ aiMovePath: null, aiAttackTarget: null })
+  },
+
+  setCameraTarget: (target: GridCoordinate | null) => {
+    set({ cameraTarget: target })
   },
 
   addCombatLog: (message: string) => {
@@ -1378,6 +1838,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
         ...state.combatLog.slice(-49),
         `[R${state.gameState?.roundNumber ?? 0}] ${message}`,
       ],
+    }))
+  },
+
+  addFloatingText: (fct) => {
+    const entry: FloatingCombatText = {
+      ...fct,
+      id: `fct-${++fctCounter}`,
+      createdAt: Date.now(),
+    }
+    set(state => ({
+      floatingTexts: [...state.floatingTexts.slice(-19), entry],
     }))
   },
 
@@ -1450,6 +1921,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })
   },
 
+  setHoveredFigure: (id: string | null, screenPos?: { x: number; y: number }) => {
+    set({
+      hoveredFigureId: id,
+      figureTooltipPos: screenPos ?? null,
+    })
+  },
+
+  setHoveredTile: (coord: { x: number; y: number } | null, screenPos?: { x: number; y: number }) => {
+    set({
+      hoveredTileCoord: coord,
+      tileTooltipPos: screenPos ?? null,
+    })
+  },
+
+  clearRoundBanner: () => set({ roundBanner: null }),
+  clearGameOverBanner: () => set({ gameOverBanner: null }),
+
   // ========================================================================
   // CAMPAIGN ACTIONS
   // ========================================================================
@@ -1486,6 +1974,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         availableMissionIds: [],
         credits: 0,
         narrativeItems: [],
+        consumableInventory: {},
         threatLevel: 0,
         threatMultiplier: 1,
         missionsPlayed: 0,
@@ -1531,6 +2020,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
       console.error('Failed to auto-save new campaign:', e)
     }
     get().saveCampaignToStorage()
+  },
+
+  showMissionBriefingScreen: (missionId: string) => {
+    set({
+      showMissionSelect: false,
+      showMissionBriefing: true,
+      pendingMissionId: missionId,
+    })
+  },
+
+  dismissMissionBriefing: () => {
+    const { pendingMissionId } = get()
+    if (!pendingMissionId) return
+    set({ showMissionBriefing: false, pendingMissionId: null })
+    get().startCampaignMission(pendingMissionId)
   },
 
   /**
@@ -1593,6 +2097,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         npcProfiles: gameData.npcProfiles,
         objectivePointTemplates: mission.objectivePoints,
         lootTokens: mission.lootTokens,
+        consumableInventory: { ...(campaignState.consumableInventory ?? {}) },
       },
     )
 
@@ -1604,19 +2109,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameState.map.deploymentZones.operative = mission.operativeDeployZone
     }
 
-    // Deploy heroes as operative army
+    // Deploy heroes + companions as operative army
+    const operativeUnits: ArmyCompositionV2['operative'] = heroes.map(h => ({
+      entityType: 'hero' as const,
+      entityId: h.id,
+      count: 1,
+    }))
+
+    // Add recruited companions as NPC allies on the operative side
+    const companions = campaignState.companions ?? []
+    for (const companionId of companions) {
+      const combatProfileId = gameData.companionProfiles?.[companionId]
+      if (combatProfileId && gameData.npcProfiles[combatProfileId]) {
+        operativeUnits.push({
+          entityType: 'npc' as const,
+          entityId: combatProfileId,
+          count: 1,
+        })
+      }
+    }
+
     const army: ArmyCompositionV2 = {
       imperial: mission.initialEnemies.map(g => ({
         npcId: g.npcProfileId,
         count: g.count,
       })),
-      operative: heroes.map(h => ({
-        entityType: 'hero' as const,
-        entityId: h.id,
-        count: 1,
-      })),
+      operative: operativeUnits,
     }
     gameState = deployFiguresV2(gameState, army, gameData)
+
+    // Initialize tactic card deck
+    if (gameData.tacticCards && Object.keys(gameData.tacticCards).length > 0) {
+      gameState.tacticDeck = initializeTacticDeck(gameData)
+    }
 
     // Build activation order
     gameState.activationOrder = buildActivationOrderV2(gameState)
@@ -1641,11 +2166,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Process a completed campaign mission and show the post-mission screen.
    */
   completeCampaignMission: (input: MissionCompletionInput) => {
+    const { campaignState, campaignMissions, gameState } = get()
     const { campaignState, campaignMissions, activeSaveSlot } = get()
     if (!campaignState) return
 
+    // Sync depleted consumable inventory from mission back to campaign
+    const updatedCampaign = gameState?.consumableInventory
+      ? { ...campaignState, consumableInventory: { ...gameState.consumableInventory } }
+      : campaignState
+
+    const previousAct = updatedCampaign.currentAct
     const { campaign: newCampaign, result } = completeMission(
-      campaignState,
+      updatedCampaign,
       input,
       campaignMissions,
     )
@@ -1656,6 +2188,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showPostMission: true,
       isInitialized: false,
       gameState: null,
+      // Flag act transition if act advanced
+      actTransitionData: newCampaign.currentAct > previousAct
+        ? { fromAct: previousAct, toAct: newCampaign.currentAct }
+        : null,
     })
 
     // Auto-save after mission completion
@@ -1674,17 +2210,40 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Return from post-mission screen to mission select.
    */
   returnToMissionSelect: () => {
-    set({
-      showPostMission: false,
-      showMissionSelect: true,
-      lastMissionResult: null,
-      activeMissionDef: null,
-      activeMission: null,
-      triggeredWaveIds: [],
-      gameState: null,
-      isInitialized: false,
-    })
+    const { actTransitionData } = get()
+    if (actTransitionData) {
+      // Show act transition screen before returning to mission select
+      set({
+        showPostMission: false,
+        showActTransition: true,
+        lastMissionResult: null,
+        activeMissionDef: null,
+        activeMission: null,
+        triggeredWaveIds: [],
+        gameState: null,
+        isInitialized: false,
+      })
+    } else {
+      set({
+        showPostMission: false,
+        showMissionSelect: true,
+        lastMissionResult: null,
+        activeMissionDef: null,
+        activeMission: null,
+        triggeredWaveIds: [],
+        gameState: null,
+        isInitialized: false,
+      })
+    }
     get().saveCampaignToStorage()
+  },
+
+  dismissActTransition: () => {
+    set({
+      showActTransition: false,
+      actTransitionData: null,
+      showMissionSelect: true,
+    })
   },
 
   /**
@@ -1806,10 +2365,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       activeSaveSlot: slot,
       showSetup: false,
       showMissionSelect: true,
+      showMissionBriefing: false,
+      pendingMissionId: null,
       showPostMission: false,
       showMissionBriefing: false,
       showCampaignJournal: false,
       showSocialPhase: false,
+      showActTransition: false,
+      actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
       showCampaignStats: false,
@@ -1846,10 +2409,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       lastMissionResult: null,
       activeSaveSlot: null,
       showMissionSelect: false,
+      showMissionBriefing: false,
+      pendingMissionId: null,
       showPostMission: false,
       showMissionBriefing: false,
       showCampaignJournal: false,
       showSocialPhase: false,
+      showActTransition: false,
+      actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
       showCampaignStats: false,
@@ -1858,6 +2425,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       activeMissionDef: null,
       activeMission: null,
       triggeredWaveIds: [],
+      imperialAIPhase: null,
+      cameraTarget: null,
       showSetup: true,
       gameState: null,
       isInitialized: false,

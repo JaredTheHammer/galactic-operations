@@ -4,11 +4,20 @@
 
 import React from 'react'
 import { useIsMobile } from '../../../hooks/useIsMobile'
+import { useGameStore } from '../../../store/game-store'
 import type {
   SocialPhaseLocation,
   SocialNPC,
 } from '../../../../../engine/src/types'
 import type { SocialSessionState } from './SocialPhase'
+
+const factionDisplayNames: Record<string, string> = {
+  underworld: 'Underworld',
+  mandalorian: 'Mandalorians',
+  rebel: 'Rebel Alliance',
+  imperial: 'Empire',
+  hutt: 'Hutt Cartel',
+}
 
 interface Props {
   session: SocialSessionState
@@ -156,20 +165,33 @@ export function SocialSummary({ session, npcs, location, onComplete }: Props) {
             )}
 
             {/* Reputation */}
-            {reputationChanges.length > 0 && (
-              <Section title="Reputation">
-                {reputationChanges.map((r, i) => (
-                  <div key={i} style={{
-                    display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '13px',
-                  }}>
-                    <span style={{ color: '#ccc' }}>{r.factionId}</span>
-                    <span style={{ color: (r.reputationDelta ?? 0) >= 0 ? '#44ff44' : '#ff4444' }}>
-                      {(r.reputationDelta ?? 0) >= 0 ? '+' : ''}{r.reputationDelta}
-                    </span>
-                  </div>
-                ))}
-              </Section>
-            )}
+            {reputationChanges.length > 0 && (() => {
+              const campaignRep = useGameStore.getState().campaignState?.factionReputation ?? {}
+              return (
+                <Section title="Reputation">
+                  {reputationChanges.map((r, i) => {
+                    const name = factionDisplayNames[r.factionId ?? ''] ?? (r.factionId ?? '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                    const delta = r.reputationDelta ?? 0
+                    const total = campaignRep[r.factionId ?? ''] ?? 0
+                    return (
+                      <div key={i} style={{
+                        display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '13px',
+                      }}>
+                        <span style={{ color: '#ccc' }}>{name}</span>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <span style={{ color: delta >= 0 ? '#44ff44' : '#ff4444' }}>
+                            {delta >= 0 ? '+' : ''}{delta}
+                          </span>
+                          <span style={{ color: '#888', fontSize: '11px' }}>
+                            (total: {total})
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </Section>
+              )
+            })()}
 
             {/* Summary line */}
             <div style={{

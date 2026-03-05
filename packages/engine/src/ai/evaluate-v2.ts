@@ -27,6 +27,8 @@ import type {
   DefensePool,
   WeaponDefinition,
   RangeBand,
+  ConsumableItem,
+  computeDiminishedHealing,
 } from '../types.js';
 
 import { getValidMoves, getDistance, getPath } from '../movement.js';
@@ -882,6 +884,8 @@ export function evaluateCondition(
       return evalShouldAimBeforeAttack(figure, gameState, gameData, weights);
     case 'should-dodge-for-defense':
       return evalShouldDodgeForDefense(figure, gameState, gameData, weights);
+    case 'should-use-consumable':
+      return evalShouldUseConsumable(figure, gameState, gameData, weights);
     case 'default':
       return { satisfied: true, context: { reasoning: 'Default fallback rule' } };
     default:
@@ -1781,4 +1785,143 @@ function evalShouldDodgeForDefense(
   }
 
   return { satisfied: false, context: { reasoning: `Dodge score ${dodgeScore.toFixed(2)} below threshold 0.25` } };
+}
+
+/**
+ * Should the figure use a consumable (stim pack / repair patch)?
+ * Triggers when a friendly figure (self or adjacent ally) is below 50% health
+ * and a matching consumable is available.
+ */
+function evalShouldUseConsumable(
+  figure: Figure,
+  gameState: GameState,
+  gameData: GameData,
+  weights: AIWeights,
+): ConditionResult {
+  if (!gameData.consumables || figure.actionsRemaining <= 0) {
+    return { satisfied: false, context: { reasoning: 'No consumables data or no actions' } };
+  }
+
+  const consumables = Object.values(gameData.consumables) as ConsumableItem[];
+  if (consumables.length === 0) {
+    return { satisfied: false, context: { reasoning: 'No consumables available' } };
+  }
+
+  // Get the side for this figure
+  const player = gameState.players.find(p => p.id === figure.playerId);
+  if (!player) {
+    return { satisfied: false, context: { reasoning: 'No player found' } };
+  }
+
+  // Find candidates: self + adjacent allies that are injured
+  const friendlyFigures = gameState.figures.filter(f =>
+    f.playerId === figure.playerId && !f.isDefeated
+  );
+
+  // Determine creature type heuristic
+  const getCreature = (f: Figure): 'organic' | 'droid' => {
+    if (f.entityType === 'hero') {
+      const hero = gameState.heroes[f.entityId];
+      if (hero?.species === 'droid') return 'droid';
+    }
+    if (f.entityId.includes('droid')) return 'droid';
+    return 'organic';
+  };
+
+  let bestTarget: { figureId: string; consumableId: string; healValue: number; urgency: number } | null = null;
+
+  for (const ally of friendlyFigures) {
+    // Must be self or adjacent
+    if (ally.id !== figure.id) {
+      const dist = Math.abs(figure.position.x - ally.position.x)
+                 + Math.abs(figure.position.y - ally.position.y);
+      if (dist > 1) continue;
+    }
+
+    // Only heal if wounded (above 40% wounds taken relative to wound threshold)
+    const woundThreshold = ally.entityType === 'hero'
+      ? (gameState.heroes[ally.entityId]?.wounds?.threshold ?? 10)
+      : (gameState.npcProfiles[ally.entityId]?.woundThreshold ?? 5);
+    const healthRatio = ally.woundsCurrent / woundThreshold;
+    if (healthRatio < 0.4) continue; // less than 40% wounds taken, not urgent
+
+    const creatureType = getCreature(ally);
+
+    // Find best consumable for this target
+    for (const consumable of consumables) {
+      if (consumable.effect !== 'heal_wounds') continue;
+      if (consumable.targetType !== 'any' && consumable.targetType !== creatureType) continue;
+
+      // Check inventory (if tracked)
+      if (gameState.consumableInventory) {
+        const available = gameState.consumableInventory[consumable.id] ?? 0;
+        if (available <= 0) continue;
+      }
+
+      const priorUses = ally.consumableUsesThisEncounter?.[consumable.id] ?? 0;
+      const healValue = consumable.diminishingReturns
+        ? computeDiminishedHealing(consumable.baseValue, priorUses)
+        : consumable.baseValue;
+
+      // Not worth it if only healing 1
+      if (healValue <= 1 && healthRatio < 0.6) continue;
+
+      const urgency = healthRatio * healValue;
+      if (!bestTarget || urgency > bestTarget.urgency) {
+        bestTarget = {
+          figureId: ally.id,
+          consumableId: consumable.id,
+          healValue,
+          urgency,
+        };
+      }
+    }
+  }
+
+  if (bestTarget) {
+    return {
+      satisfied: true,
+      context: {
+        consumableId: bestTarget.consumableId,
+        consumableTargetId: bestTarget.figureId === figure.id ? undefined : bestTarget.figureId,
+        reasoning: `Use ${bestTarget.consumableId} on ${bestTarget.figureId} (heal ${bestTarget.healValue}, urgency ${bestTarget.urgency.toFixed(1)})`,
+      },
+    };
+  }
+
+  return { satisfied: false, context: { reasoning: 'No injured allies needing consumables' } };
+}
+
+/**
+ * Get the attack range in tiles for a figure's primary weapon.
+ * Exported for UI range overlay rendering.
+ */
+export function getAttackRangeInTiles(
+  figure: Figure,
+  gameState: GameState,
+  gameData: GameData,
+): number {
+  const weapon = getPrimaryWeapon(figure, gameState, gameData);
+  return getMaxRangeInTiles(weapon);
+}
+
+/**
+ * Get IDs of enemy figures that can attack a given figure (threat assessment).
+ * Checks each enemy's weapon range + LOS to the target position.
+ */
+export function getThreateningEnemies(
+  figure: Figure,
+  gameState: GameState,
+  gameData: GameData,
+): string[] {
+  const enemies = getEnemies(figure, gameState);
+  return enemies
+    .filter(enemy => {
+      const weapon = getPrimaryWeapon(enemy, gameState, gameData);
+      const maxRange = getMaxRangeInTiles(weapon);
+      const dist = getDistance(enemy.position, figure.position);
+      if (dist > maxRange) return false;
+      return hasLineOfSight(enemy.position, figure.position, gameState.map);
+    })
+    .map(e => e.id);
 }

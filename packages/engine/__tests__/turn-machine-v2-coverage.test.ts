@@ -451,6 +451,40 @@ describe('UseConsumable action', () => {
     expect(newState.figures[0].woundsCurrent).toBe(5);
   });
 
+  it('depletes consumable inventory when used by Operative', () => {
+    const heroFig = makeFigure({ woundsCurrent: 6 });
+    const gs = makeGameState(
+      [heroFig],
+      { 'hero-1': makeHero() },
+      {},
+      { consumableInventory: { 'stim-pack': 2 } },
+    );
+    const gd = makeGameData({ 'stim-pack': makeStimPack() });
+
+    const action = { type: 'UseConsumable' as const, figureId: 'fig-hero-1', payload: { itemId: 'stim-pack' } };
+    const newState = executeActionV2(gs, action as any, gd);
+
+    expect(newState.figures[0].woundsCurrent).toBe(1);
+    expect(newState.consumableInventory?.['stim-pack']).toBe(1);
+  });
+
+  it('rejects consumable when inventory is empty', () => {
+    const heroFig = makeFigure({ woundsCurrent: 6 });
+    const gs = makeGameState(
+      [heroFig],
+      { 'hero-1': makeHero() },
+      {},
+      { consumableInventory: { 'stim-pack': 0 } },
+    );
+    const gd = makeGameData({ 'stim-pack': makeStimPack() });
+
+    const action = { type: 'UseConsumable' as const, figureId: 'fig-hero-1', payload: { itemId: 'stim-pack' } };
+    const newState = executeActionV2(gs, action as any, gd);
+
+    // Should not heal (empty inventory)
+    expect(newState.figures[0].woundsCurrent).toBe(6);
+  });
+
   it('recognizes NPC droid by entityId heuristic', () => {
     // NPC with 'droid' in entityId should be treated as droid
     const droidNPC = makeNPCFigure({
