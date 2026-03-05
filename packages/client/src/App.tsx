@@ -20,6 +20,7 @@ import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
 import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgression'
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
 import { CombatArena } from './components/CombatArena/CombatArena'
+import { useCampaignAI } from './hooks/useCampaignAI'
 import { useIsMobile } from './hooks/useIsMobile'
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
+  const campaignAIState = useCampaignAI()
   const [showCombatLog, setShowCombatLog] = useState(false)
 
   const selectedFigure = gameState?.figures.find(f => f.id === selectedFigureId) || null

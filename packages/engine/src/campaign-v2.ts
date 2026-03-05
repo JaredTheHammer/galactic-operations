@@ -320,15 +320,31 @@ export function completeMission(
   // Determine newly available missions
   const completedMissions = [...campaign.completedMissions, result];
   const completedIds = new Set(completedMissions.map(r => r.missionId));
+  const alreadyAvailable = new Set(campaign.availableMissionIds);
 
   const newAvailable: string[] = [];
+
+  // First check missions explicitly listed in unlocksNext
   for (const nextId of mission.unlocksNext) {
     const nextMission = allMissions[nextId];
     if (!nextMission) continue;
     if (completedIds.has(nextId)) continue;
-    // Check prerequisites (OR logic for branching)
     if (nextMission.prerequisites.length === 0 || nextMission.prerequisites.some(p => completedIds.has(p))) {
       newAvailable.push(nextId);
+    }
+  }
+
+  // Also scan ALL missions for newly-satisfied prerequisites (handles cross-act transitions
+  // where Act N+1 M1 lists Act N finale as a prerequisite but isn't in unlocksNext)
+  const newAvailableSet = new Set(newAvailable);
+  for (const [mId, mDef] of Object.entries(allMissions)) {
+    if (completedIds.has(mId)) continue;
+    if (alreadyAvailable.has(mId)) continue;
+    if (newAvailableSet.has(mId)) continue;
+    if (mDef.prerequisites.length === 0) continue;
+    if (mDef.prerequisites.every(p => completedIds.has(p))) {
+      newAvailable.push(mId);
+      newAvailableSet.add(mId);
     }
   }
 

@@ -370,16 +370,16 @@ describe('getNPCCourage', () => {
 });
 
 describe('getHeroCourage', () => {
-  it('derives courage from Willpower characteristic', () => {
-    expect(getHeroCourage(hero)).toBe(3); // Willpower 3
+  it('derives courage from Willpower + 2', () => {
+    expect(getHeroCourage(hero)).toBe(5); // Willpower 3 + 2
   });
 
-  it('returns low courage for low Willpower heroes', () => {
-    expect(getHeroCourage(lowWillpowerHero)).toBe(1);
+  it('floors low Willpower heroes at courage 3', () => {
+    expect(getHeroCourage(lowWillpowerHero)).toBe(3); // Willpower 1 + 2 = 3
   });
 
   it('returns high courage for high Willpower heroes', () => {
-    expect(getHeroCourage(highWillpowerHero)).toBe(5);
+    expect(getHeroCourage(highWillpowerHero)).toBe(7); // Willpower 5 + 2
   });
 });
 

@@ -93,6 +93,14 @@ function isNPC(entity: HeroCharacter | NPCProfile): entity is NPCProfile {
 // HELPER: WEAPON LOOKUP
 // ============================================================================
 
+/** Legacy v1 weapon IDs that map to v2 equivalents (for old campaign saves). */
+const LEGACY_WEAPON_MAP: Record<string, string> = {
+  'blaster-pistol': 'heavy-blaster-pistol',
+  'blaster-rifle': 'e-11',
+  'vibroaxe': 'vibro-axe',
+  'vibroknife': 'vibro-knife',
+};
+
 /**
  * Look up a WeaponDefinition from GameData, falling back to NPC embedded weapons.
  */
@@ -104,6 +112,12 @@ function resolveWeapon(
   // First try the global weapons registry
   if (gameData.weapons[weaponId]) {
     return gameData.weapons[weaponId];
+  }
+
+  // Try legacy v1 weapon ID mapping
+  const v2Id = LEGACY_WEAPON_MAP[weaponId];
+  if (v2Id && gameData.weapons[v2Id]) {
+    return gameData.weapons[v2Id];
   }
 
   // For NPCs, check embedded weapons and synthesize a WeaponDefinition
