@@ -86,12 +86,49 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
     usePortraitStore.getState().hydrate()
   }, [])
 
+  // Arrow key camera panning
+  const pressedKeysRef = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    const PAN_KEYS = new Set(['arrowup', 'arrowdown', 'arrowleft', 'arrowright'])
+    const onKeyDown = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase()
+      if (PAN_KEYS.has(key)) {
+        e.preventDefault()
+        pressedKeysRef.current.add(key)
+      }
+    }
+    const onKeyUp = (e: KeyboardEvent) => {
+      pressedKeysRef.current.delete(e.key.toLowerCase())
+    }
+    const onBlur = () => pressedKeysRef.current.clear()
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('blur', onBlur)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('blur', onBlur)
+    }
+  }, [])
+
   // Animation frame loop
   useEffect(() => {
     let animationId: number
 
     const animate = () => {
       if (!rendererRef.current || !cameraRef.current || !gameState) return
+
+      // Apply arrow key panning (pixels per frame at zoom=1)
+      const PAN_SPEED = 8
+      const keys = pressedKeysRef.current
+      if (keys.size > 0) {
+        let dx = 0, dy = 0
+        if (keys.has('arrowleft')) dx += PAN_SPEED
+        if (keys.has('arrowright')) dx -= PAN_SPEED
+        if (keys.has('arrowup')) dy += PAN_SPEED
+        if (keys.has('arrowdown')) dy -= PAN_SPEED
+        if (dx !== 0 || dy !== 0) cameraRef.current.panBy(dx, dy)
+      }
 
       // Update camera
       cameraRef.current.update()

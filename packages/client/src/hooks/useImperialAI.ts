@@ -192,21 +192,19 @@ export function useImperialAI(enabled: boolean): { isImperialTurn: boolean } {
           for (const action of decision.actions) {
             // Visualize move path or attack target
             if (action.type === 'Move') {
-              useGameStore.setState({ aiMovePath: action.payload.path })
+              useGameStore.getState().setAIMovePath(action.payload.path)
             } else if (action.type === 'Attack') {
               const targetFig = gs.figures.find(f => f.id === action.payload.targetId)
               const currentFig = gs.figures.find(f => f.id === fig!.id)
               if (targetFig && currentFig) {
-                useGameStore.setState({
-                  aiAttackTarget: { from: currentFig.position, to: targetFig.position },
-                })
+                useGameStore.getState().setAIAttackTarget({ from: currentFig.position, to: targetFig.position })
               }
             }
 
             await delay(getDelays().actionMs)
 
             // Clear visualization
-            useGameStore.setState({ aiMovePath: null, aiAttackTarget: null })
+            useGameStore.getState().clearAIVisualization()
 
             // Execute the action
             try {

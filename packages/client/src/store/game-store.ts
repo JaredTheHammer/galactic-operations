@@ -1754,10 +1754,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setAIMovePath: (path: GridCoordinate[] | null) => {
     set({ aiMovePath: path })
+    // Auto-pan camera to AI move destination
+    if (path && path.length > 0) {
+      set({ cameraTarget: path[path.length - 1] })
+    }
   },
 
   setAIAttackTarget: (target: { from: GridCoordinate; to: GridCoordinate } | null) => {
     set({ aiAttackTarget: target })
+    // Auto-pan camera to AI attack origin
+    if (target) {
+      set({ cameraTarget: target.from })
+    }
   },
 
   clearAIVisualization: () => {
