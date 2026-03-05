@@ -50,6 +50,8 @@ import { generateMap } from '@engine/map-generator.js'
 import {
   getValidMoves,
   moveFigure,
+  getPath,
+  getMovementCost,
 } from '@engine/movement.js'
 import {
   getValidTargetsV2,
@@ -458,6 +460,10 @@ export interface GameStore {
   // Attack range overlay for selected figure
   attackRange: { center: GridCoordinate; radius: number } | null
 
+  // Player move path preview (computed on hover)
+  playerMovePath: GridCoordinate[] | null
+  playerMovePathCost: number | null
+
   // Undo history (stores previous game states for undo)
   gameStateHistory: GameState[]
 
@@ -618,6 +624,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   aiMovePath: null,
   aiAttackTarget: null,
   attackRange: null,
+  playerMovePath: null,
+  playerMovePathCost: null,
 
   // Imperial AI state (campaign combat)
   imperialAIPhase: null,
@@ -970,7 +978,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { gameState, gameData } = get()
     if (!gameState || !gameData) return
 
-    set({ selectedFigureId: figureId, validMoves: [], validTargets: [], attackRange: null })
+    set({ selectedFigureId: figureId, validMoves: [], validTargets: [], attackRange: null, playerMovePath: null, playerMovePathCost: null })
 
     if (figureId) {
       const figure = gameState.figures.find(f => f.id === figureId)
@@ -1699,7 +1707,29 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   setHighlightedTile: (coord: GridCoordinate | null) => {
-    set({ highlightedTile: coord })
+    const { gameState, selectedFigureId, validMoves } = get()
+
+    // Compute player move path when hovering a valid move tile
+    if (coord && gameState && selectedFigureId) {
+      const isValidMove = validMoves.some(m => m.x === coord.x && m.y === coord.y)
+      if (isValidMove) {
+        const figure = gameState.figures.find(f => f.id === selectedFigureId)
+        if (figure) {
+          const path = getPath(figure.position, coord, gameState.map, gameState.figures)
+          if (path.length > 0) {
+            // Calculate total movement cost along the path
+            let totalCost = 0
+            for (let i = 0; i < path.length - 1; i++) {
+              totalCost += getMovementCost(path[i], path[i + 1], gameState.map)
+            }
+            set({ highlightedTile: coord, playerMovePath: path, playerMovePathCost: totalCost })
+            return
+          }
+        }
+      }
+    }
+
+    set({ highlightedTile: coord, playerMovePath: null, playerMovePathCost: null })
   },
 
   setAIMovePath: (path: GridCoordinate[] | null) => {

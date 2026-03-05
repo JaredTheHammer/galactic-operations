@@ -39,6 +39,8 @@ interface UIState {
   aiMovePath: GridCoordinate[] | null
   aiAttackTarget: { from: GridCoordinate; to: GridCoordinate } | null
   attackRange: { center: GridCoordinate; radius: number } | null
+  playerMovePath: GridCoordinate[] | null
+  playerMovePathCost: number | null
 }
 
 // ============================================================================
@@ -473,6 +475,11 @@ export class TacticalGridRenderer {
       this.ctx.strokeRect(screenX, screenY, TILE_SIZE, TILE_SIZE)
     }
 
+    // Player move path preview
+    if (uiState.playerMovePath && uiState.playerMovePath.length >= 2) {
+      this.drawPlayerMovePath(uiState.playerMovePath, uiState.playerMovePathCost)
+    }
+
     // AI move path visualization
     if (uiState.aiMovePath && uiState.aiMovePath.length >= 2) {
       this.drawAIMovePath(uiState.aiMovePath, gameState, uiState)
@@ -551,6 +558,73 @@ export class TacticalGridRenderer {
     this.ctx.stroke()
 
     this.ctx.restore()
+  }
+
+  private drawPlayerMovePath(pathCoords: GridCoordinate[], cost: number | null) {
+    if (!this.ctx || pathCoords.length < 2) return
+
+    const ctx = this.ctx
+    ctx.save()
+
+    // Dashed path line in blue
+    ctx.strokeStyle = VALID_MOVE_OVERLAY
+    ctx.lineWidth = 2.5
+    ctx.setLineDash([5, 3])
+    ctx.globalAlpha = 0.6
+
+    ctx.beginPath()
+    ctx.moveTo(
+      pathCoords[0].x * TILE_SIZE + TILE_SIZE / 2,
+      pathCoords[0].y * TILE_SIZE + TILE_SIZE / 2,
+    )
+    for (let i = 1; i < pathCoords.length; i++) {
+      ctx.lineTo(
+        pathCoords[i].x * TILE_SIZE + TILE_SIZE / 2,
+        pathCoords[i].y * TILE_SIZE + TILE_SIZE / 2,
+      )
+    }
+    ctx.stroke()
+
+    // Destination circle
+    const dest = pathCoords[pathCoords.length - 1]
+    const dx = dest.x * TILE_SIZE + TILE_SIZE / 2
+    const dy = dest.y * TILE_SIZE + TILE_SIZE / 2
+    ctx.setLineDash([])
+    ctx.globalAlpha = 0.8
+    ctx.strokeStyle = VALID_MOVE_OVERLAY
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(dx, dy, TILE_SIZE / 3, 0, Math.PI * 2)
+    ctx.stroke()
+
+    // Movement cost badge at destination
+    if (cost != null) {
+      const label = `${cost}`
+      ctx.globalAlpha = 1.0
+      ctx.font = 'bold 11px monospace'
+      const tw = ctx.measureText(label).width
+      const bw = tw + 8
+      const bh = 16
+      const bx = dx - bw / 2
+      const by = dy - TILE_SIZE / 2 - bh - 2
+
+      // Badge background
+      ctx.fillStyle = 'rgba(10, 10, 20, 0.85)'
+      ctx.beginPath()
+      ctx.roundRect(bx, by, bw, bh, 3)
+      ctx.fill()
+      ctx.strokeStyle = VALID_MOVE_OVERLAY
+      ctx.lineWidth = 1
+      ctx.stroke()
+
+      // Cost text
+      ctx.fillStyle = '#ffffff'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(label, dx, by + bh / 2)
+    }
+
+    ctx.restore()
   }
 
   private drawAIAttackTarget(target: { from: GridCoordinate; to: GridCoordinate }, _gameState: GameState) {
