@@ -207,6 +207,7 @@ button, input, select, [role="button"] {
   border: 2px solid var(--accent-blue);
   border-radius: var(--radius-md);
   padding: var(--space-md);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 
