@@ -17,10 +17,10 @@ type EquipTab = 'weapon' | 'armor'
 
 const WEAPON_CATEGORIES = [
   { id: 'all',    label: 'All' },
-  { id: 'melee',  label: 'Melee',  skills: ['Brawl', 'Melee'] },
-  { id: 'pistol', label: 'Pistol', skills: ['Ranged (Light)'] },
-  { id: 'rifle',  label: 'Rifle',  skills: ['Ranged (Heavy)'] },
-  { id: 'heavy',  label: 'Heavy',  skills: ['Gunnery'] },
+  { id: 'melee',  label: 'Melee',  skills: ['brawl', 'melee'] },
+  { id: 'pistol', label: 'Pistol', skills: ['ranged-light'] },
+  { id: 'rifle',  label: 'Rifle',  skills: ['ranged-heavy'] },
+  { id: 'heavy',  label: 'Heavy',  skills: ['gunnery'] },
 ] as const
 
 interface EquipmentStepProps {

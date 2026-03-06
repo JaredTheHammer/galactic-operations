@@ -57,12 +57,13 @@ export function useCampaignAI() {
   const cancelRef = useRef(false)
   const processingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Load AI profiles once. Also reset processingRef on mount/HMR to prevent
-  // stale locks from surviving hot module replacement.
+  // Load AI profiles once. Also reset processingRef and aiState on mount/HMR
+  // to prevent stale locks and stuck UI from surviving hot module replacement.
   useEffect(() => {
     profilesRef.current = loadAIProfiles(aiProfilesRaw)
     processingRef.current = false
     cancelRef.current = false
+    setAIState({ phase: 'idle', activeFigureName: '', reasoning: '' })
   }, [])
 
   // Async delay helper
@@ -137,6 +138,12 @@ export function useCampaignAI() {
         .finally(() => {
           if (processingTimerRef.current) clearTimeout(processingTimerRef.current)
           processingRef.current = false
+          // Safety net: if aiState is still non-idle (e.g. cancelRef caused
+          // an early return without cleanup), reset it now.
+          setAIState(prev => prev.phase !== 'idle'
+            ? { phase: 'idle', activeFigureName: '', reasoning: '' }
+            : prev
+          )
           // After processing completes, check again on next tick.
           // This ensures the next AI figure gets processed even though
           // the store change from endActivation() already fired while
@@ -214,9 +221,12 @@ export function useCampaignAI() {
       return
     }
 
-    // Ensure the figure has actions/maneuvers available
-    if (activeFig.actionsRemaining <= 0 && activeFig.maneuversRemaining <= 0) {
-      // Reset for activation if needed
+    // Always reset the figure at activation start. This ensures fresh
+    // action/maneuver economy (1 Action + 1 Maneuver) and clears transient
+    // conditions. Previously this was conditional on both resources being 0,
+    // but HMR interrupts could leave partial state (e.g. 0 actions, 1 maneuver)
+    // that the AND check wouldn't catch.
+    if (!activeFig.isActivated) {
       currentGs = {
         ...currentGs,
         figures: currentGs.figures.map(f =>
