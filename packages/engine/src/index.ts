@@ -230,6 +230,25 @@ export {
   runCombatBatch,
 } from './ai/index.js';
 
+// Re-export power ranking system
+export {
+  computeAnalyticalRating,
+  runDuelTournament,
+  runFullPowerRanking,
+  generatePowerRankingReport,
+} from './power-ranking.js';
+
+export type {
+  AnalyticalRating,
+  DuelResult,
+  DuelGameDetail,
+  DuelRanking,
+  CombinedRanking,
+  PowerRankingResult,
+  NPCCombatStats,
+  BalanceFlag,
+} from './power-ranking.js';
+
 export type {
   AIProfilesData,
   AIArchetypeProfile,

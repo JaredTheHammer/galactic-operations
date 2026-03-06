@@ -11,7 +11,11 @@
     "simulate:quick": "tsx scripts/run-simulations.ts --count 10 --seed 42",
     "combat-sim": "tsx scripts/run-combat-sim.ts",
     "export:cards": "tsx scripts/generate-card-pdf.ts",
-    "build-arena": "node scripts/build-combat-arena.mjs"
+    "build-arena": "node scripts/build-combat-arena.mjs",
+    "rank": "tsx scripts/run-npc-ranking.ts",
+    "rank:quick": "tsx scripts/run-npc-ranking.ts --quick",
+    "rank:report": "tsx scripts/run-npc-ranking.ts --report",
+    "rank:full": "tsx scripts/run-npc-ranking.ts --report --log"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["esbuild"]

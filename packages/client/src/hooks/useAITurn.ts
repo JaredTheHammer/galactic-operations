@@ -104,11 +104,11 @@ export function useAITurn(): UseAITurnReturn {
   const [battleLog, setBattleLog] = useState<BattleLog | null>(null)
 
   const profilesRef = useRef<AIProfilesData | null>(null)
-  const cancelRef = useRef(false)
   const pausedRef = useRef(false)
   const speedRef = useRef<AISpeed>(speed)
-  const loopStarted = useRef(false)
   const loggerRef = useRef<BattleLogger | null>(null)
+  // Monotonically increasing ID to distinguish effect invocations (StrictMode safe)
+  const effectIdRef = useRef(0)
 
   // Keep refs in sync with state
   useEffect(() => { pausedRef.current = isPaused }, [isPaused])
@@ -120,20 +120,6 @@ export function useAITurn(): UseAITurnReturn {
   }, [])
 
   const isAIBattle = useGameStore(s => s.gameState?.players.every(p => p.isAI) ?? false)
-
-  // Async delay that respects cancel and pause
-  const delay = useCallback(async (ms: number) => {
-    if (ms <= 0) return
-    const start = Date.now()
-    while (Date.now() - start < ms) {
-      if (cancelRef.current) return
-      while (pausedRef.current && !cancelRef.current) {
-        await new Promise(r => setTimeout(r, 100))
-      }
-      if (cancelRef.current) return
-      await new Promise(r => setTimeout(r, Math.min(50, ms - (Date.now() - start))))
-    }
-  }, [])
 
   const getBattleLogJSON = useCallback((): string | null => {
     return loggerRef.current?.toJSON() ?? null
@@ -148,13 +134,28 @@ export function useAITurn(): UseAITurnReturn {
   // -----------------------------------------------------------------------
   useEffect(() => {
     if (!isAIBattle || !gameData || !profilesRef.current) return
-    if (loopStarted.current) return
 
     const initialGs = useGameStore.getState().gameState
     if (!initialGs) return
 
-    loopStarted.current = true
-    cancelRef.current = false
+    // StrictMode-safe cancellation: each invocation gets a unique ID.
+    // Cleanup increments the ID, so stale loops detect they've been superseded.
+    const myEffectId = ++effectIdRef.current
+    const isCancelled = () => effectIdRef.current !== myEffectId
+
+    // Async delay that respects cancel and pause (closure-scoped)
+    const delay = async (ms: number) => {
+      if (ms <= 0) return
+      const start = Date.now()
+      while (Date.now() - start < ms) {
+        if (isCancelled()) return
+        while (pausedRef.current && !isCancelled()) {
+          await new Promise(r => setTimeout(r, 100))
+        }
+        if (isCancelled()) return
+        await new Promise(r => setTimeout(r, Math.min(50, ms - (Date.now() - start))))
+      }
+    }
 
     const profiles = profilesRef.current
 
@@ -219,14 +220,14 @@ export function useAITurn(): UseAITurnReturn {
 
       // ===== ROUND LOOP =====
       while (gs.roundNumber <= ROUND_LIMIT && gs.turnPhase !== 'GameOver') {
-        if (cancelRef.current) return
+        if (isCancelled()) return
 
         // ===== ACTIVATION LOOP =====
         while (
           gs.turnPhase === 'Activation' &&
           gs.currentActivationIndex < gs.activationOrder.length
         ) {
-          if (cancelRef.current) return
+          if (isCancelled()) return
           const speeds = SPEED_DELAYS[speedRef.current]
 
           const figId = gs.activationOrder[gs.currentActivationIndex]
@@ -261,7 +262,7 @@ export function useAITurn(): UseAITurnReturn {
           }))
 
           await delay(speeds.thinkMs)
-          if (cancelRef.current) return
+          if (isCancelled()) return
 
           const gsBefore = gs
 
@@ -290,7 +291,7 @@ export function useAITurn(): UseAITurnReturn {
           const executedActions: GameAction[] = []
 
           for (const action of decision.actions) {
-            if (cancelRef.current) return
+            if (isCancelled()) return
 
             // Visualize + auto-pan camera
             if (action.type === 'Move') {
@@ -304,7 +305,7 @@ export function useAITurn(): UseAITurnReturn {
             }
 
             await delay(speeds.actionMs)
-            if (cancelRef.current) return
+            if (isCancelled()) return
 
             useGameStore.getState().clearAIVisualization()
 
@@ -322,7 +323,7 @@ export function useAITurn(): UseAITurnReturn {
             }
 
             // Spawn animations based on action type
-            const ownerSide = activeFig.owner === 0 ? 'imperial' : 'operative'
+            const ownerSide = activeFig.playerId === 0 ? 'imperial' : 'operative'
             if (action.type === 'Move' && figBeforePos) {
               const dest = action.payload.path[action.payload.path.length - 1]
               combatAnimations.spawnMoveTrail(figBeforePos, dest, ownerSide)
@@ -435,7 +436,7 @@ export function useAITurn(): UseAITurnReturn {
             logger.endRound(gs)
             finalizeGame(midVictory.winner, midVictory.condition ?? 'Victory', gs)
             setAIState(prev => ({ ...prev, phase: 'idle', activeFigure: null }))
-            loopStarted.current = false
+
             return
           }
 
@@ -485,7 +486,7 @@ export function useAITurn(): UseAITurnReturn {
           addCombatLog(`GAME OVER: ${endVictory.winner} wins! ${endVictory.condition}`)
           finalizeGame(endVictory.winner, endVictory.condition ?? 'Victory', gs)
           setAIState(prev => ({ ...prev, phase: 'idle', activeFigure: null }))
-          loopStarted.current = false
+
           return
         }
 
@@ -507,7 +508,7 @@ export function useAITurn(): UseAITurnReturn {
           addCombatLog(`GAME OVER: ${winnerLabel} wins by remaining health!`)
           finalizeGame(winnerLabel, 'Round limit reached', gs)
           setAIState(prev => ({ ...prev, phase: 'idle', activeFigure: null }))
-          loopStarted.current = false
+
           return
         }
 
@@ -518,18 +519,16 @@ export function useAITurn(): UseAITurnReturn {
       }
 
       setAIState(prev => ({ ...prev, phase: 'idle', activeFigure: null }))
-      loopStarted.current = false
     }
 
     runGame().catch(err => {
       console.error('AI game loop error:', err)
       addCombatLog(`AI loop error: ${err}`)
-      loopStarted.current = false
     })
 
     return () => {
-      cancelRef.current = true
-      loopStarted.current = false
+      // Incrementing effectId makes isCancelled() return true for this invocation's loop
+      effectIdRef.current++
     }
   }, [isAIBattle, gameData])
 

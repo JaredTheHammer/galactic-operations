@@ -1,0 +1,1356 @@
+==========================================================================================
+  GALACTIC OPERATIONS -- NPC POWER RANKING REPORT
+==========================================================================================
+  Generated: 2026-03-06T09:17:47.572Z
+  NPCs: 21  |  Games/matchup: 5  |  Seed: 42
+  Total duels: 1050
+
+==========================================================================================
+  COMBINED POWER RANKINGS
+==========================================================================================
+
+  #  Name                     Tier      Analytical Empirical Combined WinRate Threat$
+  ---------------------------------------------------------------------------------------
+   1 Siege Droid Mk-II        Rival           81.2     100.0     92.5     92%      12
+   2 Warlord Kael Drayen      Nemesis        100.0      87.3     92.4     85%      12
+   3 Inquisitor               Nemesis         59.1      59.1     59.1     66%      12
+   4 The Broker               Nemesis         25.4      63.9     48.5     69%      12
+   5 Stormtrooper Elite       Rival           10.3      62.8     41.8     69%      11
+   6 Drez Venn                Rival           12.4      58.5     40.1     66%      11
+   7 War Droid Mk-I           Rival            8.3      57.0     37.6     64%      10
+   8 Krrssk                   Rival           19.6      45.3     35.1     53%       9
+   9 E-Web Engineer           Rival            8.0      50.7     33.6     57%       9
+  10 Shock Commando           Rival            7.0      48.4     31.9     55%       8
+  11 Trandoshan Hunter        Rival           13.5      41.5     30.3     50%       8
+  12 IG Assassin Droid        Rival            8.9      39.1     27.0     48%       7
+  13 Defector Trooper         Minion           4.6      31.6     20.8     43%       5
+  14 Rebel Turncoat           Rival            4.4      28.4     18.8     39%       5
+  15 Stormtrooper             Minion           4.6      25.3     17.0     36%       4
+  16 Nikto Gunner             Minion           4.2      16.1     11.4     29%       3
+  17 Imperial Officer         Rival            4.2       9.3      7.3     23%       2
+  18 Syndicate Lieutenant     Rival            3.2       9.9      7.2     24%       2
+  19 Probe Droid              Minion           3.3       9.3      6.9     24%       2
+  20 Gamorrean Brute          Minion           2.7       8.9      6.4     22%       2
+  21 Conscript Militia        Minion           1.9       0.0      0.8     18%       1
+
+==========================================================================================
+  PER-NPC COMBAT STATISTICS
+==========================================================================================
+
+  Siege Droid Mk-II [Rival]  --  Rank #1  Elo: 100
+    Record: 92W / 6L / 2D  (92.0% win rate)
+    Avg damage dealt: 5.5  |  Avg damage taken: 0.6
+    Avg rounds survived: 6  |  Avg HP remaining: 13.4
+    Best matchup:  vs Gamorrean Brute (100% WR)
+    Worst matchup: vs Warlord Kael Drayen (40% WR)
+    Upset wins vs higher tiers: 60%
+    Stats: HP=14 Soak=6 Spd=2 Atk=[0g/3y] Def=[2p/1r]
+    Weapon: Siege Cannon (dmg 12, range Long, Blast 6, Breach 1, Cumbersome 4, Prepare 1)
+
+  Warlord Kael Drayen [Nemesis]  --  Rank #2  Elo: 87
+    Record: 85W / 15L / 0D  (85.0% win rate)
+    Avg damage dealt: 4.8  |  Avg damage taken: 2.6
+    Avg rounds survived: 6.9  |  Avg HP remaining: 15.4
+    Best matchup:  vs Gamorrean Brute (100% WR)
+    Worst matchup: vs Trandoshan Hunter (60% WR)
+    Upset losses to lower tiers: 12%
+    Stats: HP=18 Soak=5 Spd=4 Atk=[1g/3y] Def=[2p/1r]
+    Weapon: Customized E-22 Blaster Rifle (dmg 9, range Long, Accurate 2, Pierce 1, Superior)
+
+  Inquisitor [Nemesis]  --  Rank #3  Elo: 59
+    Record: 66W / 34L / 0D  (66.0% win rate)
+    Avg damage dealt: 3.9  |  Avg damage taken: 6.2
+    Avg rounds survived: 6.7  |  Avg HP remaining: 9.8
+    Best matchup:  vs Gamorrean Brute (100% WR)
+    Worst matchup: vs War Droid Mk-I (40% WR)
+    Upset losses to lower tiers: 33%
+    Stats: HP=16 Soak=4 Spd=4 Atk=[1g/3y] Def=[1p/2r]
+    Weapon: Inquisitor Lightsaber (dmg 9, range Engaged, Breach 1, Sunder, Vicious 2)
+
+  The Broker [Nemesis]  --  Rank #4  Elo: 64
+    Record: 69W / 30L / 1D  (69.0% win rate)
+    Avg damage dealt: 3.9  |  Avg damage taken: 4.4
+    Avg rounds survived: 5.5  |  Avg HP remaining: 9.6
+    Best matchup:  vs Gamorrean Brute (100% WR)
+    Worst matchup: vs Inquisitor (20% WR)
+    Upset losses to lower tiers: 26%
+    Stats: HP=14 Soak=3 Spd=4 Atk=[1g/3y] Def=[1p/2r]
+    Weapon: Disruptor Pistol (dmg 8, range Medium, Vicious 3)
+
+  Stormtrooper Elite [Rival]  --  Rank #5  Elo: 63
+    Record: 69W / 30L / 1D  (69.0% win rate)
+    Avg damage dealt: 4.7  |  Avg damage taken: 2.4
+    Avg rounds survived: 5.3  |  Avg HP remaining: 5.6
+    Best matchup:  vs Gamorrean Brute (100% WR)
+    Worst matchup: vs Siege Droid Mk-II (0% WR)
+    Upset wins vs higher tiers: 47%
+    Upset losses to lower tiers: 7%
+    Stats: HP=8 Soak=4 Spd=4 Atk=[1g/2y] Def=[1p/1r]
+    Weapon: E-11 Blaster Rifle (dmg 8, range Long, Stun setting)
+
+  Drez Venn [Rival]  --  Rank #6  Elo: 59
+    Record: 66W / 34L / 0D  (66.0% win rate)
+    Avg damage dealt: 3.5  |  Avg damage taken: 3
+    Avg rounds survived: 6.8  |  Avg HP remaining: 7
+    Best matchup:  vs Gamorrean Brute (100% WR)
+    Worst matchup: vs Siege Droid Mk-II (0% WR)
+    Upset wins vs higher tiers: 40%
+    Upset losses to lower tiers: 3%
+    Stats: HP=10 Soak=4 Spd=4 Atk=[1g/2y] Def=[1p/1r]
+    Weapon: Mandalorian Heavy Blaster (dmg 8, range Medium, Accurate 1, Pierce 1)
+
+  War Droid Mk-I [Rival]  --  Rank #7  Elo: 57
+    Record: 64W / 35L / 1D  (64.0% win rate)
+    Avg damage dealt: 4.3  |  Avg damage taken: 2.3
+    Avg rounds survived: 4.8  |  Avg HP remaining: 5.7
+    Best matchup:  vs Nikto Gunner (100% WR)
+    Worst matchup: vs Siege Droid Mk-II (0% WR)
+    Upset wins vs higher tiers: 40%
+    Upset losses to lower tiers: 7%
+    Stats: HP=8 Soak=3 Spd=3 Atk=[1g/2y] Def=[1p/1r]
+    Weapon: Integrated Repeating Blaster (dmg 9, range Medium, Auto-fire, Pierce 1)
+
+  Krrssk [Rival]  --  Rank #8  Elo: 45
+    Record: 53W / 43L / 4D  (53.0% win rate)
+    Avg damage dealt: 2.5  |  Avg damage taken: 6.1
+    Avg rounds survived: 7.8  |  Avg HP remaining: 7.9
+    Best matchup:  vs Gamorrean Brute (100% WR)
+    Worst matchup: vs Siege Droid Mk-II (0% WR)
+    Upset wins vs higher tiers: 33%
+    Upset losses to lower tiers: 33%
+    Stats: HP=14 Soak=5 Spd=4 Atk=[1g/2y] Def=[2p/0r]
+    Weapon: Trandoshan Claws (dmg 4, range Engaged, Vicious 2, Pierce 1)
+
+  E-Web Engineer [Rival]  --  Rank #9  Elo: 51
+    Record: 57W / 40L / 3D  (57.0% win rate)
+    Avg damage dealt: 3.9  |  Avg damage taken: 1.7
+    Avg rounds survived: 5.3  |  Avg HP remaining: 4.3
+    Best matchup:  vs Nikto Gunner (100% WR)
+    Worst matchup: vs The Broker (0% WR)
+    Upset wins vs higher tiers: 20%
+    Upset losses to lower tiers: 23%
+    Stats: HP=6 Soak=3 Spd=2 Atk=[1g/2y] Def=[1p/0r]
+    Weapon: E-Web Heavy Repeating Blaster (dmg 11, range Long, Auto-fire, Cumbersome 4)
+
+  Shock Commando [Rival]  --  Rank #10  Elo: 48
+    Record: 55W / 43L / 2D  (55.0% win rate)
+    Avg damage dealt: 3.8  |  Avg damage taken: 2.6
+    Avg rounds survived: 4.9  |  Avg HP remaining: 4.4
+    Best matchup:  vs Probe Droid (100% WR)
+    Worst matchup: vs Siege Droid Mk-II (0% WR)
+    Upset wins vs higher tiers: 47%
+    Upset losses to lower tiers: 23%
+    Stats: HP=7 Soak=3 Spd=5 Atk=[1g/2y] Def=[2p/0r]
+    Weapon: DC-15A Blaster Carbine (dmg 8, range Medium, Accurate 1)
+
+  Trandoshan Hunter [Rival]  --  Rank #11  Elo: 42
+    Record: 50W / 48L / 2D  (50.0% win rate)
+    Avg damage dealt: 2.8  |  Avg damage taken: 4.8
+    Avg rounds survived: 7.1  |  Avg HP remaining: 5.2
+    Best matchup:  vs Gamorrean Brute (100% WR)
+    Worst matchup: vs Siege Droid Mk-II (0% WR)
+    Upset wins vs higher tiers: 40%
+    Upset losses to lower tiers: 30%
+    Stats: HP=10 Soak=4 Spd=3 Atk=[1g/2y] Def=[1p/1r]
+    Weapon: Trandoshan Scattergun (dmg 9, range Short, Blast 4)
+
+  IG Assassin Droid [Rival]  --  Rank #12  Elo: 39
+    Record: 48W / 48L / 4D  (48.0% win rate)
+    Avg damage dealt: 2.6  |  Avg damage taken: 2.6
+    Avg rounds survived: 7.2  |  Avg HP remaining: 4.4
+    Best matchup:  vs Imperial Officer (100% WR)
+    Worst matchup: vs Siege Droid Mk-II (0% WR)
+    Upset wins vs higher tiers: 20%
+    Upset losses to lower tiers: 13%
+    Stats: HP=7 Soak=4 Spd=5 Atk=[2g/1y] Def=[1p/1r]
+    Weapon: Dual Blaster Pistols (dmg 7, range Medium, Linked 1)
+
+  Defector Trooper [Minion]  --  Rank #13  Elo: 32
+    Record: 43W / 57L / 0D  (43.0% win rate)
+    Avg damage dealt: 3.2  |  Avg damage taken: 2.1
+    Avg rounds survived: 4.2  |  Avg HP remaining: 2.9
+    Best matchup:  vs Gamorrean Brute (80% WR)
+    Worst matchup: vs The Broker (0% WR)
+    Upset wins vs higher tiers: 33%
+    Stats: HP=5 Soak=2 Spd=4 Atk=[2g/1y] Def=[1p/0r]
+    Weapon: E-11 Blaster Rifle (dmg 8, range Long, Stun setting)
+
+  Rebel Turncoat [Rival]  --  Rank #14  Elo: 28
+    Record: 39W / 59L / 2D  (39.0% win rate)
+    Avg damage dealt: 2.6  |  Avg damage taken: 3
+    Avg rounds survived: 4.4  |  Avg HP remaining: 3
+    Best matchup:  vs Conscript Militia (100% WR)
+    Worst matchup: vs The Broker (0% WR)
+    Upset wins vs higher tiers: 13%
+    Upset losses to lower tiers: 40%
+    Stats: HP=6 Soak=2 Spd=5 Atk=[2g/1y] Def=[1p/0r]
+    Weapon: Westar-35 Blaster Pistol (dmg 6, range Medium, Accurate 1)
+
+  Stormtrooper [Minion]  --  Rank #15  Elo: 25
+    Record: 36W / 62L / 2D  (36.0% win rate)
+    Avg damage dealt: 2.8  |  Avg damage taken: 1.9
+    Avg rounds survived: 4.1  |  Avg HP remaining: 2.1
+    Best matchup:  vs Gamorrean Brute (80% WR)
+    Worst matchup: vs Drez Venn (0% WR)
+    Upset wins vs higher tiers: 31%
+    Stats: HP=4 Soak=3 Spd=4 Atk=[2g/1y] Def=[1p/0r]
+    Weapon: E-11 Blaster Rifle (dmg 8, range Long, Stun setting)
+
+  Nikto Gunner [Minion]  --  Rank #16  Elo: 16
+    Record: 29W / 70L / 1D  (29.0% win rate)
+    Avg damage dealt: 1.9  |  Avg damage taken: 2.8
+    Avg rounds survived: 5.3  |  Avg HP remaining: 2.2
+    Best matchup:  vs Probe Droid (80% WR)
+    Worst matchup: vs Drez Venn (0% WR)
+    Upset wins vs higher tiers: 20%
+    Stats: HP=5 Soak=3 Spd=4 Atk=[2g/1y] Def=[1p/0r]
+    Weapon: Blaster Carbine (dmg 7, range Medium, Stun setting)
+
+  Imperial Officer [Rival]  --  Rank #17  Elo: 9
+    Record: 23W / 75L / 2D  (23.0% win rate)
+    Avg damage dealt: 1.6  |  Avg damage taken: 2.9
+    Avg rounds survived: 5.6  |  Avg HP remaining: 2.1
+    Best matchup:  vs Gamorrean Brute (60% WR)
+    Worst matchup: vs IG Assassin Droid (0% WR)
+    Upset wins vs higher tiers: 7%
+    Upset losses to lower tiers: 60%
+    Stats: HP=5 Soak=2 Spd=4 Atk=[1g/1y] Def=[1p/0r]
+    Weapon: DL-44 Heavy Blaster Pistol (dmg 7, range Medium, Stun setting)
+
+  Syndicate Lieutenant [Rival]  --  Rank #18  Elo: 10
+    Record: 24W / 73L / 3D  (24.0% win rate)
+    Avg damage dealt: 1.2  |  Avg damage taken: 3.7
+    Avg rounds survived: 5.4  |  Avg HP remaining: 2.3
+    Best matchup:  vs Imperial Officer (80% WR)
+    Worst matchup: vs The Broker (0% WR)
+    Upset losses to lower tiers: 60%
+    Stats: HP=6 Soak=2 Spd=4 Atk=[1g/1y] Def=[1p/0r]
+    Weapon: Holdout Blaster (dmg 5, range Short, Stun setting)
+
+  Probe Droid [Minion]  --  Rank #19  Elo: 9
+    Record: 24W / 74L / 2D  (24.0% win rate)
+    Avg damage dealt: 1.7  |  Avg damage taken: 2.2
+    Avg rounds survived: 5.4  |  Avg HP remaining: 1.8
+    Best matchup:  vs Gamorrean Brute (60% WR)
+    Worst matchup: vs IG Assassin Droid (0% WR)
+    Upset wins vs higher tiers: 19%
+    Stats: HP=4 Soak=3 Spd=3 Atk=[1g/1y] Def=[1p/0r]
+    Weapon: Integrated Blaster (dmg 7, range Medium)
+
+  Gamorrean Brute [Minion]  --  Rank #20  Elo: 9
+    Record: 22W / 75L / 3D  (22.0% win rate)
+    Avg damage dealt: 0.6  |  Avg damage taken: 4.2
+    Avg rounds survived: 7.1  |  Avg HP remaining: 2.8
+    Best matchup:  vs Nikto Gunner (60% WR)
+    Worst matchup: vs Trandoshan Hunter (0% WR)
+    Upset wins vs higher tiers: 17%
+    Stats: HP=7 Soak=4 Spd=4 Atk=[2g/0y] Def=[1p/0r]
+    Weapon: Vibro-axe (dmg 3, range Engaged, Knockdown, Vicious 1)
+
+  Conscript Militia [Minion]  --  Rank #21  Elo: 0
+    Record: 18W / 81L / 1D  (18.0% win rate)
+    Avg damage dealt: 1.9  |  Avg damage taken: 1.6
+    Avg rounds survived: 6.2  |  Avg HP remaining: 1.4
+    Best matchup:  vs Gamorrean Brute (60% WR)
+    Worst matchup: vs IG Assassin Droid (0% WR)
+    Upset wins vs higher tiers: 12%
+    Stats: HP=3 Soak=1 Spd=4 Atk=[2g/0y] Def=[1p/0r]
+    Weapon: Slugthrower Rifle (dmg 6, range Medium, Cumbersome 2)
+
+==========================================================================================
+  HEAD-TO-HEAD MATCHUP RESULTS
+==========================================================================================
+
+  Gamorrean Brute vs Nikto Gunner
+    Score: 3-2-0 (5 games, avg 9.6 rounds)
+    Avg damage: Gamorrean Brute 1.8 / Nikto Gunner 3.8
+    Games: R16:Gamorrea, R10:Gamorrea, R2:Nikto Gu, R16:Gamorrea, R4:Nikto Gu
+
+  Gamorrean Brute vs Trandoshan Hunter
+    Score: 0-5-0 (5 games, avg 10.0 rounds)
+    Avg damage: Gamorrean Brute 0.4 / Trandoshan Hunter 2.8
+    Games: R16:Trandosh, R16:Trandosh, R1:Trandosh, R16:Trandosh, R1:Trandosh
+
+  Gamorrean Brute vs IG Assassin Droid
+    Score: 0-3-2 (5 games, avg 7.8 rounds)
+    Avg damage: Gamorrean Brute 0.0 / IG Assassin Droid 4.2
+    Games: R3:IG Assas, R16:Draw, R2:IG Assas, R16:Draw, R2:IG Assas
+
+  Gamorrean Brute vs Syndicate Lieutenant
+    Score: 3-2-0 (5 games, avg 8.6 rounds)
+    Avg damage: Gamorrean Brute 1.2 / Syndicate Lieutenant 2.8
+    Games: R4:Syndicat, R16:Gamorrea, R4:Syndicat, R3:Gamorrea, R16:Gamorrea
+
+  Gamorrean Brute vs The Broker
+    Score: 0-5-0 (5 games, avg 7.4 rounds)
+    Avg damage: Gamorrean Brute 0.6 / The Broker 4.2
+    Games: R1:The Brok, R16:The Brok, R2:The Brok, R16:The Brok, R2:The Brok
+
+  Gamorrean Brute vs Drez Venn
+    Score: 0-5-0 (5 games, avg 7.2 rounds)
+    Avg damage: Gamorrean Brute 0.0 / Drez Venn 4.2
+    Games: R1:Drez Ven, R16:Drez Ven, R1:Drez Ven, R16:Drez Ven, R2:Drez Ven
+
+  Gamorrean Brute vs Krrssk
+    Score: 0-5-0 (5 games, avg 8.6 rounds)
+    Avg damage: Gamorrean Brute 0.0 / Krrssk 4.2
+    Games: R5:Krrssk, R16:Krrssk, R4:Krrssk, R16:Krrssk, R2:Krrssk
+
+  Gamorrean Brute vs Stormtrooper
+    Score: 1-4-0 (5 games, avg 5.0 rounds)
+    Avg damage: Gamorrean Brute 0.0 / Stormtrooper 5.6
+    Games: R2:Stormtro, R16:Gamorrea, R4:Stormtro, R1:Stormtro, R2:Stormtro
+
+  Gamorrean Brute vs Stormtrooper Elite
+    Score: 0-5-0 (5 games, avg 4.4 rounds)
+    Avg damage: Gamorrean Brute 0.0 / Stormtrooper Elite 6.6
+    Games: R1:Stormtro, R16:Stormtro, R2:Stormtro, R1:Stormtro, R2:Stormtro
+
+  Gamorrean Brute vs Imperial Officer
+    Score: 2-3-0 (5 games, avg 7.0 rounds)
+    Avg damage: Gamorrean Brute 1.8 / Imperial Officer 4.2
+    Games: R2:Imperial, R16:Gamorrea, R3:Imperial, R9:Gamorrea, R5:Imperial
+
+  Gamorrean Brute vs Probe Droid
+    Score: 2-3-0 (5 games, avg 7.2 rounds)
+    Avg damage: Gamorrean Brute 0.8 / Probe Droid 4.2
+    Games: R4:Probe Dr, R4:Gamorrea, R4:Probe Dr, R16:Gamorrea, R8:Probe Dr
+
+  Gamorrean Brute vs E-Web Engineer
+    Score: 3-2-0 (5 games, avg 10.0 rounds)
+    Avg damage: Gamorrean Brute 0.4 / E-Web Engineer 2.8
+    Games: R16:Gamorrea, R16:Gamorrea, R1:E-Web En, R16:Gamorrea, R1:E-Web En
+
+  Gamorrean Brute vs Inquisitor
+    Score: 0-5-0 (5 games, avg 7.2 rounds)
+    Avg damage: Gamorrean Brute 0.0 / Inquisitor 4.2
+    Games: R1:Inquisit, R16:Inquisit, R1:Inquisit, R16:Inquisit, R2:Inquisit
+
+  Gamorrean Brute vs Conscript Militia
+    Score: 2-3-0 (5 games, avg 3.4 rounds)
+    Avg damage: Gamorrean Brute 1.2 / Conscript Militia 4.2
+    Games: R3:Conscrip, R2:Gamorrea, R6:Conscrip, R4:Gamorrea, R2:Conscrip
+
+  Gamorrean Brute vs Defector Trooper
+    Score: 1-4-0 (5 games, avg 4.4 rounds)
+    Avg damage: Gamorrean Brute 0.0 / Defector Trooper 5.6
+    Games: R16:Gamorrea, R1:Defector, R3:Defector, R1:Defector, R1:Defector
+
+  Gamorrean Brute vs War Droid Mk-I
+    Score: 1-4-0 (5 games, avg 4.0 rounds)
+    Avg damage: Gamorrean Brute 0.4 / War Droid Mk-I 5.6
+    Games: R1:War Droi, R16:Gamorrea, R1:War Droi, R1:War Droi, R1:War Droi
+
+  Gamorrean Brute vs Shock Commando
+    Score: 2-2-1 (5 games, avg 10.2 rounds)
+    Avg damage: Gamorrean Brute 1.8 / Shock Commando 2.8
+    Games: R1:Shock Co, R16:Gamorrea, R2:Shock Co, R16:Gamorrea, R16:Draw
+
+  Gamorrean Brute vs Rebel Turncoat
+    Score: 2-3-0 (5 games, avg 6.4 rounds)
+    Avg damage: Gamorrean Brute 2.0 / Rebel Turncoat 4.2
+    Games: R2:Rebel Tu, R16:Gamorrea, R4:Rebel Tu, R8:Gamorrea, R2:Rebel Tu
+
+  Gamorrean Brute vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 10.0 rounds)
+    Avg damage: Gamorrean Brute 0.0 / Siege Droid Mk-II 2.8
+    Games: R1:Siege Dr, R16:Siege Dr, R16:Siege Dr, R16:Siege Dr, R1:Siege Dr
+
+  Gamorrean Brute vs Warlord Kael Drayen
+    Score: 0-5-0 (5 games, avg 4.2 rounds)
+    Avg damage: Gamorrean Brute 0.0 / Warlord Kael Drayen 5.6
+    Games: R1:Warlord , R16:Warlord , R2:Warlord , R1:Warlord , R1:Warlord 
+
+  Nikto Gunner vs Trandoshan Hunter
+    Score: 1-4-0 (5 games, avg 4.8 rounds)
+    Avg damage: Nikto Gunner 2.0 / Trandoshan Hunter 3.0
+    Games: R1:Trandosh, R3:Nikto Gu, R1:Trandosh, R16:Trandosh, R3:Trandosh
+
+  Nikto Gunner vs IG Assassin Droid
+    Score: 1-4-0 (5 games, avg 4.6 rounds)
+    Avg damage: Nikto Gunner 1.4 / IG Assassin Droid 3.0
+    Games: R2:IG Assas, R16:IG Assas, R1:IG Assas, R3:Nikto Gu, R1:IG Assas
+
+  Nikto Gunner vs Syndicate Lieutenant
+    Score: 2-3-0 (5 games, avg 10.0 rounds)
+    Avg damage: Nikto Gunner 2.4 / Syndicate Lieutenant 0.0
+    Games: R16:Syndicat, R1:Nikto Gu, R16:Syndicat, R1:Nikto Gu, R16:Syndicat
+
+  Nikto Gunner vs The Broker
+    Score: 1-4-0 (5 games, avg 1.8 rounds)
+    Avg damage: Nikto Gunner 2.8 / The Broker 4.0
+    Games: R1:The Brok, R5:Nikto Gu, R1:The Brok, R1:The Brok, R1:The Brok
+
+  Nikto Gunner vs Drez Venn
+    Score: 0-5-0 (5 games, avg 7.0 rounds)
+    Avg damage: Nikto Gunner 0.0 / Drez Venn 3.0
+    Games: R1:Drez Ven, R16:Drez Ven, R1:Drez Ven, R16:Drez Ven, R1:Drez Ven
+
+  Nikto Gunner vs Krrssk
+    Score: 2-3-0 (5 games, avg 7.4 rounds)
+    Avg damage: Nikto Gunner 6.6 / Krrssk 2.0
+    Games: R4:Krrssk, R6:Nikto Gu, R3:Krrssk, R8:Nikto Gu, R16:Krrssk
+
+  Nikto Gunner vs Stormtrooper
+    Score: 3-2-0 (5 games, avg 7.6 rounds)
+    Avg damage: Nikto Gunner 0.8 / Stormtrooper 2.0
+    Games: R1:Stormtro, R3:Nikto Gu, R16:Nikto Gu, R16:Nikto Gu, R2:Stormtro
+
+  Nikto Gunner vs Stormtrooper Elite
+    Score: 0-5-0 (5 games, avg 7.0 rounds)
+    Avg damage: Nikto Gunner 0.0 / Stormtrooper Elite 3.0
+    Games: R16:Stormtro, R1:Stormtro, R16:Stormtro, R1:Stormtro, R1:Stormtro
+
+  Nikto Gunner vs Imperial Officer
+    Score: 3-1-1 (5 games, avg 4.0 rounds)
+    Avg damage: Nikto Gunner 3.0 / Imperial Officer 1.0
+    Games: R1:Nikto Gu, R1:Nikto Gu, R1:Imperial, R1:Nikto Gu, R16:Draw
+
+  Nikto Gunner vs Probe Droid
+    Score: 4-1-0 (5 games, avg 10.2 rounds)
+    Avg damage: Nikto Gunner 0.8 / Probe Droid 1.0
+    Games: R1:Nikto Gu, R16:Nikto Gu, R16:Nikto Gu, R16:Nikto Gu, R2:Probe Dr
+
+  Nikto Gunner vs E-Web Engineer
+    Score: 0-5-0 (5 games, avg 2.0 rounds)
+    Avg damage: Nikto Gunner 0.0 / E-Web Engineer 5.0
+    Games: R4:E-Web En, R1:E-Web En, R2:E-Web En, R1:E-Web En, R2:E-Web En
+
+  Nikto Gunner vs Inquisitor
+    Score: 2-3-0 (5 games, avg 5.8 rounds)
+    Avg damage: Nikto Gunner 6.4 / Inquisitor 3.0
+    Games: R2:Inquisit, R9:Nikto Gu, R2:Inquisit, R14:Nikto Gu, R2:Inquisit
+
+  Nikto Gunner vs Conscript Militia
+    Score: 4-1-0 (5 games, avg 4.8 rounds)
+    Avg damage: Nikto Gunner 1.8 / Conscript Militia 1.8
+    Games: R4:Conscrip, R2:Nikto Gu, R16:Nikto Gu, R1:Nikto Gu, R1:Nikto Gu
+
+  Nikto Gunner vs Defector Trooper
+    Score: 1-4-0 (5 games, avg 1.2 rounds)
+    Avg damage: Nikto Gunner 1.0 / Defector Trooper 4.0
+    Games: R2:Defector, R1:Defector, R1:Defector, R1:Defector, R1:Nikto Gu
+
+  Nikto Gunner vs War Droid Mk-I
+    Score: 0-5-0 (5 games, avg 1.0 rounds)
+    Avg damage: Nikto Gunner 1.2 / War Droid Mk-I 5.0
+    Games: R1:War Droi, R1:War Droi, R1:War Droi, R1:War Droi, R1:War Droi
+
+  Nikto Gunner vs Shock Commando
+    Score: 2-3-0 (5 games, avg 4.6 rounds)
+    Avg damage: Nikto Gunner 2.8 / Shock Commando 2.0
+    Games: R1:Shock Co, R3:Nikto Gu, R1:Shock Co, R2:Nikto Gu, R16:Shock Co
+
+  Nikto Gunner vs Rebel Turncoat
+    Score: 1-4-0 (5 games, avg 7.6 rounds)
+    Avg damage: Nikto Gunner 1.2 / Rebel Turncoat 2.0
+    Games: R1:Rebel Tu, R16:Rebel Tu, R3:Rebel Tu, R2:Nikto Gu, R16:Rebel Tu
+
+  Nikto Gunner vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 4.0 rounds)
+    Avg damage: Nikto Gunner 0.0 / Siege Droid Mk-II 4.0
+    Games: R1:Siege Dr, R1:Siege Dr, R16:Siege Dr, R1:Siege Dr, R1:Siege Dr
+
+  Nikto Gunner vs Warlord Kael Drayen
+    Score: 0-5-0 (5 games, avg 1.0 rounds)
+    Avg damage: Nikto Gunner 0.0 / Warlord Kael Drayen 5.0
+    Games: R1:Warlord , R1:Warlord , R1:Warlord , R1:Warlord , R1:Warlord 
+
+  Trandoshan Hunter vs IG Assassin Droid
+    Score: 2-3-0 (5 games, avg 4.4 rounds)
+    Avg damage: Trandoshan Hunter 2.8 / IG Assassin Droid 6.0
+    Games: R4:IG Assas, R3:Trandosh, R8:IG Assas, R3:Trandosh, R4:IG Assas
+
+  Trandoshan Hunter vs Syndicate Lieutenant
+    Score: 2-2-1 (5 games, avg 9.0 rounds)
+    Avg damage: Trandoshan Hunter 2.4 / Syndicate Lieutenant 3.8
+    Games: R11:Syndicat, R1:Trandosh, R16:Syndicat, R1:Trandosh, R16:Draw
+
+  Trandoshan Hunter vs The Broker
+    Score: 2-3-0 (5 games, avg 6.6 rounds)
+    Avg damage: Trandoshan Hunter 5.6 / The Broker 4.0
+    Games: R3:The Brok, R9:Trandosh, R16:The Brok, R4:Trandosh, R1:The Brok
+
+  Trandoshan Hunter vs Drez Venn
+    Score: 2-3-0 (5 games, avg 4.2 rounds)
+    Avg damage: Trandoshan Hunter 4.0 / Drez Venn 6.0
+    Games: R2:Drez Ven, R6:Trandosh, R2:Drez Ven, R7:Trandosh, R4:Drez Ven
+
+  Trandoshan Hunter vs Krrssk
+    Score: 2-3-0 (5 games, avg 6.0 rounds)
+    Avg damage: Trandoshan Hunter 5.6 / Krrssk 4.0
+    Games: R4:Krrssk, R3:Trandosh, R16:Krrssk, R2:Trandosh, R5:Krrssk
+
+  Trandoshan Hunter vs Stormtrooper
+    Score: 3-2-0 (5 games, avg 8.8 rounds)
+    Avg damage: Trandoshan Hunter 0.8 / Stormtrooper 4.0
+    Games: R16:Trandosh, R16:Trandosh, R5:Stormtro, R2:Trandosh, R5:Stormtro
+
+  Trandoshan Hunter vs Stormtrooper Elite
+    Score: 2-3-0 (5 games, avg 4.0 rounds)
+    Avg damage: Trandoshan Hunter 3.2 / Stormtrooper Elite 8.8
+    Games: R2:Stormtro, R4:Trandosh, R6:Stormtro, R6:Trandosh, R2:Stormtro
+
+  Trandoshan Hunter vs Imperial Officer
+    Score: 3-1-1 (5 games, avg 15.4 rounds)
+    Avg damage: Trandoshan Hunter 0.0 / Imperial Officer 3.0
+    Games: R16:Draw, R16:Trandosh, R16:Trandosh, R16:Trandosh, R13:Imperial
+
+  Trandoshan Hunter vs Probe Droid
+    Score: 3-2-0 (5 games, avg 8.6 rounds)
+    Avg damage: Trandoshan Hunter 1.6 / Probe Droid 3.6
+    Games: R16:Trandosh, R2:Trandosh, R7:Probe Dr, R2:Trandosh, R16:Probe Dr
+
+  Trandoshan Hunter vs E-Web Engineer
+    Score: 2-3-0 (5 games, avg 3.0 rounds)
+    Avg damage: Trandoshan Hunter 2.4 / E-Web Engineer 7.6
+    Games: R2:E-Web En, R4:Trandosh, R2:E-Web En, R3:Trandosh, R4:E-Web En
+
+  Trandoshan Hunter vs Inquisitor
+    Score: 2-3-0 (5 games, avg 4.2 rounds)
+    Avg damage: Trandoshan Hunter 6.4 / Inquisitor 6.0
+    Games: R3:Inquisit, R2:Trandosh, R5:Inquisit, R7:Trandosh, R4:Inquisit
+
+  Trandoshan Hunter vs Conscript Militia
+    Score: 3-2-0 (5 games, avg 6.8 rounds)
+    Avg damage: Trandoshan Hunter 1.2 / Conscript Militia 4.0
+    Games: R7:Conscrip, R1:Trandosh, R9:Conscrip, R1:Trandosh, R16:Trandosh
+
+  Trandoshan Hunter vs Defector Trooper
+    Score: 3-2-0 (5 games, avg 8.0 rounds)
+    Avg damage: Trandoshan Hunter 1.0 / Defector Trooper 5.4
+    Games: R4:Defector, R16:Trandosh, R3:Defector, R1:Trandosh, R16:Trandosh
+
+  Trandoshan Hunter vs War Droid Mk-I
+    Score: 3-2-0 (5 games, avg 8.2 rounds)
+    Avg damage: Trandoshan Hunter 1.6 / War Droid Mk-I 5.4
+    Games: R1:War Droi, R5:Trandosh, R3:War Droi, R16:Trandosh, R16:Trandosh
+
+  Trandoshan Hunter vs Shock Commando
+    Score: 3-2-0 (5 games, avg 5.8 rounds)
+    Avg damage: Trandoshan Hunter 2.8 / Shock Commando 4.0
+    Games: R4:Shock Co, R3:Trandosh, R3:Shock Co, R3:Trandosh, R16:Trandosh
+
+  Trandoshan Hunter vs Rebel Turncoat
+    Score: 2-3-0 (5 games, avg 6.8 rounds)
+    Avg damage: Trandoshan Hunter 2.4 / Rebel Turncoat 6.0
+    Games: R15:Rebel Tu, R2:Trandosh, R9:Rebel Tu, R2:Trandosh, R6:Rebel Tu
+
+  Trandoshan Hunter vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 13.0 rounds)
+    Avg damage: Trandoshan Hunter 0.0 / Siege Droid Mk-II 2.0
+    Games: R16:Siege Dr, R16:Siege Dr, R1:Siege Dr, R16:Siege Dr, R16:Siege Dr
+
+  Trandoshan Hunter vs Warlord Kael Drayen
+    Score: 2-3-0 (5 games, avg 4.8 rounds)
+    Avg damage: Trandoshan Hunter 7.2 / Warlord Kael Drayen 9.2
+    Games: R1:Warlord , R9:Trandosh, R4:Warlord , R9:Trandosh, R1:Warlord 
+
+  IG Assassin Droid vs Syndicate Lieutenant
+    Score: 3-2-0 (5 games, avg 10.0 rounds)
+    Avg damage: IG Assassin Droid 2.4 / Syndicate Lieutenant 0.8
+    Games: R16:IG Assas, R1:IG Assas, R16:Syndicat, R1:IG Assas, R16:Syndicat
+
+  IG Assassin Droid vs The Broker
+    Score: 1-4-0 (5 games, avg 9.0 rounds)
+    Avg damage: IG Assassin Droid 2.8 / The Broker 2.8
+    Games: R1:The Brok, R7:IG Assas, R16:The Brok, R16:The Brok, R5:The Brok
+
+  IG Assassin Droid vs Drez Venn
+    Score: 2-3-0 (5 games, avg 5.2 rounds)
+    Avg damage: IG Assassin Droid 4.0 / Drez Venn 4.2
+    Games: R5:Drez Ven, R5:IG Assas, R6:Drez Ven, R8:IG Assas, R2:Drez Ven
+
+  IG Assassin Droid vs Krrssk
+    Score: 1-4-0 (5 games, avg 11.0 rounds)
+    Avg damage: IG Assassin Droid 2.8 / Krrssk 2.8
+    Games: R16:Krrssk, R9:IG Assas, R3:Krrssk, R16:Krrssk, R11:Krrssk
+
+  IG Assassin Droid vs Stormtrooper
+    Score: 4-1-0 (5 games, avg 4.0 rounds)
+    Avg damage: IG Assassin Droid 2.4 / Stormtrooper 1.4
+    Games: R1:IG Assas, R1:Stormtro, R1:IG Assas, R1:IG Assas, R16:IG Assas
+
+  IG Assassin Droid vs Stormtrooper Elite
+    Score: 1-4-0 (5 games, avg 9.6 rounds)
+    Avg damage: IG Assassin Droid 1.6 / Stormtrooper Elite 3.8
+    Games: R6:Stormtro, R7:IG Assas, R3:Stormtro, R16:Stormtro, R16:Stormtro
+
+  IG Assassin Droid vs Imperial Officer
+    Score: 5-0-0 (5 games, avg 10.0 rounds)
+    Avg damage: IG Assassin Droid 2.0 / Imperial Officer 0.0
+    Games: R16:IG Assas, R16:IG Assas, R1:IG Assas, R16:IG Assas, R1:IG Assas
+
+  IG Assassin Droid vs Probe Droid
+    Score: 5-0-0 (5 games, avg 1.4 rounds)
+    Avg damage: IG Assassin Droid 4.0 / Probe Droid 0.0
+    Games: R1:IG Assas, R2:IG Assas, R1:IG Assas, R2:IG Assas, R1:IG Assas
+
+  IG Assassin Droid vs E-Web Engineer
+    Score: 2-3-0 (5 games, avg 6.4 rounds)
+    Avg damage: IG Assassin Droid 1.2 / E-Web Engineer 4.2
+    Games: R16:IG Assas, R1:E-Web En, R1:E-Web En, R7:IG Assas, R7:E-Web En
+
+  IG Assassin Droid vs Inquisitor
+    Score: 2-3-0 (5 games, avg 12.2 rounds)
+    Avg damage: IG Assassin Droid 6.0 / Inquisitor 1.4
+    Games: R4:Inquisit, R9:IG Assas, R16:Inquisit, R16:IG Assas, R16:Inquisit
+
+  IG Assassin Droid vs Conscript Militia
+    Score: 4-0-1 (5 games, avg 13.0 rounds)
+    Avg damage: IG Assassin Droid 0.6 / Conscript Militia 0.8
+    Games: R16:IG Assas, R1:IG Assas, R16:Draw, R16:IG Assas, R16:IG Assas
+
+  IG Assassin Droid vs Defector Trooper
+    Score: 3-2-0 (5 games, avg 2.0 rounds)
+    Avg damage: IG Assassin Droid 3.0 / Defector Trooper 2.8
+    Games: R1:IG Assas, R1:Defector, R1:IG Assas, R2:IG Assas, R5:Defector
+
+  IG Assassin Droid vs War Droid Mk-I
+    Score: 2-3-0 (5 games, avg 2.6 rounds)
+    Avg damage: IG Assassin Droid 3.2 / War Droid Mk-I 4.2
+    Games: R3:War Droi, R3:IG Assas, R2:War Droi, R2:IG Assas, R3:War Droi
+
+  IG Assassin Droid vs Shock Commando
+    Score: 1-3-1 (5 games, avg 10.4 rounds)
+    Avg damage: IG Assassin Droid 1.4 / Shock Commando 4.2
+    Games: R6:Shock Co, R13:IG Assas, R14:Shock Co, R16:Draw, R3:Shock Co
+
+  IG Assassin Droid vs Rebel Turncoat
+    Score: 2-3-0 (5 games, avg 6.8 rounds)
+    Avg damage: IG Assassin Droid 1.2 / Rebel Turncoat 4.2
+    Games: R4:Rebel Tu, R2:IG Assas, R6:Rebel Tu, R16:IG Assas, R6:Rebel Tu
+
+  IG Assassin Droid vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 6.2 rounds)
+    Avg damage: IG Assassin Droid 0.0 / Siege Droid Mk-II 5.6
+    Games: R4:Siege Dr, R16:Siege Dr, R5:Siege Dr, R1:Siege Dr, R5:Siege Dr
+
+  IG Assassin Droid vs Warlord Kael Drayen
+    Score: 0-5-0 (5 games, avg 7.4 rounds)
+    Avg damage: IG Assassin Droid 0.0 / Warlord Kael Drayen 4.2
+    Games: R3:Warlord , R16:Warlord , R16:Warlord , R1:Warlord , R1:Warlord 
+
+  Syndicate Lieutenant vs The Broker
+    Score: 0-5-0 (5 games, avg 4.0 rounds)
+    Avg damage: Syndicate Lieutenant 0.0 / The Broker 4.8
+    Games: R1:The Brok, R16:The Brok, R1:The Brok, R1:The Brok, R1:The Brok
+
+  Syndicate Lieutenant vs Drez Venn
+    Score: 0-5-0 (5 games, avg 4.0 rounds)
+    Avg damage: Syndicate Lieutenant 0.0 / Drez Venn 4.8
+    Games: R1:Drez Ven, R16:Drez Ven, R1:Drez Ven, R1:Drez Ven, R1:Drez Ven
+
+  Syndicate Lieutenant vs Krrssk
+    Score: 1-3-1 (5 games, avg 7.6 rounds)
+    Avg damage: Syndicate Lieutenant 4.0 / Krrssk 3.6
+    Games: R2:Krrssk, R16:Syndicat, R2:Krrssk, R16:Draw, R2:Krrssk
+
+  Syndicate Lieutenant vs Stormtrooper
+    Score: 1-4-0 (5 games, avg 1.4 rounds)
+    Avg damage: Syndicate Lieutenant 0.8 / Stormtrooper 4.8
+    Games: R1:Stormtro, R3:Syndicat, R1:Stormtro, R1:Stormtro, R1:Stormtro
+
+  Syndicate Lieutenant vs Stormtrooper Elite
+    Score: 0-5-0 (5 games, avg 1.4 rounds)
+    Avg damage: Syndicate Lieutenant 0.0 / Stormtrooper Elite 6.0
+    Games: R1:Stormtro, R1:Stormtro, R2:Stormtro, R1:Stormtro, R2:Stormtro
+
+  Syndicate Lieutenant vs Imperial Officer
+    Score: 4-1-0 (5 games, avg 8.4 rounds)
+    Avg damage: Syndicate Lieutenant 2.0 / Imperial Officer 1.2
+    Games: R2:Imperial, R6:Syndicat, R16:Syndicat, R2:Syndicat, R16:Syndicat
+
+  Syndicate Lieutenant vs Probe Droid
+    Score: 2-3-0 (5 games, avg 2.2 rounds)
+    Avg damage: Syndicate Lieutenant 1.6 / Probe Droid 3.6
+    Games: R1:Probe Dr, R4:Syndicat, R1:Probe Dr, R3:Syndicat, R2:Probe Dr
+
+  Syndicate Lieutenant vs E-Web Engineer
+    Score: 0-4-1 (5 games, avg 4.0 rounds)
+    Avg damage: Syndicate Lieutenant 0.0 / E-Web Engineer 4.8
+    Games: R1:E-Web En, R1:E-Web En, R1:E-Web En, R1:E-Web En, R16:Draw
+
+  Syndicate Lieutenant vs Inquisitor
+    Score: 0-5-0 (5 games, avg 7.8 rounds)
+    Avg damage: Syndicate Lieutenant 1.8 / Inquisitor 3.6
+    Games: R3:Inquisit, R16:Inquisit, R2:Inquisit, R16:Inquisit, R2:Inquisit
+
+  Syndicate Lieutenant vs Conscript Militia
+    Score: 3-2-0 (5 games, avg 5.8 rounds)
+    Avg damage: Syndicate Lieutenant 1.2 / Conscript Militia 3.4
+    Games: R2:Conscrip, R6:Syndicat, R16:Syndicat, R1:Syndicat, R4:Conscrip
+
+  Syndicate Lieutenant vs Defector Trooper
+    Score: 1-4-0 (5 games, avg 1.4 rounds)
+    Avg damage: Syndicate Lieutenant 1.0 / Defector Trooper 4.8
+    Games: R1:Defector, R1:Defector, R1:Defector, R3:Syndicat, R1:Defector
+
+  Syndicate Lieutenant vs War Droid Mk-I
+    Score: 0-5-0 (5 games, avg 1.0 rounds)
+    Avg damage: Syndicate Lieutenant 0.0 / War Droid Mk-I 6.0
+    Games: R1:War Droi, R1:War Droi, R1:War Droi, R1:War Droi, R1:War Droi
+
+  Syndicate Lieutenant vs Shock Commando
+    Score: 1-4-0 (5 games, avg 4.4 rounds)
+    Avg damage: Syndicate Lieutenant 1.4 / Shock Commando 3.6
+    Games: R1:Shock Co, R1:Shock Co, R1:Shock Co, R3:Syndicat, R16:Shock Co
+
+  Syndicate Lieutenant vs Rebel Turncoat
+    Score: 2-3-0 (5 games, avg 1.8 rounds)
+    Avg damage: Syndicate Lieutenant 2.4 / Rebel Turncoat 3.6
+    Games: R1:Rebel Tu, R3:Syndicat, R1:Rebel Tu, R3:Syndicat, R1:Rebel Tu
+
+  Syndicate Lieutenant vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 4.2 rounds)
+    Avg damage: Syndicate Lieutenant 0.0 / Siege Droid Mk-II 4.8
+    Games: R2:Siege Dr, R1:Siege Dr, R1:Siege Dr, R1:Siege Dr, R16:Siege Dr
+
+  Syndicate Lieutenant vs Warlord Kael Drayen
+    Score: 0-5-0 (5 games, avg 10.0 rounds)
+    Avg damage: Syndicate Lieutenant 0.2 / Warlord Kael Drayen 2.4
+    Games: R1:Warlord , R16:Warlord , R16:Warlord , R16:Warlord , R1:Warlord 
+
+  The Broker vs Drez Venn
+    Score: 2-3-0 (5 games, avg 3.6 rounds)
+    Avg damage: The Broker 4.0 / Drez Venn 8.4
+    Games: R4:Drez Ven, R4:The Brok, R4:Drez Ven, R2:The Brok, R4:Drez Ven
+
+  The Broker vs Krrssk
+    Score: 2-2-1 (5 games, avg 9.0 rounds)
+    Avg damage: The Broker 5.6 / Krrssk 5.6
+    Games: R8:Krrssk, R3:The Brok, R16:Draw, R3:The Brok, R15:Krrssk
+
+  The Broker vs Stormtrooper
+    Score: 4-1-0 (5 games, avg 1.2 rounds)
+    Avg damage: The Broker 3.2 / Stormtrooper 2.8
+    Games: R1:The Brok, R1:The Brok, R1:The Brok, R1:The Brok, R2:Stormtro
+
+  The Broker vs Stormtrooper Elite
+    Score: 2-3-0 (5 games, avg 4.4 rounds)
+    Avg damage: The Broker 3.2 / Stormtrooper Elite 9.6
+    Games: R7:Stormtro, R3:The Brok, R6:Stormtro, R3:The Brok, R3:Stormtro
+
+  The Broker vs Imperial Officer
+    Score: 5-0-0 (5 games, avg 4.0 rounds)
+    Avg damage: The Broker 4.0 / Imperial Officer 0.0
+    Games: R1:The Brok, R1:The Brok, R1:The Brok, R1:The Brok, R16:The Brok
+
+  The Broker vs Probe Droid
+    Score: 5-0-0 (5 games, avg 1.2 rounds)
+    Avg damage: The Broker 4.0 / Probe Droid 0.0
+    Games: R1:The Brok, R2:The Brok, R1:The Brok, R1:The Brok, R1:The Brok
+
+  The Broker vs E-Web Engineer
+    Score: 5-0-0 (5 games, avg 4.0 rounds)
+    Avg damage: The Broker 4.8 / E-Web Engineer 0.0
+    Games: R16:The Brok, R1:The Brok, R1:The Brok, R1:The Brok, R1:The Brok
+
+  The Broker vs Inquisitor
+    Score: 1-4-0 (5 games, avg 7.4 rounds)
+    Avg damage: The Broker 3.2 / Inquisitor 8.4
+    Games: R4:Inquisit, R16:Inquisit, R8:Inquisit, R4:The Brok, R5:Inquisit
+
+  The Broker vs Conscript Militia
+    Score: 5-0-0 (5 games, avg 13.0 rounds)
+    Avg damage: The Broker 0.6 / Conscript Militia 1.6
+    Games: R16:The Brok, R1:The Brok, R16:The Brok, R16:The Brok, R16:The Brok
+
+  The Broker vs Defector Trooper
+    Score: 5-0-0 (5 games, avg 4.0 rounds)
+    Avg damage: The Broker 4.0 / Defector Trooper 0.0
+    Games: R1:The Brok, R1:The Brok, R1:The Brok, R1:The Brok, R16:The Brok
+
+  The Broker vs War Droid Mk-I
+    Score: 2-3-0 (5 games, avg 5.8 rounds)
+    Avg damage: The Broker 3.2 / War Droid Mk-I 10.4
+    Games: R5:War Droi, R1:The Brok, R8:War Droi, R3:The Brok, R12:War Droi
+
+  The Broker vs Shock Commando
+    Score: 2-3-0 (5 games, avg 3.2 rounds)
+    Avg damage: The Broker 2.8 / Shock Commando 8.4
+    Games: R5:Shock Co, R2:The Brok, R5:Shock Co, R1:The Brok, R3:Shock Co
+
+  The Broker vs Rebel Turncoat
+    Score: 5-0-0 (5 games, avg 4.2 rounds)
+    Avg damage: The Broker 4.8 / Rebel Turncoat 0.0
+    Games: R1:The Brok, R1:The Brok, R16:The Brok, R2:The Brok, R1:The Brok
+
+  The Broker vs Siege Droid Mk-II
+    Score: 1-4-0 (5 games, avg 8.6 rounds)
+    Avg damage: The Broker 4.0 / Siege Droid Mk-II 10.4
+    Games: R9:Siege Dr, R16:Siege Dr, R7:Siege Dr, R5:The Brok, R6:Siege Dr
+
+  The Broker vs Warlord Kael Drayen
+    Score: 2-3-0 (5 games, avg 7.8 rounds)
+    Avg damage: The Broker 7.2 / Warlord Kael Drayen 10.6
+    Games: R2:Warlord , R14:The Brok, R10:Warlord , R5:The Brok, R8:Warlord 
+
+  Drez Venn vs Krrssk
+    Score: 1-4-0 (5 games, avg 12.8 rounds)
+    Avg damage: Drez Venn 2.8 / Krrssk 2.0
+    Games: R16:Krrssk, R16:Krrssk, R16:Krrssk, R4:Drez Ven, R12:Krrssk
+
+  Drez Venn vs Stormtrooper
+    Score: 5-0-0 (5 games, avg 1.2 rounds)
+    Avg damage: Drez Venn 4.0 / Stormtrooper 0.0
+    Games: R1:Drez Ven, R1:Drez Ven, R1:Drez Ven, R2:Drez Ven, R1:Drez Ven
+
+  Drez Venn vs Stormtrooper Elite
+    Score: 2-3-0 (5 games, avg 7.8 rounds)
+    Avg damage: Drez Venn 3.2 / Stormtrooper Elite 7.2
+    Games: R12:Stormtro, R7:Drez Ven, R7:Stormtro, R4:Drez Ven, R9:Stormtro
+
+  Drez Venn vs Imperial Officer
+    Score: 4-1-0 (5 games, avg 3.2 rounds)
+    Avg damage: Drez Venn 4.0 / Imperial Officer 2.0
+    Games: R1:Drez Ven, R2:Drez Ven, R1:Drez Ven, R1:Drez Ven, R11:Imperial
+
+  Drez Venn vs Probe Droid
+    Score: 5-0-0 (5 games, avg 13.2 rounds)
+    Avg damage: Drez Venn 0.8 / Probe Droid 0.8
+    Games: R16:Drez Ven, R16:Drez Ven, R16:Drez Ven, R2:Drez Ven, R16:Drez Ven
+
+  Drez Venn vs E-Web Engineer
+    Score: 3-2-0 (5 games, avg 10.8 rounds)
+    Avg damage: Drez Venn 1.2 / E-Web Engineer 4.0
+    Games: R9:E-Web En, R4:Drez Ven, R9:E-Web En, R16:Drez Ven, R16:Drez Ven
+
+  Drez Venn vs Inquisitor
+    Score: 2-3-0 (5 games, avg 5.6 rounds)
+    Avg damage: Drez Venn 6.4 / Inquisitor 6.0
+    Games: R3:Inquisit, R7:Drez Ven, R3:Inquisit, R12:Drez Ven, R3:Inquisit
+
+  Drez Venn vs Conscript Militia
+    Score: 5-0-0 (5 games, avg 7.8 rounds)
+    Avg damage: Drez Venn 1.8 / Conscript Militia 0.6
+    Games: R16:Drez Ven, R1:Drez Ven, R16:Drez Ven, R5:Drez Ven, R1:Drez Ven
+
+  Drez Venn vs Defector Trooper
+    Score: 4-1-0 (5 games, avg 3.8 rounds)
+    Avg damage: Drez Venn 4.0 / Defector Trooper 2.0
+    Games: R1:Drez Ven, R1:Drez Ven, R15:Defector, R1:Drez Ven, R1:Drez Ven
+
+  Drez Venn vs War Droid Mk-I
+    Score: 2-3-0 (5 games, avg 5.8 rounds)
+    Avg damage: Drez Venn 3.2 / War Droid Mk-I 5.8
+    Games: R16:War Droi, R1:Drez Ven, R6:War Droi, R3:Drez Ven, R3:War Droi
+
+  Drez Venn vs Shock Commando
+    Score: 3-2-0 (5 games, avg 9.4 rounds)
+    Avg damage: Drez Venn 1.4 / Shock Commando 4.0
+    Games: R12:Shock Co, R16:Drez Ven, R16:Drez Ven, R1:Drez Ven, R2:Shock Co
+
+  Drez Venn vs Rebel Turncoat
+    Score: 5-0-0 (5 games, avg 7.2 rounds)
+    Avg damage: Drez Venn 3.6 / Rebel Turncoat 0.0
+    Games: R16:Drez Ven, R1:Drez Ven, R16:Drez Ven, R2:Drez Ven, R1:Drez Ven
+
+  Drez Venn vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 9.8 rounds)
+    Avg damage: Drez Venn 0.0 / Siege Droid Mk-II 6.0
+    Games: R3:Siege Dr, R16:Siege Dr, R10:Siege Dr, R16:Siege Dr, R4:Siege Dr
+
+  Drez Venn vs Warlord Kael Drayen
+    Score: 1-4-0 (5 games, avg 6.0 rounds)
+    Avg damage: Drez Venn 2.8 / Warlord Kael Drayen 8.0
+    Games: R2:Warlord , R1:Warlord , R4:Warlord , R16:Drez Ven, R7:Warlord 
+
+  Krrssk vs Stormtrooper
+    Score: 2-3-0 (5 games, avg 2.8 rounds)
+    Avg damage: Krrssk 1.6 / Stormtrooper 9.2
+    Games: R5:Stormtro, R1:Krrssk, R3:Stormtro, R2:Krrssk, R3:Stormtro
+
+  Krrssk vs Stormtrooper Elite
+    Score: 2-3-0 (5 games, avg 5.0 rounds)
+    Avg damage: Krrssk 3.2 / Stormtrooper Elite 9.8
+    Games: R3:Stormtro, R4:Krrssk, R3:Stormtro, R10:Krrssk, R5:Stormtro
+
+  Krrssk vs Imperial Officer
+    Score: 3-2-0 (5 games, avg 7.4 rounds)
+    Avg damage: Krrssk 2.0 / Imperial Officer 5.6
+    Games: R7:Imperial, R2:Krrssk, R10:Imperial, R2:Krrssk, R16:Krrssk
+
+  Krrssk vs Probe Droid
+    Score: 3-2-0 (5 games, avg 9.4 rounds)
+    Avg damage: Krrssk 0.8 / Probe Droid 5.6
+    Games: R16:Krrssk, R16:Krrssk, R6:Probe Dr, R4:Krrssk, R5:Probe Dr
+
+  Krrssk vs E-Web Engineer
+    Score: 2-3-0 (5 games, avg 6.8 rounds)
+    Avg damage: Krrssk 1.2 / E-Web Engineer 8.4
+    Games: R2:E-Web En, R16:Krrssk, R4:E-Web En, R5:Krrssk, R7:E-Web En
+
+  Krrssk vs Inquisitor
+    Score: 1-4-0 (5 games, avg 7.4 rounds)
+    Avg damage: Krrssk 3.2 / Inquisitor 8.4
+    Games: R3:Inquisit, R16:Inquisit, R3:Inquisit, R12:Krrssk, R3:Inquisit
+
+  Krrssk vs Conscript Militia
+    Score: 4-1-0 (5 games, avg 10.0 rounds)
+    Avg damage: Krrssk 1.2 / Conscript Militia 4.8
+    Games: R16:Krrssk, R2:Krrssk, R16:Krrssk, R2:Krrssk, R14:Conscrip
+
+  Krrssk vs Defector Trooper
+    Score: 3-2-0 (5 games, avg 6.0 rounds)
+    Avg damage: Krrssk 2.0 / Defector Trooper 6.4
+    Games: R16:Krrssk, R3:Krrssk, R3:Defector, R2:Krrssk, R6:Defector
+
+  Krrssk vs War Droid Mk-I
+    Score: 3-2-0 (5 games, avg 7.6 rounds)
+    Avg damage: Krrssk 3.2 / War Droid Mk-I 7.4
+    Games: R16:Krrssk, R10:Krrssk, R3:War Droi, R4:Krrssk, R5:War Droi
+
+  Krrssk vs Shock Commando
+    Score: 2-3-0 (5 games, avg 6.0 rounds)
+    Avg damage: Krrssk 1.4 / Shock Commando 8.4
+    Games: R5:Shock Co, R16:Krrssk, R4:Shock Co, R3:Krrssk, R2:Shock Co
+
+  Krrssk vs Rebel Turncoat
+    Score: 2-3-0 (5 games, avg 4.8 rounds)
+    Avg damage: Krrssk 2.4 / Rebel Turncoat 8.4
+    Games: R10:Rebel Tu, R2:Krrssk, R5:Rebel Tu, R2:Krrssk, R5:Rebel Tu
+
+  Krrssk vs Siege Droid Mk-II
+    Score: 0-3-2 (5 games, avg 10.4 rounds)
+    Avg damage: Krrssk 0.0 / Siege Droid Mk-II 7.4
+    Games: R2:Siege Dr, R16:Draw, R2:Siege Dr, R16:Siege Dr, R16:Draw
+
+  Krrssk vs Warlord Kael Drayen
+    Score: 2-3-0 (5 games, avg 10.6 rounds)
+    Avg damage: Krrssk 3.6 / Warlord Kael Drayen 5.6
+    Games: R3:Warlord , R16:Krrssk, R2:Warlord , R16:Krrssk, R16:Warlord 
+
+  Stormtrooper vs Stormtrooper Elite
+    Score: 0-5-0 (5 games, avg 4.0 rounds)
+    Avg damage: Stormtrooper 1.0 / Stormtrooper Elite 3.2
+    Games: R1:Stormtro, R16:Stormtro, R1:Stormtro, R1:Stormtro, R1:Stormtro
+
+  Stormtrooper vs Imperial Officer
+    Score: 4-1-0 (5 games, avg 4.4 rounds)
+    Avg damage: Stormtrooper 4.0 / Imperial Officer 0.0
+    Games: R1:Stormtro, R2:Stormtro, R16:Imperial, R2:Stormtro, R1:Stormtro
+
+  Stormtrooper vs Probe Droid
+    Score: 1-2-2 (5 games, avg 7.4 rounds)
+    Avg damage: Stormtrooper 0.8 / Probe Droid 1.6
+    Games: R16:Draw, R16:Draw, R2:Probe Dr, R1:Stormtro, R2:Probe Dr
+
+  Stormtrooper vs E-Web Engineer
+    Score: 0-5-0 (5 games, avg 7.0 rounds)
+    Avg damage: Stormtrooper 0.0 / E-Web Engineer 2.4
+    Games: R1:E-Web En, R1:E-Web En, R16:E-Web En, R16:E-Web En, R1:E-Web En
+
+  Stormtrooper vs Inquisitor
+    Score: 2-3-0 (5 games, avg 5.8 rounds)
+    Avg damage: Stormtrooper 6.4 / Inquisitor 1.6
+    Games: R2:Inquisit, R4:Stormtro, R2:Inquisit, R5:Stormtro, R16:Inquisit
+
+  Stormtrooper vs Conscript Militia
+    Score: 4-1-0 (5 games, avg 4.4 rounds)
+    Avg damage: Stormtrooper 1.8 / Conscript Militia 0.8
+    Games: R1:Conscrip, R1:Stormtro, R16:Stormtro, R3:Stormtro, R1:Stormtro
+
+  Stormtrooper vs Defector Trooper
+    Score: 2-3-0 (5 games, avg 1.2 rounds)
+    Avg damage: Stormtrooper 2.0 / Defector Trooper 2.4
+    Games: R1:Stormtro, R1:Defector, R1:Stormtro, R1:Defector, R2:Defector
+
+  Stormtrooper vs War Droid Mk-I
+    Score: 0-5-0 (5 games, avg 7.2 rounds)
+    Avg damage: Stormtrooper 1.4 / War Droid Mk-I 2.4
+    Games: R2:War Droi, R16:War Droi, R16:War Droi, R1:War Droi, R1:War Droi
+
+  Stormtrooper vs Shock Commando
+    Score: 2-3-0 (5 games, avg 1.6 rounds)
+    Avg damage: Stormtrooper 4.0 / Shock Commando 2.4
+    Games: R1:Shock Co, R1:Shock Co, R1:Stormtro, R3:Stormtro, R2:Shock Co
+
+  Stormtrooper vs Rebel Turncoat
+    Score: 4-1-0 (5 games, avg 1.6 rounds)
+    Avg damage: Stormtrooper 4.8 / Rebel Turncoat 0.8
+    Games: R2:Rebel Tu, R3:Stormtro, R1:Stormtro, R1:Stormtro, R1:Stormtro
+
+  Stormtrooper vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 4.2 rounds)
+    Avg damage: Stormtrooper 0.0 / Siege Droid Mk-II 3.2
+    Games: R1:Siege Dr, R16:Siege Dr, R2:Siege Dr, R1:Siege Dr, R1:Siege Dr
+
+  Stormtrooper vs Warlord Kael Drayen
+    Score: 0-5-0 (5 games, avg 1.2 rounds)
+    Avg damage: Stormtrooper 0.0 / Warlord Kael Drayen 4.0
+    Games: R1:Warlord , R1:Warlord , R2:Warlord , R1:Warlord , R1:Warlord 
+
+  Stormtrooper Elite vs Imperial Officer
+    Score: 4-1-0 (5 games, avg 4.4 rounds)
+    Avg damage: Stormtrooper Elite 3.0 / Imperial Officer 1.6
+    Games: R1:Stormtro, R1:Stormtro, R3:Imperial, R1:Stormtro, R16:Stormtro
+
+  Stormtrooper Elite vs Probe Droid
+    Score: 4-1-0 (5 games, avg 8.2 rounds)
+    Avg damage: Stormtrooper Elite 1.6 / Probe Droid 1.6
+    Games: R7:Probe Dr, R1:Stormtro, R1:Stormtro, R16:Stormtro, R16:Stormtro
+
+  Stormtrooper Elite vs E-Web Engineer
+    Score: 2-3-0 (5 games, avg 4.4 rounds)
+    Avg damage: Stormtrooper Elite 1.2 / E-Web Engineer 4.8
+    Games: R1:Stormtro, R1:E-Web En, R3:E-Web En, R1:E-Web En, R16:Stormtro
+
+  Stormtrooper Elite vs Inquisitor
+    Score: 2-3-0 (5 games, avg 4.0 rounds)
+    Avg damage: Stormtrooper Elite 6.4 / Inquisitor 4.8
+    Games: R5:Inquisit, R5:Stormtro, R2:Inquisit, R4:Stormtro, R4:Inquisit
+
+  Stormtrooper Elite vs Conscript Militia
+    Score: 5-0-0 (5 games, avg 7.2 rounds)
+    Avg damage: Stormtrooper Elite 1.8 / Conscript Militia 1.2
+    Games: R1:Stormtro, R2:Stormtro, R16:Stormtro, R1:Stormtro, R16:Stormtro
+
+  Stormtrooper Elite vs Defector Trooper
+    Score: 4-1-0 (5 games, avg 4.4 rounds)
+    Avg damage: Stormtrooper Elite 3.0 / Defector Trooper 2.6
+    Games: R1:Stormtro, R1:Stormtro, R3:Defector, R1:Stormtro, R16:Stormtro
+
+  Stormtrooper Elite vs War Droid Mk-I
+    Score: 2-2-1 (5 games, avg 4.8 rounds)
+    Avg damage: Stormtrooper Elite 3.2 / War Droid Mk-I 3.2
+    Games: R2:War Droi, R16:Draw, R1:War Droi, R4:Stormtro, R1:Stormtro
+
+  Stormtrooper Elite vs Shock Commando
+    Score: 4-1-0 (5 games, avg 1.4 rounds)
+    Avg damage: Stormtrooper Elite 6.8 / Shock Commando 1.6
+    Games: R2:Shock Co, R1:Stormtro, R1:Stormtro, R2:Stormtro, R1:Stormtro
+
+  Stormtrooper Elite vs Rebel Turncoat
+    Score: 4-1-0 (5 games, avg 4.4 rounds)
+    Avg damage: Stormtrooper Elite 3.6 / Rebel Turncoat 1.6
+    Games: R1:Stormtro, R16:Stormtro, R1:Stormtro, R1:Stormtro, R3:Rebel Tu
+
+  Stormtrooper Elite vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 4.8 rounds)
+    Avg damage: Stormtrooper Elite 0.0 / Siege Droid Mk-II 6.4
+    Games: R4:Siege Dr, R1:Siege Dr, R1:Siege Dr, R16:Siege Dr, R2:Siege Dr
+
+  Stormtrooper Elite vs Warlord Kael Drayen
+    Score: 2-3-0 (5 games, avg 11.2 rounds)
+    Avg damage: Stormtrooper Elite 5.8 / Warlord Kael Drayen 3.2
+    Games: R16:Warlord , R16:Stormtro, R3:Warlord , R16:Stormtro, R5:Warlord 
+
+  Imperial Officer vs Probe Droid
+    Score: 2-3-0 (5 games, avg 4.8 rounds)
+    Avg damage: Imperial Officer 0.8 / Probe Droid 3.0
+    Games: R2:Probe Dr, R1:Imperial, R2:Probe Dr, R16:Imperial, R3:Probe Dr
+
+  Imperial Officer vs E-Web Engineer
+    Score: 0-5-0 (5 games, avg 4.0 rounds)
+    Avg damage: Imperial Officer 0.0 / E-Web Engineer 4.0
+    Games: R1:E-Web En, R1:E-Web En, R1:E-Web En, R16:E-Web En, R1:E-Web En
+
+  Imperial Officer vs Inquisitor
+    Score: 1-4-0 (5 games, avg 7.6 rounds)
+    Avg damage: Imperial Officer 3.4 / Inquisitor 3.0
+    Games: R2:Inquisit, R16:Inquisit, R2:Inquisit, R16:Imperial, R2:Inquisit
+
+  Imperial Officer vs Conscript Militia
+    Score: 3-2-0 (5 games, avg 1.2 rounds)
+    Avg damage: Imperial Officer 1.8 / Conscript Militia 2.0
+    Games: R1:Imperial, R1:Conscrip, R1:Imperial, R2:Imperial, R1:Conscrip
+
+  Imperial Officer vs Defector Trooper
+    Score: 1-4-0 (5 games, avg 1.8 rounds)
+    Avg damage: Imperial Officer 1.0 / Defector Trooper 4.0
+    Games: R2:Defector, R1:Defector, R1:Defector, R4:Imperial, R1:Defector
+
+  Imperial Officer vs War Droid Mk-I
+    Score: 2-3-0 (5 games, avg 9.6 rounds)
+    Avg damage: Imperial Officer 2.6 / War Droid Mk-I 2.0
+    Games: R1:War Droi, R16:Imperial, R16:War Droi, R13:Imperial, R2:War Droi
+
+  Imperial Officer vs Shock Commando
+    Score: 1-4-0 (5 games, avg 2.6 rounds)
+    Avg damage: Imperial Officer 1.4 / Shock Commando 4.0
+    Games: R3:Shock Co, R1:Shock Co, R4:Shock Co, R1:Imperial, R4:Shock Co
+
+  Imperial Officer vs Rebel Turncoat
+    Score: 2-3-0 (5 games, avg 1.8 rounds)
+    Avg damage: Imperial Officer 2.4 / Rebel Turncoat 3.0
+    Games: R1:Rebel Tu, R2:Imperial, R2:Rebel Tu, R2:Imperial, R2:Rebel Tu
+
+  Imperial Officer vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 7.0 rounds)
+    Avg damage: Imperial Officer 0.0 / Siege Droid Mk-II 3.0
+    Games: R1:Siege Dr, R16:Siege Dr, R1:Siege Dr, R16:Siege Dr, R1:Siege Dr
+
+  Imperial Officer vs Warlord Kael Drayen
+    Score: 0-5-0 (5 games, avg 4.2 rounds)
+    Avg damage: Imperial Officer 0.0 / Warlord Kael Drayen 4.0
+    Games: R2:Warlord , R16:Warlord , R1:Warlord , R1:Warlord , R1:Warlord 
+
+  Probe Droid vs E-Web Engineer
+    Score: 0-5-0 (5 games, avg 4.6 rounds)
+    Avg damage: Probe Droid 0.0 / E-Web Engineer 3.2
+    Games: R16:E-Web En, R1:E-Web En, R3:E-Web En, R1:E-Web En, R2:E-Web En
+
+  Probe Droid vs Inquisitor
+    Score: 1-4-0 (5 games, avg 5.4 rounds)
+    Avg damage: Probe Droid 4.4 / Inquisitor 2.4
+    Games: R2:Inquisit, R4:Probe Dr, R2:Inquisit, R16:Inquisit, R3:Inquisit
+
+  Probe Droid vs Conscript Militia
+    Score: 3-2-0 (5 games, avg 4.4 rounds)
+    Avg damage: Probe Droid 1.2 / Conscript Militia 1.6
+    Games: R16:Probe Dr, R1:Probe Dr, R3:Conscrip, R1:Probe Dr, R1:Conscrip
+
+  Probe Droid vs Defector Trooper
+    Score: 1-4-0 (5 games, avg 4.2 rounds)
+    Avg damage: Probe Droid 1.0 / Defector Trooper 2.4
+    Games: R1:Defector, R1:Defector, R16:Defector, R2:Probe Dr, R1:Defector
+
+  Probe Droid vs War Droid Mk-I
+    Score: 0-5-0 (5 games, avg 1.0 rounds)
+    Avg damage: Probe Droid 0.0 / War Droid Mk-I 4.0
+    Games: R1:War Droi, R1:War Droi, R1:War Droi, R1:War Droi, R1:War Droi
+
+  Probe Droid vs Shock Commando
+    Score: 0-5-0 (5 games, avg 4.0 rounds)
+    Avg damage: Probe Droid 0.0 / Shock Commando 3.2
+    Games: R1:Shock Co, R16:Shock Co, R1:Shock Co, R1:Shock Co, R1:Shock Co
+
+  Probe Droid vs Rebel Turncoat
+    Score: 2-3-0 (5 games, avg 2.2 rounds)
+    Avg damage: Probe Droid 2.4 / Rebel Turncoat 2.4
+    Games: R2:Rebel Tu, R2:Probe Dr, R1:Rebel Tu, R4:Probe Dr, R2:Rebel Tu
+
+  Probe Droid vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 4.0 rounds)
+    Avg damage: Probe Droid 0.0 / Siege Droid Mk-II 3.2
+    Games: R1:Siege Dr, R1:Siege Dr, R1:Siege Dr, R1:Siege Dr, R16:Siege Dr
+
+  Probe Droid vs Warlord Kael Drayen
+    Score: 0-5-0 (5 games, avg 4.0 rounds)
+    Avg damage: Probe Droid 0.0 / Warlord Kael Drayen 3.2
+    Games: R1:Warlord , R1:Warlord , R1:Warlord , R16:Warlord , R1:Warlord 
+
+  E-Web Engineer vs Inquisitor
+    Score: 2-3-0 (5 games, avg 3.4 rounds)
+    Avg damage: E-Web Engineer 10.4 / Inquisitor 3.6
+    Games: R3:Inquisit, R3:E-Web En, R3:Inquisit, R5:E-Web En, R3:Inquisit
+
+  E-Web Engineer vs Conscript Militia
+    Score: 3-2-0 (5 games, avg 9.2 rounds)
+    Avg damage: E-Web Engineer 1.2 / Conscript Militia 2.0
+    Games: R16:Conscrip, R2:E-Web En, R11:Conscrip, R1:E-Web En, R16:E-Web En
+
+  E-Web Engineer vs Defector Trooper
+    Score: 3-2-0 (5 games, avg 7.0 rounds)
+    Avg damage: E-Web Engineer 1.0 / Defector Trooper 2.4
+    Games: R16:E-Web En, R16:E-Web En, R1:E-Web En, R1:Defector, R1:Defector
+
+  E-Web Engineer vs War Droid Mk-I
+    Score: 2-3-0 (5 games, avg 1.2 rounds)
+    Avg damage: E-Web Engineer 3.2 / War Droid Mk-I 3.6
+    Games: R1:E-Web En, R1:War Droi, R2:War Droi, R1:E-Web En, R1:War Droi
+
+  E-Web Engineer vs Shock Commando
+    Score: 3-2-0 (5 games, avg 4.6 rounds)
+    Avg damage: E-Web Engineer 4.2 / Shock Commando 1.2
+    Games: R16:Shock Co, R1:E-Web En, R2:Shock Co, R3:E-Web En, R1:E-Web En
+
+  E-Web Engineer vs Rebel Turncoat
+    Score: 3-0-2 (5 games, avg 7.0 rounds)
+    Avg damage: E-Web Engineer 3.6 / Rebel Turncoat 0.0
+    Games: R16:Draw, R1:E-Web En, R1:E-Web En, R1:E-Web En, R16:Draw
+
+  E-Web Engineer vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 4.2 rounds)
+    Avg damage: E-Web Engineer 0.0 / Siege Droid Mk-II 4.8
+    Games: R1:Siege Dr, R1:Siege Dr, R16:Siege Dr, R1:Siege Dr, R2:Siege Dr
+
+  E-Web Engineer vs Warlord Kael Drayen
+    Score: 1-4-0 (5 games, avg 2.6 rounds)
+    Avg damage: E-Web Engineer 3.6 / Warlord Kael Drayen 4.8
+    Games: R1:Warlord , R1:Warlord , R1:Warlord , R9:E-Web En, R1:Warlord 
+
+  Inquisitor vs Conscript Militia
+    Score: 5-0-0 (5 games, avg 13.2 rounds)
+    Avg damage: Inquisitor 0.6 / Conscript Militia 3.4
+    Games: R16:Inquisit, R2:Inquisit, R16:Inquisit, R16:Inquisit, R16:Inquisit
+
+  Inquisitor vs Defector Trooper
+    Score: 3-2-0 (5 games, avg 6.6 rounds)
+    Avg damage: Inquisitor 2.0 / Defector Trooper 8.2
+    Games: R11:Defector, R2:Inquisit, R2:Defector, R2:Inquisit, R16:Inquisit
+
+  Inquisitor vs War Droid Mk-I
+    Score: 2-3-0 (5 games, avg 4.0 rounds)
+    Avg damage: Inquisitor 3.2 / War Droid Mk-I 9.6
+    Games: R2:War Droi, R2:Inquisit, R7:War Droi, R3:Inquisit, R6:War Droi
+
+  Inquisitor vs Shock Commando
+    Score: 2-3-0 (5 games, avg 3.8 rounds)
+    Avg damage: Inquisitor 2.8 / Shock Commando 9.6
+    Games: R5:Shock Co, R3:Inquisit, R5:Shock Co, R3:Inquisit, R3:Shock Co
+
+  Inquisitor vs Rebel Turncoat
+    Score: 3-2-0 (5 games, avg 8.6 rounds)
+    Avg damage: Inquisitor 2.4 / Rebel Turncoat 6.4
+    Games: R16:Inquisit, R2:Inquisit, R10:Rebel Tu, R2:Inquisit, R13:Rebel Tu
+
+  Inquisitor vs Siege Droid Mk-II
+    Score: 2-3-0 (5 games, avg 7.4 rounds)
+    Avg damage: Inquisitor 4.4 / Siege Droid Mk-II 11.8
+    Games: R3:Siege Dr, R16:Inquisit, R9:Siege Dr, R6:Inquisit, R3:Siege Dr
+
+  Inquisitor vs Warlord Kael Drayen
+    Score: 2-3-0 (5 games, avg 6.0 rounds)
+    Avg damage: Inquisitor 6.0 / Warlord Kael Drayen 11.0
+    Games: R2:Warlord , R7:Inquisit, R3:Warlord , R16:Inquisit, R2:Warlord 
+
+  Conscript Militia vs Defector Trooper
+    Score: 2-3-0 (5 games, avg 4.0 rounds)
+    Avg damage: Conscript Militia 2.0 / Defector Trooper 1.2
+    Games: R1:Conscrip, R16:Defector, R1:Conscrip, R1:Defector, R1:Defector
+
+  Conscript Militia vs War Droid Mk-I
+    Score: 0-5-0 (5 games, avg 7.6 rounds)
+    Avg damage: Conscript Militia 1.0 / War Droid Mk-I 1.8
+    Games: R2:War Droi, R1:War Droi, R16:War Droi, R16:War Droi, R3:War Droi
+
+  Conscript Militia vs Shock Commando
+    Score: 0-5-0 (5 games, avg 1.8 rounds)
+    Avg damage: Conscript Militia 0.8 / Shock Commando 3.0
+    Games: R1:Shock Co, R1:Shock Co, R4:Shock Co, R1:Shock Co, R2:Shock Co
+
+  Conscript Militia vs Rebel Turncoat
+    Score: 0-5-0 (5 games, avg 1.2 rounds)
+    Avg damage: Conscript Militia 1.0 / Rebel Turncoat 3.0
+    Games: R1:Rebel Tu, R1:Rebel Tu, R2:Rebel Tu, R1:Rebel Tu, R1:Rebel Tu
+
+  Conscript Militia vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 1.0 rounds)
+    Avg damage: Conscript Militia 0.0 / Siege Droid Mk-II 3.0
+    Games: R1:Siege Dr, R1:Siege Dr, R1:Siege Dr, R1:Siege Dr, R1:Siege Dr
+
+  Conscript Militia vs Warlord Kael Drayen
+    Score: 0-5-0 (5 games, avg 4.2 rounds)
+    Avg damage: Conscript Militia 0.0 / Warlord Kael Drayen 2.4
+    Games: R2:Warlord , R16:Warlord , R1:Warlord , R1:Warlord , R1:Warlord 
+
+  Defector Trooper vs War Droid Mk-I
+    Score: 1-4-0 (5 games, avg 1.2 rounds)
+    Avg damage: Defector Trooper 1.6 / War Droid Mk-I 4.0
+    Games: R1:War Droi, R1:War Droi, R1:War Droi, R2:Defector, R1:War Droi
+
+  Defector Trooper vs Shock Commando
+    Score: 1-4-0 (5 games, avg 4.0 rounds)
+    Avg damage: Defector Trooper 1.4 / Shock Commando 3.0
+    Games: R1:Shock Co, R16:Shock Co, R1:Shock Co, R1:Shock Co, R1:Defector
+
+  Defector Trooper vs Rebel Turncoat
+    Score: 3-2-0 (5 games, avg 1.6 rounds)
+    Avg damage: Defector Trooper 3.6 / Rebel Turncoat 2.0
+    Games: R3:Rebel Tu, R1:Defector, R2:Rebel Tu, R1:Defector, R1:Defector
+
+  Defector Trooper vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 4.0 rounds)
+    Avg damage: Defector Trooper 0.0 / Siege Droid Mk-II 4.0
+    Games: R1:Siege Dr, R1:Siege Dr, R1:Siege Dr, R16:Siege Dr, R1:Siege Dr
+
+  Defector Trooper vs Warlord Kael Drayen
+    Score: 0-5-0 (5 games, avg 13.0 rounds)
+    Avg damage: Defector Trooper 4.0 / Warlord Kael Drayen 1.0
+    Games: R16:Warlord , R16:Warlord , R16:Warlord , R16:Warlord , R1:Warlord 
+
+  War Droid Mk-I vs Shock Commando
+    Score: 3-2-0 (5 games, avg 4.4 rounds)
+    Avg damage: War Droid Mk-I 2.8 / Shock Commando 3.2
+    Games: R1:Shock Co, R1:War Droi, R2:Shock Co, R2:War Droi, R16:War Droi
+
+  War Droid Mk-I vs Rebel Turncoat
+    Score: 4-1-0 (5 games, avg 4.6 rounds)
+    Avg damage: War Droid Mk-I 3.6 / Rebel Turncoat 1.6
+    Games: R16:War Droi, R1:War Droi, R1:War Droi, R1:War Droi, R4:Rebel Tu
+
+  War Droid Mk-I vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 4.2 rounds)
+    Avg damage: War Droid Mk-I 0.0 / Siege Droid Mk-II 6.4
+    Games: R1:Siege Dr, R1:Siege Dr, R1:Siege Dr, R16:Siege Dr, R2:Siege Dr
+
+  War Droid Mk-I vs Warlord Kael Drayen
+    Score: 0-5-0 (5 games, avg 10.0 rounds)
+    Avg damage: War Droid Mk-I 0.0 / Warlord Kael Drayen 3.2
+    Games: R16:Warlord , R16:Warlord , R16:Warlord , R1:Warlord , R1:Warlord 
+
+  Shock Commando vs Rebel Turncoat
+    Score: 3-2-0 (5 games, avg 2.0 rounds)
+    Avg damage: Shock Commando 3.6 / Rebel Turncoat 2.8
+    Games: R1:Shock Co, R1:Shock Co, R4:Rebel Tu, R1:Shock Co, R3:Rebel Tu
+
+  Shock Commando vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 1.2 rounds)
+    Avg damage: Shock Commando 0.0 / Siege Droid Mk-II 7.0
+    Games: R1:Siege Dr, R1:Siege Dr, R1:Siege Dr, R1:Siege Dr, R2:Siege Dr
+
+  Shock Commando vs Warlord Kael Drayen
+    Score: 1-4-0 (5 games, avg 12.0 rounds)
+    Avg damage: Shock Commando 3.6 / Warlord Kael Drayen 1.4
+    Games: R2:Warlord , R16:Warlord , R16:Warlord , R10:Shock Co, R16:Warlord 
+
+  Rebel Turncoat vs Siege Droid Mk-II
+    Score: 0-5-0 (5 games, avg 1.2 rounds)
+    Avg damage: Rebel Turncoat 0.0 / Siege Droid Mk-II 6.0
+    Games: R1:Siege Dr, R1:Siege Dr, R2:Siege Dr, R1:Siege Dr, R1:Siege Dr
+
+  Rebel Turncoat vs Warlord Kael Drayen
+    Score: 0-5-0 (5 games, avg 7.0 rounds)
+    Avg damage: Rebel Turncoat 0.0 / Warlord Kael Drayen 3.6
+    Games: R16:Warlord , R16:Warlord , R1:Warlord , R1:Warlord , R1:Warlord 
+
+  Siege Droid Mk-II vs Warlord Kael Drayen
+    Score: 2-3-0 (5 games, avg 10.4 rounds)
+    Avg damage: Siege Droid Mk-II 7.2 / Warlord Kael Drayen 2.8
+    Games: R16:Warlord , R3:Siege Dr, R13:Warlord , R4:Siege Dr, R16:Warlord 
+
+==========================================================================================
+  BALANCE FLAGS & RECOMMENDATIONS
+==========================================================================================
+
+  [!!!] OVERPOWERED: Siege Droid Mk-II (Rival)
+        92% overall win rate across 100 games
+        Suggestion: Reduce wound threshold (currently 14), lower base damage, or reduce attack pool dice
+
+  [!! ] UNDERPOWERED: Conscript Militia (Minion)
+        18% overall win rate across 100 games
+        Suggestion: Increase wound threshold (currently 3), raise base damage, or add a weapon quality
+
+  [!! ] OVERPOWERED: Warlord Kael Drayen (Nemesis)
+        85% overall win rate across 100 games
+        Suggestion: Reduce wound threshold (currently 18), lower base damage, or reduce attack pool dice
+
+==========================================================================================
+  ANALYTICAL RATING BREAKDOWN
+==========================================================================================
+
+  Name                     Tier      Offense Defense Speed Keywords  Total
+  -----------------------------------------------------------------------
+  Warlord Kael Drayen      Nemesis       8.4   182.1  1.00      3.4  294.4
+  Siege Droid Mk-II        Rival        12.6   140.0  0.70      3.0  238.9
+  Inquisitor               Nemesis       8.5   102.4  1.00      2.4  174.0
+  The Broker               Nemesis       7.8    37.5  1.00      1.9   74.7
+  Krrssk                   Rival         7.0    27.8  1.00      1.0   57.8
+  Trandoshan Hunter        Rival         8.3    14.1  0.85      1.0   39.6
+  Drez Venn                Rival         6.2    14.5  1.00      1.5   36.6
+  Stormtrooper Elite       Rival         5.9    11.6  1.00      0.3   30.4
+  IG Assassin Droid        Rival         4.3     9.9  1.15      1.5   26.1
+  War Droid Mk-I           Rival         7.0     6.4  0.85      0.0   24.5
+  E-Web Engineer           Rival         8.5     2.8  0.70      1.5   23.4
+  Shock Commando           Rival         5.9     4.7  1.15      0.6   20.5
+  Defector Trooper         Minion        5.1     1.4  1.00      0.3   13.6
+  Stormtrooper             Minion        5.1     1.5  1.00      0.0   13.4
+  Rebel Turncoat           Rival         3.5     2.8  1.15      0.8   13.1
+  Imperial Officer         Rival         3.2     2.6  1.00      1.1   12.4
+  Nikto Gunner             Minion        4.3     1.9  1.00      0.0   12.4
+  Probe Droid              Minion        3.2     1.5  0.85      0.3    9.8
+  Syndicate Lieutenant     Rival         1.9     2.9  1.00      0.3    9.4
+  Gamorrean Brute          Minion        0.8     3.7  1.00      0.0    8.1
+  Conscript Militia        Minion        1.8     0.7  1.00      0.0    5.5
