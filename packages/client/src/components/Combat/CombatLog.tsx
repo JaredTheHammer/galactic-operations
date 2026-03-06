@@ -91,7 +91,7 @@ const FILTER_CATEGORIES: { key: FilterCategory; label: string; color: string; ty
 ]
 
 // Build lookup: eventType -> category key
-const TYPE_TO_CATEGORY: Record<LogEventType, FilterCategory> = {} as any
+const TYPE_TO_CATEGORY = {} as Record<LogEventType, FilterCategory>
 for (const cat of FILTER_CATEGORIES) {
   for (const t of cat.types) {
     TYPE_TO_CATEGORY[t] = cat.key

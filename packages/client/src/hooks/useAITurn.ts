@@ -597,6 +597,6 @@ function describeActionV2(action: GameAction, gs: GameState): string {
       return `Interact with objective (${objId})`
     }
     default:
-      return (action as any).type
+      return action.type
   }
 }

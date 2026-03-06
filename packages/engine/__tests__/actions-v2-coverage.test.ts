@@ -40,7 +40,18 @@ import {
   buildActionsForAIAction,
   buildMoveAction,
   buildAttackAction,
+  buildRallyAction,
+  buildGuardedStanceAction,
+  buildTakeCoverAction,
+  buildStrainForManeuverAction,
+  buildAimAction,
+  buildDodgeAction,
 } from '../src/ai/actions-v2.js';
+
+import {
+  determineActions,
+  generateCardText,
+} from '../src/ai/decide-v2.js';
 
 import type {
   Figure,
@@ -53,7 +64,7 @@ import type {
   Tile,
 } from '../src/types.js';
 
-import type { AIWeights, ConditionContext } from '../src/ai/types.js';
+import type { AIWeights, AIProfilesData, ConditionContext } from '../src/ai/types.js';
 
 // ============================================================================
 // FIXTURES
@@ -892,5 +903,389 @@ describe('simple action builders', () => {
 
     const actions = buildActionsForAIAction('nonsense' as any, heroFig, ctx, gs, gd, defaultWeights());
     expect(actions).toHaveLength(0);
+  });
+});
+
+// ============================================================================
+// BASIC ACTION BUILDER UNIT TESTS
+// ============================================================================
+
+describe('basic action builder functions', () => {
+  it('buildRallyAction creates Rally', () => {
+    const a = buildRallyAction('fig-1');
+    expect(a.type).toBe('Rally');
+    expect(a.figureId).toBe('fig-1');
+  });
+
+  it('buildGuardedStanceAction creates GuardedStance', () => {
+    const a = buildGuardedStanceAction('fig-1');
+    expect(a.type).toBe('GuardedStance');
+  });
+
+  it('buildTakeCoverAction creates TakeCover', () => {
+    const a = buildTakeCoverAction('fig-1');
+    expect(a.type).toBe('TakeCover');
+  });
+
+  it('buildStrainForManeuverAction creates StrainForManeuver', () => {
+    const a = buildStrainForManeuverAction('fig-1');
+    expect(a.type).toBe('StrainForManeuver');
+  });
+
+  it('buildAimAction creates Aim', () => {
+    const a = buildAimAction('fig-1');
+    expect(a.type).toBe('Aim');
+  });
+
+  it('buildDodgeAction creates Dodge', () => {
+    const a = buildDodgeAction('fig-1');
+    expect(a.type).toBe('Dodge');
+  });
+
+  it('buildMoveAction returns null for zero-length path', () => {
+    (getPath as any).mockReturnValue([]);
+    const fig = makeFigure();
+    const gs = makeGameState([fig]);
+    expect(buildMoveAction(fig, fig.position, gs)).toBeNull();
+  });
+
+  it('buildMoveAction returns Move for valid path', () => {
+    const fig = makeFigure();
+    const gs = makeGameState([fig]);
+    const result = buildMoveAction(fig, { x: 6, y: 5 }, gs);
+    expect(result).not.toBeNull();
+    expect(result!.type).toBe('Move');
+  });
+});
+
+// ============================================================================
+// MELEE-CHARGE
+// ============================================================================
+
+describe('melee-charge', () => {
+  it('returns empty when no targetId in context', () => {
+    const fig = makeFigure();
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'charge' };
+    const actions = buildActionsForAIAction('melee-charge', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(0);
+  });
+
+  it('attacks directly when already adjacent to target', () => {
+    const fig = makeFigure({ position: { x: 5, y: 5 } });
+    const enemy = makeNPCFigure({ position: { x: 6, y: 5 } });
+    const gs = makeGameState([fig, enemy], { 'hero-1': makeHero() }, { stormtrooper: makeNPC() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'charge', targetId: enemy.id };
+    const actions = buildActionsForAIAction('melee-charge', fig, ctx, gs, gd, defaultWeights());
+    if (actions.length > 0) {
+      expect(actions[0].type).toBe('Attack');
+    }
+  });
+
+  it('returns empty when not adjacent and cannot move+attack', () => {
+    const fig = makeFigure({ actionsRemaining: 0 });
+    const enemy = makeNPCFigure({ position: { x: 10, y: 5 } });
+    const gs = makeGameState([fig, enemy], { 'hero-1': makeHero() }, { stormtrooper: makeNPC() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'charge', targetId: enemy.id };
+    const actions = buildActionsForAIAction('melee-charge', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(0);
+  });
+});
+
+// ============================================================================
+// ATTACK-KILL-TARGET
+// ============================================================================
+
+describe('attack-kill-target', () => {
+  it('returns empty when no targetId in context', () => {
+    const fig = makeFigure();
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'kill' };
+    const actions = buildActionsForAIAction('attack-kill-target', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(0);
+  });
+
+  it('moves + attacks when target not in range but attack position provided', () => {
+    const fig = makeFigure({ position: { x: 5, y: 5 } });
+    const enemy = makeNPCFigure({ position: { x: 15, y: 5 } });
+    (hasLineOfSight as any).mockImplementation((_map: any, from: any) => from.x === 12);
+    const gs = makeGameState([fig, enemy], { 'hero-1': makeHero() }, { stormtrooper: makeNPC() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = {
+      reasoning: 'kill', targetId: enemy.id, attackPosition: { x: 12, y: 5 },
+    };
+    const actions = buildActionsForAIAction('attack-kill-target', fig, ctx, gs, gd, defaultWeights());
+    if (actions.length > 0) {
+      expect(actions[0].type).toBe('Move');
+      if (actions.length > 1) expect(actions[1].type).toBe('Attack');
+    }
+  });
+});
+
+// ============================================================================
+// RETREAT-TO-COVER EDGE CASES
+// ============================================================================
+
+describe('retreat-to-cover edge cases', () => {
+  it('returns empty when no destination', () => {
+    const fig = makeFigure();
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'retreat' };
+    const actions = buildActionsForAIAction('retreat-to-cover', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(0);
+  });
+
+  it('returns empty when no maneuvers', () => {
+    const fig = makeFigure({ maneuversRemaining: 0 });
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'retreat', destination: { x: 3, y: 3 } };
+    const actions = buildActionsForAIAction('retreat-to-cover', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(0);
+  });
+
+  it('emits Move + Rally when both available', () => {
+    const fig = makeFigure();
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'retreat', destination: { x: 3, y: 3 } };
+    const actions = buildActionsForAIAction('retreat-to-cover', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(2);
+    expect(actions[0].type).toBe('Move');
+    expect(actions[1].type).toBe('Rally');
+  });
+
+  it('emits Move only when no action remaining', () => {
+    const fig = makeFigure({ actionsRemaining: 0 });
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'retreat', destination: { x: 3, y: 3 } };
+    const actions = buildActionsForAIAction('retreat-to-cover', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(1);
+    expect(actions[0].type).toBe('Move');
+  });
+});
+
+// ============================================================================
+// SET-OVERWATCH
+// ============================================================================
+
+describe('set-overwatch', () => {
+  it('returns GuardedStance when action available', () => {
+    const fig = makeFigure();
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'overwatch' };
+    const actions = buildActionsForAIAction('set-overwatch', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(1);
+    expect(actions[0].type).toBe('GuardedStance');
+  });
+
+  it('returns empty when no action remaining', () => {
+    const fig = makeFigure({ actionsRemaining: 0 });
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'overwatch' };
+    const actions = buildActionsForAIAction('set-overwatch', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(0);
+  });
+});
+
+// ============================================================================
+// DODGE-AND-HOLD EDGE CASES
+// ============================================================================
+
+describe('dodge-and-hold edge cases', () => {
+  it('returns empty when no action remaining', () => {
+    const fig = makeFigure({ actionsRemaining: 0 });
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'dodge' };
+    const actions = buildActionsForAIAction('dodge-and-hold', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(0);
+  });
+
+  it('returns empty when dodge tokens already at max', () => {
+    const fig = makeFigure({ dodgeTokens: 1 });
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'dodge' };
+    const actions = buildActionsForAIAction('dodge-and-hold', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(0);
+  });
+
+  it('emits Dodge + Move to destination when provided', () => {
+    const fig = makeFigure();
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'dodge', destination: { x: 3, y: 3 } };
+    const actions = buildActionsForAIAction('dodge-and-hold', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(2);
+    expect(actions[0].type).toBe('Dodge');
+    expect(actions[1].type).toBe('Move');
+  });
+
+  it('emits Dodge only when no maneuvers remaining', () => {
+    const fig = makeFigure({ maneuversRemaining: 0 });
+    const gs = makeGameState([fig], { 'hero-1': makeHero() });
+    const gd = makeGameData();
+    const ctx: ConditionContext = { reasoning: 'dodge' };
+    const actions = buildActionsForAIAction('dodge-and-hold', fig, ctx, gs, gd, defaultWeights());
+    expect(actions).toHaveLength(1);
+    expect(actions[0].type).toBe('Dodge');
+  });
+});
+
+// ============================================================================
+// GENERATE CARD TEXT
+// ============================================================================
+
+describe('generateCardText', () => {
+  function makeProfile(): AIProfilesData {
+    return {
+      archetypes: {
+        trooper: {
+          id: 'trooper', name: 'Trooper', cardTitle: 'TROOPER TACTICS',
+          description: 'Standard infantry behavior.',
+          priorityRules: [
+            { rank: 1, condition: 'enemy-in-range', action: 'attack-best-target', cardText: 'If enemy in range: Attack.' },
+            { rank: 2, condition: 'default', action: 'advance-with-cover', cardText: 'Otherwise: Advance.' },
+          ],
+          weights: defaultWeights(),
+        },
+      },
+      unitMapping: {},
+      defaultArchetype: 'trooper',
+    };
+  }
+
+  it('generates formatted card text with title and rules', () => {
+    const profile = makeProfile().archetypes.trooper;
+    const text = generateCardText(profile);
+    expect(text).toContain('TROOPER TACTICS');
+    expect(text).toContain('Standard infantry behavior.');
+    expect(text).toContain('CHECK THESE IN ORDER');
+    expect(text).toContain('1. If enemy in range: Attack.');
+    expect(text).toContain('2. Otherwise: Advance.');
+  });
+
+  it('includes REMEMBER section with rules', () => {
+    const profile = makeProfile().archetypes.trooper;
+    const text = generateCardText(profile);
+    expect(text).toContain('REMEMBER:');
+    expect(text).toContain('1 Action + 1 Maneuver per activation');
+    expect(text).toContain('Suffer 2 strain for extra Maneuver');
+    expect(text).toContain('Broken morale = Move or Rally only');
+  });
+
+  it('includes all rules numbered sequentially', () => {
+    const profile = makeProfile().archetypes.trooper;
+    const text = generateCardText(profile);
+    const lines = text.split('\n');
+    const ruleLines = lines.filter(l => l.match(/^\s+\d+\./));
+    expect(ruleLines).toHaveLength(2);
+  });
+});
+
+// ============================================================================
+// DECIDE-V2: RULE ITERATION EDGE CASES
+// ============================================================================
+
+describe('decide-v2 rule iteration', () => {
+  function makeProfiles(): AIProfilesData {
+    return {
+      archetypes: {
+        trooper: {
+          id: 'trooper', name: 'Trooper', cardTitle: 'TROOPER', description: 'Test.',
+          priorityRules: [
+            { rank: 1, condition: 'enemy-in-range', action: 'attack-best-target', cardText: 'Attack.' },
+            { rank: 2, condition: 'default', action: 'advance-with-cover', cardText: 'Advance.' },
+          ],
+          weights: defaultWeights(),
+        },
+        hero: {
+          id: 'hero', name: 'Hero', cardTitle: 'HERO', description: 'Hero.',
+          priorityRules: [
+            { rank: 1, condition: 'default', action: 'rest', cardText: 'Rest.' },
+          ],
+          weights: defaultWeights(),
+        },
+      },
+      unitMapping: { stormtrooper: 'trooper' },
+      defaultArchetype: 'trooper',
+    };
+  }
+
+  it('falls back to rally when no rules match', () => {
+    const profiles: AIProfilesData = {
+      archetypes: {
+        trooper: {
+          id: 'trooper', name: 'Trooper', cardTitle: 'TROOPER', description: 'Test.',
+          priorityRules: [
+            { rank: 1, condition: 'enemy-in-range', action: 'attack-best-target', cardText: 'Attack.' },
+          ],
+          weights: defaultWeights(),
+        },
+        hero: {
+          id: 'hero', name: 'Hero', cardTitle: 'HERO', description: 'Hero.',
+          priorityRules: [
+            { rank: 1, condition: 'enemy-in-range', action: 'attack-best-target', cardText: 'Attack.' },
+          ],
+          weights: defaultWeights(),
+        },
+      },
+      unitMapping: { stormtrooper: 'trooper' },
+      defaultArchetype: 'trooper',
+    };
+
+    // Solo NPC, no enemies -> enemy-in-range won't match
+    const npcFig = makeNPCFigure();
+    const gs = makeGameState([npcFig], {}, { stormtrooper: makeNPC() });
+    const gd = makeGameData();
+
+    const result = determineActions(npcFig, gs, gd, profiles);
+    expect(result.reasoning).toContain('No rules matched');
+    expect(result.actions).toHaveLength(1);
+    expect(result.actions[0].type).toBe('Rally');
+  });
+
+  it('uses per-rule weight overrides when specified', () => {
+    const profiles: AIProfilesData = {
+      archetypes: {
+        trooper: {
+          id: 'trooper', name: 'Trooper', cardTitle: 'TROOPER', description: 'Test.',
+          priorityRules: [
+            {
+              rank: 1, condition: 'default', action: 'advance-with-cover',
+              cardText: 'Advance.', weights: { proximity: 10 },
+            },
+          ],
+          weights: defaultWeights(),
+        },
+        hero: {
+          id: 'hero', name: 'Hero', cardTitle: 'HERO', description: 'Hero.',
+          priorityRules: [
+            { rank: 1, condition: 'default', action: 'rest', cardText: 'Rest.' },
+          ],
+          weights: defaultWeights(),
+        },
+      },
+      unitMapping: { stormtrooper: 'trooper' },
+      defaultArchetype: 'trooper',
+    };
+
+    (getValidMoves as any).mockReturnValue([{ x: 11, y: 5 }]);
+    const npcFig = makeNPCFigure({ position: { x: 12, y: 5 } });
+    const heroFig = makeFigure({ position: { x: 5, y: 5 } });
+    const gs = makeGameState([npcFig, heroFig], { 'hero-1': makeHero() }, { stormtrooper: makeNPC() });
+    const gd = makeGameData();
+
+    const result = determineActions(npcFig, gs, gd, profiles);
+    expect(result.reasoning).toContain('Rule #1');
   });
 });

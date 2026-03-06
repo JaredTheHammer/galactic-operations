@@ -350,6 +350,6 @@ function describeAction(action: GameAction, gs: GameState): string {
     case 'Interact': return 'Interact'
     case 'InteractTerminal': return `Interact with objective (${action.payload?.terminalId ?? '?'})`
     case 'UseTalent': return `Use talent: ${action.payload.talentId}`
-    default: return (action as any).type
+    default: return action.type
   }
 }
