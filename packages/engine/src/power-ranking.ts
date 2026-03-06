@@ -36,9 +36,11 @@ import {
 
 import type { ArmyCompositionV2 } from './turn-machine-v2.js';
 import type { AIProfilesData } from './ai/types.js';
-import { determineActions } from './ai/decide-v2.js';
+import { determineActions, getProfileForFigure } from './ai/decide-v2.js';
 import { createSeededRng, installSeededRandom } from './ai/simulator-v2.js';
 import { buildArenaMap } from './ai/combat-simulator.js';
+import { BattleLogger } from './ai/battle-logger.js';
+import type { BattleLog } from './ai/battle-logger.js';
 
 // ============================================================================
 // ANALYTICAL POWER RATING
@@ -198,11 +200,27 @@ export function computeAnalyticalRating(
 export interface DuelResult {
   npcA: string;
   npcB: string;
+  nameA: string;
+  nameB: string;
   winsA: number;
   winsB: number;
   draws: number;
   gamesPlayed: number;
   avgRounds: number;
+  /** Per-game detail: damage dealt by each side, rounds, HP remaining */
+  gameDetails: DuelGameDetail[];
+}
+
+export interface DuelGameDetail {
+  seed: number;
+  winner: 'A' | 'B' | 'draw';
+  rounds: number;
+  damageByA: number;
+  damageByB: number;
+  hpRemainingA: number;
+  hpRemainingB: number;
+  /** Full BattleLog for this game (only populated when logging enabled) */
+  battleLog?: BattleLog;
 }
 
 export interface DuelRanking {
@@ -218,9 +236,47 @@ export interface DuelRanking {
 }
 
 export interface PowerRankingResult {
+  timestamp: string;
+  config: { gamesPerMatchup: number; baseSeed: number; npcCount: number; totalDuels: number };
   analytical: AnalyticalRating[];
   duelResults: DuelResult[];
   rankings: CombinedRanking[];
+  /** Per-NPC aggregated combat stats from all duels */
+  npcCombatStats: NPCCombatStats[];
+  /** Balance flags: NPCs that may need adjustment */
+  balanceFlags: BalanceFlag[];
+}
+
+export interface NPCCombatStats {
+  npcId: string;
+  name: string;
+  tier: string;
+  totalGames: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  winRate: number;
+  avgDamageDealt: number;
+  avgDamageTaken: number;
+  avgRoundsSurvived: number;
+  avgHpRemaining: number;
+  /** How often this NPC wins vs higher-tier units */
+  upsetWinRate: number;
+  /** How often this NPC loses to lower-tier units */
+  upsetLossRate: number;
+  /** Best and worst matchups */
+  bestMatchup: { opponentId: string; opponentName: string; winRate: number } | null;
+  worstMatchup: { opponentId: string; opponentName: string; winRate: number } | null;
+}
+
+export interface BalanceFlag {
+  npcId: string;
+  name: string;
+  tier: string;
+  flag: 'overpowered' | 'underpowered' | 'tier_mismatch' | 'high_draw_rate';
+  reason: string;
+  severity: 'low' | 'medium' | 'high';
+  suggestion: string;
 }
 
 export interface CombinedRanking {
@@ -235,9 +291,19 @@ export interface CombinedRanking {
   suggestedThreatCost: number;
 }
 
+interface DuelRunResult {
+  winner: 'A' | 'B' | 'draw';
+  rounds: number;
+  damageByA: number;
+  damageByB: number;
+  hpRemainingA: number;
+  hpRemainingB: number;
+  battleLog?: BattleLog;
+}
+
 /**
  * Run a single 1v1 duel between two NPCs on a small arena.
- * Returns the winner ('A', 'B', or 'draw').
+ * Returns winner, rounds, damage stats, and optionally a full BattleLog.
  */
 function runDuel(
   npcA: string,
@@ -246,8 +312,9 @@ function runDuel(
   profilesData: AIProfilesData,
   boardTemplates: BoardTemplate[],
   seed: number,
-  roundLimit: number = 15,
-): { winner: 'A' | 'B' | 'draw'; rounds: number } {
+  options: { roundLimit?: number; enableLogging?: boolean } = {},
+): DuelRunResult {
+  const roundLimit = options.roundLimit ?? 15;
   const rng = createSeededRng(seed);
   const restoreRandom = installSeededRandom(rng);
 
@@ -295,6 +362,22 @@ function runDuel(
       operativeMorale: { ...gs.operativeMorale, value: 99, max: 99 },
     };
 
+    // Track damage per side
+    let damageByA = 0;
+    let damageByB = 0;
+
+    // Initialize BattleLogger if enabled
+    let logger: BattleLogger | null = null;
+    if (options.enableLogging) {
+      logger = new BattleLogger();
+      const archetypeMap: Record<string, string> = {};
+      for (const fig of gs.figures) {
+        const profile = getProfileForFigure(fig, gs, profilesData);
+        archetypeMap[fig.id] = profile.name;
+      }
+      logger.startGame(gs, gameData, archetypeMap, roundLimit, 'Duel Arena');
+    }
+
     // Run combat
     gs = advancePhaseV2(gs); // Setup -> Initiative
 
@@ -303,6 +386,7 @@ function runDuel(
 
     while (gs.turnPhase !== 'GameOver' && gs.roundNumber <= roundLimit && turnCount < maxTurns) {
       gs = advancePhaseV2(gs); // Initiative -> Activation
+      logger?.startRound(gs.roundNumber);
 
       while (
         gs.turnPhase === 'Activation' &&
@@ -324,10 +408,34 @@ function runDuel(
         };
 
         const activeFig = gs.figures.find(f => f.id === figure.id)!;
+        const gsBefore = gs;
+        const profile = getProfileForFigure(activeFig, gs, profilesData);
         const decision = determineActions(activeFig, gs, gameData, profilesData);
 
+        const actionDescs: string[] = [];
         for (const action of decision.actions) {
+          actionDescs.push(`${action.type}${action.payload?.targetId ? ' -> ' + action.payload.targetId : ''}`);
           gs = executeActionV2(gs, action, gameData);
+        }
+
+        // Track damage dealt this activation
+        for (const enemy of gsBefore.figures.filter(f => f.playerId !== activeFig.playerId)) {
+          const enemyAfter = gs.figures.find(f => f.id === enemy.id);
+          if (enemyAfter) {
+            const dmg = Math.max(0, enemyAfter.woundsCurrent - enemy.woundsCurrent);
+            if (dmg > 0) {
+              if (activeFig.playerId === 0) damageByA += dmg;
+              else damageByB += dmg;
+            }
+          }
+        }
+
+        // Log activation
+        if (logger) {
+          logger.logActivation(
+            activeFig, gsBefore, gs, gameData,
+            decision, profile, decision.actions, actionDescs,
+          );
         }
 
         gs = {
@@ -346,6 +454,8 @@ function runDuel(
         gs = advancePhaseV2(gs);
         turnCount++;
       }
+
+      logger?.endRound(gs);
 
       if (gs.turnPhase === 'GameOver') break;
 
@@ -366,19 +476,34 @@ function runDuel(
       };
     }
 
+    // HP remaining
+    const figA = gs.figures.find(f => f.entityId === npcA);
+    const figB = gs.figures.find(f => f.entityId === npcB);
+    const maxHpA = gameData.npcProfiles[npcA]?.woundThreshold ?? 0;
+    const maxHpB = gameData.npcProfiles[npcB]?.woundThreshold ?? 0;
+    const hpA = figA && !figA.isDefeated ? maxHpA - figA.woundsCurrent : 0;
+    const hpB = figB && !figB.isDefeated ? maxHpB - figB.woundsCurrent : 0;
+
     // Resolve winner
-    if (gs.winner === 'Imperial') return { winner: 'A', rounds: gs.roundNumber };
-    if (gs.winner === 'Operative') return { winner: 'B', rounds: gs.roundNumber };
+    let winner: 'A' | 'B' | 'draw';
+    if (gs.winner === 'Imperial') winner = 'A';
+    else if (gs.winner === 'Operative') winner = 'B';
+    else if (hpA > hpB) winner = 'A';
+    else if (hpB > hpA) winner = 'B';
+    else winner = 'draw';
 
-    // Tiebreak by remaining wounds
-    const figA = gs.figures.find(f => f.entityId === npcA && !f.isDefeated);
-    const figB = gs.figures.find(f => f.entityId === npcB && !f.isDefeated);
-    const hpA = figA ? (gameData.npcProfiles[npcA]?.woundThreshold ?? 0) - figA.woundsCurrent : 0;
-    const hpB = figB ? (gameData.npcProfiles[npcB]?.woundThreshold ?? 0) - figB.woundsCurrent : 0;
+    const winnerStr = winner === 'A' ? 'Imperial' : winner === 'B' ? 'Operative' : 'Draw';
+    logger?.endGame(winnerStr, gs.victoryCondition ?? 'HP tiebreak', gs);
 
-    if (hpA > hpB) return { winner: 'A', rounds: gs.roundNumber };
-    if (hpB > hpA) return { winner: 'B', rounds: gs.roundNumber };
-    return { winner: 'draw', rounds: gs.roundNumber };
+    return {
+      winner,
+      rounds: gs.roundNumber,
+      damageByA,
+      damageByB,
+      hpRemainingA: hpA,
+      hpRemainingB: hpB,
+      battleLog: logger?.getLog(),
+    };
   } finally {
     restoreRandom();
   }
@@ -386,6 +511,7 @@ function runDuel(
 
 /**
  * Run a full round-robin 1v1 tournament between all provided NPCs.
+ * When enableLogging is true, each duel includes a full BattleLog for analysis.
  */
 export function runDuelTournament(
   npcIds: string[],
@@ -394,6 +520,7 @@ export function runDuelTournament(
   boardTemplates: BoardTemplate[],
   gamesPerMatchup: number = 20,
   baseSeed: number = 42,
+  enableLogging: boolean = false,
 ): { duelResults: DuelResult[]; rankings: DuelRanking[] } {
   const duelResults: DuelResult[] = [];
   const tracker = new Map<string, { wins: number; losses: number; draws: number; games: number }>();
@@ -410,40 +537,73 @@ export function runDuelTournament(
     for (let j = i + 1; j < npcIds.length; j++) {
       const npcA = npcIds[i];
       const npcB = npcIds[j];
+      const nameA = gameData.npcProfiles[npcA]?.name ?? npcA;
+      const nameB = gameData.npcProfiles[npcB]?.name ?? npcB;
       let winsA = 0, winsB = 0, draws = 0;
       let totalRounds = 0;
+      const gameDetails: DuelGameDetail[] = [];
 
       for (let g = 0; g < gamesPerMatchup; g++) {
         // Alternate who goes on which side for fairness
         const swapped = g % 2 === 1;
+        const currentSeed = seedCounter++;
         const result = runDuel(
           swapped ? npcB : npcA,
           swapped ? npcA : npcB,
           gameData,
           profilesData,
           boardTemplates,
-          seedCounter++,
+          currentSeed,
+          { enableLogging },
         );
 
         totalRounds += result.rounds;
 
+        // Normalize: translate A/B relative to the canonical npcA/npcB order
+        let canonicalWinner: 'A' | 'B' | 'draw';
+        let dmgA: number, dmgB: number, hpA: number, hpB: number;
         if (result.winner === 'draw') {
+          canonicalWinner = 'draw';
           draws++;
         } else if ((result.winner === 'A' && !swapped) || (result.winner === 'B' && swapped)) {
+          canonicalWinner = 'A';
           winsA++;
         } else {
+          canonicalWinner = 'B';
           winsB++;
         }
+
+        if (swapped) {
+          dmgA = result.damageByB; dmgB = result.damageByA;
+          hpA = result.hpRemainingB; hpB = result.hpRemainingA;
+        } else {
+          dmgA = result.damageByA; dmgB = result.damageByB;
+          hpA = result.hpRemainingA; hpB = result.hpRemainingB;
+        }
+
+        gameDetails.push({
+          seed: currentSeed,
+          winner: canonicalWinner,
+          rounds: result.rounds,
+          damageByA: dmgA,
+          damageByB: dmgB,
+          hpRemainingA: hpA,
+          hpRemainingB: hpB,
+          battleLog: result.battleLog,
+        });
       }
 
       duelResults.push({
         npcA,
         npcB,
+        nameA,
+        nameB,
         winsA,
         winsB,
         draws,
         gamesPlayed: gamesPerMatchup,
         avgRounds: totalRounds / gamesPerMatchup,
+        gameDetails,
       });
 
       const tA = tracker.get(npcA)!;
@@ -451,7 +611,7 @@ export function runDuelTournament(
       tA.wins += winsA; tA.losses += winsB; tA.draws += draws; tA.games += gamesPerMatchup;
       tB.wins += winsB; tB.losses += winsA; tB.draws += draws; tB.games += gamesPerMatchup;
 
-      process.stdout.write(`  Duel: ${npcA} vs ${npcB}: ${winsA}-${winsB}-${draws}\n`);
+      process.stdout.write(`  Duel: ${nameA} vs ${nameB}: ${winsA}-${winsB}-${draws}\n`);
     }
   }
 
@@ -522,6 +682,7 @@ function suggestThreatCost(combinedScore: number, tier: string): number {
  * 1. Compute analytical ratings for all NPCs
  * 2. Run round-robin 1v1 duel tournament
  * 3. Combine scores and produce final ranking
+ * 4. Compute per-NPC combat stats and balance flags
  */
 export function runFullPowerRanking(
   gameData: GameData,
@@ -530,11 +691,13 @@ export function runFullPowerRanking(
   options: {
     gamesPerMatchup?: number;
     baseSeed?: number;
-    npcFilter?: string[];  // Optional: only rank these NPC IDs
+    npcFilter?: string[];
+    enableLogging?: boolean;  // Enable per-duel BattleLogs (slower, more data)
   } = {},
 ): PowerRankingResult {
   const gamesPerMatchup = options.gamesPerMatchup ?? 20;
   const baseSeed = options.baseSeed ?? 42;
+  const enableLogging = options.enableLogging ?? false;
 
   // Collect all NPC IDs
   let npcIds = Object.keys(gameData.npcProfiles);
@@ -578,6 +741,7 @@ export function runFullPowerRanking(
     boardTemplates,
     gamesPerMatchup,
     baseSeed,
+    enableLogging,
   );
 
   console.log('\n--- Duel Rankings (by Elo) ---\n');
@@ -653,5 +817,407 @@ export function runFullPowerRanking(
     );
   }
 
-  return { analytical, duelResults, rankings: combined };
+  // 4. Compute per-NPC combat stats
+  const npcCombatStats = computeNPCCombatStats(npcIds, duelResults, gameData);
+
+  // 5. Detect balance issues
+  const balanceFlags = detectBalanceFlags(npcCombatStats, combined, gameData);
+
+  if (balanceFlags.length > 0) {
+    console.log('\n--- Balance Flags ---\n');
+    for (const flag of balanceFlags) {
+      const icon = flag.severity === 'high' ? '!!!' : flag.severity === 'medium' ? ' !!' : '  !';
+      console.log(`  ${icon} [${flag.flag.toUpperCase()}] ${flag.name} (${flag.tier}): ${flag.reason}`);
+      console.log(`      Suggestion: ${flag.suggestion}`);
+    }
+  }
+
+  const totalDuels = duelResults.length * gamesPerMatchup;
+
+  return {
+    timestamp: new Date().toISOString(),
+    config: { gamesPerMatchup, baseSeed, npcCount: npcIds.length, totalDuels },
+    analytical,
+    duelResults,
+    rankings: combined,
+    npcCombatStats,
+    balanceFlags,
+  };
+}
+
+// ============================================================================
+// PER-NPC COMBAT STATS AGGREGATION
+// ============================================================================
+
+function computeNPCCombatStats(
+  npcIds: string[],
+  duelResults: DuelResult[],
+  gameData: GameData,
+): NPCCombatStats[] {
+  const tierOrder: Record<string, number> = { 'Minion': 0, 'Rival': 1, 'Nemesis': 2 };
+
+  return npcIds.map(npcId => {
+    const npc = gameData.npcProfiles[npcId];
+    const tier = npc?.tier ?? 'Unknown';
+
+    // Gather all matchups involving this NPC
+    let totalDmgDealt = 0, totalDmgTaken = 0;
+    let totalRounds = 0, totalHpRemaining = 0;
+    let wins = 0, losses = 0, draws = 0, totalGames = 0;
+    let upsetWins = 0, upsetOpportunities = 0;
+    let upsetLosses = 0, upsetLossOpportunities = 0;
+
+    const matchupWins = new Map<string, number>();
+    const matchupGames = new Map<string, number>();
+
+    for (const duel of duelResults) {
+      const isA = duel.npcA === npcId;
+      const isB = duel.npcB === npcId;
+      if (!isA && !isB) continue;
+
+      const opponentId = isA ? duel.npcB : duel.npcA;
+      const opponentTier = gameData.npcProfiles[opponentId]?.tier ?? 'Unknown';
+
+      const myWins = isA ? duel.winsA : duel.winsB;
+      const myLosses = isA ? duel.winsB : duel.winsA;
+      wins += myWins;
+      losses += myLosses;
+      draws += duel.draws;
+      totalGames += duel.gamesPlayed;
+
+      matchupWins.set(opponentId, (matchupWins.get(opponentId) ?? 0) + myWins);
+      matchupGames.set(opponentId, (matchupGames.get(opponentId) ?? 0) + duel.gamesPlayed);
+
+      // Upset tracking
+      const myTierRank = tierOrder[tier] ?? 0;
+      const oppTierRank = tierOrder[opponentTier] ?? 0;
+      if (oppTierRank > myTierRank) {
+        upsetOpportunities += duel.gamesPlayed;
+        upsetWins += myWins;
+      }
+      if (oppTierRank < myTierRank) {
+        upsetLossOpportunities += duel.gamesPlayed;
+        upsetLosses += myLosses;
+      }
+
+      // Aggregate per-game stats
+      for (const game of duel.gameDetails) {
+        totalRounds += game.rounds;
+        if (isA) {
+          totalDmgDealt += game.damageByA;
+          totalDmgTaken += game.damageByB;
+          totalHpRemaining += game.hpRemainingA;
+        } else {
+          totalDmgDealt += game.damageByB;
+          totalDmgTaken += game.damageByA;
+          totalHpRemaining += game.hpRemainingB;
+        }
+      }
+    }
+
+    // Best and worst matchups
+    let bestMatchup: NPCCombatStats['bestMatchup'] = null;
+    let worstMatchup: NPCCombatStats['worstMatchup'] = null;
+    let bestWR = -1, worstWR = 2;
+
+    for (const [oppId, oppGames] of matchupGames) {
+      const oppWins = matchupWins.get(oppId) ?? 0;
+      const wr = oppGames > 0 ? oppWins / oppGames : 0;
+      const oppNpc = gameData.npcProfiles[oppId];
+      if (wr > bestWR) {
+        bestWR = wr;
+        bestMatchup = { opponentId: oppId, opponentName: oppNpc?.name ?? oppId, winRate: Math.round(wr * 1000) / 1000 };
+      }
+      if (wr < worstWR) {
+        worstWR = wr;
+        worstMatchup = { opponentId: oppId, opponentName: oppNpc?.name ?? oppId, winRate: Math.round(wr * 1000) / 1000 };
+      }
+    }
+
+    return {
+      npcId,
+      name: npc?.name ?? npcId,
+      tier,
+      totalGames,
+      wins,
+      losses,
+      draws,
+      winRate: totalGames > 0 ? Math.round((wins / totalGames) * 1000) / 1000 : 0,
+      avgDamageDealt: totalGames > 0 ? Math.round((totalDmgDealt / totalGames) * 10) / 10 : 0,
+      avgDamageTaken: totalGames > 0 ? Math.round((totalDmgTaken / totalGames) * 10) / 10 : 0,
+      avgRoundsSurvived: totalGames > 0 ? Math.round((totalRounds / totalGames) * 10) / 10 : 0,
+      avgHpRemaining: totalGames > 0 ? Math.round((totalHpRemaining / totalGames) * 10) / 10 : 0,
+      upsetWinRate: upsetOpportunities > 0 ? Math.round((upsetWins / upsetOpportunities) * 1000) / 1000 : 0,
+      upsetLossRate: upsetLossOpportunities > 0 ? Math.round((upsetLosses / upsetLossOpportunities) * 1000) / 1000 : 0,
+      bestMatchup,
+      worstMatchup,
+    };
+  });
+}
+
+// ============================================================================
+// BALANCE FLAG DETECTION
+// ============================================================================
+
+function detectBalanceFlags(
+  stats: NPCCombatStats[],
+  rankings: CombinedRanking[],
+  gameData: GameData,
+): BalanceFlag[] {
+  const flags: BalanceFlag[] = [];
+  const tierOrder: Record<string, number> = { 'Minion': 0, 'Rival': 1, 'Nemesis': 2 };
+
+  for (const s of stats) {
+    const npc = gameData.npcProfiles[s.npcId];
+    if (!npc) continue;
+
+    const ranking = rankings.find(r => r.npcId === s.npcId);
+
+    // Overpowered: wins > 80% of all matchups
+    if (s.totalGames >= 10 && s.winRate > 0.80) {
+      flags.push({
+        npcId: s.npcId,
+        name: s.name,
+        tier: s.tier,
+        flag: 'overpowered',
+        severity: s.winRate > 0.90 ? 'high' : 'medium',
+        reason: `${(s.winRate * 100).toFixed(0)}% overall win rate across ${s.totalGames} games`,
+        suggestion: `Reduce wound threshold (currently ${npc.woundThreshold}), lower base damage, or reduce attack pool dice`,
+      });
+    }
+
+    // Underpowered: wins < 20% of all matchups
+    if (s.totalGames >= 10 && s.winRate < 0.20) {
+      flags.push({
+        npcId: s.npcId,
+        name: s.name,
+        tier: s.tier,
+        flag: 'underpowered',
+        severity: s.winRate < 0.10 ? 'high' : 'medium',
+        reason: `${(s.winRate * 100).toFixed(0)}% overall win rate across ${s.totalGames} games`,
+        suggestion: `Increase wound threshold (currently ${npc.woundThreshold}), raise base damage, or add a weapon quality`,
+      });
+    }
+
+    // Tier mismatch: Minion consistently beating Rivals, or Rival beating Nemesis
+    if (s.tier === 'Minion' && s.upsetWinRate > 0.40) {
+      flags.push({
+        npcId: s.npcId,
+        name: s.name,
+        tier: s.tier,
+        flag: 'tier_mismatch',
+        severity: s.upsetWinRate > 0.55 ? 'high' : 'medium',
+        reason: `Minion beats higher-tier units ${(s.upsetWinRate * 100).toFixed(0)}% of the time`,
+        suggestion: `Consider promoting to Rival tier, or nerf stats to match Minion power budget`,
+      });
+    }
+
+    if (s.tier === 'Nemesis' && s.upsetLossRate > 0.40) {
+      flags.push({
+        npcId: s.npcId,
+        name: s.name,
+        tier: s.tier,
+        flag: 'tier_mismatch',
+        severity: s.upsetLossRate > 0.55 ? 'high' : 'medium',
+        reason: `Nemesis loses to lower-tier units ${(s.upsetLossRate * 100).toFixed(0)}% of the time`,
+        suggestion: `Buff stats to justify Nemesis tier, or demote to Rival`,
+      });
+    }
+
+    // High draw rate indicates stalemates (bad for gameplay)
+    if (s.totalGames >= 10 && s.draws / s.totalGames > 0.25) {
+      flags.push({
+        npcId: s.npcId,
+        name: s.name,
+        tier: s.tier,
+        flag: 'high_draw_rate',
+        severity: s.draws / s.totalGames > 0.40 ? 'high' : 'low',
+        reason: `${(s.draws / s.totalGames * 100).toFixed(0)}% draw rate (${s.draws}/${s.totalGames} games)`,
+        suggestion: `Increase offensive capability or reduce defense to create decisive outcomes`,
+      });
+    }
+  }
+
+  // Sort: high severity first
+  const sevOrder: Record<string, number> = { 'high': 0, 'medium': 1, 'low': 2 };
+  flags.sort((a, b) => (sevOrder[a.severity] ?? 2) - (sevOrder[b.severity] ?? 2));
+
+  return flags;
+}
+
+// ============================================================================
+// REPORT GENERATION
+// ============================================================================
+
+/**
+ * Generate a full text report from a PowerRankingResult.
+ * Designed to be saved to a file and read by a human or LLM for balance analysis.
+ */
+export function generatePowerRankingReport(result: PowerRankingResult, gameData: GameData): string {
+  const lines: string[] = [];
+  const hr = '='.repeat(90);
+  const hr2 = '-'.repeat(90);
+
+  lines.push(hr);
+  lines.push('  GALACTIC OPERATIONS -- NPC POWER RANKING REPORT');
+  lines.push(hr);
+  lines.push(`  Generated: ${result.timestamp}`);
+  lines.push(`  NPCs: ${result.config.npcCount}  |  Games/matchup: ${result.config.gamesPerMatchup}  |  Seed: ${result.config.baseSeed}`);
+  lines.push(`  Total duels: ${result.config.totalDuels}`);
+  lines.push('');
+
+  // === COMBINED RANKINGS ===
+  lines.push(hr);
+  lines.push('  COMBINED POWER RANKINGS');
+  lines.push(hr);
+  lines.push('');
+  lines.push(
+    '  #  ' +
+    'Name'.padEnd(25) +
+    'Tier'.padEnd(9) +
+    'Analytical'.padStart(11) +
+    'Empirical'.padStart(10) +
+    'Combined'.padStart(9) +
+    'WinRate'.padStart(8) +
+    'Threat$'.padStart(8)
+  );
+  lines.push('  ' + '-'.repeat(87));
+  for (const c of result.rankings) {
+    lines.push(
+      `  ${String(c.rank).padStart(2)} ` +
+      `${c.name.padEnd(25)}` +
+      `${c.tier.padEnd(9)}` +
+      `${c.analyticalScore.toFixed(1).padStart(11)}` +
+      `${c.empiricalScore.toFixed(1).padStart(10)}` +
+      `${c.combinedScore.toFixed(1).padStart(9)}` +
+      `${(c.winRate * 100).toFixed(0).padStart(7)}%` +
+      `${String(c.suggestedThreatCost).padStart(8)}`
+    );
+  }
+  lines.push('');
+
+  // === PER-NPC COMBAT STATS ===
+  lines.push(hr);
+  lines.push('  PER-NPC COMBAT STATISTICS');
+  lines.push(hr);
+  lines.push('');
+
+  // Sort stats by combined score for consistent ordering
+  const sortedStats = [...result.npcCombatStats].sort((a, b) => {
+    const ra = result.rankings.find(r => r.npcId === a.npcId);
+    const rb = result.rankings.find(r => r.npcId === b.npcId);
+    return (ra?.rank ?? 999) - (rb?.rank ?? 999);
+  });
+
+  for (const s of sortedStats) {
+    const npc = gameData.npcProfiles[s.npcId];
+    const ranking = result.rankings.find(r => r.npcId === s.npcId);
+    lines.push(`  ${s.name} [${s.tier}]  --  Rank #${ranking?.rank ?? '?'}  Elo: ${ranking?.empiricalScore.toFixed(0) ?? '?'}`);
+    lines.push(`    Record: ${s.wins}W / ${s.losses}L / ${s.draws}D  (${(s.winRate * 100).toFixed(1)}% win rate)`);
+    lines.push(`    Avg damage dealt: ${s.avgDamageDealt}  |  Avg damage taken: ${s.avgDamageTaken}`);
+    lines.push(`    Avg rounds survived: ${s.avgRoundsSurvived}  |  Avg HP remaining: ${s.avgHpRemaining}`);
+    if (s.bestMatchup) {
+      lines.push(`    Best matchup:  vs ${s.bestMatchup.opponentName} (${(s.bestMatchup.winRate * 100).toFixed(0)}% WR)`);
+    }
+    if (s.worstMatchup) {
+      lines.push(`    Worst matchup: vs ${s.worstMatchup.opponentName} (${(s.worstMatchup.winRate * 100).toFixed(0)}% WR)`);
+    }
+    if (s.upsetWinRate > 0) {
+      lines.push(`    Upset wins vs higher tiers: ${(s.upsetWinRate * 100).toFixed(0)}%`);
+    }
+    if (s.upsetLossRate > 0) {
+      lines.push(`    Upset losses to lower tiers: ${(s.upsetLossRate * 100).toFixed(0)}%`);
+    }
+
+    // Stat summary for context
+    if (npc) {
+      const w = npc.weapons[0];
+      lines.push(`    Stats: HP=${npc.woundThreshold} Soak=${npc.soak} Spd=${npc.speed} Atk=[${npc.attackPool.ability}g/${npc.attackPool.proficiency}y] Def=[${npc.defensePool.difficulty}p/${npc.defensePool.challenge}r]`);
+      if (w) {
+        lines.push(`    Weapon: ${w.name} (dmg ${w.baseDamage}, range ${w.range}${w.qualities?.length ? ', ' + w.qualities.map(q => `${q.name}${q.value ? ' ' + q.value : ''}`).join(', ') : ''})`);
+      }
+    }
+    lines.push('');
+  }
+
+  // === MATCHUP MATRIX ===
+  lines.push(hr);
+  lines.push('  HEAD-TO-HEAD MATCHUP RESULTS');
+  lines.push(hr);
+  lines.push('');
+
+  for (const duel of result.duelResults) {
+    const avgDmgA = duel.gameDetails.length > 0
+      ? (duel.gameDetails.reduce((sum, g) => sum + g.damageByA, 0) / duel.gameDetails.length).toFixed(1)
+      : '?';
+    const avgDmgB = duel.gameDetails.length > 0
+      ? (duel.gameDetails.reduce((sum, g) => sum + g.damageByB, 0) / duel.gameDetails.length).toFixed(1)
+      : '?';
+
+    lines.push(`  ${duel.nameA} vs ${duel.nameB}`);
+    lines.push(`    Score: ${duel.winsA}-${duel.winsB}-${duel.draws} (${duel.gamesPlayed} games, avg ${duel.avgRounds.toFixed(1)} rounds)`);
+    lines.push(`    Avg damage: ${duel.nameA} ${avgDmgA} / ${duel.nameB} ${avgDmgB}`);
+
+    // Show per-game breakdown for small matchup counts
+    if (duel.gameDetails.length <= 10) {
+      const gameStrs = duel.gameDetails.map(g => {
+        const w = g.winner === 'A' ? duel.nameA.substring(0, 8) : g.winner === 'B' ? duel.nameB.substring(0, 8) : 'Draw';
+        return `R${g.rounds}:${w}`;
+      });
+      lines.push(`    Games: ${gameStrs.join(', ')}`);
+    }
+    lines.push('');
+  }
+
+  // === BALANCE FLAGS ===
+  if (result.balanceFlags.length > 0) {
+    lines.push(hr);
+    lines.push('  BALANCE FLAGS & RECOMMENDATIONS');
+    lines.push(hr);
+    lines.push('');
+
+    for (const flag of result.balanceFlags) {
+      const icon = flag.severity === 'high' ? '[!!!]' : flag.severity === 'medium' ? '[!! ]' : '[!  ]';
+      lines.push(`  ${icon} ${flag.flag.toUpperCase()}: ${flag.name} (${flag.tier})`);
+      lines.push(`        ${flag.reason}`);
+      lines.push(`        Suggestion: ${flag.suggestion}`);
+      lines.push('');
+    }
+  } else {
+    lines.push(hr);
+    lines.push('  No balance flags detected. All units within expected parameters.');
+    lines.push(hr);
+    lines.push('');
+  }
+
+  // === ANALYTICAL BREAKDOWN ===
+  lines.push(hr);
+  lines.push('  ANALYTICAL RATING BREAKDOWN');
+  lines.push(hr);
+  lines.push('');
+  lines.push(
+    '  ' +
+    'Name'.padEnd(25) +
+    'Tier'.padEnd(9) +
+    'Offense'.padStart(8) +
+    'Defense'.padStart(8) +
+    'Speed'.padStart(6) +
+    'Keywords'.padStart(9) +
+    'Total'.padStart(7)
+  );
+  lines.push('  ' + '-'.repeat(71));
+  for (const r of result.analytical) {
+    lines.push(
+      `  ${r.name.padEnd(25)}` +
+      `${r.tier.padEnd(9)}` +
+      `${r.offensiveRating.toFixed(1).padStart(8)}` +
+      `${r.defensiveRating.toFixed(1).padStart(8)}` +
+      `${r.mobilityRating.toFixed(2).padStart(6)}` +
+      `${r.keywordBonus.toFixed(1).padStart(9)}` +
+      `${r.totalRating.toFixed(1).padStart(7)}`
+    );
+  }
+  lines.push('');
+
+  return lines.join('\n');
 }

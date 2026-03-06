@@ -235,14 +235,18 @@ export {
   computeAnalyticalRating,
   runDuelTournament,
   runFullPowerRanking,
+  generatePowerRankingReport,
 } from './power-ranking.js';
 
 export type {
   AnalyticalRating,
   DuelResult,
+  DuelGameDetail,
   DuelRanking,
   CombinedRanking,
   PowerRankingResult,
+  NPCCombatStats,
+  BalanceFlag,
 } from './power-ranking.js';
 
 export type {

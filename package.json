@@ -13,7 +13,9 @@
     "export:cards": "tsx scripts/generate-card-pdf.ts",
     "build-arena": "node scripts/build-combat-arena.mjs",
     "rank": "tsx scripts/run-npc-ranking.ts",
-    "rank:quick": "tsx scripts/run-npc-ranking.ts --quick"
+    "rank:quick": "tsx scripts/run-npc-ranking.ts --quick",
+    "rank:report": "tsx scripts/run-npc-ranking.ts --report",
+    "rank:full": "tsx scripts/run-npc-ranking.ts --report --log"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["esbuild"]
