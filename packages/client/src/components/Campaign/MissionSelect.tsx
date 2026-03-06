@@ -8,6 +8,7 @@ import React, { useCallback, useRef, useState, useEffect } from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult } from '../../../../engine/src/types'
+import { getCampaignStats } from '../../../../engine/src/campaign-v2'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
 import { usePortraitStore } from '../../store/portrait-store'
@@ -244,6 +245,240 @@ function MissionCard({
 }
 
 // ============================================================================
+// CAMPAIGN COMPLETE SCREEN
+// ============================================================================
+
+function CampaignCompleteScreen({
+  campaign,
+  onNewCampaign,
+  onExport,
+  isMobile,
+}: {
+  campaign: CampaignState
+  onNewCampaign: () => void
+  onExport: () => void
+  isMobile: boolean
+}) {
+  const stats = getCampaignStats(campaign)
+  const heroes = Object.values(campaign.heroes) as HeroCharacter[]
+  const bestHero = heroes.reduce((best, h) => {
+    const kills = campaign.completedMissions.reduce(
+      (sum, r) => sum + (r.heroKills[h.id] ?? 0), 0,
+    )
+    const bestKills = campaign.completedMissions.reduce(
+      (sum, r) => sum + (r.heroKills[best.id] ?? 0), 0,
+    )
+    return kills > bestKills ? h : best
+  }, heroes[0])
+
+  const bestHeroKills = bestHero
+    ? campaign.completedMissions.reduce((sum, r) => sum + (r.heroKills[bestHero.id] ?? 0), 0)
+    : 0
+
+  return (
+    <div style={{
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: isMobile ? '24px 16px' : '48px',
+      textAlign: 'center',
+      overflowY: 'auto',
+    }}>
+      <div style={{
+        fontSize: isMobile ? '36px' : '48px',
+        marginBottom: '8px',
+      }}>
+        {'\u2728'}
+      </div>
+      <h1 style={{
+        color: '#ffd700',
+        margin: '0 0 8px 0',
+        fontSize: isMobile ? '24px' : '32px',
+        textShadow: '0 0 30px #ffd70040',
+      }}>
+        CAMPAIGN COMPLETE
+      </h1>
+      <p style={{ color: '#aaa', margin: '0 0 32px 0', maxWidth: '500px', lineHeight: '1.5' }}>
+        Your operatives have completed their mission. The galaxy shifts in the wake of their actions.
+      </p>
+
+      {/* Stats grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+        gap: '12px',
+        maxWidth: '600px',
+        width: '100%',
+        marginBottom: '24px',
+      }}>
+        {[
+          { label: 'Missions', value: `${stats.missionsPlayed}`, color: '#4a9eff' },
+          { label: 'Victories', value: `${stats.victories}`, color: '#44ff44' },
+          { label: 'Defeats', value: `${stats.defeats}`, color: '#ff4444' },
+          { label: 'Total XP', value: `${stats.totalXPEarned}`, color: '#bb99ff' },
+          { label: 'Total Kills', value: `${stats.totalKills}`, color: '#ffaa00' },
+          { label: 'Credits', value: `${stats.totalCredits}`, color: '#ffd700' },
+          { label: 'Heroes', value: `${stats.heroCount}`, color: '#4a9eff' },
+          { label: 'Avg XP/Mission', value: `${stats.averageMissionXP}`, color: '#88bbff' },
+        ].map(stat => (
+          <div key={stat.label} style={{
+            backgroundColor: '#12121f',
+            border: '1px solid #2a2a3f',
+            borderRadius: '8px',
+            padding: '12px',
+          }}>
+            <div style={{ color: stat.color, fontSize: '20px', fontWeight: 'bold' }}>{stat.value}</div>
+            <div style={{ color: '#888', fontSize: '11px', marginTop: '4px' }}>{stat.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* MVP Hero */}
+      {bestHero && bestHeroKills > 0 && (
+        <div style={{
+          backgroundColor: '#12121f',
+          border: '1px solid #ffd70040',
+          borderRadius: '8px',
+          padding: '16px 24px',
+          marginBottom: '24px',
+          maxWidth: '400px',
+          width: '100%',
+        }}>
+          <div style={{ color: '#ffd700', fontSize: '11px', fontWeight: 'bold', marginBottom: '8px' }}>
+            MOST VALUABLE OPERATIVE
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
+            <HeroPortrait portraitId={bestHero.portraitId} name={bestHero.name} size={40} accentColor="#ffd700" />
+            <div>
+              <div style={{ color: '#fff', fontWeight: 'bold' }}>{bestHero.name}</div>
+              <div style={{ color: '#ffaa00', fontSize: '12px' }}>{bestHeroKills} kills</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hero roster final state */}
+      <div style={{ maxWidth: '600px', width: '100%', marginBottom: '32px' }}>
+        <h3 style={{ color: '#4a9eff', margin: '0 0 12px 0', fontSize: '14px' }}>Final Roster</h3>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+          gap: '8px',
+        }}>
+          {heroes.map(hero => (
+            <div key={hero.id} style={{
+              ...cardStyle,
+              cursor: 'default',
+              borderColor: hero.isWounded ? '#ffaa00' : '#2a4a2a',
+              padding: '10px 12px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <HeroPortrait portraitId={hero.portraitId} name={hero.name} size={24} accentColor="#4a9eff" />
+                <span style={{ color: '#4a9eff', fontWeight: 'bold', fontSize: '13px' }}>{hero.name}</span>
+                <span style={{ color: '#888', fontSize: '11px', marginLeft: 'auto' }}>
+                  {hero.xp.total} XP earned
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div style={{ display: 'flex', gap: '12px', flexDirection: isMobile ? 'column' : 'row' }}>
+        <button
+          style={{
+            ...buttonStyle,
+            backgroundColor: '#1a2a3a',
+            color: '#88bbff',
+          }}
+          onClick={onExport}
+        >
+          EXPORT CAMPAIGN
+        </button>
+        <button
+          style={{
+            ...buttonStyle,
+            backgroundColor: '#4a9eff',
+            color: '#fff',
+          }}
+          onClick={onNewCampaign}
+        >
+          NEW CAMPAIGN
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// EXIT CONFIRMATION DIALOG
+// ============================================================================
+
+function ExitConfirmDialog({
+  onConfirm,
+  onCancel,
+}: {
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 9999,
+    }}>
+      <div style={{
+        backgroundColor: '#12121f',
+        border: '1px solid #3a2a2a',
+        borderRadius: '12px',
+        padding: '32px',
+        maxWidth: '400px',
+        width: '90%',
+        textAlign: 'center',
+      }}>
+        <h2 style={{ color: '#ff6644', margin: '0 0 12px 0', fontSize: '18px' }}>
+          Exit Campaign?
+        </h2>
+        <p style={{ color: '#aaa', margin: '0 0 24px 0', fontSize: '14px', lineHeight: '1.5' }}>
+          Unsaved progress will be lost. Make sure to save your campaign before exiting.
+        </p>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            style={{
+              ...buttonStyle,
+              flex: 1,
+              backgroundColor: '#2a2a3f',
+              color: '#c0c0c0',
+            }}
+            onClick={onCancel}
+          >
+            CANCEL
+          </button>
+          <button
+            style={{
+              ...buttonStyle,
+              flex: 1,
+              backgroundColor: '#3a2a2a',
+              color: '#ff6644',
+            }}
+            onClick={onConfirm}
+          >
+            EXIT
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
@@ -265,6 +500,7 @@ export default function MissionSelect() {
   const [saveFlash, setSaveFlash] = useState(false)
   const [exportFlash, setExportFlash] = useState(false)
   const [importStatus, setImportStatus] = useState<string | null>(null)
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
   const importInputRef = useRef<HTMLInputElement>(null)
 
   // Auto-select first available mission
@@ -461,7 +697,7 @@ export default function MissionSelect() {
           />
           <button
             style={{ ...buttonStyle, backgroundColor: '#3a2a2a', color: '#ff6644', flex: isMobile ? '1 1 auto' : undefined }}
-            onClick={exitCampaign}
+            onClick={() => setShowExitConfirm(true)}
           >
             EXIT
           </button>
@@ -507,9 +743,12 @@ export default function MissionSelect() {
           </h2>
 
           {availableMissions.length === 0 ? (
-            <div style={{ color: '#888', padding: '40px', textAlign: 'center' }}>
-              Campaign complete! All missions finished.
-            </div>
+            <CampaignCompleteScreen
+              campaign={campaignState}
+              onNewCampaign={exitCampaign}
+              onExport={handleExport}
+              isMobile={isMobile}
+            />
           ) : (
             <div style={{ display: 'flex', gap: isMobile ? '16px' : '24px', flexDirection: isMobile ? 'column' : 'row' }}>
               {/* Mission list */}
@@ -621,6 +860,14 @@ export default function MissionSelect() {
           )}
         </div>
       </div>
+
+      {/* Exit confirmation modal */}
+      {showExitConfirm && (
+        <ExitConfirmDialog
+          onConfirm={exitCampaign}
+          onCancel={() => setShowExitConfirm(false)}
+        />
+      )}
     </div>
   )
 }
