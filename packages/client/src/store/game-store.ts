@@ -1958,7 +1958,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       createdHeroes: [],
       pendingPlayers: [
         { id: 0, name: 'Imperial AI', role: 'Imperial' as const, isLocal: true, isAI: true },
-        { id: 1, name: 'Operative AI', role: 'Operative' as const, isLocal: true, isAI: true },
+        { id: 1, name: 'Player', role: 'Operative' as const, isLocal: true, isAI: false },
       ],
       pendingMapConfig: null,
       // Store difficulty for campaign creation after heroes are made
@@ -2064,10 +2064,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       heroesRegistry[hero.id] = hero
     }
 
-    // Create players (both AI for automated campaign simulation)
+    // Imperial side is AI-controlled; Operative side is player-controlled
     const players: Player[] = [
       { id: 0, name: 'Imperial AI', role: 'Imperial', isLocal: true, isAI: true },
-      { id: 1, name: 'Operative AI', role: 'Operative', isLocal: true, isAI: true },
+      { id: 1, name: 'Player', role: 'Operative', isLocal: true, isAI: false },
     ]
 
     // Build a mission object compatible with createInitialGameStateV2
