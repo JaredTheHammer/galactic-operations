@@ -2867,8 +2867,8 @@ function resolveWeaponId(
   return 'fists'
 }
 
-// Debug: expose store + helpers on window for dev tooling
-if (typeof window !== 'undefined') {
+// Debug: expose store + helpers on window for dev tooling (dev only)
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
   ;(window as any).__store = useGameStore
   ;(window as any).__createHero = createHero
 }
