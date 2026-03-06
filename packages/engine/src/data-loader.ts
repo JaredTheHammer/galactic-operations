@@ -131,7 +131,7 @@ export async function loadGameDataV2(basePath: string): Promise<GameData> {
   const diceRaw = JSON.parse(
     await readFile(join(basePath, 'dice-d6.json'), 'utf-8')
   );
-  const dice: Record<string, D6DieDefinition> = diceRaw.dieTypes ?? diceRaw;
+  const dice = (diceRaw.dieTypes ?? diceRaw) as Record<D6DieType, D6DieDefinition>;
 
   // Species
   const speciesRaw = JSON.parse(
@@ -187,7 +187,7 @@ export async function loadGameDataV2(basePath: string): Promise<GameData> {
   }
 
   return {
-    dice: dice as any,
+    dice,
     species,
     careers,
     specializations,

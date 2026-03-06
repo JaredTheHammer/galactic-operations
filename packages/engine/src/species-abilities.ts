@@ -79,7 +79,8 @@ function getEffectValue(
   if (!species?.abilities) return 0;
   const ability = species.abilities.find(a => a.effect.type === effectType);
   if (!ability) return 0;
-  return (ability.effect as any).value ?? 0;
+  const eff = ability.effect;
+  return 'value' in eff ? eff.value ?? 0 : 0;
 }
 
 // ============================================================================
@@ -175,10 +176,10 @@ export function isImmuneToCondition(
 ): boolean {
   const species = gameData?.species?.[hero.species];
   if (!species?.abilities) return false;
-  return species.abilities.some(
-    a => a.effect.type === 'condition_immunity'
-      && (a.effect as any).condition === condition,
-  );
+  return species.abilities.some(a => {
+    if (a.effect.type !== 'condition_immunity') return false;
+    return a.effect.condition === condition;
+  });
 }
 
 /**
@@ -222,7 +223,7 @@ export function getSpeciesSkillBonus(
     if (ability.effect.type === 'social_skill_upgrade') {
       const socialSkills = ['charm', 'coercion', 'deception', 'leadership', 'negotiation'];
       if (socialSkills.includes(skillId)) {
-        bonusUpgrade += (ability.effect as any).value ?? 0;
+        bonusUpgrade += ability.effect.value ?? 0;
       }
     }
   }

@@ -168,9 +168,9 @@ function assembleMap(
             // Deep copy the tile (avoid shared references)
             const src = board.tiles[ly][lx];
             tiles[gy][gx] = {
-              terrain: src.terrain as any,
+              terrain: src.terrain,
               elevation: src.elevation,
-              cover: src.cover as any,
+              cover: src.cover,
               occupied: null, // Always clear occupancy for fresh map
               objective: src.objective,
             };

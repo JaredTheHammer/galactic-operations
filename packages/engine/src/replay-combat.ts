@@ -115,29 +115,34 @@ export interface CombatReplay {
 class ReplayRecorder {
   public frames: ReplayFrame[] = [];
   private figureSideMap: Map<string, 'A' | 'B'>;
-  private gs: GameState;
+  private gs: GameState | null;
 
   constructor(
     private gameData: GameData,
     figureSideMap: Map<string, 'A' | 'B'>,
   ) {
     this.figureSideMap = figureSideMap;
-    this.gs = null as any; // set via setGameState before first record
+    this.gs = null; // set via setGameState before first record
   }
 
   setGameState(gs: GameState): void {
     this.gs = gs;
   }
 
+  private get state(): GameState {
+    if (!this.gs) throw new Error('ReplayRecorder: setGameState must be called before recording');
+    return this.gs;
+  }
+
   private snapshotFigures(): ReplayFigureSnapshot[] {
-    return this.gs.figures.map(f => {
+    return this.state.figures.map(f => {
       // Resolve portrait ID: figure override -> hero/NPC default
       let portraitId = f.portraitId;
       let baseSize = f.baseSize;
       let silhouetteHint: string | undefined;
 
       if (f.entityType === 'hero') {
-        const hero = this.gs.heroes?.[f.entityId];
+        const hero = this.state.heroes?.[f.entityId];
         if (!portraitId && hero?.portraitId) portraitId = hero.portraitId;
         if (!baseSize && hero?.baseSize) baseSize = hero.baseSize;
       } else {
@@ -154,7 +159,7 @@ class ReplayRecorder {
         id: f.id,
         entityId: f.entityId,
         entityType: f.entityType,
-        name: getFigureName(f, this.gs),
+        name: getFigureName(f, this.state),
         position: { x: f.position.x, y: f.position.y },
         playerId: f.playerId,
         side: this.figureSideMap.get(f.id) ?? 'A',
@@ -175,7 +180,7 @@ class ReplayRecorder {
   recordPhase(phaseLabel: string): void {
     this.frames.push({
       frameIndex: this.frames.length,
-      roundNumber: this.gs.roundNumber,
+      roundNumber: this.state.roundNumber,
       phaseLabel,
       actionText: phaseLabel,
       executingFigureId: null,
@@ -193,7 +198,7 @@ class ReplayRecorder {
   ): void {
     this.frames.push({
       frameIndex: this.frames.length,
-      roundNumber: this.gs.roundNumber,
+      roundNumber: this.state.roundNumber,
       phaseLabel: `Activation`,
       actionText,
       executingFigureId: figureId,
