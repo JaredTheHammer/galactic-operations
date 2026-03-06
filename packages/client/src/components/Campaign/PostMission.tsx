@@ -160,7 +160,7 @@ export default function PostMission() {
   const lootDetails: { label: string; color: string }[] = []
   if (missionDef && result.lootCollected.length > 0) {
     for (const lootId of result.lootCollected) {
-      const token = missionDef.lootTokens.find((l: any) => l.id === lootId)
+      const token = missionDef.lootTokens.find(l => l.id === lootId)
       if (!token) {
         lootDetails.push({ label: lootId, color: '#888' })
         continue
@@ -172,9 +172,9 @@ export default function PostMission() {
       } else if (r.type === 'xp') {
         lootDetails.push({ label: `${r.value} XP`, color: '#44ff44' })
       } else if (r.type === 'equipment') {
-        lootDetails.push({ label: (r as any).itemId?.replace(/-/g, ' ') ?? 'Equipment', color: '#ff6644' })
+        lootDetails.push({ label: r.itemId.replace(/-/g, ' '), color: '#ff6644' })
       } else if (r.type === 'narrative') {
-        lootDetails.push({ label: (r as any).description ?? 'Narrative Item', color: '#cc77ff' })
+        lootDetails.push({ label: r.description, color: '#cc77ff' })
       }
     }
   }

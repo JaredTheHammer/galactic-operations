@@ -24,7 +24,12 @@ import act1HubData from '../../../../../../data/social/act1-hub.json'
 import act2HubData from '../../../../../../data/social/act2-hub.json'
 import act3HubData from '../../../../../../data/social/act3-hub.json'
 
-const socialHubsByAct: Record<number, any> = {
+interface SocialHubData {
+  location: SocialPhaseLocation
+  npcs: Record<string, SocialNPC>
+}
+
+const socialHubsByAct: Record<number, SocialHubData> = {
   1: act1HubData,
   2: act2HubData,
   3: act3HubData,
@@ -84,12 +89,12 @@ export function SocialPhase() {
   const currentAct = campaignState?.currentAct ?? 1
   const location = useMemo<SocialPhaseLocation>(() => {
     const raw = socialHubsByAct[currentAct] ?? socialHubsByAct[1]
-    return (raw as any).location as SocialPhaseLocation
+    return raw.location
   }, [currentAct])
 
   const npcs = useMemo<Record<string, SocialNPC>>(() => {
     const raw = socialHubsByAct[currentAct] ?? socialHubsByAct[1]
-    return (raw as any).npcs as Record<string, SocialNPC>
+    return raw.npcs
   }, [currentAct])
 
   if (!campaignState) {
