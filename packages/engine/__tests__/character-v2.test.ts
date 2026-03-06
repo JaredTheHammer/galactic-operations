@@ -28,6 +28,8 @@ import {
   purchaseTalent,
   unlockSpecialization,
   rollInitiative,
+  awardAbilityPoints,
+  spendAbilityPoints,
   type HeroCreationInput,
 } from '../src/character-v2.js';
 
@@ -884,5 +886,85 @@ describe('edge cases', () => {
       specializationId: 'mercenary',
     }, gd);
     expect(hero.talents.length).toBe(15);
+  });
+});
+
+// ============================================================================
+// ABILITY POINTS
+// ============================================================================
+
+describe('Ability Points', () => {
+  const gd = makeGameData();
+
+  it('createHero initializes AP at 0/0', () => {
+    const hero = createHero({
+      name: 'AP Test',
+      speciesId: 'human',
+      careerId: 'hired-gun',
+      specializationId: 'mercenary',
+    }, gd);
+    expect(hero.abilityPoints).toEqual({ total: 0, available: 0 });
+  });
+
+  it('awardAbilityPoints increases both total and available', () => {
+    const hero = makeHero();
+    const updated = awardAbilityPoints({ ...hero, abilityPoints: { total: 0, available: 0 } }, 3);
+    expect(updated.abilityPoints).toEqual({ total: 3, available: 3 });
+  });
+
+  it('awardAbilityPoints stacks correctly', () => {
+    let hero = { ...makeHero(), abilityPoints: { total: 0, available: 0 } };
+    hero = awardAbilityPoints(hero, 2);
+    hero = awardAbilityPoints(hero, 3);
+    expect(hero.abilityPoints).toEqual({ total: 5, available: 5 });
+  });
+
+  it('awardAbilityPoints throws on negative amount', () => {
+    const hero = { ...makeHero(), abilityPoints: { total: 5, available: 5 } };
+    expect(() => awardAbilityPoints(hero, -1)).toThrow('Cannot award negative AP');
+  });
+
+  it('spendAbilityPoints deducts from available', () => {
+    const hero = { ...makeHero(), abilityPoints: { total: 5, available: 5 } };
+    const updated = spendAbilityPoints(hero, 3);
+    expect(updated.abilityPoints).toEqual({ total: 5, available: 2 });
+  });
+
+  it('spendAbilityPoints throws when insufficient AP', () => {
+    const hero = { ...makeHero(), abilityPoints: { total: 5, available: 2 } };
+    expect(() => spendAbilityPoints(hero, 3)).toThrow('Not enough AP: need 3, have 2');
+  });
+
+  it('spendAbilityPoints throws on non-positive cost', () => {
+    const hero = { ...makeHero(), abilityPoints: { total: 5, available: 5 } };
+    expect(() => spendAbilityPoints(hero, 0)).toThrow('AP cost must be positive');
+  });
+
+  it('validateHero detects AP available exceeding total', () => {
+    const hero = {
+      ...makeHero(),
+      abilityPoints: { total: 3, available: 5 },
+    };
+    const result = validateHero(hero, gd);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Available AP (5) exceeds total AP (3)');
+  });
+
+  it('validateHero passes with valid AP', () => {
+    const hero = {
+      ...makeHero(),
+      abilityPoints: { total: 10, available: 4 },
+    };
+    const result = validateHero(hero, gd);
+    expect(result.valid).toBe(true);
+  });
+
+  it('returns new object (immutability)', () => {
+    const original = { ...makeHero(), abilityPoints: { total: 5, available: 5 } };
+    const awarded = awardAbilityPoints(original, 2);
+    const spent = spendAbilityPoints(original, 1);
+    expect(awarded).not.toBe(original);
+    expect(spent).not.toBe(original);
+    expect(original.abilityPoints).toEqual({ total: 5, available: 5 }); // unchanged
   });
 });

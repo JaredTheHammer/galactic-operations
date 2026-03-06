@@ -23,6 +23,7 @@ import {
   evaluateObjective,
   checkVictoryConditions,
   getCampaignStats,
+  calculateMissionAP,
 } from '../src/campaign-v2';
 
 import type {
@@ -1302,5 +1303,44 @@ describe('Mission Tracking Actions', () => {
     }, makeGameDataMinimal());
 
     expect(result.lootCollected).toEqual(['loot-1', 'loot-2']);
+  });
+});
+
+// ============================================================================
+// ABILITY POINTS -- calculateMissionAP
+// ============================================================================
+
+describe('calculateMissionAP', () => {
+  it('awards 0 AP on defeat', () => {
+    expect(calculateMissionAP('defeat', ['obj-1'], 2, [])).toBe(0);
+  });
+
+  it('awards 1 AP base on victory', () => {
+    expect(calculateMissionAP('victory', [], 3, ['hero-1'])).toBe(1);
+  });
+
+  it('awards +1 AP for all objectives completed', () => {
+    expect(calculateMissionAP('victory', ['o1', 'o2'], 2, ['hero-1'])).toBe(2);
+  });
+
+  it('awards +1 AP for no heroes incapacitated', () => {
+    expect(calculateMissionAP('victory', [], 3, [])).toBe(2);
+  });
+
+  it('awards max 3 AP for flawless all-objectives victory', () => {
+    expect(calculateMissionAP('victory', ['o1', 'o2', 'o3'], 3, [])).toBe(3);
+  });
+
+  it('awards +2 AP bonus for act finale', () => {
+    // 1 base + 1 all-objectives + 2 finale = 4 (hero incapacitated removes flawless bonus)
+    expect(calculateMissionAP('victory', ['o1', 'o2'], 2, ['hero-1'], true)).toBe(4);
+  });
+
+  it('awards max 5 AP for flawless act finale', () => {
+    expect(calculateMissionAP('victory', ['o1'], 1, [], true)).toBe(5);
+  });
+
+  it('awards AP on draw (same as victory)', () => {
+    expect(calculateMissionAP('draw', [], 2, [])).toBe(2);
   });
 });

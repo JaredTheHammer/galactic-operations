@@ -70,12 +70,12 @@ const SPECIES_LIST = [
 ]
 
 const CAREER_SPECS: Record<string, string[]> = {
-  'hired-gun':     ['mercenary', 'enforcer', 'demolitionist'],
-  'scoundrel':     ['smuggler', 'thief', 'gambler'],
-  'commander':     ['tactician', 'vanguard', 'figurehead'],
-  'spy':           ['infiltrator', 'scout', 'slicer'],
+  'hired-gun':     ['mercenary', 'bodyguard', 'demolitionist'],
+  'scoundrel':     ['smuggler', 'gunslinger', 'charmer'],
+  'commander':     ['tactician', 'figurehead', 'strategist'],
   'bounty-hunter': ['assassin', 'gadgeteer', 'survivalist'],
-  'technician':    ['mechanic', 'outlaw-tech', 'slicer'],
+  'technician':    ['droid-tech', 'outlaw-tech', 'slicer'],
+  'mystic':        ['force-adept', 'healer', 'niman-disciple'],
 }
 
 const MAX_HEROES_PER_SIDE = 4

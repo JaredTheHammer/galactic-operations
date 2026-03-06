@@ -2191,6 +2191,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
         : null,
     })
 
+    // Autosave after mission completion
+    try {
+      const json = campaignToJSON(newCampaign)
+      localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
+    } catch (e) {
+      console.error('Autosave after mission failed:', e)
+    }
     // Auto-save after mission completion
     try {
       saveToSlot(AUTO_SAVE_SLOT, newCampaign)
@@ -2460,12 +2467,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Close social phase and return to mission select.
    */
   closeSocialPhase: () => {
+    const { campaignState } = get()
     const { campaignState, activeSaveSlot } = get()
     set({
       showSocialPhase: false,
       showMissionSelect: true,
       lastMissionResult: null,
     })
+
+    // Autosave after social phase completion
+    if (campaignState) {
+      try {
+        const json = campaignToJSON(campaignState)
+        localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
+      } catch (e) {
+        console.error('Autosave after social phase failed:', e)
+      }
+    }
     // Auto-save after social phase
     if (campaignState) {
       try {
