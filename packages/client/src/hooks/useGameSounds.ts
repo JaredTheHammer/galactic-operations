@@ -60,8 +60,8 @@ export function useGameSounds(): void {
     const screens = { showSetup, showMissionSelect, showPostMission, showSocialPhase, showHeroProgression, showPortraitManager };
     const prevScreens = { showSetup: p.showSetup, showMissionSelect: p.showMissionSelect, showPostMission: p.showPostMission, showSocialPhase: p.showSocialPhase, showHeroProgression: p.showHeroProgression, showPortraitManager: p.showPortraitManager };
 
-    const screenChanged = Object.keys(screens).some(
-      k => (screens as any)[k] !== (prevScreens as any)[k]
+    const screenChanged = (Object.keys(screens) as (keyof typeof screens)[]).some(
+      k => screens[k] !== prevScreens[k]
     );
     if (screenChanged) {
       play('screenTransition');

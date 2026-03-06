@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react'
+import { t } from '../../styles/theme'
 
 // ============================================================================
 // Event type detection from log message strings
@@ -90,7 +91,7 @@ const FILTER_CATEGORIES: { key: FilterCategory; label: string; color: string; ty
 ]
 
 // Build lookup: eventType -> category key
-const TYPE_TO_CATEGORY: Record<LogEventType, FilterCategory> = {} as any
+const TYPE_TO_CATEGORY = {} as Record<LogEventType, FilterCategory>
 for (const cat of FILTER_CATEGORIES) {
   for (const t of cat.types) {
     TYPE_TO_CATEGORY[t] = cat.key
@@ -143,15 +144,15 @@ function formatLogText(text: string): React.ReactNode[] {
 
     const m = match[0]
     if (m.startsWith('**') && m.endsWith('**')) {
-      parts.push(<strong key={match.index} style={{ color: '#ffffff' }}>{m.slice(2, -2)}</strong>)
+      parts.push(<strong key={match.index} style={{ color: t.textPrimary }}>{m.slice(2, -2)}</strong>)
     } else if (/defeated!/i.test(m)) {
-      parts.push(<strong key={match.index} style={{ color: '#ff4444' }}>{m}</strong>)
+      parts.push(<strong key={match.index} style={{ color: t.accentRed }}>{m}</strong>)
     } else if (/wounds?/i.test(m)) {
-      parts.push(<span key={match.index} style={{ color: '#ff8888', fontWeight: 'bold' }}>{m}</span>)
+      parts.push(<span key={match.index} style={{ color: t.accentOrange, fontWeight: 'bold' }}>{m}</span>)
     } else if (/strain/i.test(m)) {
-      parts.push(<span key={match.index} style={{ color: '#6699ff', fontWeight: 'bold' }}>{m}</span>)
+      parts.push(<span key={match.index} style={{ color: t.accentBlue, fontWeight: 'bold' }}>{m}</span>)
     } else if (/damage/i.test(m)) {
-      parts.push(<span key={match.index} style={{ color: '#ff8888', fontWeight: 'bold' }}>{m}</span>)
+      parts.push(<span key={match.index} style={{ color: t.accentOrange, fontWeight: 'bold' }}>{m}</span>)
     } else {
       parts.push(m)
     }
@@ -219,9 +220,9 @@ export const CombatLog: React.FC<CombatLogProps> = ({ messages, compact = false,
             onClick={() => toggleCategory(cat.key)}
             style={{
               background: active ? `${cat.color}20` : 'transparent',
-              border: `1px solid ${active ? cat.color + '60' : '#333355'}`,
+              border: `1px solid ${active ? cat.color + '60' : t.border}`,
               borderRadius: '3px',
-              color: active ? cat.color : '#555',
+              color: active ? cat.color : t.textDim,
               padding: '1px 5px',
               fontSize: '9px',
               fontWeight: 'bold',
@@ -280,7 +281,7 @@ export const CombatLog: React.FC<CombatLogProps> = ({ messages, compact = false,
     return (
       <div style={compactOverlayStyle}>
         <div style={compactHeaderRow}>
-          <span style={{ color: '#ffd700', fontWeight: 'bold', fontSize: '14px' }}>Combat Log</span>
+          <span style={{ color: t.accentGold, fontWeight: 'bold', fontSize: '14px' }}>Combat Log</span>
           <button onClick={onClose} style={closeButtonStyle}>&#x2715;</button>
         </div>
         {renderFilters()}
@@ -301,7 +302,7 @@ export const CombatLog: React.FC<CombatLogProps> = ({ messages, compact = false,
     <div style={containerStyle}>
       <div style={headerStyle}>
         <span>Combat Log</span>
-        <span style={{ color: '#555', fontSize: '9px', fontWeight: 'normal' }}>
+        <span style={{ color: t.textDim, fontSize: '9px', fontWeight: 'normal' }}>
           {filteredEntries.length}/{entries.length}
         </span>
       </div>
@@ -342,8 +343,8 @@ const compactScrollStyle: React.CSSProperties = {
 
 const closeButtonStyle: React.CSSProperties = {
   background: 'none',
-  border: '1px solid #333355',
-  color: '#ffffff',
+  border: `1px solid ${t.border}`,
+  color: t.textPrimary,
   padding: '6px 12px',
   borderRadius: '4px',
   fontSize: '14px',
@@ -361,13 +362,13 @@ const containerStyle: React.CSSProperties = {
   right: '20px',
   width: '340px',
   maxHeight: '280px',
-  backgroundColor: 'rgba(19, 19, 32, 0.9)',
-  border: '2px solid #4a9eff',
-  borderRadius: '8px',
+  backgroundColor: t.panelBg,
+  border: `2px solid ${t.accentBlue}`,
+  borderRadius: t.radiusMd,
   padding: '10px',
   zIndex: 80,
   backdropFilter: 'blur(4px)',
-  color: '#ffffff',
+  color: t.textPrimary,
   fontSize: '11px',
   overflow: 'hidden',
   display: 'flex',
@@ -383,7 +384,7 @@ const logStyle: React.CSSProperties = {
 
 const headerStyle: React.CSSProperties = {
   fontSize: '10px',
-  color: '#4a9eff',
+  color: t.accentBlue,
   textTransform: 'uppercase',
   fontWeight: 'bold',
   marginBottom: '4px',
@@ -404,12 +405,12 @@ const roundSepStyle: React.CSSProperties = {
   fontWeight: 'bold',
   textTransform: 'uppercase',
   letterSpacing: '1px',
-  color: '#4a9eff',
-  borderTop: '1px solid #333355',
-  borderBottom: '1px solid #333355',
+  color: t.accentBlue,
+  borderTop: `1px solid ${t.border}`,
+  borderBottom: `1px solid ${t.border}`,
   backgroundColor: 'rgba(74, 158, 255, 0.08)',
 }
 
 const emptyStyle: React.CSSProperties = {
-  color: '#999999', textAlign: 'center', padding: '20px 0',
+  color: t.textMuted, textAlign: 'center', padding: '20px 0',
 }

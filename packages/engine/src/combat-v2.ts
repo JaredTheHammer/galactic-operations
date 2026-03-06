@@ -821,7 +821,7 @@ export function resolveCombatV2(
   let talentBonusDamage = 0;
   if (isHero(attackerEntity) && rollResult.isHit) {
     const talentCtx: CombatTalentContext = {
-      rangeBand: (scenario as any).rangeBand ?? 'Medium',
+      rangeBand: scenario.rangeBand,
       weapon: poolCtx.weapon,
       isAttacker: true,
     };

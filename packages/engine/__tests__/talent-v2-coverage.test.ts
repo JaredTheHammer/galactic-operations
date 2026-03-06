@@ -275,7 +275,7 @@ describe('executeActiveTalent - upgrade_defense (Side Step)', () => {
 
   it('does not duplicate SideStep condition if already present', () => {
     const hero = makeHero(['test-side-step']);
-    const figure = makeFigure({ maneuversRemaining: 1, conditions: ['SideStep' as any] });
+    const figure = makeFigure({ maneuversRemaining: 1, conditions: ['SideStep'] });
     const gs = makeGameState(hero, [figure]);
     const gd = makeGameData();
 
@@ -304,7 +304,7 @@ describe('executeActiveTalent - upgrade_attack (True Aim)', () => {
 
   it('does not duplicate TrueAim condition', () => {
     const hero = makeHero(['test-true-aim']);
-    const figure = makeFigure({ maneuversRemaining: 1, conditions: ['TrueAim' as any] });
+    const figure = makeFigure({ maneuversRemaining: 1, conditions: ['TrueAim'] });
     const gs = makeGameState(hero, [figure]);
     const gd = makeGameData();
 

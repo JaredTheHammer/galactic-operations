@@ -159,7 +159,7 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState,
     Minion: '#888888', Rival: '#ffaa00', Elite: '#cc77ff', Nemesis: '#ff4444',
   }
   const displaySubline = isHero && hero && gameData
-    ? `${(gameData.species[hero.species] as any)?.name ?? hero.species} ${(gameData.careers[hero.career] as any)?.name ?? hero.career}`
+    ? `${gameData.species[hero.species]?.name ?? hero.species} ${gameData.careers[hero.career]?.name ?? hero.career}`
     : npcTier
       ? npcTier
       : `${selectedFigure.entityType}`
@@ -434,9 +434,9 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState,
 
       {/* Equipment (heroes) */}
       {isHero && hero && gameData && (() => {
-        const pw = hero.equipment.primaryWeapon ? gameData.weapons[hero.equipment.primaryWeapon] as any : null
-        const sw = hero.equipment.secondaryWeapon ? gameData.weapons[hero.equipment.secondaryWeapon] as any : null
-        const arm = hero.equipment.armor ? gameData.armor[hero.equipment.armor] as any : null
+        const pw = hero.equipment.primaryWeapon ? gameData.weapons[hero.equipment.primaryWeapon] : null
+        const sw = hero.equipment.secondaryWeapon ? gameData.weapons[hero.equipment.secondaryWeapon] : null
+        const arm = hero.equipment.armor ? gameData.armor[hero.equipment.armor] : null
         return (
           <div style={sectionStyle}>
             <div style={labelStyle}>Equipment</div>
@@ -472,7 +472,7 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState,
               <div style={{ fontSize: '11px', color: '#666' }}>Unarmed</div>
             )}
             <div style={{ fontSize: '10px', color: '#888', marginTop: '4px' }}>
-              Soak: {hero.soak} | Speed: {(gameData.species[hero.species] as any)?.speed ?? '?'}
+              Soak: {hero.soak} | Speed: {gameData.species[hero.species]?.speed ?? '?'}
             </div>
           </div>
         )
@@ -486,7 +486,7 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState,
             <span>Soak: {npc.soak}</span>
             <span>Speed: {npc.speed ?? '?'}</span>
             {selectedFigure.minionGroupSize != null && selectedFigure.minionGroupSize > 0 && (
-              <span>Group: {selectedFigure.minionGroupSize}/{(selectedFigure as any).minionGroupMax ?? selectedFigure.minionGroupSize}</span>
+              <span>Group: {selectedFigure.minionGroupSize}/{selectedFigure.minionGroupMax ?? selectedFigure.minionGroupSize}</span>
             )}
           </div>
           {npc.weapons?.map((w: any, i: number) => (

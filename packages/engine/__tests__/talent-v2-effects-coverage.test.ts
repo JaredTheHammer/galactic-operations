@@ -254,7 +254,7 @@ describe('ignore_critical_penalties effect (HeroicFortitude)', () => {
 
   it('does not duplicate HeroicFortitude condition on second use', () => {
     const hero = makeHero([HEROIC_FORTITUDE.id]);
-    const fig = makeFigure({ conditions: ['HeroicFortitude' as any] });
+    const fig = makeFigure({ conditions: ['HeroicFortitude'] });
     const gs = makeGameState(hero, [fig]);
     const gd = makeGameData();
 
@@ -280,7 +280,7 @@ describe('empowered_critical effect (CripplingBlow)', () => {
 
   it('does not duplicate CripplingBlow condition on second use', () => {
     const hero = makeHero([CRIPPLING_BLOW.id]);
-    const fig = makeFigure({ conditions: ['CripplingBlow' as any] });
+    const fig = makeFigure({ conditions: ['CripplingBlow'] });
     const gs = makeGameState(hero, [fig]);
     const gd = makeGameData();
 

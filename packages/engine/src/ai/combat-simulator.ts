@@ -184,9 +184,9 @@ export interface CombatBatchResult {
 // ============================================================================
 
 const ARENA_MAP_CONFIGS: Record<ArenaPreset, MapConfig> = {
-  tiny:   { preset: 'custom' as any, boardsWide: 1, boardsTall: 1 },   // 12x12
-  small:  { preset: 'custom' as any, boardsWide: 2, boardsTall: 2 },   // 24x24
-  medium: { preset: 'custom' as any, boardsWide: 3, boardsTall: 3 },   // 36x36
+  tiny:   { preset: 'custom', boardsWide: 1, boardsTall: 1 },   // 12x12
+  small:  { preset: 'custom', boardsWide: 2, boardsTall: 2 },   // 24x24
+  medium: { preset: 'custom', boardsWide: 3, boardsTall: 3 },   // 36x36
 };
 
 /** Cover retention rates: fraction of terrain tiles to keep */
@@ -488,7 +488,7 @@ function executeCombat(
         army.imperial.push({
           npcId: hero.id,
           count: figSpec.count ?? 1,
-        } as any);
+        });
         // Heroes on side A are deployed as Imperial-side operatives
         // We need a different approach: put heroes on operative side always
         // Actually, the engine ties hero deployment to the operative side.
@@ -499,7 +499,7 @@ function executeCombat(
 
   for (const figSpec of scenario.sideB.figures) {
     if (figSpec.type === 'npc') {
-      army.operative.push({ npcId: figSpec.npcId, count: figSpec.count } as any);
+      army.operative.push({ entityType: 'npc' as const, entityId: figSpec.npcId, count: figSpec.count });
       npcSideMap.set(figSpec.npcId, 'B');
     } else {
       const hero = heroRegistry[figSpec.heroId ?? `hero-${figSpec.spec.name.toLowerCase().replace(/\s+/g, '-')}`];

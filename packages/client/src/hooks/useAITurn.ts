@@ -429,7 +429,7 @@ export function useAITurn(): UseAITurnReturn {
           // Check victory after each activation
           const midVictory = checkVictoryV2(gs, mission)
           if (midVictory.winner) {
-            gs = { ...gs, winner: midVictory.winner, victoryCondition: midVictory.condition, turnPhase: 'GameOver' as any }
+            gs = { ...gs, winner: midVictory.winner, victoryCondition: midVictory.condition, turnPhase: 'GameOver' as const }
             useGameStore.setState({ gameState: gs })
             addCombatLog(`GAME OVER: ${midVictory.winner} wins! ${midVictory.condition}`)
             logger.endRound(gs)
@@ -449,7 +449,7 @@ export function useAITurn(): UseAITurnReturn {
 
         // Force to Status if still in Activation
         if (gs.turnPhase === 'Activation') {
-          gs = { ...gs, turnPhase: 'Status' as any }
+          gs = { ...gs, turnPhase: 'Status' as const }
         }
         gs = advancePhaseV2(gs) // Status -> Reinforcement
 
@@ -480,7 +480,7 @@ export function useAITurn(): UseAITurnReturn {
         // Check victory / round limit
         const endVictory = checkVictoryV2(gs, mission)
         if (endVictory.winner) {
-          gs = { ...gs, winner: endVictory.winner, victoryCondition: endVictory.condition, turnPhase: 'GameOver' as any }
+          gs = { ...gs, winner: endVictory.winner, victoryCondition: endVictory.condition, turnPhase: 'GameOver' as const }
           useGameStore.setState({ gameState: gs })
           addCombatLog(`GAME OVER: ${endVictory.winner} wins! ${endVictory.condition}`)
           finalizeGame(endVictory.winner, endVictory.condition ?? 'Victory', gs)
@@ -500,11 +500,12 @@ export function useAITurn(): UseAITurnReturn {
             if (side === 'Imperial') impWounds += remaining
             else opWounds += remaining
           }
-          const winner = impWounds > opWounds ? 'Imperial' : opWounds > impWounds ? 'Operative' : 'Draw'
-          gs = { ...gs, winner: winner as any, victoryCondition: 'Round limit reached', turnPhase: 'GameOver' as any }
+          const winnerLabel = impWounds > opWounds ? 'Imperial' : opWounds > impWounds ? 'Operative' : 'Draw'
+          const winnerSide = winnerLabel === 'Draw' ? null : winnerLabel as 'Imperial' | 'Operative'
+          gs = { ...gs, winner: winnerSide, victoryCondition: 'Round limit reached', turnPhase: 'GameOver' as const }
           useGameStore.setState({ gameState: gs })
-          addCombatLog(`GAME OVER: ${winner} wins by remaining health!`)
-          finalizeGame(winner, 'Round limit reached', gs)
+          addCombatLog(`GAME OVER: ${winnerLabel} wins by remaining health!`)
+          finalizeGame(winnerLabel, 'Round limit reached', gs)
           setAIState(prev => ({ ...prev, phase: 'idle', activeFigure: null }))
           loopStarted.current = false
           return
@@ -596,6 +597,6 @@ function describeActionV2(action: GameAction, gs: GameState): string {
       return `Interact with objective (${objId})`
     }
     default:
-      return (action as any).type
+      return action.type
   }
 }
