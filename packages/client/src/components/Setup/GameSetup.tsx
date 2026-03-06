@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useGameStore } from '../../store/game-store'
+import { useTutorialStore } from '../../store/tutorial-store'
 import type { Player, MapConfig, MapSizePreset, CampaignDifficulty, MissionDefinition } from '@engine/types.js'
 import { MAP_PRESETS, BOARD_SIZE } from '@engine/types.js'
 import { t, mixins } from '../../styles/theme'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { listSaveSlots, migrateLegacySave, type SaveSlotMeta } from '../../services/save-slots'
+import { SettingsModal } from './SettingsModal'
 
 // Import mission data for the skirmish mission picker
 import mission1Data from '@data/missions/act1-mission1-arrival.json'
@@ -33,8 +36,13 @@ export const GameSetup: React.FC = () => {
   const [playPath, setPlayPath] = useState<PlayPath>('skirmish')
   const [selectedMissionId, setSelectedMissionId] = useState<string>(ALL_MISSIONS[0]?.id ?? '')
 
+  const [showSaveSlots, setShowSaveSlots] = useState(false)
+  const [saveSlots, setSaveSlots] = useState<SaveSlotMeta[]>([])
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
+  const [showSettings, setShowSettings] = useState(false)
+
   const { isMobile } = useIsMobile()
-  const { initGame, startHeroCreation, startCampaign, loadCampaignFromStorage, openCombatArena } = useGameStore()
+  const { initGame, startHeroCreation, startCampaign, loadCampaignFromStorage, loadCampaignFromSlot, deleteSaveSlot, openCombatArena, openMapEditor } = useGameStore()
 
   // When AI Battle is selected, force skirmish path
   useEffect(() => {
@@ -90,6 +98,17 @@ export const GameSetup: React.FC = () => {
   const handleCreateHeroes = () => {
     startHeroCreation(buildPlayers(), getMapConfig())
   }
+
+  const handleStartTutorial = useCallback(() => {
+    // Start a quick skirmish game with default units, then activate the tutorial
+    const players: Player[] = [
+      { id: 0, name: 'Empire', side: 'imperial', isAI: true },
+      { id: 1, name: 'You', side: 'operative', isAI: false },
+    ]
+    const tutorialMap: MapConfig = { preset: 'skirmish', boardsWide: 3, boardsTall: 3 }
+    initGame(players, tutorialMap)
+    useTutorialStore.getState().startTutorial()
+  }, [initGame])
 
   // Mini board preview
   const previewWidth = 160
@@ -165,9 +184,133 @@ export const GameSetup: React.FC = () => {
     </div>
   )
 
+  const refreshSaveSlots = () => {
+    migrateLegacySave()
+    setSaveSlots(listSaveSlots())
+  }
+
+  const handleContinueCampaign = () => {
+    refreshSaveSlots()
+    const slots = listSaveSlots()
+    if (slots.length === 0) {
+      // Try legacy load as fallback
+      const loaded = loadCampaignFromStorage()
+      if (!loaded) alert('No saved campaign found.')
+      return
+    }
+    if (slots.length === 1) {
+      // Single save -- load directly
+      loadCampaignFromSlot(slots[0].slotId)
+      return
+    }
+    setShowSaveSlots(true)
+  }
+
+  const handleDeleteSlot = (slotId: number) => {
+    deleteSaveSlot(slotId)
+    setDeleteConfirm(null)
+    refreshSaveSlots()
+    if (saveSlots.length <= 1) setShowSaveSlots(false)
+  }
+
+  const formatSlotDate = (iso: string) => {
+    try {
+      const d = new Date(iso)
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
+        ' ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+    } catch { return iso }
+  }
+
+  const renderSaveSlotList = () => (
+    <div>
+      <div style={{ fontSize: t.textSm, color: t.textSecondary, marginBottom: '8px' }}>
+        Select a save to continue:
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '240px', overflowY: 'auto' }}>
+        {saveSlots.map(slot => (
+          <div
+            key={slot.slotId}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 12px',
+              backgroundColor: '#131320',
+              border: '1px solid #333355',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              transition: 'border-color 0.15s',
+            }}
+            onClick={() => loadCampaignFromSlot(slot.slotId)}
+          >
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {slot.slotId === 0 && (
+                  <span style={{ fontSize: '9px', color: '#44ff44', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    AUTO
+                  </span>
+                )}
+                <span style={{ color: '#ffd966', fontWeight: 'bold', fontSize: '13px' }}>
+                  {slot.campaignName}
+                </span>
+              </div>
+              <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>
+                Act {slot.currentAct} | {slot.missionsPlayed} missions | {slot.heroNames.join(', ')} | {slot.credits} cr
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ fontSize: '10px', color: '#666' }}>{formatSlotDate(slot.savedAt)}</div>
+              <div style={{ fontSize: '10px', color: '#888', textTransform: 'capitalize' }}>{slot.difficulty}</div>
+            </div>
+            {deleteConfirm === slot.slotId ? (
+              <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                <button
+                  style={{ ...mixins.buttonPrimary, padding: '4px 8px', fontSize: '10px', backgroundColor: '#ff4444', color: '#fff' }}
+                  onClick={(e) => { e.stopPropagation(); handleDeleteSlot(slot.slotId) }}
+                >
+                  YES
+                </button>
+                <button
+                  style={{ ...mixins.buttonPrimary, padding: '4px 8px', fontSize: '10px', backgroundColor: '#333' }}
+                  onClick={(e) => { e.stopPropagation(); setDeleteConfirm(null) }}
+                >
+                  NO
+                </button>
+              </div>
+            ) : (
+              <button
+                style={{
+                  background: 'none',
+                  border: '1px solid #333355',
+                  color: '#666',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  fontSize: '10px',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+                onClick={(e) => { e.stopPropagation(); setDeleteConfirm(slot.slotId) }}
+              >
+                DEL
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+      <button
+        style={{ ...mixins.buttonGhost, width: '100%', marginTop: '6px', fontSize: '11px' }}
+        onClick={() => { setShowSaveSlots(false); setDeleteConfirm(null) }}
+      >
+        BACK
+      </button>
+    </div>
+  )
+
   const renderCampaignPath = () => (
     <div style={mixins.tabContent}>
-      {!showCampaignDifficulty ? (
+      {showSaveSlots ? (
+        renderSaveSlotList()
+      ) : !showCampaignDifficulty ? (
         <div>
           <div style={{ fontSize: t.textSm, color: t.textSecondary, marginBottom: '12px' }}>
             Liberation of the Tangrene Sector -- a 4-mission campaign with branching paths,
@@ -192,12 +335,7 @@ export const GameSetup: React.FC = () => {
                 border: `2px solid ${t.accentOrange}`,
                 flex: 1,
               }}
-              onClick={() => {
-                const loaded = loadCampaignFromStorage()
-                if (!loaded) {
-                  alert('No saved campaign found.')
-                }
-              }}
+              onClick={handleContinueCampaign}
             >
               CONTINUE CAMPAIGN
             </button>
@@ -209,24 +347,34 @@ export const GameSetup: React.FC = () => {
             Liberation of the Tangrene Sector (4 missions)
           </div>
           <div style={{ display: 'flex', gap: '6px' }}>
-            {(['standard', 'veteran', 'legendary'] as CampaignDifficulty[]).map(diff => (
-              <button
-                key={diff}
-                style={{
-                  ...mixins.buttonPrimary,
-                  flex: 1,
-                  backgroundColor: diff === 'standard' ? t.accentGreen : diff === 'veteran' ? '#ffaa00' : t.accentRed,
-                  color: '#000',
-                  fontSize: '11px',
-                }}
-                onClick={() => {
-                  setShowCampaignDifficulty(false)
-                  startCampaign(diff)
-                }}
-              >
-                {diff.toUpperCase()}
-              </button>
-            ))}
+            {(['standard', 'veteran', 'legendary'] as CampaignDifficulty[]).map(diff => {
+              const desc: Record<string, string> = {
+                standard: 'Base threat, forgiving economy',
+                veteran: '+2 threat/round, tougher enemies',
+                legendary: '+4 threat/round, elite scaling',
+              }
+              return (
+                <button
+                  key={diff}
+                  style={{
+                    ...mixins.buttonPrimary,
+                    flex: 1,
+                    backgroundColor: diff === 'standard' ? t.accentGreen : diff === 'veteran' ? '#ffaa00' : t.accentRed,
+                    color: '#000',
+                    fontSize: '11px',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                  onClick={() => {
+                    setShowCampaignDifficulty(false)
+                    startCampaign(diff)
+                  }}
+                >
+                  <span style={{ fontWeight: 'bold' }}>{diff.toUpperCase()}</span>
+                  <span style={{ fontSize: '8px', opacity: 0.7 }}>{desc[diff]}</span>
+                </button>
+              )
+            })}
           </div>
           <button
             style={{
@@ -444,8 +592,32 @@ export const GameSetup: React.FC = () => {
         maxWidth: isMobile ? '100%' : '600px',
         width: '100%',
         textAlign: 'center',
+        position: 'relative',
         ...(isMobile ? { padding: '20px 16px', borderRadius: t.radiusMd, margin: '0 8px' } : {}),
       }}>
+        {/* Settings gear */}
+        <button
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            background: 'none',
+            border: 'none',
+            color: t.textMuted,
+            cursor: 'pointer',
+            fontSize: '18px',
+            padding: '4px',
+            lineHeight: 1,
+          }}
+          onClick={() => setShowSettings(true)}
+          title="Settings"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+
         <div style={{
           fontSize: isMobile ? t.text2xl : t.text3xl,
           fontWeight: 'bold',
@@ -462,7 +634,39 @@ export const GameSetup: React.FC = () => {
         {renderGameModeSelector()}
         {renderPathTabs()}
         {playPath === 'campaign' ? renderCampaignPath() : renderSkirmishPath()}
+
+        {/* Tutorial & Map Editor buttons */}
+        <div style={{ marginTop: '16px', borderTop: '1px solid #2a2a3f', paddingTop: '16px', display: 'flex', gap: t.spaceSm, flexDirection: isMobile ? 'column' : 'row' }}>
+          <button
+            style={{
+              ...mixins.buttonPrimary,
+              flex: 1,
+              backgroundColor: '#1a2a3a',
+              color: '#4a9eff',
+              border: '1px solid #333355',
+              fontSize: t.textSm,
+            }}
+            onClick={handleStartTutorial}
+          >
+            TUTORIAL
+          </button>
+          <button
+            style={{
+              ...mixins.buttonPrimary,
+              flex: 1,
+              backgroundColor: '#1a2a3a',
+              color: '#ff9944',
+              border: '1px solid #333355',
+              fontSize: t.textSm,
+            }}
+            onClick={openMapEditor}
+          >
+            MAP EDITOR
+          </button>
+        </div>
       </div>
+
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
     </div>
   )
 }

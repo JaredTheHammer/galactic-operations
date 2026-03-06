@@ -47,6 +47,18 @@
       "baseValue": 3,
       "diminishingReturns": false,
       "price": 15
+    },
+    "bacta-infusion": {
+      "id": "bacta-infusion",
+      "name": "Bacta Infusion",
+      "description": "Premium bacta compound in a pressurized applicator. Provides superior wound recovery compared to standard stim packs.",
+      "targetType": "organic",
+      "effect": "heal_wounds",
+      "baseValue": 8,
+      "skillUsed": "medicine",
+      "characteristicUsed": "intellect",
+      "diminishingReturns": true,
+      "price": 400
     }
   }
 }

@@ -12,6 +12,7 @@ import { getCampaignStats } from '../../../../engine/src/campaign-v2'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
 import { usePortraitStore } from '../../store/portrait-store'
+import { listSaveSlots, MAX_SLOTS, findEmptySlot, type SaveSlotMeta } from '../../services/save-slots'
 
 // ============================================================================
 // STYLES
@@ -158,6 +159,113 @@ function CampaignStatsPanel({ campaign }: { campaign: CampaignState }) {
         <div>Threat Level: {campaign.threatLevel}</div>
         <div>Difficulty: {campaign.difficulty}</div>
       </div>
+    </div>
+  )
+}
+
+const factionDisplayNames: Record<string, string> = {
+  underworld: 'Underworld',
+  mandalorian: 'Mandalorians',
+  rebel: 'Rebel Alliance',
+  imperial: 'Empire',
+  hutt: 'Hutt Cartel',
+}
+
+function FactionReputationPanel({ reputation }: { reputation: Record<string, number> }) {
+  const entries = Object.entries(reputation)
+  if (entries.length === 0) return null
+
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <h3 style={{ color: '#4a9eff', margin: '0 0 8px 0', fontSize: '14px' }}>Faction Standing</h3>
+      {entries.map(([factionId, value]) => {
+        const name = factionDisplayNames[factionId] ?? factionId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+        const color = value > 0 ? '#44ff44' : value < 0 ? '#ff4444' : '#888'
+        const sign = value > 0 ? '+' : ''
+        // Bar: map value to a visual width (-10 to +10 range)
+        const barWidth = Math.min(Math.abs(value) * 10, 100)
+        const barColor = value > 0 ? '#44ff4440' : '#ff444440'
+        const barAlign = value >= 0 ? 'left' : 'right'
+        return (
+          <div key={factionId} style={{
+            padding: '6px 8px',
+            marginBottom: '4px',
+            backgroundColor: '#0a0a1a',
+            borderRadius: '4px',
+            fontSize: '12px',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              [barAlign]: 0,
+              bottom: 0,
+              width: `${barWidth}%`,
+              backgroundColor: barColor,
+              transition: 'width 0.3s',
+            }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
+              <span style={{ color: '#ccc' }}>{name}</span>
+              <span style={{ color, fontWeight: 'bold' }}>{sign}{value}</span>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function InventoryPanel({ campaign }: { campaign: CampaignState }) {
+  const narrativeItems = campaign.narrativeItems ?? []
+  const consumables = Object.entries(campaign.consumableInventory ?? {}).filter(([, qty]) => qty > 0)
+
+  if (narrativeItems.length === 0 && consumables.length === 0) return null
+
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <h3 style={{ color: '#4a9eff', margin: '0 0 8px 0', fontSize: '14px' }}>Inventory</h3>
+      {consumables.length > 0 && (
+        <div style={{ marginBottom: narrativeItems.length > 0 ? '8px' : '0' }}>
+          {consumables.map(([id, qty]) => {
+            const name = id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+            return (
+              <div key={id} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '4px 8px',
+                marginBottom: '2px',
+                backgroundColor: '#0a0a1a',
+                borderRadius: '3px',
+                fontSize: '11px',
+              }}>
+                <span style={{ color: '#ff6644' }}>{name}</span>
+                <span style={{ color: '#888' }}>x{qty}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      {narrativeItems.length > 0 && (
+        <div>
+          <div style={{ fontSize: '10px', color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>Intel & Items</div>
+          {narrativeItems.map((item, i) => {
+            const name = item.replace(/^(item:|info:)/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+            return (
+              <div key={i} style={{
+                padding: '3px 8px',
+                marginBottom: '2px',
+                backgroundColor: '#0a0a1a',
+                borderRadius: '3px',
+                fontSize: '11px',
+                color: '#cc77ff',
+              }}>
+                {name}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -486,13 +594,18 @@ export default function MissionSelect() {
   const {
     campaignState,
     campaignMissions,
-    startCampaignMission,
+    gameData,
+    showMissionBriefingScreen,
     saveCampaignToStorage,
+    saveCampaignToSlot,
+    activeSaveSlot,
     loadImportedCampaign,
     exitCampaign,
     openSocialPhase,
     openHeroProgression,
     openPortraitManager,
+    openCampaignStats,
+    openCampaignJournal,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -501,6 +614,7 @@ export default function MissionSelect() {
   const [exportFlash, setExportFlash] = useState(false)
   const [importStatus, setImportStatus] = useState<string | null>(null)
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [showSaveSlotPicker, setShowSaveSlotPicker] = useState(false)
   const importInputRef = useRef<HTMLInputElement>(null)
 
   // Auto-select first available mission
@@ -536,7 +650,7 @@ export default function MissionSelect() {
 
   const handleLaunchMission = () => {
     if (!selectedMissionId) return
-    startCampaignMission(selectedMissionId)
+    showMissionBriefingScreen(selectedMissionId)
   }
 
   const handleSave = () => {
@@ -649,17 +763,101 @@ export default function MissionSelect() {
             PORTRAITS
           </button>
           <button
-            style={{
-              ...buttonStyle,
-              backgroundColor: saveFlash ? '#44ff44' : '#2a4a2a',
-              color: saveFlash ? '#000' : '#44ff44',
-              transition: 'all 0.3s',
-              flex: isMobile ? '1 1 auto' : undefined,
-            }}
-            onClick={handleSave}
+            style={{ ...buttonStyle, backgroundColor: '#1a2a3a', color: '#cc8800', flex: isMobile ? '1 1 auto' : undefined }}
+            onClick={openCampaignJournal}
           >
-            {saveFlash ? '\u2714 SAVED!' : 'SAVE CAMPAIGN'}
+            JOURNAL
           </button>
+          <button
+            style={{ ...buttonStyle, backgroundColor: '#1a2a3a', color: '#4a9eff', flex: isMobile ? '1 1 auto' : undefined }}
+            onClick={openCampaignStats}
+          >
+            STATS
+          </button>
+          <div style={{ position: 'relative', flex: isMobile ? '1 1 auto' : undefined, display: 'flex', gap: '2px' }}>
+            <button
+              style={{
+                ...buttonStyle,
+                backgroundColor: saveFlash ? '#44ff44' : '#2a4a2a',
+                color: saveFlash ? '#000' : '#44ff44',
+                transition: 'all 0.3s',
+                flex: 1,
+                borderTopRightRadius: '0',
+                borderBottomRightRadius: '0',
+              }}
+              onClick={handleSave}
+            >
+              {saveFlash ? '\u2714 SAVED!' : activeSaveSlot != null ? `SAVE (SLOT ${activeSaveSlot})` : 'SAVE'}
+            </button>
+            <button
+              style={{
+                ...buttonStyle,
+                backgroundColor: '#2a4a2a',
+                color: '#44ff44',
+                borderTopLeftRadius: '0',
+                borderBottomLeftRadius: '0',
+                padding: '10px 8px',
+                fontSize: '10px',
+              }}
+              onClick={() => setShowSaveSlotPicker(!showSaveSlotPicker)}
+            >
+              {'\u25BC'}
+            </button>
+            {showSaveSlotPicker && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '4px',
+                backgroundColor: '#131320',
+                border: '1px solid #333355',
+                borderRadius: '6px',
+                padding: '6px',
+                zIndex: 100,
+                minWidth: '180px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+              }}>
+                {Array.from({ length: MAX_SLOTS }, (_, i) => i).map(slotId => {
+                  const existing = listSaveSlots().find(s => s.slotId === slotId)
+                  return (
+                    <button
+                      key={slotId}
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        padding: '8px 10px',
+                        backgroundColor: activeSaveSlot === slotId ? '#1a2a1a' : 'transparent',
+                        border: 'none',
+                        borderRadius: '4px',
+                        color: '#ccc',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '11px',
+                      }}
+                      onClick={() => {
+                        saveCampaignToSlot(slotId)
+                        setShowSaveSlotPicker(false)
+                        setSaveFlash(true)
+                        setTimeout(() => setSaveFlash(false), 2000)
+                      }}
+                    >
+                      <span style={{ color: '#44ff44', fontWeight: 'bold' }}>
+                        {slotId === 0 ? 'Auto' : `Slot ${slotId}`}
+                      </span>
+                      {existing && (
+                        <span style={{ color: '#666', marginLeft: '8px' }}>
+                          {existing.campaignName} (Act {existing.currentAct})
+                        </span>
+                      )}
+                      {!existing && (
+                        <span style={{ color: '#555', marginLeft: '8px' }}>Empty</span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
           <button
             style={{
               ...buttonStyle,
@@ -722,6 +920,12 @@ export default function MissionSelect() {
         {/* Left sidebar: hero roster + stats + history */}
         <div style={sidebarResponsive}>
           <CampaignStatsPanel campaign={campaignState} />
+
+          {campaignState.factionReputation && Object.keys(campaignState.factionReputation).length > 0 && (
+            <FactionReputationPanel reputation={campaignState.factionReputation} />
+          )}
+
+          <InventoryPanel campaign={campaignState} />
 
           <MissionHistoryPanel
             missions={campaignState.completedMissions}
@@ -816,6 +1020,88 @@ export default function MissionSelect() {
                       )
                     })}
 
+                    {/* Enemy composition intel */}
+                    {selectedMission.initialEnemies.length > 0 && (
+                      <div style={{ marginTop: '16px' }}>
+                        <div style={{ fontSize: '12px', color: '#888', marginBottom: '6px' }}>
+                          <strong style={{ color: '#ff6b6b' }}>Enemy Intel:</strong>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {selectedMission.initialEnemies.map((group, idx) => {
+                            const profile = gameData?.npcProfiles?.[group.npcProfileId]
+                            const name = profile?.name ?? group.npcProfileId
+                            const tier = profile?.tier
+                            const tierColor = tier === 'Nemesis' ? '#ff4444'
+                              : tier === 'Rival' ? '#ffaa00'
+                              : tier === 'Elite' ? '#cc77ff'
+                              : '#888'
+                            return (
+                              <span key={idx} style={{
+                                padding: '3px 8px',
+                                backgroundColor: '#1a0a0a',
+                                border: `1px solid ${tierColor}40`,
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                color: tierColor,
+                              }}>
+                                {group.count > 1 ? `${group.count}x ` : ''}{name}
+                                {tier && tier !== 'Minion' && (
+                                  <span style={{ fontSize: '9px', opacity: 0.7, marginLeft: '3px' }}>
+                                    [{tier}]
+                                  </span>
+                                )}
+                              </span>
+                            )
+                          })}
+                        </div>
+                        {selectedMission.reinforcements.length > 0 && (
+                          <div style={{
+                            fontSize: '10px',
+                            color: '#f97316',
+                            marginTop: '4px',
+                            fontStyle: 'italic',
+                          }}>
+                            + {selectedMission.reinforcements.length} reinforcement wave{selectedMission.reinforcements.length > 1 ? 's' : ''} (threat-based)
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Loot preview */}
+                    {selectedMission.lootTokens.length > 0 && (
+                      <div style={{ marginTop: '12px' }}>
+                        <div style={{ fontSize: '12px', color: '#888', marginBottom: '6px' }}>
+                          <strong style={{ color: '#ffd700' }}>Loot Available:</strong>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {selectedMission.lootTokens.map((loot, idx) => {
+                            const r = loot.reward
+                            const label = r.type === 'xp' ? `${r.value} XP`
+                              : r.type === 'credits' ? `${r.value} Cr`
+                              : r.type === 'equipment' ? r.itemId.replace(/-/g, ' ')
+                              : r.type === 'narrative' ? r.description
+                              : '???'
+                            const color = r.type === 'xp' ? '#44ff44'
+                              : r.type === 'credits' ? '#ffd700'
+                              : r.type === 'equipment' ? '#ff6644'
+                              : '#cc77ff'
+                            return (
+                              <span key={idx} style={{
+                                padding: '2px 7px',
+                                backgroundColor: '#0a0a1a',
+                                border: `1px solid ${color}30`,
+                                borderRadius: '3px',
+                                fontSize: '11px',
+                                color,
+                              }}>
+                                {label}
+                              </span>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     <div style={{ marginTop: '16px', fontSize: '12px', color: '#888' }}>
                       <div style={{ marginBottom: '4px' }}>
                         Recommended heroes: {selectedMission.recommendedHeroCount}
@@ -830,10 +1116,33 @@ export default function MissionSelect() {
                         )}
                       </div>
                       <div>
-                        Map: {selectedMission.boardsWide}x{selectedMission.boardsTall} boards \u2022
-                        Threat: {selectedMission.imperialThreat}
+                        Map: {selectedMission.boardsWide}x{selectedMission.boardsTall} boards {'\u2022'}
+                        Threat: {selectedMission.imperialThreat} {'\u2022'}
+                        Base XP: {selectedMission.baseXP}
                       </div>
                     </div>
+
+                    {/* Companion deployment info */}
+                    {campaignState.companions && campaignState.companions.length > 0 && (
+                      <div style={{ marginTop: '12px', fontSize: '12px' }}>
+                        <strong style={{ color: '#44ff44' }}>Companions deploying:</strong>
+                        <div style={{ marginTop: '4px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          {campaignState.companions.map(id => (
+                            <span key={id} style={{
+                              padding: '3px 8px',
+                              backgroundColor: '#0a2a1a',
+                              border: '1px solid #44ff4440',
+                              borderRadius: '4px',
+                              color: '#44ff44',
+                              fontSize: '11px',
+                              fontWeight: 'bold',
+                            }}>
+                              {id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <button
                       style={{

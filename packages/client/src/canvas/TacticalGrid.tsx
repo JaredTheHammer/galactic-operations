@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { TacticalGridRenderer, TILE_SIZE } from './renderer'
 import { Camera } from './camera'
+import { combatAnimations } from './animation-manager'
 import { useGameStore } from '../store/game-store'
 import { usePortraitStore } from '../store/portrait-store'
 import type { GridCoordinate } from '@engine/types.js'
 import { getThumbnail } from '../services'
+import { sharedCamera } from './camera-state'
 
 interface TacticalGridProps {
   gameState: any
@@ -27,6 +29,13 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
     highlightedTile,
     aiMovePath,
     aiAttackTarget,
+    attackRange,
+    playerMovePath,
+    playerMovePathCost,
+    movePreviewTargets,
+    threateningEnemies,
+    cameraTarget,
+    setCameraTarget,
   } = useGameStore()
 
   // Initialize renderer and camera
@@ -38,6 +47,7 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
     const camera = new Camera()
 
     renderer.init(canvas)
+    renderer.setAnimationManager(combatAnimations)
     if (gameState?.map) {
       const mapWidthPx = gameState.map.width * TILE_SIZE
       const mapHeightPx = gameState.map.height * TILE_SIZE
@@ -51,6 +61,14 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
 
     setIsInitialized(true)
   }, [isInitialized])
+
+  // Pan camera to target when cameraTarget changes
+  useEffect(() => {
+    if (!cameraTarget || !cameraRef.current) return
+    cameraRef.current.centerOn(cameraTarget, TILE_SIZE, true)
+    // Clear the target so it doesn't re-trigger
+    setCameraTarget(null)
+  }, [cameraTarget, setCameraTarget])
 
   // Handle window resize
   useEffect(() => {
@@ -70,6 +88,31 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
     usePortraitStore.getState().hydrate()
   }, [])
 
+  // Arrow key camera panning
+  const pressedKeysRef = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    const PAN_KEYS = new Set(['arrowup', 'arrowdown', 'arrowleft', 'arrowright'])
+    const onKeyDown = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase()
+      if (PAN_KEYS.has(key)) {
+        e.preventDefault()
+        pressedKeysRef.current.add(key)
+      }
+    }
+    const onKeyUp = (e: KeyboardEvent) => {
+      pressedKeysRef.current.delete(e.key.toLowerCase())
+    }
+    const onBlur = () => pressedKeysRef.current.clear()
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('blur', onBlur)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('blur', onBlur)
+    }
+  }, [])
+
   // Animation frame loop
   useEffect(() => {
     let animationId: number
@@ -77,10 +120,31 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
     const animate = () => {
       if (!rendererRef.current || !cameraRef.current || !gameState) return
 
+      // Apply arrow key panning (pixels per frame at zoom=1)
+      const PAN_SPEED = 8
+      const keys = pressedKeysRef.current
+      if (keys.size > 0) {
+        let dx = 0, dy = 0
+        if (keys.has('arrowleft')) dx += PAN_SPEED
+        if (keys.has('arrowright')) dx -= PAN_SPEED
+        if (keys.has('arrowup')) dy += PAN_SPEED
+        if (keys.has('arrowdown')) dy -= PAN_SPEED
+        if (dx !== 0 || dy !== 0) cameraRef.current.panBy(dx, dy)
+      }
+
       // Update camera
       cameraRef.current.update()
       const cameraState = cameraRef.current.getState()
       rendererRef.current.setCamera(cameraState.x, cameraState.y, cameraState.zoom)
+
+      // Share camera state for minimap
+      sharedCamera.x = cameraState.x
+      sharedCamera.y = cameraState.y
+      sharedCamera.zoom = cameraState.zoom
+      if (canvasRef.current) {
+        sharedCamera.canvasWidth = canvasRef.current.width
+        sharedCamera.canvasHeight = canvasRef.current.height
+      }
 
       // Collect portrait bitmaps from the in-memory cache for all figures.
       // This is synchronous (cache hits only) -- async loading is handled
@@ -122,6 +186,11 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
         currentActivatingId: currentFigure?.id || null,
         aiMovePath,
         aiAttackTarget,
+        attackRange,
+        playerMovePath,
+        playerMovePathCost,
+        movePreviewTargets,
+        threateningEnemies,
       })
 
       animationId = requestAnimationFrame(animate)
@@ -129,7 +198,7 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
 
     animationId = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(animationId)
-  }, [gameState, selectedFigureId, validMoves, validTargets, highlightedTile, aiMovePath, aiAttackTarget])
+  }, [gameState, selectedFigureId, validMoves, validTargets, highlightedTile, aiMovePath, aiAttackTarget, attackRange, playerMovePath, playerMovePathCost, movePreviewTargets, threateningEnemies])
 
   // Async portrait loading: when game state changes, ensure thumbnails
   // are loaded into the LRU cache. Once cached, the synchronous getThumbnail()
@@ -228,13 +297,40 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
           hovered ? { x: e.clientX, y: e.clientY } : undefined,
         )
       }
+
+      // Check if hovering over a figure for tooltip
+      const figures = gameState?.figures
+      if (figures) {
+        const hoveredFig = figures.find(
+          (f: any) => f.position.x === gridCoord.x && f.position.y === gridCoord.y && !f.isDefeated
+        )
+        useGameStore.getState().setHoveredFigure(
+          hoveredFig ? hoveredFig.id : null,
+          hoveredFig ? { x: e.clientX, y: e.clientY } : undefined,
+        )
+      }
+
+      // Set hovered tile for terrain tooltip (only when no figure is hovered)
+      const hasFigure = figures?.some(
+        (f: any) => f.position.x === gridCoord.x && f.position.y === gridCoord.y && !f.isDefeated
+      )
+      if (!hasFigure) {
+        useGameStore.getState().setHoveredTile(
+          gridCoord,
+          { x: e.clientX, y: e.clientY },
+        )
+      } else {
+        useGameStore.getState().setHoveredTile(null)
+      }
     },
-    [setHighlightedTile, gameState?.objectivePoints]
+    [setHighlightedTile, gameState?.objectivePoints, gameState?.figures]
   )
 
   const handleCanvasMouseLeave = useCallback(() => {
     setHighlightedTile(null)
     useGameStore.getState().setHoveredObjective(null)
+    useGameStore.getState().setHoveredFigure(null)
+    useGameStore.getState().setHoveredTile(null)
   }, [setHighlightedTile])
 
   // Handle wheel zoom

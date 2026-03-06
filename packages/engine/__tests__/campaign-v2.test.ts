@@ -1026,6 +1026,96 @@ describe('Objective Evaluation', () => {
 });
 
 // ============================================================================
+// ESCORT OBJECTIVE
+// ============================================================================
+
+describe('Escort Objective Evaluation', () => {
+  it('returns true when escort target is alive and in extraction zone', () => {
+    const obj: MissionObjective = {
+      id: 'obj-escort', type: 'escort', side: 'Operative',
+      description: 'Escort the defector to extraction',
+      targetId: 'defector-npc',
+      zoneCoordinates: [{ x: 0, y: 0 }, { x: 1, y: 0 }],
+      priority: 'primary', xpReward: 50,
+    };
+    const gs = makeMinimalGameState([
+      makeFigure({ id: 'hero-1', entityType: 'hero', playerId: 1 }),
+      makeFigure({ id: 'escort-1', entityType: 'npc', entityId: 'defector-npc', playerId: 1, position: { x: 0, y: 0 } }),
+    ]);
+    expect(evaluateObjective(obj, gs, [], [])).toBe(true);
+  });
+
+  it('returns false when escort target is alive but not in zone', () => {
+    const obj: MissionObjective = {
+      id: 'obj-escort', type: 'escort', side: 'Operative',
+      description: 'Escort the defector',
+      targetId: 'defector-npc',
+      zoneCoordinates: [{ x: 0, y: 0 }],
+      priority: 'primary', xpReward: 50,
+    };
+    const gs = makeMinimalGameState([
+      makeFigure({ id: 'escort-1', entityType: 'npc', entityId: 'defector-npc', playerId: 1, position: { x: 5, y: 5 } }),
+    ]);
+    expect(evaluateObjective(obj, gs, [], [])).toBe(false);
+  });
+
+  it('returns false when escort target is defeated', () => {
+    const obj: MissionObjective = {
+      id: 'obj-escort', type: 'escort', side: 'Operative',
+      description: 'Escort the defector',
+      targetId: 'defector-npc',
+      zoneCoordinates: [{ x: 0, y: 0 }],
+      priority: 'primary', xpReward: 50,
+    };
+    const gs = makeMinimalGameState([
+      makeFigure({ id: 'escort-1', entityType: 'npc', entityId: 'defector-npc', playerId: 1, position: { x: 0, y: 0 }, isDefeated: true }),
+    ]);
+    expect(evaluateObjective(obj, gs, [], [])).toBe(false);
+  });
+
+  it('returns false when no zoneCoordinates defined', () => {
+    const obj: MissionObjective = {
+      id: 'obj-escort', type: 'escort', side: 'Operative',
+      description: 'Escort the defector',
+      targetId: 'defector-npc',
+      priority: 'primary', xpReward: 50,
+    };
+    const gs = makeMinimalGameState([
+      makeFigure({ id: 'escort-1', entityType: 'npc', entityId: 'defector-npc', playerId: 1 }),
+    ]);
+    expect(evaluateObjective(obj, gs, [], [])).toBe(false);
+  });
+
+  it('returns false when no targetId defined', () => {
+    const obj: MissionObjective = {
+      id: 'obj-escort', type: 'escort', side: 'Operative',
+      description: 'Escort someone',
+      zoneCoordinates: [{ x: 0, y: 0 }],
+      priority: 'primary', xpReward: 50,
+    };
+    const gs = makeMinimalGameState([
+      makeFigure({ id: 'escort-1', entityType: 'npc', entityId: 'defector-npc', playerId: 1, position: { x: 0, y: 0 } }),
+    ]);
+    expect(evaluateObjective(obj, gs, [], [])).toBe(false);
+  });
+
+  it('returns false when escort target not on board', () => {
+    const obj: MissionObjective = {
+      id: 'obj-escort', type: 'escort', side: 'Operative',
+      description: 'Escort the defector',
+      targetId: 'defector-npc',
+      zoneCoordinates: [{ x: 0, y: 0 }],
+      priority: 'primary', xpReward: 50,
+    };
+    // No figure with entityId 'defector-npc' on board
+    const gs = makeMinimalGameState([
+      makeFigure({ id: 'hero-1', entityType: 'hero', playerId: 1, position: { x: 0, y: 0 } }),
+    ]);
+    expect(evaluateObjective(obj, gs, [], [])).toBe(false);
+  });
+});
+
+// ============================================================================
 // VICTORY CONDITIONS
 // ============================================================================
 

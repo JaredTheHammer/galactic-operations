@@ -22,10 +22,13 @@ import type {
   HeroCharacter,
   NPCProfile,
   OpposedRollResult,
+  TacticCard,
   WeaponDefinition,
   WeaponQuality,
   YahtzeeCombo,
 } from './types';
+
+import { applyTacticCards, aiSelectTacticCards, playCard } from './tactic-cards.js';
 
 import {
   buildAttackPool,
@@ -59,6 +62,12 @@ import {
   applyGuardianTransfer,
   applyArmorKeyword,
 } from './keywords';
+
+import {
+  getSpeciesAttackBonus,
+  getSpeciesWoundedMeleeBonus,
+  getSpeciesSoakBonus,
+} from './species-abilities';
 
 // ============================================================================
 // HELPER: RESOLVE ENTITY BACKING A FIGURE
@@ -176,7 +185,10 @@ function computeSoak(
   // Talent soak bonuses (Enduring, Armor Master)
   const talentSoak = getTalentSoakBonus(entity, gameData);
 
-  return brawn + resilienceRank + armorSoak + talentSoak;
+  // Species soak bonus (e.g., Droid Enduring Chassis: +1 soak)
+  const speciesSoak = isHero(entity) ? getSpeciesSoakBonus(entity, gameData) : 0;
+
+  return brawn + resilienceRank + armorSoak + talentSoak + speciesSoak;
 }
 
 /**
@@ -322,6 +334,12 @@ export function buildCombatPools(
     };
     const atkMods = getPassiveAttackPoolModifiers(attackerEntity, gameData, talentCtx);
     attackPool = applyTalentAttackPoolModifiers(attackPool, atkMods);
+
+    // Species attack pool bonus (e.g., Rodian Expert Tracker: +1 on first attack)
+    const speciesAtkBonus = getSpeciesAttackBonus(attacker, attackerEntity, gameData);
+    if (speciesAtkBonus > 0) {
+      attackPool = { ...attackPool, ability: attackPool.ability + speciesAtkBonus };
+    }
   }
 
   // --- DEFENSE POOL ---
@@ -750,6 +768,41 @@ export function resolveCombatV2(
     };
   }
 
+  // 3d. Apply tactic cards (if deck is active)
+  let tacticPierce = 0;
+  let tacticSuppression = 0;
+  let tacticRecover = 0;
+  let tacticCardsPlayedAll: string[] = [];
+  if (gameState.tacticDeck && gameData.tacticCards) {
+    // Determine sides
+    const attackerPlayer = gameState.players.find(p => p.id === attacker.playerId);
+    const defenderPlayer = gameState.players.find(p => p.id === defender.playerId);
+    const attackerSide = attackerPlayer?.role ?? 'Imperial';
+    const defenderSide = defenderPlayer?.role ?? 'Imperial';
+
+    // AI selects cards for both sides (player cards come from scenario.attackerTacticCards/defenderTacticCards)
+    const attackerCardIds = scenario.attackerTacticCards
+      ?? aiSelectTacticCards(gameState.tacticDeck, gameData, attackerSide, 'attacker', rollResult);
+    const defenderCardIds = scenario.defenderTacticCards
+      ?? aiSelectTacticCards(gameState.tacticDeck, gameData, defenderSide, 'defender', rollResult);
+
+    const attackerCards = attackerCardIds
+      .map(id => gameData.tacticCards![id])
+      .filter((c): c is TacticCard => !!c);
+    const defenderCards = defenderCardIds
+      .map(id => gameData.tacticCards![id])
+      .filter((c): c is TacticCard => !!c);
+
+    if (attackerCards.length > 0 || defenderCards.length > 0) {
+      const tacticResult = applyTacticCards(rollResult, [...attackerCards], [...defenderCards]);
+      rollResult = tacticResult.rollResult;
+      tacticPierce = tacticResult.tacticPierce;
+      tacticSuppression = tacticResult.tacticSuppression;
+      tacticRecover = tacticResult.tacticRecover;
+      tacticCardsPlayedAll = [...attackerCardIds, ...defenderCardIds];
+    }
+  }
+
   // 4. Get attacker brawn for melee damage bonus
   const attackerEntity = getEntity(attacker, gameState);
   const attackerBrawn = isHero(attackerEntity)
@@ -760,7 +813,7 @@ export function resolveCombatV2(
   const damageResult = calculateDamage(
     rollResult,
     poolCtx.weapon,
-    poolCtx.soak,
+    poolCtx.soak - tacticPierce, // Apply tactic card pierce to soak reduction
     attackerBrawn,
   );
 
@@ -768,12 +821,17 @@ export function resolveCombatV2(
   let talentBonusDamage = 0;
   if (isHero(attackerEntity) && rollResult.isHit) {
     const talentCtx: CombatTalentContext = {
-      rangeBand: (scenario as any).rangeBand ?? 'Medium',
+      rangeBand: scenario.rangeBand,
       weapon: poolCtx.weapon,
       isAttacker: true,
     };
     const dmgMods = getPassiveDamageModifiers(attackerEntity, gameData, talentCtx);
     talentBonusDamage = dmgMods.bonusDamage;
+
+    // Species damage bonus (e.g., Wookiee Rage: +1 melee damage when wounded)
+    talentBonusDamage += getSpeciesWoundedMeleeBonus(
+      attacker, attackerEntity, gameData, poolCtx.weapon.skill ?? poolCtx.weapon.type,
+    );
   }
 
   // 6. Auto-spend advantages/threats
@@ -819,6 +877,9 @@ export function resolveCombatV2(
     criticalResult,
     advantagesSpent: spending.advantagesSpent,
     threatsSpent: spending.threatsSpent,
+    tacticCardsPlayed: tacticCardsPlayedAll.length > 0 ? tacticCardsPlayedAll : undefined,
+    tacticSuppression: tacticSuppression > 0 ? tacticSuppression : undefined,
+    tacticRecover: tacticRecover > 0 ? tacticRecover : undefined,
     isHit: rollResult.isHit,
     isDefeated,
     isNewlyWounded,
@@ -997,10 +1058,22 @@ export function applyCombatResult(
     resolution,
   };
 
+  // Update tactic deck: move played cards from hands to discard pile
+  let updatedTacticDeck = gameState.tacticDeck;
+  if (updatedTacticDeck && resolution.tacticCardsPlayed && resolution.tacticCardsPlayed.length > 0) {
+    let deck = { ...updatedTacticDeck };
+    for (const cardId of resolution.tacticCardsPlayed) {
+      const result = playCard(deck, 'Operative', cardId) ?? playCard(deck, 'Imperial', cardId);
+      if (result) deck = result;
+    }
+    updatedTacticDeck = deck;
+  }
+
   return {
     ...gameState,
     figures: newFigures,
     activeCombat: completedScenario,
+    ...(updatedTacticDeck ? { tacticDeck: updatedTacticDeck } : {}),
   };
 }
 

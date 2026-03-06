@@ -11,14 +11,36 @@ const coreFiles = [
   'data/careers.json',
   'data/weapons-v2.json',
   'data/armor.json',
+  'data/consumables.json',
   'data/ai-profiles.json',
+];
+
+const specFiles = [
   'data/specializations/mercenary.json',
+  'data/specializations/assassin.json',
+  'data/specializations/droid-tech.json',
+  'data/specializations/force-adept.json',
+  'data/specializations/smuggler.json',
+  'data/specializations/tactician.json',
+  'data/specializations/bodyguard.json',
+  'data/specializations/demolitionist.json',
+  'data/specializations/gadgeteer.json',
+  'data/specializations/survivalist.json',
+  'data/specializations/gunslinger.json',
+  'data/specializations/charmer.json',
+  'data/specializations/outlaw-tech.json',
+  'data/specializations/slicer.json',
+  'data/specializations/healer.json',
+  'data/specializations/niman-disciple.json',
+  'data/specializations/figurehead.json',
+  'data/specializations/strategist.json',
 ];
 
 const npcFiles = [
   'data/npcs/imperials.json',
   'data/npcs/bounty-hunters.json',
   'data/npcs/warlord-forces.json',
+  'data/npcs/companions.json',
 ];
 
 const missionFiles = [
@@ -49,7 +71,7 @@ const campaignFiles = [
   'data/campaigns/tangrene-liberation.json',
 ];
 
-const allFiles = [...coreFiles, ...npcFiles, ...missionFiles, ...socialFiles, ...campaignFiles];
+const allFiles = [...coreFiles, ...specFiles, ...npcFiles, ...missionFiles, ...socialFiles, ...campaignFiles];
 
 let allOk = true;
 function fail(msg) { console.error('FAIL: ' + msg); allOk = false; }
@@ -69,9 +91,10 @@ const species = JSON.parse(fs.readFileSync('data/species.json', 'utf8')).species
 const careers = JSON.parse(fs.readFileSync('data/careers.json', 'utf8')).careers;
 const weapons = JSON.parse(fs.readFileSync('data/weapons-v2.json', 'utf8')).weapons;
 const armor = JSON.parse(fs.readFileSync('data/armor.json', 'utf8')).armor;
-const merc = JSON.parse(fs.readFileSync('data/specializations/mercenary.json', 'utf8'));
+const consumables = JSON.parse(fs.readFileSync('data/consumables.json', 'utf8')).consumables;
 const dice = JSON.parse(fs.readFileSync('data/dice-d6.json', 'utf8')).dieTypes;
 const aiProfiles = JSON.parse(fs.readFileSync('data/ai-profiles.json', 'utf8'));
+const allSpecs = specFiles.map(f => JSON.parse(fs.readFileSync(f, 'utf8')));
 
 // Merge all NPC data
 const allNpcs = {};
@@ -102,14 +125,21 @@ for (const [id, career] of Object.entries(careers)) {
 }
 console.log('OK: All careers have 3 specializations and 8 career skills');
 
-// 6. Mercenary talent pool: 30 cards with 10/8/6/4/2 distribution
-const tiers = [0, 0, 0, 0, 0, 0];
-for (const t of merc.talents) { tiers[t.tier]++; }
-const expected = [0, 10, 8, 6, 4, 2];
-for (let i = 1; i <= 5; i++) {
-  if (tiers[i] !== expected[i]) fail('Merc Tier ' + i + ': got ' + tiers[i] + ', expected ' + expected[i]);
+// 6. Specialization talent pools: 30 cards each with 10/8/6/4/2 distribution
+const expectedTierDist = [0, 10, 8, 6, 4, 2];
+for (const spec of allSpecs) {
+  const name = spec.specialization.id;
+  const tierCounts = [0, 0, 0, 0, 0, 0];
+  for (const t of spec.talents) { tierCounts[t.tier]++; }
+  for (let i = 1; i <= 5; i++) {
+    if (tierCounts[i] !== expectedTierDist[i]) fail('Spec ' + name + ' Tier ' + i + ': got ' + tierCounts[i] + ', expected ' + expectedTierDist[i]);
+  }
+  if (!spec.specialization.career) fail('Spec ' + name + ' missing career reference');
+  if (!spec.specialization.bonusCareerSkills || spec.specialization.bonusCareerSkills.length !== 4) {
+    fail('Spec ' + name + ' should have exactly 4 bonus career skills');
+  }
 }
-console.log('OK: Merc talent pool is 30 cards (10/8/6/4/2): total=' + merc.talents.length);
+console.log('OK: All ' + allSpecs.length + ' specializations have 30 talents (10/8/6/4/2)');
 
 // 7. NPC stat blocks: valid pools, strain rules
 for (const [id, npc] of Object.entries(allNpcs)) {
@@ -218,6 +248,69 @@ for (const sf of socialFiles) {
   }
 }
 console.log('OK: All social hubs structurally valid');
+
+// 14. Consumables: required fields and valid effect types
+const validEffects = ['heal_wounds', 'recover_strain', 'boost'];
+const validTargetTypes = ['organic', 'droid', 'any'];
+for (const [id, con] of Object.entries(consumables)) {
+  if (!con.id || con.id !== id) fail('Consumable ' + id + ' has mismatched id');
+  if (!con.name) fail('Consumable ' + id + ' missing name');
+  if (!validEffects.includes(con.effect)) fail('Consumable ' + id + ' has unknown effect: ' + con.effect);
+  if (!validTargetTypes.includes(con.targetType)) fail('Consumable ' + id + ' has unknown targetType: ' + con.targetType);
+  if (typeof con.baseValue !== 'number' || con.baseValue < 1) fail('Consumable ' + id + ' baseValue must be a positive number');
+  if (typeof con.price !== 'number' || con.price < 0) fail('Consumable ' + id + ' price must be non-negative');
+}
+console.log('OK: All ' + Object.keys(consumables).length + ' consumables valid (fields, effects, target types)');
+
+// 15. Shop inventory cross-references: every shop item must exist in weapons, armor, or consumables
+const allItemIds = new Set([
+  ...Object.keys(weapons),
+  ...Object.keys(armor),
+  ...Object.keys(consumables),
+]);
+// Also include gear items from equipment.json (v1 format, items in "equipment" array)
+try {
+  const equipData = JSON.parse(fs.readFileSync('data/equipment.json', 'utf8'));
+  for (const item of (equipData.equipment || [])) {
+    allItemIds.add(item.id);
+  }
+} catch (e) { /* equipment.json is optional */ }
+
+let shopItemCount = 0;
+for (const sf of socialFiles) {
+  const hub = JSON.parse(fs.readFileSync(sf, 'utf8'));
+  for (const shop of (hub.location.shops || [])) {
+    for (const entry of (shop.inventory || [])) {
+      shopItemCount++;
+      if (!allItemIds.has(entry.itemId)) {
+        fail(sf + ' shop "' + shop.name + '" references unknown item: ' + entry.itemId);
+      }
+    }
+  }
+}
+console.log('OK: All ' + shopItemCount + ' shop inventory items reference valid catalog entries');
+
+// 16. Board templates: valid structure and dimensions
+const boardsDir = 'data/boards';
+const boardFiles = fs.readdirSync(boardsDir).filter(f => f.endsWith('.json') && f !== 'index.json');
+for (const bf of boardFiles) {
+  const filePath = path.join(boardsDir, bf);
+  const board = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  if (!board.id) fail(filePath + ' missing id');
+  if (!board.name) fail(filePath + ' missing name');
+  if (typeof board.width !== 'number' || board.width < 1) fail(filePath + ' missing or invalid width');
+  if (typeof board.height !== 'number' || board.height < 1) fail(filePath + ' missing or invalid height');
+  if (!Array.isArray(board.tiles)) fail(filePath + ' missing tiles array');
+  if (board.tiles.length !== board.height) {
+    fail(filePath + ' tiles rows (' + board.tiles.length + ') does not match height (' + board.height + ')');
+  }
+  for (let r = 0; r < board.tiles.length; r++) {
+    if (board.tiles[r].length !== board.width) {
+      fail(filePath + ' row ' + r + ' has ' + board.tiles[r].length + ' cols (expected ' + board.width + ')');
+    }
+  }
+}
+console.log('OK: All ' + boardFiles.length + ' board templates valid (id, dimensions, tile grid)');
 
 console.log(allOk ? '\n=== ALL CHECKS PASSED ===' : '\n=== SOME CHECKS FAILED ===');
 process.exit(allOk ? 0 : 1);

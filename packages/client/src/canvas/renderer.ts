@@ -2,6 +2,7 @@ import type { GameState, GridCoordinate, Figure, ObjectivePoint, BaseSize } from
 import { BOARD_SIZE } from '@engine/types.js'
 import type { SilhouetteType } from '../types/portrait'
 import { drawSilhouetteOnContext, inferSilhouetteType } from './silhouettes'
+import type { AnimationManager } from './animation-manager'
 
 export const TILE_SIZE = 56
 const GRID_COLOR = '#1a2a4a'
@@ -9,11 +10,11 @@ const BOARD_BOUNDARY_COLOR = '#4a9eff'
 const DEPLOY_IMPERIAL_COLOR = 'rgba(255, 68, 68, 0.06)'
 const DEPLOY_OPERATIVE_COLOR = 'rgba(68, 255, 68, 0.06)'
 const OPEN_TERRAIN = '#1a1a2e'
-const WALL_TERRAIN = '#333355'
-const COVER_LIGHT = '#1a1a2e'
-const COVER_HEAVY = '#1a1a2e'
-const DIFFICULT_TERRAIN = '#2a2a1e'
-const ELEVATED_TERRAIN = '#2a2a3e'
+const WALL_TERRAIN = '#2a2a44'
+const COVER_LIGHT = '#1e2a1e'
+const COVER_HEAVY = '#1e331e'
+const DIFFICULT_TERRAIN = '#2e2a18'
+const ELEVATED_TERRAIN = '#242038'
 const DOOR_TERRAIN = '#2a2a4e'
 const IMPASSABLE_TERRAIN = '#0a0a0a'
 
@@ -26,6 +27,9 @@ const VALID_MOVE_OVERLAY = '#4a9eff'
 const VALID_TARGET_OVERLAY = '#ff4444'
 const SELECTED_GLOW = '#ffd700'
 const HOVER_OUTLINE = '#ffffff'
+const ACTIVATED_DIM_ALPHA = 0.35
+const NAME_LABEL_COLOR = '#e0e0e0'
+const STRAIN_BAR_COLOR = '#6699ff'
 
 interface UIState {
   selectedFigureId: string | null
@@ -35,6 +39,11 @@ interface UIState {
   currentActivatingId: string | null
   aiMovePath: GridCoordinate[] | null
   aiAttackTarget: { from: GridCoordinate; to: GridCoordinate } | null
+  attackRange: { center: GridCoordinate; radius: number } | null
+  playerMovePath: GridCoordinate[] | null
+  playerMovePathCost: number | null
+  movePreviewTargets: string[] | null
+  threateningEnemies: string[]
 }
 
 // ============================================================================
@@ -101,6 +110,12 @@ export class TacticalGridRenderer {
     this.centerOn({ x: 5, y: 5 })
   }
 
+  private animationManager: AnimationManager | null = null
+
+  setAnimationManager(manager: AnimationManager): void {
+    this.animationManager = manager
+  }
+
   render(gameState: GameState, uiState: UIState) {
     if (!this.ctx || !this.canvas) return
 
@@ -111,10 +126,12 @@ export class TacticalGridRenderer {
     // Save context state
     this.ctx.save()
 
-    // Apply camera transform
+    // Apply camera transform with screen shake offset
+    const shakeX = this.animationManager?.shakeOffsetX ?? 0
+    const shakeY = this.animationManager?.shakeOffsetY ?? 0
     this.ctx.translate(
-      this.canvas.width / 2 - this.cameraX * this.zoom,
-      this.canvas.height / 2 - this.cameraY * this.zoom
+      this.canvas.width / 2 - this.cameraX * this.zoom + shakeX,
+      this.canvas.height / 2 - this.cameraY * this.zoom + shakeY
     )
     this.ctx.scale(this.zoom, this.zoom)
 
@@ -144,6 +161,11 @@ export class TacticalGridRenderer {
 
     // Draw effects (animations, status, etc)
     this.drawEffects(gameState, uiState)
+
+    // Draw combat animations (projectiles, damage numbers, particles)
+    if (this.animationManager) {
+      this.animationManager.drawAnimations(this.ctx)
+    }
 
     this.ctx.restore()
   }
@@ -190,32 +212,112 @@ export class TacticalGridRenderer {
         this.ctx.fillStyle = color
         this.ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE)
 
-        // Draw cover markers
+        // Terrain-specific visual patterns
         if (tile.terrain === 'LightCover') {
-          this.ctx.fillStyle = '#ffff00'
-          const size = 6
-          const centerX = screenX + TILE_SIZE / 2
-          const centerY = screenY + TILE_SIZE / 2
-          this.ctx.fillRect(centerX - size / 2, centerY - size / 2, size, size)
+          // Diagonal hash lines + corner marker
+          this.ctx.strokeStyle = 'rgba(180, 200, 80, 0.15)'
+          this.ctx.lineWidth = 1
+          for (let d = -TILE_SIZE; d < TILE_SIZE * 2; d += 12) {
+            this.ctx.beginPath()
+            this.ctx.moveTo(screenX + d, screenY)
+            this.ctx.lineTo(screenX + d + TILE_SIZE, screenY + TILE_SIZE)
+            this.ctx.stroke()
+          }
+          // Corner shield marker
+          this.ctx.fillStyle = 'rgba(220, 220, 80, 0.5)'
+          this.ctx.fillRect(screenX + 2, screenY + 2, 6, 6)
         } else if (tile.terrain === 'HeavyCover') {
-          this.ctx.fillStyle = '#ff9900'
-          const size = 10
-          const centerX = screenX + TILE_SIZE / 2
-          const centerY = screenY + TILE_SIZE / 2
+          // Cross-hatch pattern + larger corner marker
+          this.ctx.strokeStyle = 'rgba(100, 200, 100, 0.18)'
+          this.ctx.lineWidth = 1
+          for (let d = -TILE_SIZE; d < TILE_SIZE * 2; d += 10) {
+            this.ctx.beginPath()
+            this.ctx.moveTo(screenX + d, screenY)
+            this.ctx.lineTo(screenX + d + TILE_SIZE, screenY + TILE_SIZE)
+            this.ctx.stroke()
+            this.ctx.beginPath()
+            this.ctx.moveTo(screenX + d + TILE_SIZE, screenY)
+            this.ctx.lineTo(screenX + d, screenY + TILE_SIZE)
+            this.ctx.stroke()
+          }
+          // Corner shield marker (orange diamond)
+          const cx = screenX + 7
+          const cy = screenY + 7
+          this.ctx.fillStyle = 'rgba(255, 160, 40, 0.7)'
           this.ctx.beginPath()
-          this.ctx.moveTo(centerX, centerY - size / 2)
-          this.ctx.lineTo(centerX + size / 2, centerY)
-          this.ctx.lineTo(centerX, centerY + size / 2)
-          this.ctx.lineTo(centerX - size / 2, centerY)
+          this.ctx.moveTo(cx, cy - 5)
+          this.ctx.lineTo(cx + 5, cy)
+          this.ctx.lineTo(cx, cy + 5)
+          this.ctx.lineTo(cx - 5, cy)
+          this.ctx.closePath()
+          this.ctx.fill()
+        } else if (tile.terrain === 'Wall') {
+          // Brick-like pattern
+          this.ctx.strokeStyle = 'rgba(100, 100, 160, 0.25)'
+          this.ctx.lineWidth = 1
+          const bw = TILE_SIZE / 3
+          const bh = TILE_SIZE / 2
+          for (let by = 0; by < 2; by++) {
+            const offsetX = by % 2 === 0 ? 0 : bw / 2
+            for (let bx = 0; bx < 4; bx++) {
+              this.ctx.strokeRect(screenX + bx * bw + offsetX, screenY + by * bh, bw, bh)
+            }
+          }
+        } else if (tile.terrain === 'Difficult') {
+          // Scattered dots pattern
+          this.ctx.fillStyle = 'rgba(200, 180, 80, 0.2)'
+          const offsets = [[8, 12], [22, 8], [38, 18], [14, 38], [32, 34], [46, 44]]
+          for (const [dx, dy] of offsets) {
+            this.ctx.beginPath()
+            this.ctx.arc(screenX + dx, screenY + dy, 2, 0, Math.PI * 2)
+            this.ctx.fill()
+          }
+        } else if (tile.terrain === 'Elevated') {
+          // Upward chevron pattern
+          this.ctx.strokeStyle = 'rgba(140, 120, 200, 0.2)'
+          this.ctx.lineWidth = 1
+          const cx = screenX + TILE_SIZE / 2
+          this.ctx.beginPath()
+          this.ctx.moveTo(cx - 10, screenY + TILE_SIZE - 8)
+          this.ctx.lineTo(cx, screenY + TILE_SIZE - 16)
+          this.ctx.lineTo(cx + 10, screenY + TILE_SIZE - 8)
+          this.ctx.stroke()
+        } else if (tile.terrain === 'Impassable') {
+          // X pattern
+          this.ctx.strokeStyle = 'rgba(255, 50, 50, 0.15)'
+          this.ctx.lineWidth = 1.5
+          this.ctx.beginPath()
+          this.ctx.moveTo(screenX + 4, screenY + 4)
+          this.ctx.lineTo(screenX + TILE_SIZE - 4, screenY + TILE_SIZE - 4)
+          this.ctx.stroke()
+          this.ctx.beginPath()
+          this.ctx.moveTo(screenX + TILE_SIZE - 4, screenY + 4)
+          this.ctx.lineTo(screenX + 4, screenY + TILE_SIZE - 4)
+          this.ctx.stroke()
+        }
+
+        // Also render tile.cover when it differs from terrain type
+        if (tile.cover === 'Light' && tile.terrain !== 'LightCover') {
+          this.ctx.fillStyle = 'rgba(220, 220, 80, 0.4)'
+          this.ctx.fillRect(screenX + 2, screenY + 2, 5, 5)
+        } else if (tile.cover === 'Heavy' && tile.terrain !== 'HeavyCover') {
+          this.ctx.fillStyle = 'rgba(255, 160, 40, 0.6)'
+          const cx = screenX + 6
+          const cy = screenY + 6
+          this.ctx.beginPath()
+          this.ctx.moveTo(cx, cy - 4)
+          this.ctx.lineTo(cx + 4, cy)
+          this.ctx.lineTo(cx, cy + 4)
+          this.ctx.lineTo(cx - 4, cy)
           this.ctx.closePath()
           this.ctx.fill()
         }
 
-        // Draw elevation
+        // Draw elevation number
         if (tile.elevation > 0) {
-          this.ctx.fillStyle = '#ffffff'
-          this.ctx.font = '10px monospace'
-          this.ctx.fillText(String(tile.elevation), screenX + 4, screenY + 12)
+          this.ctx.fillStyle = 'rgba(180, 160, 255, 0.7)'
+          this.ctx.font = 'bold 10px monospace'
+          this.ctx.fillText(`E${tile.elevation}`, screenX + TILE_SIZE - 22, screenY + 12)
         }
 
         // Draw objectives (legacy fallback -- enhanced objectives drawn in drawObjectives)
@@ -333,6 +435,28 @@ export class TacticalGridRenderer {
   private drawHighlights(gameState: GameState, uiState: UIState) {
     if (!this.ctx) return
 
+    // Draw attack range overlay (subtle tint showing weapon reach)
+    if (uiState.attackRange) {
+      const { center, radius } = uiState.attackRange
+      const ctx = this.ctx!
+      const cx = center.x * TILE_SIZE + TILE_SIZE / 2
+      const cy = center.y * TILE_SIZE + TILE_SIZE / 2
+      const radiusPx = radius * TILE_SIZE
+
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(cx, cy, radiusPx, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(255, 68, 68, 0.04)'
+      ctx.fill()
+
+      // Dashed border ring
+      ctx.strokeStyle = 'rgba(255, 68, 68, 0.15)'
+      ctx.lineWidth = 1
+      ctx.setLineDash([6, 4])
+      ctx.stroke()
+      ctx.restore()
+    }
+
     // Draw valid moves
     uiState.validMoves.forEach(coord => {
       const screenX = coord.x * TILE_SIZE
@@ -365,6 +489,71 @@ export class TacticalGridRenderer {
       this.ctx.strokeStyle = HOVER_OUTLINE
       this.ctx.lineWidth = 2
       this.ctx.strokeRect(screenX, screenY, TILE_SIZE, TILE_SIZE)
+    }
+
+    // Player move path preview
+    if (uiState.playerMovePath && uiState.playerMovePath.length >= 2) {
+      this.drawPlayerMovePath(uiState.playerMovePath, uiState.playerMovePathCost, uiState.movePreviewTargets?.length ?? 0)
+    }
+
+    // Move preview targets: show which enemies are targetable from hovered move destination
+    if (uiState.movePreviewTargets && uiState.movePreviewTargets.length > 0) {
+      const ctx = this.ctx!
+      ctx.save()
+      gameState.figures.forEach(figure => {
+        if (uiState.movePreviewTargets!.includes(figure.id)) {
+          const fx = figure.position.x * TILE_SIZE
+          const fy = figure.position.y * TILE_SIZE
+
+          // Amber/orange pulsing border to distinguish from current valid targets (red)
+          const pulse = Math.sin(Date.now() / 300) * 0.15 + 0.55
+          ctx.strokeStyle = '#ffaa22'
+          ctx.lineWidth = 2
+          ctx.globalAlpha = pulse
+          ctx.strokeRect(fx + 1, fy + 1, TILE_SIZE - 2, TILE_SIZE - 2)
+
+          // Small crosshair icon at top-right corner
+          ctx.globalAlpha = pulse + 0.15
+          ctx.fillStyle = '#ffaa22'
+          ctx.font = 'bold 10px monospace'
+          ctx.textAlign = 'right'
+          ctx.textBaseline = 'top'
+          ctx.fillText('\u2316', fx + TILE_SIZE - 3, fy + 2)
+        }
+      })
+      ctx.restore()
+    }
+
+    // Threat indicators: enemies that can attack the selected figure
+    if (uiState.threateningEnemies.length > 0) {
+      const ctx = this.ctx!
+      ctx.save()
+      gameState.figures.forEach(figure => {
+        if (uiState.threateningEnemies.includes(figure.id)) {
+          const fx = figure.position.x * TILE_SIZE
+          const fy = figure.position.y * TILE_SIZE
+
+          // Small red warning triangle at bottom-left of tile
+          ctx.globalAlpha = 0.85
+          ctx.fillStyle = '#ff3333'
+          ctx.beginPath()
+          const tx = fx + 4
+          const ty = fy + TILE_SIZE - 4
+          ctx.moveTo(tx, ty)
+          ctx.lineTo(tx + 5, ty - 9)
+          ctx.lineTo(tx + 10, ty)
+          ctx.closePath()
+          ctx.fill()
+
+          // Exclamation mark
+          ctx.fillStyle = '#000000'
+          ctx.font = 'bold 7px monospace'
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'bottom'
+          ctx.fillText('!', tx + 5, ty - 1)
+        }
+      })
+      ctx.restore()
     }
 
     // AI move path visualization
@@ -447,6 +636,86 @@ export class TacticalGridRenderer {
     this.ctx.restore()
   }
 
+  private drawPlayerMovePath(pathCoords: GridCoordinate[], cost: number | null, targetCount: number) {
+    if (!this.ctx || pathCoords.length < 2) return
+
+    const ctx = this.ctx
+    ctx.save()
+
+    // Dashed path line in blue
+    ctx.strokeStyle = VALID_MOVE_OVERLAY
+    ctx.lineWidth = 2.5
+    ctx.setLineDash([5, 3])
+    ctx.globalAlpha = 0.6
+
+    ctx.beginPath()
+    ctx.moveTo(
+      pathCoords[0].x * TILE_SIZE + TILE_SIZE / 2,
+      pathCoords[0].y * TILE_SIZE + TILE_SIZE / 2,
+    )
+    for (let i = 1; i < pathCoords.length; i++) {
+      ctx.lineTo(
+        pathCoords[i].x * TILE_SIZE + TILE_SIZE / 2,
+        pathCoords[i].y * TILE_SIZE + TILE_SIZE / 2,
+      )
+    }
+    ctx.stroke()
+
+    // Destination circle
+    const dest = pathCoords[pathCoords.length - 1]
+    const dx = dest.x * TILE_SIZE + TILE_SIZE / 2
+    const dy = dest.y * TILE_SIZE + TILE_SIZE / 2
+    ctx.setLineDash([])
+    ctx.globalAlpha = 0.8
+    ctx.strokeStyle = VALID_MOVE_OVERLAY
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(dx, dy, TILE_SIZE / 3, 0, Math.PI * 2)
+    ctx.stroke()
+
+    // Info badge at destination: movement cost + target count
+    if (cost != null) {
+      ctx.globalAlpha = 1.0
+      ctx.font = 'bold 10px monospace'
+
+      // Build label parts
+      const costLabel = `${cost}mp`
+      const targetLabel = targetCount > 0 ? `${targetCount}\u2316` : ''
+      const fullLabel = targetLabel ? `${costLabel} ${targetLabel}` : costLabel
+
+      const tw = ctx.measureText(fullLabel).width
+      const bw = tw + 10
+      const bh = 16
+      const bx = dx - bw / 2
+      const by = dy - TILE_SIZE / 2 - bh - 2
+
+      // Badge background
+      ctx.fillStyle = 'rgba(10, 10, 20, 0.88)'
+      ctx.beginPath()
+      ctx.roundRect(bx, by, bw, bh, 3)
+      ctx.fill()
+      ctx.strokeStyle = targetCount > 0 ? '#ffaa22' : VALID_MOVE_OVERLAY
+      ctx.lineWidth = 1
+      ctx.stroke()
+
+      // Cost text
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillStyle = '#ffffff'
+      ctx.fillText(costLabel, dx - (targetLabel ? ctx.measureText(` ${targetLabel}`).width / 2 : 0), by + bh / 2)
+
+      // Target count in amber
+      if (targetLabel) {
+        const costW = ctx.measureText(`${costLabel} `).width
+        ctx.fillStyle = '#ffaa22'
+        ctx.textAlign = 'left'
+        ctx.fillText(targetLabel, bx + (bw - tw) / 2 + costW, by + bh / 2)
+      }
+    }
+
+    ctx.restore()
+  }
+
   private drawAIAttackTarget(target: { from: GridCoordinate; to: GridCoordinate }, _gameState: GameState) {
     if (!this.ctx) return
 
@@ -521,6 +790,33 @@ export class TacticalGridRenderer {
     this.ctx.restore()
   }
 
+  /** Get wound threshold for a figure from its backing data. */
+  private getWoundThreshold(figure: Figure, gameState: GameState): number {
+    if (figure.entityType === 'hero') {
+      const hero = gameState.heroes[figure.entityId]
+      return hero?.wounds.threshold ?? 10
+    }
+    const npc = gameState.npcProfiles[figure.entityId]
+    return npc?.woundThreshold ?? 4
+  }
+
+  /** Get short display name for a figure. */
+  private getFigureLabel(figure: Figure, gameState: GameState): string {
+    if (figure.entityType === 'hero') {
+      const hero = gameState.heroes[figure.entityId]
+      return hero?.name ?? figure.entityId
+    }
+    const npc = gameState.npcProfiles[figure.entityId]
+    // For NPCs, use profile name but strip "Imperial" prefix for brevity
+    const name = npc?.name ?? figure.entityId
+    // Add suffix number if ID has one (e.g. "stormtrooper-2" -> "Stormtrooper 2")
+    const numMatch = figure.id.match(/-(\d+)$/)
+    if (numMatch) {
+      return `${name} ${numMatch[1]}`
+    }
+    return name
+  }
+
   private drawFigures(gameState: GameState, uiState: UIState) {
     if (!this.ctx) return
 
@@ -539,6 +835,13 @@ export class TacticalGridRenderer {
       const player = gameState.players.find(p => p.id === figure.playerId)
       const isOperative = player?.role === 'Operative'
       const factionColor = isOperative ? OPERATIVE_COLOR : IMPERIAL_COLOR
+
+      // --- Activation dimming: reduce alpha for figures that have already activated ---
+      const isDimmed = figure.isActivated
+      if (isDimmed) {
+        this.ctx.save()
+        this.ctx.globalAlpha = ACTIVATED_DIM_ALPHA
+      }
 
       // --- Selection glow ---
       if (figure.id === uiState.selectedFigureId) {
@@ -614,7 +917,7 @@ export class TacticalGridRenderer {
       this.ctx.fillStyle = '#333333'
       this.ctx.fillRect(barX, barY, barWidth, barHeight)
 
-      const woundThreshold = (figure as any).woundThreshold ?? 5
+      const woundThreshold = this.getWoundThreshold(figure, gameState)
       const woundsRemaining = Math.max(0, woundThreshold - figure.woundsCurrent)
       const healthPercent = woundThreshold > 0 ? woundsRemaining / woundThreshold : 1
       const healthBarWidth = barWidth * healthPercent
@@ -628,6 +931,57 @@ export class TacticalGridRenderer {
       }
 
       this.ctx.fillRect(barX, barY, healthBarWidth, barHeight)
+
+      // --- Strain bar for heroes (thin blue bar below health bar) ---
+      if (figure.entityType === 'hero') {
+        const hero = gameState.heroes[figure.entityId]
+        if (hero && hero.strain && hero.strain.threshold > 0) {
+          const strainBarY = barY + barHeight + 1
+          const strainHeight = 2
+
+          this.ctx.fillStyle = '#222233'
+          this.ctx.fillRect(barX, strainBarY, barWidth, strainHeight)
+
+          const strainRemaining = Math.max(0, hero.strain.threshold - figure.strainCurrent)
+          const strainPercent = strainRemaining / hero.strain.threshold
+          this.ctx.fillStyle = STRAIN_BAR_COLOR
+          this.ctx.fillRect(barX, strainBarY, barWidth * strainPercent, strainHeight)
+        }
+      }
+
+      // --- Restore alpha after dimming ---
+      if (isDimmed) {
+        this.ctx.restore()
+      }
+
+      // --- Name label above figure (rendered at full alpha, outside dimming) ---
+      const label = this.getFigureLabel(figure, gameState)
+      if (label) {
+        const labelY = screenY - radius - 10
+        this.ctx.save()
+        this.ctx.font = '8px sans-serif'
+        this.ctx.textAlign = 'center'
+        this.ctx.textBaseline = 'bottom'
+
+        // Background pill for readability
+        const measured = this.ctx.measureText(label)
+        const pillW = Math.min(measured.width + 6, TILE_SIZE * 1.2)
+        const pillH = 10
+        const pillX = screenX - pillW / 2
+        const pillY = labelY - pillH
+
+        this.ctx.fillStyle = 'rgba(10, 10, 15, 0.75)'
+        this.ctx.beginPath()
+        this.ctx.roundRect(pillX, pillY, pillW, pillH, 3)
+        this.ctx.fill()
+
+        this.ctx.fillStyle = isDimmed ? '#777777' : NAME_LABEL_COLOR
+        // Truncate if too long
+        const maxChars = 12
+        const displayLabel = label.length > maxChars ? label.slice(0, maxChars - 1) + '\u2026' : label
+        this.ctx.fillText(displayLabel, screenX, labelY)
+        this.ctx.restore()
+      }
     })
   }
 

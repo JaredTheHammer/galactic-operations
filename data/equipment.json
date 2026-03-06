@@ -177,6 +177,20 @@
       "slot": "utility",
       "effect": "Cannot be targeted beyond range 4 if in cover",
       "cost": 125
+    },
+    {
+      "id": "comm-jammer",
+      "name": "Comm Jammer",
+      "slot": "utility",
+      "effect": "Once per encounter, prevent one enemy reinforcement wave from deploying for 1 round",
+      "cost": 300
+    },
+    {
+      "id": "tactical-scanner",
+      "name": "Tactical Scanner",
+      "slot": "utility",
+      "effect": "Once per encounter, reveal all enemy positions and remove 1 Setback die from the next attack",
+      "cost": 350
     }
   ]
 }

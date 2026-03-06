@@ -10,14 +10,18 @@
   },
   "dependencies": {
     "@galactic-ops/engine": "workspace:*",
+    "plotly.js-basic-dist": "^3.4.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-plotly.js": "^2.6.0",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/react-plotly.js": "^2.6.4",
     "@vitejs/plugin-react": "^5.1.4",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vite-plugin-pwa": "^1.2.0"
   }
 }

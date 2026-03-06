@@ -1,0 +1,316 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Survivalist specialization (Bounty Hunter career). 30 talent cards: 10 Tier 1, 8 Tier 2, 6 Tier 3, 4 Tier 4, 2 Tier 5. Players draft 15 into a pyramid (5/4/3/2/1)."
+  },
+  "specialization": {
+    "id": "survivalist",
+    "name": "Survivalist",
+    "career": "bounty-hunter",
+    "description": "A wilderness expert and tracker who thrives in hostile environments. The Survivalist uses terrain, cover, and patience to outmaneuver prey, striking from ambush with devastating precision.",
+    "bonusCareerSkills": ["perception", "resilience", "stealth", "survival"],
+    "capstoneCharacteristics": ["cunning", "brawn"]
+  },
+  "talents": [
+    {
+      "id": "surv-t1-01",
+      "name": "Toughened",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Wound Threshold by 2 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "woundThreshold", "value": 2, "perRank": true }
+    },
+    {
+      "id": "surv-t1-02",
+      "name": "Grit",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Strain Threshold by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "strainThreshold", "value": 1, "perRank": true }
+    },
+    {
+      "id": "surv-t1-03",
+      "name": "Stalker",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from Stealth and Coordination checks.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "skill": "stealth" }
+    },
+    {
+      "id": "surv-t1-04",
+      "name": "Expert Tracker",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from checks to find or follow tracks. Decrease time to track a target by 25% per rank.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "skill": "survival" }
+    },
+    {
+      "id": "surv-t1-05",
+      "name": "Second Wind",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": true,
+      "description": "Once per encounter, recover strain equal to ranks in Second Wind.",
+      "mechanicalEffect": { "type": "recover_strain", "value": 1, "perRank": true }
+    },
+    {
+      "id": "surv-t1-06",
+      "name": "Quick Draw",
+      "tier": 1,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per round, draw or holster a weapon as an incidental instead of a maneuver.",
+      "mechanicalEffect": { "type": "free_maneuver" }
+    },
+    {
+      "id": "surv-t1-07",
+      "name": "Durable",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Subtract 10 per rank from critical injury rolls against you (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "surv-t1-08",
+      "name": "Outdoorsman",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Remove 1 Setback die per rank from checks made in natural terrain. Add 1 Boost die to Perception checks in wilderness.",
+      "mechanicalEffect": { "type": "remove_setback", "value": 1, "perRank": true, "condition": "natural_terrain" }
+    },
+    {
+      "id": "surv-t1-09",
+      "name": "Quick Strike",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 Boost die per rank to combat checks against targets that have not yet acted this encounter.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "condition": "target_has_not_acted" }
+    },
+    {
+      "id": "surv-t1-10",
+      "name": "Heroic Fortitude",
+      "tier": 1,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "May spend a Destiny Point to ignore effects of critical injuries on checks until end of encounter.",
+      "mechanicalEffect": { "type": "ignore_critical_penalties" }
+    },
+    {
+      "id": "surv-t2-01",
+      "name": "Enduring",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Increase Soak by 1 per rank.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "perRank": true }
+    },
+    {
+      "id": "surv-t2-02",
+      "name": "Point Blank",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one attack per round when firing a ranged weapon at Short range or closer.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "short_range" }
+    },
+    {
+      "id": "surv-t2-03",
+      "name": "Bought Time",
+      "tier": 2,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "On your turn, suffer 2 strain to perform an additional maneuver.",
+      "mechanicalEffect": { "type": "extra_maneuver" }
+    },
+    {
+      "id": "surv-t2-04",
+      "name": "Lethal Blows",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add +10 per rank to critical injury rolls inflicted on opponents.",
+      "mechanicalEffect": { "type": "increase_critical", "value": 10, "perRank": true }
+    },
+    {
+      "id": "surv-t2-05",
+      "name": "Natural Hunter",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Once per session, reroll one Perception or Vigilance check.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "perception_or_vigilance_reroll" }
+    },
+    {
+      "id": "surv-t2-06",
+      "name": "Side Step",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, as a maneuver, upgrade the difficulty of ranged attacks targeting you by 1 per rank until the start of your next turn.",
+      "mechanicalEffect": { "type": "upgrade_defense", "value": 1, "perRank": true }
+    },
+    {
+      "id": "surv-t2-07",
+      "name": "Sniper Shot",
+      "tier": 2,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Before making a ranged attack, use a maneuver to increase the weapon's range by one range band per rank. Suffer 2 strain per use.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true, "condition": "extended_range" }
+    },
+    {
+      "id": "surv-t2-08",
+      "name": "Barrage",
+      "tier": 2,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to one attack per round when using a weapon with a range of Short or greater.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "ranged_short_or_greater" }
+    },
+    {
+      "id": "surv-t3-01",
+      "name": "Ambush",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage per rank to first attack each encounter when attacking from concealment or while target is unaware.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "ambush" }
+    },
+    {
+      "id": "surv-t3-02",
+      "name": "True Aim",
+      "tier": 3,
+      "type": "active",
+      "activation": "maneuver",
+      "ranked": true,
+      "description": "Once per round, use a maneuver to gain +1 Boost die per rank on your next ranged attack this turn.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "perRank": true }
+    },
+    {
+      "id": "surv-t3-03",
+      "name": "Heroic Resilience",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, when you would be incapacitated by wounds, make a Hard Resilience check. On success, remain conscious with 1 wound remaining.",
+      "mechanicalEffect": { "type": "prevent_incapacitation" }
+    },
+    {
+      "id": "surv-t3-04",
+      "name": "Crippling Blow",
+      "tier": 3,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Increase the difficulty of your next combat check by 1. If you deal a critical, add +10 to the roll.",
+      "mechanicalEffect": { "type": "empowered_critical", "bonus": 10 }
+    },
+    {
+      "id": "surv-t3-05",
+      "name": "Feral Strength",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Add 1 damage to one Brawl or Melee attack per round.",
+      "mechanicalEffect": { "type": "bonus_damage", "value": 1, "perRank": true, "condition": "melee_or_brawl" }
+    },
+    {
+      "id": "surv-t3-06",
+      "name": "Armor Master",
+      "tier": 3,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When wearing armor, increase total Soak by 1.",
+      "mechanicalEffect": { "type": "modify_stat", "stat": "soak", "value": 1, "condition": "wearing_armor" }
+    },
+    {
+      "id": "surv-t4-01",
+      "name": "Deadly Accuracy",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "When making a ranged attack, add ranks in the weapon's skill as bonus damage to one hit.",
+      "mechanicalEffect": { "type": "skill_damage_bonus", "skill": "ranged-heavy" }
+    },
+    {
+      "id": "surv-t4-02",
+      "name": "Unstoppable",
+      "tier": 4,
+      "type": "active",
+      "activation": "incidental",
+      "ranked": false,
+      "description": "Once per session, perform a bonus action during your turn. Suffer 4 strain.",
+      "mechanicalEffect": { "type": "extra_action" }
+    },
+    {
+      "id": "surv-t4-03",
+      "name": "Iron Body",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": true,
+      "description": "Reduce strain suffered from voluntary maneuvers and actions by 1 per rank (minimum 1).",
+      "mechanicalEffect": { "type": "reduce_strain_suffered", "value": 1, "perRank": true }
+    },
+    {
+      "id": "surv-t4-04",
+      "name": "Natural Marksman",
+      "tier": 4,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Once per session, reroll one ranged combat check.",
+      "mechanicalEffect": { "type": "upgrade_attack", "value": 1, "condition": "session_reroll" }
+    },
+    {
+      "id": "surv-t5-01",
+      "name": "Dedication (Cunning)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Cunning by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "cunning" }
+    },
+    {
+      "id": "surv-t5-02",
+      "name": "Dedication (Brawn)",
+      "tier": 5,
+      "type": "passive",
+      "activation": "passive",
+      "ranked": false,
+      "description": "Permanently increase Brawn by 1.",
+      "mechanicalEffect": { "type": "modify_characteristic", "characteristic": "brawn" }
+    }
+  ]
+}

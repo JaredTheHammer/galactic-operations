@@ -531,10 +531,10 @@ export function executeActiveTalent(
       // Side Step: upgrade difficulty of ranged attacks vs self until next turn
       // Implemented as a transient condition (consumed by buildCombatPools)
       const ranks = card.ranked ? getTalentRankCount(hero, talentId) : 1;
-      if (!newFigure.conditions.includes('SideStep' as any)) {
+      if (!newFigure.conditions.includes('SideStep')) {
         // Store rank count in a side-channel on the figure
         // For now, add a condition marker; the combat pipeline reads ranks from talent data
-        newFigure.conditions = [...newFigure.conditions, 'SideStep' as any];
+        newFigure.conditions = [...newFigure.conditions, 'SideStep'];
       }
       description = `${hero.name} uses ${card.name}: upgrades ranged defense by ${ranks} until next turn`;
       break;
@@ -542,8 +542,8 @@ export function executeActiveTalent(
 
     case 'upgrade_attack': {
       // True Aim: upgrade attack pool for next check this turn
-      if (!newFigure.conditions.includes('TrueAim' as any)) {
-        newFigure.conditions = [...newFigure.conditions, 'TrueAim' as any];
+      if (!newFigure.conditions.includes('TrueAim')) {
+        newFigure.conditions = [...newFigure.conditions, 'TrueAim'];
       }
       const ranks = card.ranked ? getTalentRankCount(hero, talentId) : 1;
       description = `${hero.name} uses ${card.name}: upgrades attack by ${ranks} for next check`;
@@ -563,8 +563,8 @@ export function executeActiveTalent(
 
     case 'ignore_critical_penalties': {
       // Heroic Fortitude: ignore critical injury effects until end of encounter
-      if (!newFigure.conditions.includes('HeroicFortitude' as any)) {
-        newFigure.conditions = [...newFigure.conditions, 'HeroicFortitude' as any];
+      if (!newFigure.conditions.includes('HeroicFortitude')) {
+        newFigure.conditions = [...newFigure.conditions, 'HeroicFortitude'];
       }
       description = `${hero.name} uses ${card.name}: ignores critical injury penalties`;
       break;
@@ -572,8 +572,8 @@ export function executeActiveTalent(
 
     case 'empowered_critical': {
       // Crippling Blow: next critical gets +20 but costs 1 more advantage
-      if (!newFigure.conditions.includes('CripplingBlow' as any)) {
-        newFigure.conditions = [...newFigure.conditions, 'CripplingBlow' as any];
+      if (!newFigure.conditions.includes('CripplingBlow')) {
+        newFigure.conditions = [...newFigure.conditions, 'CripplingBlow'];
       }
       description = `${hero.name} uses ${card.name}: empowered critical on next attack`;
       break;

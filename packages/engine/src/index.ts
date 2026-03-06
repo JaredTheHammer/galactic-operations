@@ -67,6 +67,9 @@ export type {
   // Unit Keywords
   UnitKeyword,
   UnitKeywordName,
+  // Species Abilities
+  SpeciesAbilityEffect,
+  SpeciesAbility,
 } from './types.js';
 
 // Re-export data loader functions
@@ -75,7 +78,6 @@ export {
   loadGameDataFromObjects,
   loadGameDataV2,
   loadBoardTemplates,
-  loadConsumables,
 } from './data-loader.js';
 
 // Re-export dice functions (v2 Genesys-style)
@@ -157,6 +159,21 @@ export {
 } from './turn-machine-v2.js';
 export type { ArmyCompositionV2, SuppressionState } from './turn-machine-v2.js';
 
+// Re-export species ability system
+export {
+  getHeroSpecies,
+  getSpeciesAbilities,
+  hasSpeciesAbility,
+  getSpeciesAttackBonus,
+  getSpeciesWoundedMeleeBonus,
+  getSpeciesSoakBonus,
+  getSpeciesRegeneration,
+  getSpeciesBonusStrainRecovery,
+  isImmuneToCondition,
+  filterImmuneConditions,
+  getSpeciesSkillBonus,
+} from './species-abilities.js';
+
 // Re-export keyword system (Legion-inspired mechanical keywords)
 export {
   hasKeyword,
@@ -191,6 +208,8 @@ export {
   getSoakForFigure,
   getWoundThreshold,
   getRemainingHealth,
+  getAttackRangeInTiles,
+  getThreateningEnemies,
   findAttackPositions,
   findMeleePositions,
   buildMoveAction,
@@ -210,6 +229,25 @@ export {
   runCombatSim,
   runCombatBatch,
 } from './ai/index.js';
+
+// Re-export power ranking system
+export {
+  computeAnalyticalRating,
+  runDuelTournament,
+  runFullPowerRanking,
+  generatePowerRankingReport,
+} from './power-ranking.js';
+
+export type {
+  AnalyticalRating,
+  DuelResult,
+  DuelGameDetail,
+  DuelRanking,
+  CombinedRanking,
+  PowerRankingResult,
+  NPCCombatStats,
+  BalanceFlag,
+} from './power-ranking.js';
 
 export type {
   AIProfilesData,

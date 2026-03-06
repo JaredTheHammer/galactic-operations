@@ -1,8 +1,10 @@
 import React from 'react'
 import { DiceDisplay } from './DiceDisplay'
+import { TacticCardHand } from './TacticCardHand'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import type { CombatScenario, GameState } from '@engine/types.js'
-import { getWoundThresholdV2 } from '@engine/turn-machine-v2.js'
+import { useGameStore } from '../../store/game-store'
+import type { CombatScenario, GameState, TacticCard } from '@engine/types.js'
+import { getWoundThresholdV2, getFigureName } from '@engine/turn-machine-v2.js'
 
 interface CombatPanelProps {
   combat: CombatScenario | null
@@ -11,6 +13,7 @@ interface CombatPanelProps {
 
 export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) => {
   const { isMobile } = useIsMobile()
+  const { gameData, dismissCombat } = useGameStore()
 
   if (!combat || !gameState) return null
 
@@ -21,6 +24,8 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
 
   const attackerWT = getWoundThresholdV2(attacker, gameState)
   const defenderWT = getWoundThresholdV2(defender, gameState)
+  const attackerName = getFigureName(attacker, gameState)
+  const defenderName = getFigureName(defender, gameState)
 
   const containerStyle: React.CSSProperties = {
     position: 'fixed',
@@ -100,9 +105,25 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
       <div style={sectionStyle}>
         <div style={sideHeaderStyle('#ff4444')}>⚔️ Attacker</div>
         <div style={figureInfoStyle}>
-          <span>{attacker.id}</span>
+          <span>{attackerName}</span>
           <span>Wounds: {attacker.woundsCurrent}/{attackerWT}</span>
         </div>
+        {/* Weapon and range info */}
+        {(() => {
+          const weapon = gameData?.weapons?.[combat.weaponId]
+          const weaponName = weapon?.name ?? combat.weaponId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+          const rangeColors: Record<string, string> = {
+            Engaged: '#ff6644', Short: '#ffaa00', Medium: '#44ff44', Long: '#4a9eff', Extreme: '#cc77ff',
+          }
+          return (
+            <div style={{ fontSize: '10px', color: '#ccc', marginBottom: '4px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ color: '#ff8844' }}>{weaponName}</span>
+              {weapon && <span style={{ color: '#888' }}>Dmg {weapon.baseDamage}{weapon.damageAddBrawn ? '+Br' : ''}</span>}
+              <span style={{ color: rangeColors[combat.rangeBand] ?? '#888' }}>{combat.rangeBand}</span>
+              {combat.cover !== 'None' && <span style={{ color: '#888' }}>Cover: {combat.cover}</span>}
+            </div>
+          )
+        })()}
         {/* Aim token indicator */}
         {attacker.aimTokens > 0 && (
           <div style={{ fontSize: '10px', color: '#ffd700', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -127,7 +148,7 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
       <div style={sectionStyle}>
         <div style={sideHeaderStyle('#44ff44')}>🛡️ Defender</div>
         <div style={figureInfoStyle}>
-          <span>{defender.id}</span>
+          <span>{defenderName}</span>
           <span>Wounds: {defender.woundsCurrent}/{defenderWT}</span>
         </div>
         {/* Dodge token indicator */}
@@ -163,7 +184,7 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
       </div>
 
       {/* Resolution */}
-      {combat.state === 'Resolving' && combat.resolution && (
+      {(combat.state === 'Resolving' || combat.state === 'Complete') && combat.resolution && (
         <div style={sectionStyle}>
           <div style={sideHeaderStyle('#ffd700')}>Resolution</div>
 
@@ -202,6 +223,11 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
 
           <div style={{ fontSize: '12px', marginBottom: '4px' }}>
             Gross Damage: <span style={{ color: '#ff8844' }}>{combat.resolution.grossDamage}</span>
+            {combat.resolution.comboBonus > 0 && (
+              <span style={{ color: '#ffd700', marginLeft: '6px', fontSize: '10px' }}>
+                (includes +{combat.resolution.comboBonus} combo)
+              </span>
+            )}
           </div>
           <div style={{ fontSize: '12px', marginBottom: '4px' }}>
             Soak: <span style={{ color: '#4a9eff' }}>{combat.resolution.soak}</span>
@@ -232,12 +258,124 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
               DEFENDER DEFEATED
             </div>
           )}
+          {combat.resolution.isNewlyWounded && !combat.resolution.isDefeated && (
+            <div style={{ fontSize: '12px', color: '#ff8844', fontWeight: 'bold', marginTop: '8px' }}>
+              HERO WOUNDED
+            </div>
+          )}
+
+          {/* Critical hit */}
+          {combat.resolution.criticalTriggered && (
+            <div style={{
+              marginTop: '8px',
+              padding: '6px 10px',
+              backgroundColor: 'rgba(255, 68, 68, 0.15)',
+              border: '1px solid #ff444460',
+              borderRadius: '4px',
+            }}>
+              <div style={{ fontSize: '12px', color: '#ff4444', fontWeight: 'bold' }}>
+                CRITICAL HIT!
+              </div>
+              {combat.resolution.criticalResult != null && (
+                <div style={{ fontSize: '10px', color: '#ff8844', marginTop: '2px' }}>
+                  Critical Roll: {combat.resolution.criticalResult}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Advantage spending */}
+          {combat.resolution.advantagesSpent.length > 0 && (
+            <div style={{ marginTop: '8px' }}>
+              <div style={{ fontSize: '10px', color: '#4a9eff', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '2px' }}>
+                Advantages Spent
+              </div>
+              {combat.resolution.advantagesSpent.map((effect, i) => (
+                <div key={i} style={{ fontSize: '11px', color: '#88bbff', padding: '1px 0' }}>
+                  {effect}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Threat spending */}
+          {combat.resolution.threatsSpent.length > 0 && (
+            <div style={{ marginTop: '6px' }}>
+              <div style={{ fontSize: '10px', color: '#ff8844', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '2px' }}>
+                Threats Spent
+              </div>
+              {combat.resolution.threatsSpent.map((effect, i) => (
+                <div key={i} style={{ fontSize: '11px', color: '#ffaa66', padding: '1px 0' }}>
+                  {effect}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Tactic cards played */}
+          {combat.resolution.tacticCardsPlayed && combat.resolution.tacticCardsPlayed.length > 0 && gameData?.tacticCards && (
+            <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #333355' }}>
+              <div style={{ fontSize: '10px', color: '#bb99ff', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '4px' }}>
+                Tactic Cards Played
+              </div>
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                {combat.resolution.tacticCardsPlayed.map(cardId => {
+                  const card = gameData.tacticCards![cardId]
+                  if (!card) return null
+                  const color = card.timing === 'Attack' ? '#ff4444' : card.timing === 'Defense' ? '#4a9eff' : '#ffd700'
+                  return (
+                    <span key={cardId} style={{
+                      padding: '2px 8px',
+                      backgroundColor: 'rgba(187, 153, 255, 0.1)',
+                      border: `1px solid ${color}`,
+                      borderRadius: '3px',
+                      fontSize: '10px',
+                      color,
+                    }}>
+                      {card.name}
+                    </span>
+                  )
+                })}
+              </div>
+              {combat.resolution.tacticSuppression != null && combat.resolution.tacticSuppression > 0 && (
+                <div style={{ fontSize: '10px', color: '#ff8844', marginTop: '4px' }}>
+                  Tactic Suppression: +{combat.resolution.tacticSuppression}
+                </div>
+              )}
+              {combat.resolution.tacticRecover != null && combat.resolution.tacticRecover > 0 && (
+                <div style={{ fontSize: '10px', color: '#44ff44', marginTop: '4px' }}>
+                  Tactic Recovery: {combat.resolution.tacticRecover} wounds
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
+      {/* Tactic Card Hand (Operative) */}
+      {gameState.tacticDeck && gameData?.tacticCards && (() => {
+        const operativePlayer = gameState.players.find(p => p.role === 'Operative')
+        const isAttacker = attacker.playerId === operativePlayer?.id
+        const hand = gameState.tacticDeck.operativeHand
+        const cards = hand
+          .map(id => gameData.tacticCards![id])
+          .filter((c): c is TacticCard => !!c)
+        if (cards.length === 0) return null
+        return (
+          <div style={{ ...sectionStyle, borderTop: '1px solid #333355', paddingTop: '12px' }}>
+            <div style={sideHeaderStyle('#bb99ff')}>Your Tactic Cards ({cards.length})</div>
+            <TacticCardHand
+              cards={cards}
+              side={isAttacker ? 'attacker' : 'defender'}
+              isActive={combat.state === 'Rolling'}
+            />
+          </div>
+        )
+      })()}
+
       <button
         style={{ ...buttonStyle('primary'), marginTop: '0', ...(isMobile ? { width: '100%' } : {}) }}
-        onClick={() => {}}
+        onClick={dismissCombat}
       >
         Continue
       </button>

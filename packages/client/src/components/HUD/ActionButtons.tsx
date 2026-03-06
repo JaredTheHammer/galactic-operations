@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useGameStore } from '../../store/game-store'
 import type { Figure } from '@engine/types.js'
 import { getWoundThresholdV2 } from '@engine/turn-machine-v2.js'
@@ -12,8 +12,29 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
   const {
     moveFigure, startAttack, rallyFigure, guardedStance, useTalent,
     endActivation, validMoves, validTargets, gameState, getActivatableTalents,
-    aimFigure, dodgeFigure,
+    aimFigure, dodgeFigure, takeCover, standUp, strainForManeuver, drawHolster,
+    undoLastAction, gameStateHistory,
+    useConsumable, getAvailableConsumables, gameData,
   } = useGameStore()
+
+  const [showConsumableMenu, setShowConsumableMenu] = useState(false)
+  const consumableMenuRef = useRef<HTMLDivElement>(null)
+  const consumableBtnRef = useRef<HTMLButtonElement>(null)
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!showConsumableMenu) return
+    const handler = (e: MouseEvent) => {
+      if (
+        consumableMenuRef.current && !consumableMenuRef.current.contains(e.target as Node) &&
+        consumableBtnRef.current && !consumableBtnRef.current.contains(e.target as Node)
+      ) {
+        setShowConsumableMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showConsumableMenu])
 
   if (!selectedFigure) return null
 
@@ -23,12 +44,26 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
   const canGuardedStance = selectedFigure.actionsRemaining > 0
   const canAim = selectedFigure.actionsRemaining > 0 && selectedFigure.aimTokens < 2
   const canDodge = selectedFigure.actionsRemaining > 0 && selectedFigure.dodgeTokens < 1
-  const canStrainForManeuver = !selectedFigure.hasUsedStrainForManeuver && selectedFigure.maneuversRemaining === 0
+  const canTakeCover = selectedFigure.maneuversRemaining > 0
+  const isProne = selectedFigure.conditions?.includes('Prone') ?? false
+  const canStandUp = isProne && selectedFigure.maneuversRemaining > 0
+  const canStrainForManeuver = !selectedFigure.hasUsedStrainForManeuver
+  const hero = selectedFigure.entityType === 'hero' && gameState
+    ? gameState.heroes?.[selectedFigure.entityId]
+    : null
+  const hasSecondaryWeapon = hero?.equipment?.secondaryWeapon != null
+  const canDrawHolster = hasSecondaryWeapon && selectedFigure.maneuversRemaining > 0
 
   const woundThreshold = gameState ? getWoundThresholdV2(selectedFigure, gameState) : 0
 
   // Get activatable talents for hero figures
   const activatableTalents = getActivatableTalents(selectedFigure)
+
+  // Get available consumables (only for heroes with actions remaining)
+  const availableConsumables = selectedFigure.entityType === 'hero' && selectedFigure.actionsRemaining > 0
+    ? getAvailableConsumables(selectedFigure)
+    : []
+  const hasConsumables = availableConsumables.length > 0
 
   const containerStyle: React.CSSProperties = compact ? {
     display: 'flex',
@@ -57,6 +92,14 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
     flexWrap: 'wrap',
     justifyContent: 'center',
     maxWidth: '90vw',
+  }
+
+  const actionTypeLabel: React.CSSProperties = {
+    fontSize: '7px',
+    letterSpacing: '0.5px',
+    color: '#aaaaaa',
+    textTransform: 'uppercase',
+    marginBottom: '1px',
   }
 
   const buttonStyle = (bgColor: string, disabled: boolean = false): React.CSSProperties => ({
@@ -93,6 +136,11 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
     }
   }
 
+  const handleConsumableUse = (itemId: string) => {
+    useConsumable(itemId)
+    setShowConsumableMenu(false)
+  }
+
   return (
     <div style={containerStyle}>
       {/* Core actions */}
@@ -102,6 +150,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Move: Use valid move tiles (M)"
         disabled={!canMove}
       >
+        <span style={actionTypeLabel}>maneuver</span>
         <span>Move</span>
         <span style={{ fontSize: '10px', marginTop: '2px' }}>
           {validMoves.length}
@@ -114,6 +163,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Attack: Click target (A)"
         disabled={!canAttack}
       >
+        <span style={actionTypeLabel}>action</span>
         <span>Atk</span>
         <span style={{ fontSize: '10px', marginTop: '2px' }}>
           {validTargets.length}
@@ -126,6 +176,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Aim: Gain aim token (+1 die on next attack, max 2)"
         disabled={!canAim}
       >
+        <span style={actionTypeLabel}>maneuver</span>
         <span>Aim</span>
         {selectedFigure.aimTokens > 0 && (
           <span style={{ fontSize: '10px', marginTop: '2px' }}>
@@ -140,6 +191,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Rally: Recover strain (R)"
         disabled={!canRally}
       >
+        <span style={actionTypeLabel}>action</span>
         <span>Rally</span>
       </button>
 
@@ -149,6 +201,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Dodge: Gain dodge token (cancel 1 hit when attacked)"
         disabled={!canDodge}
       >
+        <span style={actionTypeLabel}>maneuver</span>
         <span>Dodge</span>
         {selectedFigure.dodgeTokens > 0 && (
           <span style={{ fontSize: '10px', marginTop: '2px' }}>
@@ -163,8 +216,140 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         title="Standby: Set overwatch, interrupt enemy movement with attack"
         disabled={!canGuardedStance}
       >
+        <span style={actionTypeLabel}>action</span>
         <span>Guard</span>
       </button>
+
+      <button
+        style={buttonStyle('#8899aa', !canTakeCover)}
+        onClick={() => takeCover()}
+        title="Take Cover: Use maneuver to gain +1 ranged defense this round"
+        disabled={!canTakeCover}
+      >
+        <span style={actionTypeLabel}>maneuver</span>
+        <span>Cover</span>
+      </button>
+
+      {isProne && (
+        <button
+          style={buttonStyle('#ff8844', !canStandUp)}
+          onClick={() => standUp()}
+          title="Stand Up: Remove Prone condition (maneuver)"
+          disabled={!canStandUp}
+        >
+          <span style={actionTypeLabel}>maneuver</span>
+          <span>Stand</span>
+        </button>
+      )}
+
+      <button
+        style={buttonStyle('#bb66ff', !canStrainForManeuver)}
+        onClick={() => strainForManeuver()}
+        title="Strain for Maneuver: Suffer 2 strain to gain extra maneuver (once per turn) (S)"
+        disabled={!canStrainForManeuver}
+      >
+        <span style={actionTypeLabel}>special</span>
+        <span>+Man</span>
+        <span style={{ fontSize: '9px', marginTop: '1px' }}>2 strain</span>
+      </button>
+
+      {hasSecondaryWeapon && (
+        <button
+          style={buttonStyle('#ff6600', !canDrawHolster)}
+          onClick={() => drawHolster()}
+          title={`Swap Weapon: Draw ${gameData?.weapons?.[hero?.equipment?.secondaryWeapon ?? '']?.name ?? 'secondary'} (maneuver)`}
+          disabled={!canDrawHolster}
+        >
+          <span>Swap</span>
+          <span style={{ fontSize: '9px', marginTop: '1px' }}>
+            {gameData?.weapons?.[hero?.equipment?.secondaryWeapon ?? '']?.name?.slice(0, 8) ?? 'wpn'}
+          </span>
+        </button>
+      )}
+
+      {/* Consumable items button (heroes only) */}
+      {hasConsumables && (
+        <div style={{ position: 'relative' }}>
+          <button
+            ref={consumableBtnRef}
+            style={buttonStyle('#ff8800', !hasConsumables)}
+            onClick={() => setShowConsumableMenu(prev => !prev)}
+            title="Use consumable item (stim pack, repair patch, etc.)"
+            disabled={!hasConsumables}
+          >
+            <span>Item</span>
+            <span style={{ fontSize: '10px', marginTop: '2px' }}>
+              {availableConsumables.reduce((sum, c) => sum + c.count, 0)}
+            </span>
+          </button>
+
+          {showConsumableMenu && (
+            <div
+              ref={consumableMenuRef}
+              style={{
+                position: 'fixed',
+                bottom: compact ? '60px' : '80px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: 'rgba(19, 19, 32, 0.98)',
+                border: '2px solid #ff8800',
+                borderRadius: '8px',
+                padding: '8px',
+                zIndex: 300,
+                minWidth: '220px',
+                maxWidth: '320px',
+                boxShadow: '0 0 20px rgba(255, 136, 0, 0.3)',
+              }}
+            >
+              <div style={{
+                fontSize: '11px',
+                color: '#ff8800',
+                fontWeight: 'bold',
+                textTransform: 'uppercase',
+                marginBottom: '8px',
+                paddingBottom: '4px',
+                borderBottom: '1px solid #333355',
+              }}>
+                Use Consumable
+              </div>
+              {availableConsumables.map(({ item, count }) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleConsumableUse(item.id)}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '8px 10px',
+                    backgroundColor: 'transparent',
+                    color: '#ffffff',
+                    border: '1px solid #333355',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    marginBottom: '4px',
+                    fontSize: '11px',
+                    transition: 'background-color 0.15s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(255, 136, 0, 0.15)')}
+                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  title={item.description}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 'bold' }}>{item.name}</span>
+                    <span style={{ color: '#ff8800', fontSize: '10px' }}>
+                      x{count}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '9px', color: '#999999', marginTop: '2px' }}>
+                    {item.effect === 'heal_wounds' ? `Heal ${item.baseValue} wounds` : `Recover ${item.baseValue} strain`}
+                    {item.diminishingReturns && ' (diminishing)'}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Active Talent buttons (heroes only) */}
       {activatableTalents.length > 0 && (
@@ -200,6 +385,20 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
         <span>End</span>
       </button>
 
+      <button
+        style={buttonStyle('#665588', gameStateHistory.length === 0)}
+        onClick={() => undoLastAction()}
+        title="Undo Last Action (Ctrl+Z)"
+        disabled={gameStateHistory.length === 0}
+      >
+        <span>Undo</span>
+        {gameStateHistory.length > 0 && (
+          <span style={{ fontSize: '10px', marginTop: '2px' }}>
+            {gameStateHistory.length}
+          </span>
+        )}
+      </button>
+
       {/* Status readout */}
       <div
         style={{
@@ -227,21 +426,33 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
           <span style={{ borderLeft: '1px solid #555', paddingLeft: '8px', display: 'flex', gap: '6px' }}>
             {selectedFigure.aimTokens > 0 && (
               <span style={{ color: '#ffd700' }} title="Aim tokens">
-                🎯{selectedFigure.aimTokens}
+                Aim:{selectedFigure.aimTokens}
               </span>
             )}
             {selectedFigure.dodgeTokens > 0 && (
               <span style={{ color: '#4a9eff' }} title="Dodge tokens">
-                🛡{selectedFigure.dodgeTokens}
+                Dge:{selectedFigure.dodgeTokens}
               </span>
             )}
             {selectedFigure.suppressionTokens > 0 && (
               <span style={{ color: selectedFigure.suppressionTokens >= selectedFigure.courage ? '#ff4444' : '#ff8844' }} title="Suppression tokens">
-                ⚡{selectedFigure.suppressionTokens}
+                Sup:{selectedFigure.suppressionTokens}
               </span>
             )}
           </span>
         )}
+        {gameState?.tacticDeck && (() => {
+          const operativePlayer = gameState.players.find(p => p.role === 'Operative')
+          const isOperative = selectedFigure.playerId === operativePlayer?.id
+          if (!isOperative) return null
+          const handSize = gameState.tacticDeck!.operativeHand.length
+          if (handSize === 0) return null
+          return (
+            <span style={{ borderLeft: '1px solid #555', paddingLeft: '8px', color: '#bb99ff' }} title="Tactic cards in hand">
+              Cards:{handSize}
+            </span>
+          )
+        })()}
       </div>
     </div>
   )

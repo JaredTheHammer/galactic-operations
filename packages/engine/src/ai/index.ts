@@ -54,6 +54,8 @@ export {
   getRemainingHealth,
   findAttackPositions,
   findMeleePositions,
+  getAttackRangeInTiles,
+  getThreateningEnemies,
 } from './evaluate-v2.js';
 
 // ============================================================================

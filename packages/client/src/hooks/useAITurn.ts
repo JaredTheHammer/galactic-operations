@@ -26,6 +26,7 @@ import {
   getProfileForFigure,
   determineActions,
 } from '@engine/ai/index.js'
+import { combatAnimations } from '../canvas/animation-manager'
 import {
   advancePhaseV2,
   executeActionV2,
@@ -103,11 +104,11 @@ export function useAITurn(): UseAITurnReturn {
   const [battleLog, setBattleLog] = useState<BattleLog | null>(null)
 
   const profilesRef = useRef<AIProfilesData | null>(null)
-  const cancelRef = useRef(false)
   const pausedRef = useRef(false)
   const speedRef = useRef<AISpeed>(speed)
-  const loopStarted = useRef(false)
   const loggerRef = useRef<BattleLogger | null>(null)
+  // Monotonically increasing ID to distinguish effect invocations (StrictMode safe)
+  const effectIdRef = useRef(0)
 
   // Keep refs in sync with state
   useEffect(() => { pausedRef.current = isPaused }, [isPaused])
@@ -119,20 +120,6 @@ export function useAITurn(): UseAITurnReturn {
   }, [])
 
   const isAIBattle = useGameStore(s => s.gameState?.players.every(p => p.isAI) ?? false)
-
-  // Async delay that respects cancel and pause
-  const delay = useCallback(async (ms: number) => {
-    if (ms <= 0) return
-    const start = Date.now()
-    while (Date.now() - start < ms) {
-      if (cancelRef.current) return
-      while (pausedRef.current && !cancelRef.current) {
-        await new Promise(r => setTimeout(r, 100))
-      }
-      if (cancelRef.current) return
-      await new Promise(r => setTimeout(r, Math.min(50, ms - (Date.now() - start))))
-    }
-  }, [])
 
   const getBattleLogJSON = useCallback((): string | null => {
     return loggerRef.current?.toJSON() ?? null
@@ -147,13 +134,28 @@ export function useAITurn(): UseAITurnReturn {
   // -----------------------------------------------------------------------
   useEffect(() => {
     if (!isAIBattle || !gameData || !profilesRef.current) return
-    if (loopStarted.current) return
 
     const initialGs = useGameStore.getState().gameState
     if (!initialGs) return
 
-    loopStarted.current = true
-    cancelRef.current = false
+    // StrictMode-safe cancellation: each invocation gets a unique ID.
+    // Cleanup increments the ID, so stale loops detect they've been superseded.
+    const myEffectId = ++effectIdRef.current
+    const isCancelled = () => effectIdRef.current !== myEffectId
+
+    // Async delay that respects cancel and pause (closure-scoped)
+    const delay = async (ms: number) => {
+      if (ms <= 0) return
+      const start = Date.now()
+      while (Date.now() - start < ms) {
+        if (isCancelled()) return
+        while (pausedRef.current && !isCancelled()) {
+          await new Promise(r => setTimeout(r, 100))
+        }
+        if (isCancelled()) return
+        await new Promise(r => setTimeout(r, Math.min(50, ms - (Date.now() - start))))
+      }
+    }
 
     const profiles = profilesRef.current
 
@@ -218,14 +220,14 @@ export function useAITurn(): UseAITurnReturn {
 
       // ===== ROUND LOOP =====
       while (gs.roundNumber <= ROUND_LIMIT && gs.turnPhase !== 'GameOver') {
-        if (cancelRef.current) return
+        if (isCancelled()) return
 
         // ===== ACTIVATION LOOP =====
         while (
           gs.turnPhase === 'Activation' &&
           gs.currentActivationIndex < gs.activationOrder.length
         ) {
-          if (cancelRef.current) return
+          if (isCancelled()) return
           const speeds = SPEED_DELAYS[speedRef.current]
 
           const figId = gs.activationOrder[gs.currentActivationIndex]
@@ -260,7 +262,7 @@ export function useAITurn(): UseAITurnReturn {
           }))
 
           await delay(speeds.thinkMs)
-          if (cancelRef.current) return
+          if (isCancelled()) return
 
           const gsBefore = gs
 
@@ -289,25 +291,27 @@ export function useAITurn(): UseAITurnReturn {
           const executedActions: GameAction[] = []
 
           for (const action of decision.actions) {
-            if (cancelRef.current) return
+            if (isCancelled()) return
 
-            // Visualize
+            // Visualize + auto-pan camera
             if (action.type === 'Move') {
-              useGameStore.setState({ aiMovePath: action.payload.path })
+              useGameStore.getState().setAIMovePath(action.payload.path)
             } else if (action.type === 'Attack') {
               const targetFig = gs.figures.find(f => f.id === action.payload.targetId)
               const currentFig = gs.figures.find(f => f.id === activeFig.id)
               if (targetFig && currentFig) {
-                useGameStore.setState({
-                  aiAttackTarget: { from: currentFig.position, to: targetFig.position },
-                })
+                useGameStore.getState().setAIAttackTarget({ from: currentFig.position, to: targetFig.position })
               }
             }
 
             await delay(speeds.actionMs)
-            if (cancelRef.current) return
+            if (isCancelled()) return
 
-            useGameStore.setState({ aiMovePath: null, aiAttackTarget: null })
+            useGameStore.getState().clearAIVisualization()
+
+            // Capture pre-execution state for animations
+            const figBefore = gs.figures.find(f => f.id === activeFig.id)
+            const figBeforePos = figBefore ? { x: figBefore.position.x, y: figBefore.position.y } : null
 
             try {
               gs = executeActionV2(gs, action, gameData)
@@ -316,6 +320,28 @@ export function useAITurn(): UseAITurnReturn {
               console.error(`Action execution error:`, err)
               addCombatLog(`  !! Action failed: ${err}`)
               continue
+            }
+
+            // Spawn animations based on action type
+            const ownerSide = activeFig.playerId === 0 ? 'imperial' : 'operative'
+            if (action.type === 'Move' && figBeforePos) {
+              const dest = action.payload.path[action.payload.path.length - 1]
+              combatAnimations.spawnMoveTrail(figBeforePos, dest, ownerSide)
+            } else if (action.type === 'Attack') {
+              const targetFig = gs.figures.find(f => f.id === action.payload.targetId)
+              const attackerFig = gs.figures.find(f => f.id === activeFig.id)
+              if (targetFig && attackerFig) {
+                const resolution = gs.activeCombat?.resolution
+                const isHit = resolution?.isHit ?? false
+                const defSide = targetFig.owner === 0 ? 'imperial' : 'operative'
+                combatAnimations.spawnProjectile(attackerFig.position, targetFig.position, isHit, ownerSide)
+                if (resolution) {
+                  combatAnimations.spawnDamageNumber(targetFig.position, resolution.woundsDealt, resolution.isHit)
+                  if (resolution.isDefeated) {
+                    combatAnimations.spawnDeathParticles(targetFig.position, defSide)
+                  }
+                }
+              }
             }
 
             const actionLabel = describeActionV2(action, gs)
@@ -356,6 +382,10 @@ export function useAITurn(): UseAITurnReturn {
               }
             }
 
+            // Clear activeCombat overlay after AI actions so it doesn't block the UI
+            if (gs.activeCombat) {
+              gs = { ...gs, activeCombat: null }
+            }
             useGameStore.setState({ gameState: gs })
           }
 
@@ -400,13 +430,13 @@ export function useAITurn(): UseAITurnReturn {
           // Check victory after each activation
           const midVictory = checkVictoryV2(gs, mission)
           if (midVictory.winner) {
-            gs = { ...gs, winner: midVictory.winner, victoryCondition: midVictory.condition, turnPhase: 'GameOver' as any }
+            gs = { ...gs, winner: midVictory.winner, victoryCondition: midVictory.condition, turnPhase: 'GameOver' as const }
             useGameStore.setState({ gameState: gs })
             addCombatLog(`GAME OVER: ${midVictory.winner} wins! ${midVictory.condition}`)
             logger.endRound(gs)
             finalizeGame(midVictory.winner, midVictory.condition ?? 'Victory', gs)
             setAIState(prev => ({ ...prev, phase: 'idle', activeFigure: null }))
-            loopStarted.current = false
+
             return
           }
 
@@ -420,7 +450,7 @@ export function useAITurn(): UseAITurnReturn {
 
         // Force to Status if still in Activation
         if (gs.turnPhase === 'Activation') {
-          gs = { ...gs, turnPhase: 'Status' as any }
+          gs = { ...gs, turnPhase: 'Status' as const }
         }
         gs = advancePhaseV2(gs) // Status -> Reinforcement
 
@@ -451,12 +481,12 @@ export function useAITurn(): UseAITurnReturn {
         // Check victory / round limit
         const endVictory = checkVictoryV2(gs, mission)
         if (endVictory.winner) {
-          gs = { ...gs, winner: endVictory.winner, victoryCondition: endVictory.condition, turnPhase: 'GameOver' as any }
+          gs = { ...gs, winner: endVictory.winner, victoryCondition: endVictory.condition, turnPhase: 'GameOver' as const }
           useGameStore.setState({ gameState: gs })
           addCombatLog(`GAME OVER: ${endVictory.winner} wins! ${endVictory.condition}`)
           finalizeGame(endVictory.winner, endVictory.condition ?? 'Victory', gs)
           setAIState(prev => ({ ...prev, phase: 'idle', activeFigure: null }))
-          loopStarted.current = false
+
           return
         }
 
@@ -471,13 +501,14 @@ export function useAITurn(): UseAITurnReturn {
             if (side === 'Imperial') impWounds += remaining
             else opWounds += remaining
           }
-          const winner = impWounds > opWounds ? 'Imperial' : opWounds > impWounds ? 'Operative' : 'Draw'
-          gs = { ...gs, winner: winner as any, victoryCondition: 'Round limit reached', turnPhase: 'GameOver' as any }
+          const winnerLabel = impWounds > opWounds ? 'Imperial' : opWounds > impWounds ? 'Operative' : 'Draw'
+          const winnerSide = winnerLabel === 'Draw' ? null : winnerLabel as 'Imperial' | 'Operative'
+          gs = { ...gs, winner: winnerSide, victoryCondition: 'Round limit reached', turnPhase: 'GameOver' as const }
           useGameStore.setState({ gameState: gs })
-          addCombatLog(`GAME OVER: ${winner} wins by remaining health!`)
-          finalizeGame(winner, 'Round limit reached', gs)
+          addCombatLog(`GAME OVER: ${winnerLabel} wins by remaining health!`)
+          finalizeGame(winnerLabel, 'Round limit reached', gs)
           setAIState(prev => ({ ...prev, phase: 'idle', activeFigure: null }))
-          loopStarted.current = false
+
           return
         }
 
@@ -488,18 +519,16 @@ export function useAITurn(): UseAITurnReturn {
       }
 
       setAIState(prev => ({ ...prev, phase: 'idle', activeFigure: null }))
-      loopStarted.current = false
     }
 
     runGame().catch(err => {
       console.error('AI game loop error:', err)
       addCombatLog(`AI loop error: ${err}`)
-      loopStarted.current = false
     })
 
     return () => {
-      cancelRef.current = true
-      loopStarted.current = false
+      // Incrementing effectId makes isCancelled() return true for this invocation's loop
+      effectIdRef.current++
     }
   }, [isAIBattle, gameData])
 
@@ -567,6 +596,6 @@ function describeActionV2(action: GameAction, gs: GameState): string {
       return `Interact with objective (${objId})`
     }
     default:
-      return (action as any).type
+      return action.type
   }
 }

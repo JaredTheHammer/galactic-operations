@@ -58,6 +58,11 @@ import {
 import { executeActiveTalent } from './talent-v2.js';
 import { resolveSkillCheck } from './character-v2.js';
 import { hasKeyword, getKeywordValue } from './keywords.js';
+import {
+  getSpeciesRegeneration,
+  getSpeciesBonusStrainRecovery,
+  isImmuneToCondition,
+} from './species-abilities.js';
 
 // ============================================================================
 // OBJECTIVE POINT UTILITIES
@@ -93,6 +98,8 @@ export function createInitialGameStateV2(
     objectivePointTemplates?: ObjectivePointTemplate[];
     /** Loot tokens from mission definition. Placed on the map for collection. */
     lootTokens?: LootToken[];
+    /** Consumable inventory from campaign state. Maps item ID to quantity. */
+    consumableInventory?: Record<string, number>;
   },
 ): GameState {
   let map: GameMap;
@@ -170,6 +177,9 @@ export function createInitialGameStateV2(
 
     // Loot tokens from mission definition (placed on map for collection)
     lootTokens: options?.lootTokens ?? [],
+
+    // Consumable inventory (initialized from campaign state or empty for standalone)
+    consumableInventory: options?.consumableInventory ?? {},
   };
 }
 
@@ -1042,6 +1052,7 @@ export function resetForActivation(
   figure: Figure,
   rollFn?: () => number,
   gameState?: GameState,
+  gameData?: GameData,
 ): Figure {
   const newConditions = figure.conditions.filter(c =>
     // Remove transient conditions that expire at activation start
@@ -1112,6 +1123,18 @@ export function resetForActivation(
     maneuversRemaining = 1;
   }
 
+  // Species regeneration (e.g., Trandoshan: recover 1 wound at activation start)
+  let woundsCurrent = figure.woundsCurrent;
+  if (gameState && gameData && figure.entityType === 'hero') {
+    const hero = gameState.heroes[figure.entityId];
+    if (hero) {
+      const regenAmount = getSpeciesRegeneration(figure, hero, gameData);
+      if (regenAmount > 0) {
+        woundsCurrent = Math.max(0, woundsCurrent - regenAmount);
+      }
+    }
+  }
+
   return {
     ...figure,
     actionsRemaining,
@@ -1126,6 +1149,7 @@ export function resetForActivation(
     conditions: newConditions,
     suppressionTokens,
     strainCurrent,
+    woundsCurrent,
   };
 }
 
@@ -1493,7 +1517,14 @@ export function executeActionV2(
 
     case 'Rally': {
       // Rally: recover strain equal to Presence (or 1 for NPCs)
-      const strainRecovery = getStrainRecovery(figure, newState);
+      let strainRecovery = getStrainRecovery(figure, newState);
+      // Species bonus strain recovery (e.g., Human Adaptable: +1)
+      if (figure.entityType === 'hero') {
+        const hero = newState.heroes[figure.entityId];
+        if (hero) {
+          strainRecovery += getSpeciesBonusStrainRecovery(hero, gameData);
+        }
+      }
       newState.figures[figIdx] = {
         ...newState.figures[figIdx],
         strainCurrent: Math.max(0, figure.strainCurrent - strainRecovery),
@@ -1591,6 +1622,13 @@ export function executeActionV2(
 
       if (!consumable) break;
 
+      // Validate inventory (Operative side only -- Imperial NPCs have unlimited consumables)
+      const consumePlayer = newState.players.find(p => p.id === figure.playerId);
+      if (consumePlayer?.role === 'Operative' && newState.consumableInventory) {
+        const available = newState.consumableInventory[itemId] ?? 0;
+        if (available <= 0) break;
+      }
+
       // Determine target (self if no targetId)
       const targetFigureId = targetId ?? figure.id;
       const targetIdx = newState.figures.findIndex(f => f.id === targetFigureId);
@@ -1640,6 +1678,18 @@ export function executeActionV2(
       }
 
       newState.figures[targetIdx] = updatedTarget;
+
+      // Deplete from inventory (Operative side)
+      if (consumePlayer?.role === 'Operative' && newState.consumableInventory) {
+        const currentCount = newState.consumableInventory[itemId] ?? 0;
+        newState = {
+          ...newState,
+          consumableInventory: {
+            ...newState.consumableInventory,
+            [itemId]: Math.max(0, currentCount - 1),
+          },
+        };
+      }
 
       // Consume action
       newState.figures[figIdx] = {

@@ -640,7 +640,7 @@ const styles = {
   canvas: {
     borderRadius: '4px',
     border: '1px solid #333',
-    imageRendering: 'pixelated' as any,
+    imageRendering: 'pixelated' as React.CSSProperties['imageRendering'],
   } as React.CSSProperties,
 
   actionOverlay: {

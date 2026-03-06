@@ -8,12 +8,13 @@ import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { MissionResult, HeroCharacter } from '../../../../engine/src/types'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
+import { t } from '../../styles/theme'
 
 const containerStyle: React.CSSProperties = {
   width: '100vw',
   height: '100vh',
-  backgroundColor: '#0a0a0f',
-  color: '#c0c0c0',
+  backgroundColor: t.bgBase,
+  color: t.textSecondary,
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
   display: 'flex',
   flexDirection: 'column',
@@ -23,9 +24,9 @@ const containerStyle: React.CSSProperties = {
 }
 
 const panelStyle: React.CSSProperties = {
-  backgroundColor: '#12121f',
-  border: '1px solid #2a2a3f',
-  borderRadius: '12px',
+  backgroundColor: t.bgSurface1,
+  border: `1px solid ${t.border}`,
+  borderRadius: t.radiusLg,
   padding: '32px',
   maxWidth: '700px',
   width: '90%',
@@ -33,7 +34,7 @@ const panelStyle: React.CSSProperties = {
 
 const buttonStyle: React.CSSProperties = {
   padding: '12px 24px',
-  borderRadius: '6px',
+  borderRadius: t.radiusSm,
   border: 'none',
   cursor: 'pointer',
   fontWeight: 'bold',
@@ -51,9 +52,9 @@ const pillStyle: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
   gap: '6px',
-  backgroundColor: '#0a0a1a',
-  border: '1px solid #1a1a2f',
-  borderRadius: '6px',
+  backgroundColor: t.bgSurface2,
+  border: `1px solid ${t.borderSubtle}`,
+  borderRadius: t.radiusSm,
   padding: '6px 10px',
   fontSize: '12px',
   marginRight: '8px',
@@ -69,7 +70,7 @@ function XPRow({ label, value }: { label: string; value: number }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px' }}>
       <span>{label}</span>
-      <span style={{ color: '#44ff44', fontWeight: 'bold' }}>+{value} XP</span>
+      <span style={{ color: t.accentGreen, fontWeight: 'bold' }}>+{value} XP</span>
     </div>
   )
 }
@@ -86,8 +87,8 @@ function HeroStatusCard({
   isMobile?: boolean
 }) {
   const isWounded = hero.isWounded
-  const borderColor = wasIncapacitated ? '#ff4444' : isWounded ? '#ffaa00' : '#2a4a2a'
-  const statusColor = wasIncapacitated ? '#ff4444' : isWounded ? '#ffaa00' : '#44ff44'
+  const borderColor = wasIncapacitated ? t.accentRed : isWounded ? t.accentOrange : '#2a4a2a'
+  const statusColor = wasIncapacitated ? t.accentRed : isWounded ? t.accentOrange : t.accentGreen
   const statusText = wasIncapacitated ? 'INCAPACITATED' : isWounded ? 'WOUNDED' : 'HEALTHY'
   const statusIcon = wasIncapacitated ? '\u2620' : isWounded ? '\u26A0' : '\u2714'
 
@@ -105,17 +106,17 @@ function HeroStatusCard({
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <HeroPortrait portraitId={hero.portraitId} name={hero.name} size={28} accentColor="#4a9eff" />
-          <span style={{ color: '#4a9eff', fontWeight: 'bold', fontSize: '13px' }}>{hero.name}</span>
+          <HeroPortrait portraitId={hero.portraitId} name={hero.name} size={28} accentColor={t.accentBlue} />
+          <span style={{ color: t.accentBlue, fontWeight: 'bold', fontSize: '13px' }}>{hero.name}</span>
         </div>
         <span style={{ color: statusColor, fontSize: '10px', fontWeight: 'bold' }}>
           {statusIcon} {statusText}
         </span>
       </div>
-      <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: '#888' }}>
+      <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: t.textMuted }}>
         <span>W: {hero.wounds.current}/{hero.wounds.threshold}</span>
         <span>S: {hero.strain.current}/{hero.strain.threshold}</span>
-        {kills > 0 && <span style={{ color: '#ffaa00' }}>{kills} kill{kills !== 1 ? 's' : ''}</span>}
+        {kills > 0 && <span style={{ color: t.accentOrange }}>{kills} kill{kills !== 1 ? 's' : ''}</span>}
       </div>
     </div>
   )
@@ -126,16 +127,16 @@ function HeroStatusCard({
 // ============================================================================
 
 export default function PostMission() {
-  const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState } = useGameStore()
+  const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState, activeMissionDef, campaignMissions } = useGameStore()
   const { isMobile } = useIsMobile()
 
   if (!lastMissionResult) {
     return (
       <div style={containerStyle}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ color: '#ff4444', marginBottom: '16px' }}>No mission result available.</div>
+          <div style={{ color: t.accentRed, marginBottom: '16px' }}>No mission result available.</div>
           <button
-            style={{ ...buttonStyle, backgroundColor: '#2a2a3f', color: '#c0c0c0', width: 'auto' }}
+            style={{ ...buttonStyle, backgroundColor: t.bgSurface2, color: t.textSecondary, width: 'auto' }}
             onClick={returnToMissionSelect}
           >
             Return to Campaign
@@ -147,12 +148,40 @@ export default function PostMission() {
 
   const result = lastMissionResult
   const isVictory = result.outcome === 'victory'
-  const outcomeColor = isVictory ? '#44ff44' : '#ff4444'
+  const outcomeColor = isVictory ? t.accentGreen : t.accentRed
   const outcomeText = isVictory ? 'MISSION COMPLETE' : 'MISSION FAILED'
 
   const heroes = campaignState
     ? (Object.values(campaignState.heroes) as HeroCharacter[])
     : []
+
+  // Compute credit rewards from loot tokens
+  const missionDef = campaignMissions?.[result.missionId]
+  let creditsEarned = 0
+  const lootDetails: { label: string; color: string }[] = []
+  if (missionDef && result.lootCollected.length > 0) {
+    for (const lootId of result.lootCollected) {
+      const token = missionDef.lootTokens.find(l => l.id === lootId)
+      if (!token) {
+        lootDetails.push({ label: lootId, color: t.textMuted })
+        continue
+      }
+      const r = token.reward
+      if (r.type === 'credits') {
+        creditsEarned += r.value
+        lootDetails.push({ label: `${r.value} Credits`, color: t.accentGold })
+      } else if (r.type === 'xp') {
+        lootDetails.push({ label: `${r.value} XP`, color: t.accentGreen })
+      } else if (r.type === 'equipment') {
+        lootDetails.push({ label: r.itemId.replace(/-/g, ' '), color: t.accentOrange })
+      } else if (r.type === 'narrative') {
+        lootDetails.push({ label: r.description, color: t.accentPurple })
+      }
+    }
+  }
+
+  // Enemy casualty summary
+  const totalKills = Object.values(result.heroKills).reduce((sum, k) => sum + k, 0)
 
   return (
     <div style={containerStyle}>
@@ -175,18 +204,58 @@ export default function PostMission() {
         }}>
           {outcomeText}
         </h1>
-        <div style={{ textAlign: 'center', color: '#888', marginBottom: isMobile ? '16px' : '24px', fontSize: isMobile ? '13px' : '14px' }}>
-          Completed in {result.roundsPlayed} rounds
+        <div style={{
+          textAlign: 'center',
+          color: t.textMuted,
+          marginBottom: isMobile ? '12px' : '16px',
+          fontSize: isMobile ? '13px' : '14px',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '16px',
+          flexWrap: 'wrap',
+        }}>
+          <span>{result.roundsPlayed} rounds</span>
+          {totalKills > 0 && (
+            <span style={{ color: t.accentRed }}>{totalKills} enem{totalKills === 1 ? 'y' : 'ies'} defeated</span>
+          )}
+          {creditsEarned > 0 && (
+            <span style={{ color: t.accentGold }}>+{creditsEarned} credits</span>
+          )}
         </div>
+
+        {/* Narrative outcome text */}
+        {(() => {
+          const narrativeMission = activeMissionDef ?? campaignMissions?.[result.missionId]
+          const narrativeText = narrativeMission
+            ? (isVictory ? narrativeMission.narrativeSuccess : narrativeMission.narrativeFailure)
+            : null
+          if (!narrativeText) return null
+          return (
+            <div style={{
+              backgroundColor: t.bgSurface1,
+              border: `1px solid ${t.border}`,
+              borderLeft: `3px solid ${outcomeColor}`,
+              borderRadius: t.radiusMd,
+              padding: isMobile ? '12px' : '16px',
+              marginBottom: isMobile ? '16px' : '24px',
+              fontStyle: 'italic',
+              color: t.textPrimary,
+              fontSize: '13px',
+              lineHeight: '1.7',
+            }}>
+              {narrativeText}
+            </div>
+          )
+        })()}
 
         {/* XP Breakdown */}
         <div style={{ marginBottom: isMobile ? '16px' : '24px' }}>
-          <h3 style={{ color: '#4a9eff', margin: '0 0 8px 0', fontSize: isMobile ? '14px' : '16px' }}>XP Earned</h3>
+          <h3 style={{ color: t.accentBlue, margin: '0 0 8px 0', fontSize: isMobile ? '14px' : '16px' }}>XP Earned</h3>
           <div style={{
-            backgroundColor: '#0a0a1a',
-            borderRadius: '8px',
+            backgroundColor: t.bgSurface2,
+            borderRadius: t.radiusMd,
             padding: isMobile ? '8px' : '12px',
-            border: '1px solid #1a1a2f',
+            border: `1px solid ${t.borderSubtle}`,
           }}>
             <XPRow label="Participation" value={result.xpBreakdown.participation} />
             <XPRow label="Mission Success" value={result.xpBreakdown.missionSuccess} />
@@ -200,12 +269,12 @@ export default function PostMission() {
               justifyContent: 'space-between',
               padding: '10px 0 0 0',
               marginTop: '8px',
-              borderTop: '1px solid #2a2a3f',
+              borderTop: `1px solid ${t.border}`,
               fontSize: isMobile ? '15px' : '18px',
               fontWeight: 'bold',
             }}>
-              <span style={{ color: '#fff' }}>Total</span>
-              <span style={{ color: '#44ff44', textShadow: '0 0 8px #44ff4440' }}>
+              <span style={{ color: t.textPrimary }}>Total</span>
+              <span style={{ color: t.accentGreen, textShadow: t.shadowGlowSm }}>
                 +{result.xpBreakdown.total} XP
               </span>
             </div>
@@ -215,7 +284,7 @@ export default function PostMission() {
         {/* Hero Status */}
         {heroes.length > 0 && (
           <div style={{ marginBottom: isMobile ? '12px' : '20px' }}>
-            <h3 style={{ ...sectionHeaderStyle, color: '#4a9eff' }}>Squad Status</h3>
+            <h3 style={{ ...sectionHeaderStyle, color: t.accentBlue }}>Squad Status</h3>
             <div style={{
               display: 'flex',
               flexWrap: 'wrap',
@@ -238,7 +307,7 @@ export default function PostMission() {
         {/* Objectives completed */}
         {result.completedObjectiveIds.length > 0 && (
           <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
-            <h3 style={{ ...sectionHeaderStyle, color: '#4a9eff' }}>
+            <h3 style={{ ...sectionHeaderStyle, color: t.accentBlue }}>
               Objectives Completed ({result.completedObjectiveIds.length})
             </h3>
             <div style={{
@@ -249,7 +318,7 @@ export default function PostMission() {
               {result.completedObjectiveIds.map(id => (
                 <span key={id} style={{
                   ...pillStyle,
-                  color: '#44ff44',
+                  color: t.accentGreen,
                   ...(isMobile ? { width: '100%', marginRight: 0 } : {}),
                 }}>
                   <span style={{ fontSize: '14px' }}>{'\u2714'}</span>
@@ -260,10 +329,35 @@ export default function PostMission() {
           </div>
         )}
 
-        {/* Loot collected */}
-        {result.lootCollected.length > 0 && (
+        {/* Loot collected (enhanced with reward details) */}
+        {lootDetails.length > 0 && (
           <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
-            <h3 style={{ ...sectionHeaderStyle, color: '#ffaa00' }}>
+            <h3 style={{ ...sectionHeaderStyle, color: t.accentOrange }}>
+              Loot Secured ({lootDetails.length})
+            </h3>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              flexDirection: isMobile ? 'column' : 'row',
+            }}>
+              {lootDetails.map((item, i) => (
+                <span key={i} style={{
+                  ...pillStyle,
+                  color: item.color,
+                  borderColor: `${item.color}30`,
+                  ...(isMobile ? { width: '100%', marginRight: 0 } : {}),
+                }}>
+                  <span style={{ fontSize: '14px' }}>{'\u2B50'}</span>
+                  {item.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* Fallback: raw loot IDs when no mission definition available */}
+        {lootDetails.length === 0 && result.lootCollected.length > 0 && (
+          <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
+            <h3 style={{ ...sectionHeaderStyle, color: t.accentOrange }}>
               Loot Secured ({result.lootCollected.length})
             </h3>
             <div style={{
@@ -274,8 +368,8 @@ export default function PostMission() {
               {result.lootCollected.map((item, i) => (
                 <span key={i} style={{
                   ...pillStyle,
-                  color: '#ffd700',
-                  borderColor: '#3a3a1a',
+                  color: t.accentGold,
+                  borderColor: t.borderSubtle,
                   ...(isMobile ? { width: '100%', marginRight: 0 } : {}),
                 }}>
                   <span style={{ fontSize: '14px' }}>{'\u2B50'}</span>
@@ -290,7 +384,7 @@ export default function PostMission() {
         <button
           style={{
             ...buttonStyle,
-            backgroundColor: '#4a9eff',
+            backgroundColor: t.accentBlue,
             color: '#fff',
           }}
           onClick={campaignState ? openSocialPhase : returnToMissionSelect}

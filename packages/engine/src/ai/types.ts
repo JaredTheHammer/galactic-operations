@@ -78,6 +78,7 @@ export type AIConditionId =
   | 'can-interact-objective'
   | 'should-aim-before-attack'
   | 'should-dodge-for-defense'
+  | 'should-use-consumable'
   | 'default';
 
 /**
@@ -99,7 +100,8 @@ export type AIActionId =
   | 'use-bought-time-advance'
   | 'move-to-objective-interact'
   | 'aim-then-attack'
-  | 'dodge-and-hold';
+  | 'dodge-and-hold'
+  | 'use-consumable';
 
 // ============================================================================
 // SCORING AND EVALUATION
@@ -163,6 +165,10 @@ export interface ConditionContext {
   talentId?: string;
   /** Objective point ID to interact with */
   objectivePointId?: string;
+  /** Consumable item ID to use */
+  consumableId?: string;
+  /** Target figure ID for consumable use */
+  consumableTargetId?: string;
   /** Human-readable reasoning */
   reasoning: string;
 }

@@ -284,6 +284,9 @@ export function buildActionsForAIAction(
     case 'dodge-and-hold':
       return buildDodgeAndHold(figure, context, gameState, gameData, weights);
 
+    case 'use-consumable':
+      return buildUseConsumable(figure, context);
+
     default:
       return [];
   }
@@ -1109,4 +1112,23 @@ function buildDodgeAndHold(
   }
 
   return actions;
+}
+
+/**
+ * Build a UseConsumable action from condition context.
+ */
+function buildUseConsumable(
+  figure: Figure,
+  context: ConditionContext,
+): GameAction[] {
+  if (!context.consumableId) return [];
+
+  return [{
+    type: 'UseConsumable' as const,
+    figureId: figure.id,
+    payload: {
+      itemId: context.consumableId,
+      targetId: context.consumableTargetId,
+    },
+  }];
 }

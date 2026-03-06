@@ -21,7 +21,6 @@ import type {
   D6DieType,
   D6DieDefinition,
   BoardTemplate,
-  ConsumableItem,
 } from './types.js';
 
 /**
@@ -132,7 +131,7 @@ export async function loadGameDataV2(basePath: string): Promise<GameData> {
   const diceRaw = JSON.parse(
     await readFile(join(basePath, 'dice-d6.json'), 'utf-8')
   );
-  const dice: Record<string, D6DieDefinition> = diceRaw.dieTypes ?? diceRaw;
+  const dice = (diceRaw.dieTypes ?? diceRaw) as Record<D6DieType, D6DieDefinition>;
 
   // Species
   const speciesRaw = JSON.parse(
@@ -188,7 +187,7 @@ export async function loadGameDataV2(basePath: string): Promise<GameData> {
   }
 
   return {
-    dice: dice as any,
+    dice,
     species,
     careers,
     specializations,
@@ -221,13 +220,3 @@ export async function loadBoardTemplates(basePath: string): Promise<BoardTemplat
   return templates;
 }
 
-/**
- * Load consumable item definitions from data/consumables.json.
- */
-export async function loadConsumables(basePath: string): Promise<Record<string, ConsumableItem>> {
-  const { readFile } = await import('fs/promises');
-  const { join } = await import('path');
-
-  const raw = JSON.parse(await readFile(join(basePath, 'consumables.json'), 'utf-8'));
-  return raw.consumables as Record<string, ConsumableItem>;
-}

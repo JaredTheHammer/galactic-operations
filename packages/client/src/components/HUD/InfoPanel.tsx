@@ -3,6 +3,31 @@ import type { Figure, GameState, HeroCharacter, TalentCard, TalentSlot } from '@
 import { getWoundThresholdV2 } from '@engine/turn-machine-v2.js'
 import { useGameStore } from '../../store/game-store'
 
+const ThreatCount: React.FC = () => {
+  const threateningEnemies = useGameStore(s => s.threateningEnemies)
+  if (threateningEnemies.length === 0) return null
+
+  const color = threateningEnemies.length >= 3 ? '#ff3333' : threateningEnemies.length >= 2 ? '#ff8844' : '#ffaa00'
+
+  return (
+    <div style={{
+      padding: '4px 8px',
+      marginBottom: '4px',
+      backgroundColor: 'rgba(255, 50, 50, 0.08)',
+      border: '1px solid rgba(255, 50, 50, 0.2)',
+      borderRadius: '4px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+    }}>
+      <span style={{ color, fontSize: '12px', fontWeight: 'bold' }}>!</span>
+      <span style={{ color: '#cc9999', fontSize: '10px' }}>
+        {threateningEnemies.length} {threateningEnemies.length === 1 ? 'enemy' : 'enemies'} in range
+      </span>
+    </div>
+  )
+}
+
 interface InfoPanelProps {
   selectedFigure: Figure | null
   gameState: GameState | null
@@ -126,11 +151,18 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState,
     color: '#999999',
   }
 
-  // Hero display name
-  const displayName = isHero && hero ? hero.name : selectedFigure.id
+  // Display name and subline
+  const npc = !isHero ? gameState.npcProfiles[selectedFigure.entityId] : null
+  const displayName = isHero && hero ? hero.name : npc?.name ?? selectedFigure.entityId
+  const npcTier = npc?.tier
+  const tierColors: Record<string, string> = {
+    Minion: '#888888', Rival: '#ffaa00', Elite: '#cc77ff', Nemesis: '#ff4444',
+  }
   const displaySubline = isHero && hero && gameData
-    ? `${(gameData.species[hero.species] as any)?.name ?? hero.species} ${(gameData.careers[hero.career] as any)?.name ?? hero.career}`
-    : `${selectedFigure.entityType}/${selectedFigure.entityId}`
+    ? `${gameData.species[hero.species]?.name ?? hero.species} ${gameData.careers[hero.career]?.name ?? hero.career}`
+    : npcTier
+      ? npcTier
+      : `${selectedFigure.entityType}`
 
   return (
     <div style={panelStyle}>
@@ -149,7 +181,7 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState,
           ) : (
             <span style={{ color: '#44ff44' }}>Operative</span>
           )}
-          <span style={{ marginLeft: '8px', color: '#666' }}>
+          <span style={{ marginLeft: '8px', color: npcTier ? tierColors[npcTier] ?? '#666' : '#666' }}>
             {displaySubline}
           </span>
         </div>
@@ -272,6 +304,9 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState,
           })()}
         </div>
       )}
+
+      {/* Threat Assessment */}
+      <ThreatCount />
 
       {/* Combat Tokens */}
       {(selectedFigure.aimTokens > 0 || selectedFigure.dodgeTokens > 0 || selectedFigure.hasStandby) && (
@@ -397,18 +432,76 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState,
         </div>
       )}
 
-      {/* Equipment (heroes only) */}
-      {isHero && hero && gameData && (
-        <div style={sectionStyle}>
-          <div style={labelStyle}>Equipment</div>
-          <div style={{ fontSize: '11px', color: '#d1d5db' }}>
-            {hero.equipment.primaryWeapon && gameData.weapons[hero.equipment.primaryWeapon]
-              ? (gameData.weapons[hero.equipment.primaryWeapon] as any).name
-              : 'Fists'}
-            {hero.equipment.armor && gameData.armor[hero.equipment.armor]
-              ? ` | ${(gameData.armor[hero.equipment.armor] as any).name}`
-              : ''}
+      {/* Equipment (heroes) */}
+      {isHero && hero && gameData && (() => {
+        const pw = hero.equipment.primaryWeapon ? gameData.weapons[hero.equipment.primaryWeapon] : null
+        const sw = hero.equipment.secondaryWeapon ? gameData.weapons[hero.equipment.secondaryWeapon] : null
+        const arm = hero.equipment.armor ? gameData.armor[hero.equipment.armor] : null
+        return (
+          <div style={sectionStyle}>
+            <div style={labelStyle}>Equipment</div>
+            {pw && (
+              <div style={{ fontSize: '11px', color: '#ff8844', marginBottom: '2px' }}>
+                {pw.name}
+                <span style={{ color: '#888', marginLeft: '6px' }}>
+                  Dmg {pw.baseDamage}{pw.damageAddBrawn ? '+Br' : ''} | {pw.range} | Crit {pw.critical}
+                </span>
+                {pw.qualities?.length > 0 && (
+                  <span style={{ color: '#cc77ff', marginLeft: '6px' }}>
+                    {pw.qualities.map((q: any) => q.value != null ? `${q.name} ${q.value}` : q.name).join(', ')}
+                  </span>
+                )}
+              </div>
+            )}
+            {sw && (
+              <div style={{ fontSize: '11px', color: '#ff8844', marginBottom: '2px' }}>
+                {sw.name}
+                <span style={{ color: '#888', marginLeft: '6px' }}>
+                  Dmg {sw.baseDamage}{sw.damageAddBrawn ? '+Br' : ''} | {sw.range} | Crit {sw.critical}
+                </span>
+              </div>
+            )}
+            {arm && (
+              <div style={{ fontSize: '11px', color: '#4a9eff' }}>
+                {arm.name}
+                {arm.soak > 0 && <span style={{ color: '#888', marginLeft: '6px' }}>Soak +{arm.soak}</span>}
+                {arm.defense > 0 && <span style={{ color: '#888', marginLeft: '6px' }}>Def {arm.defense}</span>}
+              </div>
+            )}
+            {!pw && !arm && (
+              <div style={{ fontSize: '11px', color: '#666' }}>Unarmed</div>
+            )}
+            <div style={{ fontSize: '10px', color: '#888', marginTop: '4px' }}>
+              Soak: {hero.soak} | Speed: {gameData.species[hero.species]?.speed ?? '?'}
+            </div>
           </div>
+        )
+      })()}
+
+      {/* NPC combat stats */}
+      {!isHero && npc && (
+        <div style={sectionStyle}>
+          <div style={labelStyle}>Combat Stats</div>
+          <div style={{ fontSize: '10px', color: '#888', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <span>Soak: {npc.soak}</span>
+            <span>Speed: {npc.speed ?? '?'}</span>
+            {selectedFigure.minionGroupSize != null && selectedFigure.minionGroupSize > 0 && (
+              <span>Group: {selectedFigure.minionGroupSize}/{selectedFigure.minionGroupMax ?? selectedFigure.minionGroupSize}</span>
+            )}
+          </div>
+          {npc.weapons?.map((w: any, i: number) => (
+            <div key={i} style={{ fontSize: '11px', color: '#ff8844', marginTop: '4px' }}>
+              {w.name ?? w.weaponId ?? 'Weapon'}
+              <span style={{ color: '#888', marginLeft: '6px' }}>
+                Dmg {w.baseDamage} | {w.range ?? 'Short'} | Crit {w.critical ?? 4}
+              </span>
+              {w.qualities?.length > 0 && (
+                <span style={{ color: '#cc77ff', marginLeft: '6px' }}>
+                  {w.qualities.map((q: any) => q.value != null ? `${q.name} ${q.value}` : q.name).join(', ')}
+                </span>
+              )}
+            </div>
+          ))}
         </div>
       )}
 

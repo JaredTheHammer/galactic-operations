@@ -126,8 +126,8 @@ export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatFo
   // NPC profiles
   const npcList = useMemo(() => {
     return Object.values(gameData.npcProfiles).sort((a, b) => {
-      const costA = (a as any).threatCost ?? 0
-      const costB = (b as any).threatCost ?? 0
+      const costA = a.threatCost ?? 0
+      const costB = b.threatCost ?? 0
       return costA - costB
     })
   }, [gameData])
@@ -299,7 +299,7 @@ export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatFo
   const renderNpcRow = (npc: NPCProfile, which: 'A' | 'B', side: SideState) => {
     const slot = side.npcs.find(n => n.npcId === npc.id)
     const count = slot?.count ?? 0
-    const threatCost = (npc as any).threatCost ?? '?'
+    const threatCost = npc.threatCost ?? '?'
     const weapon = npc.weapons?.[0]
 
     return (
