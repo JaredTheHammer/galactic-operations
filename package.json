@@ -15,7 +15,7 @@
     "balance": "tsx scripts/run-balance-tests.ts",
     "balance:quick": "tsx scripts/run-balance-tests.ts --tier 1 --count 20 --category weapon",
     "balance:weak": "tsx scripts/run-balance-tests.ts --baseline weak --tier 1 --count 30 --format html --output reports/balance-cross-currency.html",
-    "balance:full": "tsx scripts/run-balance-tests.ts --tier all --count 200 --seed 42 --format html --output reports/balance.html"
+    "balance:full": "tsx scripts/run-balance-tests.ts --tier all --count 200 --seed 42 --format html --output reports/balance.html",
     "rank": "tsx scripts/run-npc-ranking.ts",
     "rank:quick": "tsx scripts/run-npc-ranking.ts --quick",
     "rank:report": "tsx scripts/run-npc-ranking.ts --report",
