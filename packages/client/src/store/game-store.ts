@@ -450,7 +450,6 @@ export interface GameStore {
   showMissionBriefing: boolean
   pendingMissionId: string | null
   showPostMission: boolean
-  showMissionBriefing: boolean
   showCampaignJournal: boolean
   showSocialPhase: boolean
   showActTransition: boolean
@@ -650,7 +649,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
   showMissionBriefing: false,
   pendingMissionId: null,
   showPostMission: false,
-  showMissionBriefing: false,
   showCampaignJournal: false,
   showSocialPhase: false,
   showActTransition: false,
@@ -2367,7 +2365,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showMissionBriefing: false,
       pendingMissionId: null,
       showPostMission: false,
-      showMissionBriefing: false,
       showCampaignJournal: false,
       showSocialPhase: false,
       showActTransition: false,
@@ -2376,6 +2373,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showPortraitManager: false,
       showCampaignStats: false,
       showMapEditor: false,
+      // Clear stale combat state from previous campaign
+      gameState: null,
+      selectedFigureId: null,
+      validMoves: [],
+      validTargets: [],
+      highlightedTile: null,
+      gameStateHistory: [],
+      floatingTexts: [],
+      combatLog: [],
     })
 
     // Persist to slot and legacy key
@@ -2411,7 +2417,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showMissionBriefing: false,
       pendingMissionId: null,
       showPostMission: false,
-      showMissionBriefing: false,
       showCampaignJournal: false,
       showSocialPhase: false,
       showActTransition: false,
@@ -2429,6 +2434,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showSetup: true,
       gameState: null,
       isInitialized: false,
+      // Clear combat/UI state
+      selectedFigureId: null,
+      validMoves: [],
+      validTargets: [],
+      highlightedTile: null,
+      gameStateHistory: [],
+      floatingTexts: [],
+      combatLog: [],
     })
   },
 

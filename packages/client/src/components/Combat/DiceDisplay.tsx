@@ -1,24 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import type { D6RollResult, D6DieType } from '@engine/types.js'
+import { t } from '../../styles/theme'
 
 interface DiceDisplayProps {
   rolls: D6RollResult[] | null
   isRolling?: boolean
 }
 
-/** Map die types to display colors */
+/** Map die types to theme color tokens */
 const DIE_COLORS: Record<D6DieType | string, string> = {
-  ability: '#44ff44',       // green
-  proficiency: '#ffd700',   // yellow
-  difficulty: '#9966ff',    // purple
-  challenge: '#ff4444',     // red
-}
-
-const DIE_BG_COLORS: Record<D6DieType | string, string> = {
-  ability: 'rgba(68, 255, 68, 0.15)',
-  proficiency: 'rgba(255, 215, 0, 0.15)',
-  difficulty: 'rgba(153, 102, 255, 0.15)',
-  challenge: 'rgba(255, 68, 68, 0.15)',
+  ability: t.diceAbility,
+  proficiency: t.diceProficiency,
+  difficulty: t.diceDifficulty,
+  challenge: t.diceChallenge,
 }
 
 /** Summarize a single die result into a compact symbol string */
@@ -46,7 +40,7 @@ export const DiceDisplay: React.FC<DiceDisplayProps> = ({ rolls, isRolling }) =>
 
   if (!rolls || rolls.length === 0) {
     return (
-      <div style={{ padding: '12px', color: '#999999', textAlign: 'center' }}>
+      <div style={{ padding: '12px', color: t.textMuted, textAlign: 'center' }}>
         No dice rolled
       </div>
     )
@@ -62,8 +56,7 @@ export const DiceDisplay: React.FC<DiceDisplayProps> = ({ rolls, isRolling }) =>
 
   const dieStyle = (roll: D6RollResult, index: number): React.CSSProperties => {
     const isAnimating = animatingDice.has(index)
-    const color = DIE_COLORS[roll.dieType] || '#ffffff'
-    const bgColor = DIE_BG_COLORS[roll.dieType] || 'rgba(255, 255, 255, 0.1)'
+    const color = DIE_COLORS[roll.dieType] || t.textPrimary
 
     return {
       width: '52px',
@@ -72,10 +65,9 @@ export const DiceDisplay: React.FC<DiceDisplayProps> = ({ rolls, isRolling }) =>
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: bgColor,
       border: `2px solid ${color}`,
       borderRadius: '4px',
-      color: '#ffffff',
+      color: t.textPrimary,
       fontSize: isAnimating ? '20px' : '14px',
       fontWeight: 'bold',
       transition: 'transform 0.1s, font-size 0.1s',
@@ -94,7 +86,7 @@ export const DiceDisplay: React.FC<DiceDisplayProps> = ({ rolls, isRolling }) =>
           </div>
           <div style={{
             fontSize: '9px',
-            color: DIE_COLORS[roll.dieType] || '#ffffff',
+            color: DIE_COLORS[roll.dieType] || t.textPrimary,
             marginTop: '2px',
             textTransform: 'uppercase',
           }}>

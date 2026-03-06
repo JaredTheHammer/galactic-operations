@@ -1,6 +1,7 @@
 import React from 'react'
 import { useGameStore } from '../../store/game-store'
 import type { TacticCard } from '@engine/types.js'
+import { t } from '../../styles/theme'
 
 interface TacticCardHandProps {
   cards: TacticCard[] | null
@@ -13,7 +14,7 @@ export const TacticCardHand: React.FC<TacticCardHandProps> = ({ cards, side, isA
 
   if (!cards || cards.length === 0) {
     return (
-      <div style={{ padding: '12px', color: '#999999', textAlign: 'center', fontSize: '12px' }}>
+      <div style={{ padding: '12px', color: t.textMuted, textAlign: 'center', fontSize: '12px' }}>
         No cards in hand
       </div>
     )
@@ -28,9 +29,9 @@ export const TacticCardHand: React.FC<TacticCardHandProps> = ({ cards, side, isA
   }
 
   const timingColor: Record<string, string> = {
-    Attack: '#ff4444',
-    Defense: '#4a9eff',
-    Any: '#ffd700',
+    Attack: t.accentRed,
+    Defense: t.accentBlue,
+    Any: t.accentGold,
   }
 
   const cardStyle = (card: TacticCard): React.CSSProperties => {
@@ -42,13 +43,13 @@ export const TacticCardHand: React.FC<TacticCardHandProps> = ({ cards, side, isA
     return {
       width: '120px',
       padding: '8px',
-      backgroundColor: isValid ? 'rgba(19, 19, 32, 0.8)' : 'rgba(51, 51, 51, 0.5)',
+      backgroundColor: isValid ? t.panelBg : t.bgSurface2,
       border: `2px solid ${timingColor[card.timing]}`,
       borderRadius: '4px',
       cursor: isValid && isActive ? 'pointer' : 'default',
       opacity: isValid && isActive ? 1 : 0.6,
       transition: 'all 0.2s',
-      color: '#ffffff',
+      color: t.textPrimary,
       fontSize: '10px',
     }
   }
@@ -85,7 +86,7 @@ export const TacticCardHand: React.FC<TacticCardHandProps> = ({ cards, side, isA
           >
             {card.timing}
           </div>
-          <div style={{ fontSize: '9px', color: '#999999' }}>Cost: {card.cost}</div>
+          <div style={{ fontSize: '9px', color: t.textMuted }}>Cost: {card.cost}</div>
         </button>
       ))}
     </div>
