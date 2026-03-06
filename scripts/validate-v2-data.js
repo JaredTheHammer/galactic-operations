@@ -290,5 +290,27 @@ for (const sf of socialFiles) {
 }
 console.log('OK: All ' + shopItemCount + ' shop inventory items reference valid catalog entries');
 
+// 16. Board templates: valid structure and dimensions
+const boardsDir = 'data/boards';
+const boardFiles = fs.readdirSync(boardsDir).filter(f => f.endsWith('.json') && f !== 'index.json');
+for (const bf of boardFiles) {
+  const filePath = path.join(boardsDir, bf);
+  const board = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  if (!board.id) fail(filePath + ' missing id');
+  if (!board.name) fail(filePath + ' missing name');
+  if (typeof board.width !== 'number' || board.width < 1) fail(filePath + ' missing or invalid width');
+  if (typeof board.height !== 'number' || board.height < 1) fail(filePath + ' missing or invalid height');
+  if (!Array.isArray(board.tiles)) fail(filePath + ' missing tiles array');
+  if (board.tiles.length !== board.height) {
+    fail(filePath + ' tiles rows (' + board.tiles.length + ') does not match height (' + board.height + ')');
+  }
+  for (let r = 0; r < board.tiles.length; r++) {
+    if (board.tiles[r].length !== board.width) {
+      fail(filePath + ' row ' + r + ' has ' + board.tiles[r].length + ' cols (expected ' + board.width + ')');
+    }
+  }
+}
+console.log('OK: All ' + boardFiles.length + ' board templates valid (id, dimensions, tile grid)');
+
 console.log(allOk ? '\n=== ALL CHECKS PASSED ===' : '\n=== SOME CHECKS FAILED ===');
 process.exit(allOk ? 0 : 1);
