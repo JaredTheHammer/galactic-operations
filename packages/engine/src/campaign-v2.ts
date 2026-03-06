@@ -703,11 +703,15 @@ export function evaluateObjective(
     }
 
     case 'escort': {
-      // Escort objective: allied NPC must reach extraction zone alive
+      // Escort objective: allied NPC (identified by targetId) must reach extraction zone alive
       if (!objective.zoneCoordinates || objective.zoneCoordinates.length === 0) return false;
-      // For now, treat as extract for allied NPCs
-      // Future: add allied NPC tracking
-      return false;
+      if (!objective.targetId) return false;
+      const escortZone = new Set(objective.zoneCoordinates.map(c => `${c.x},${c.y}`));
+      const escortTargets = gameState.figures.filter(
+        f => f.entityId === objective.targetId && !f.isDefeated,
+      );
+      if (escortTargets.length === 0) return false; // target is dead or not on board
+      return escortTargets.every(f => escortZone.has(`${f.position.x},${f.position.y}`));
     }
 
     default:

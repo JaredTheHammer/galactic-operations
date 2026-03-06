@@ -28,8 +28,8 @@ import type {
   WeaponDefinition,
   RangeBand,
   ConsumableItem,
-  computeDiminishedHealing,
 } from '../types.js';
+import { computeDiminishedHealing } from '../types.js';
 
 import { getValidMoves, getDistance, getPath } from '../movement.js';
 import { hasLineOfSight, getCover } from '../los.js';

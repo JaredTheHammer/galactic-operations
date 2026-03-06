@@ -51,6 +51,8 @@ import {
   findMeleePositions,
   getValidTargetsV2,
   evaluateCondition,
+  getAttackRangeInTiles,
+  getThreateningEnemies,
 } from '../src/ai/evaluate-v2.js';
 
 import type {
@@ -1684,6 +1686,368 @@ describe('Phase 7c: AI Talent Awareness', () => {
 
       const result = evaluateCondition('should-use-bought-time', heroFig, gs, gd, defaultWeights());
       expect(result.satisfied).toBe(false);
+    });
+  });
+
+  // ==========================================================================
+  // DODGE FOR DEFENSE
+  // ==========================================================================
+
+  describe('should-dodge-for-defense', () => {
+    it('returns false when dodgeValue weight is 0', () => {
+      const heroFig = makeFigure({ position: { x: 0, y: 0 } });
+      const enemyFig = makeNPCFigure({ position: { x: 3, y: 0 } });
+      const gs = makeGameState([heroFig, enemyFig], { 'hero-1': makeHero() }, { stormtrooper: makeNPC() });
+      const gd = makeGameData();
+      const weights = { ...defaultWeights(), dodgeValue: 0 };
+
+      const result = evaluateCondition('should-dodge-for-defense', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(false);
+      expect(result.context.reasoning).toContain('0');
+    });
+
+    it('returns false when no action remaining', () => {
+      const heroFig = makeFigure({ position: { x: 0, y: 0 }, actionsRemaining: 0 });
+      const enemyFig = makeNPCFigure({ position: { x: 3, y: 0 } });
+      const gs = makeGameState([heroFig, enemyFig], { 'hero-1': makeHero() }, { stormtrooper: makeNPC() });
+      const gd = makeGameData();
+      const weights = { ...defaultWeights(), dodgeValue: 5 };
+
+      const result = evaluateCondition('should-dodge-for-defense', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(false);
+    });
+
+    it('returns false when already at max dodge tokens', () => {
+      const heroFig = makeFigure({ position: { x: 0, y: 0 }, dodgeTokens: 1 });
+      const enemyFig = makeNPCFigure({ position: { x: 3, y: 0 } });
+      const gs = makeGameState([heroFig, enemyFig], { 'hero-1': makeHero() }, { stormtrooper: makeNPC() });
+      const gd = makeGameData();
+      const weights = { ...defaultWeights(), dodgeValue: 5 };
+
+      const result = evaluateCondition('should-dodge-for-defense', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(false);
+    });
+
+    it('returns false when no enemies on the board', () => {
+      const heroFig = makeFigure({ position: { x: 0, y: 0 } });
+      const gs = makeGameState([heroFig], { 'hero-1': makeHero() }, {});
+      const gd = makeGameData();
+      const weights = { ...defaultWeights(), dodgeValue: 5 };
+
+      const result = evaluateCondition('should-dodge-for-defense', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(false);
+    });
+
+    it('returns false when no enemies can threaten the figure', () => {
+      (hasLineOfSight as any).mockReturnValue(false);
+      const heroFig = makeFigure({ position: { x: 0, y: 0 } });
+      const enemyFig = makeNPCFigure({ position: { x: 3, y: 0 } });
+      const gs = makeGameState([heroFig, enemyFig], { 'hero-1': makeHero() }, { stormtrooper: makeNPC() });
+      const gd = makeGameData();
+      const weights = { ...defaultWeights(), dodgeValue: 5 };
+
+      const result = evaluateCondition('should-dodge-for-defense', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(false);
+      expect(result.context.reasoning).toContain('No enemies can threaten');
+    });
+
+    it('auto-dodges when wounded with 2+ threats and high dodgeValue', () => {
+      (hasLineOfSight as any).mockReturnValue(true);
+      (getDistance as any).mockReturnValue(3);
+      const heroFig = makeFigure({
+        position: { x: 5, y: 5 },
+        isWounded: true,
+        woundsCurrent: 10,
+      });
+      const enemy1 = makeNPCFigure({ id: 'e1', position: { x: 8, y: 5 } });
+      const enemy2 = makeNPCFigure({ id: 'e2', position: { x: 5, y: 8 } });
+      const gs = makeGameState(
+        [heroFig, enemy1, enemy2],
+        { 'hero-1': makeHero() },
+        { stormtrooper: makeNPC() },
+      );
+      const gd = makeGameData();
+      const weights = { ...defaultWeights(), dodgeValue: 5 };
+
+      const result = evaluateCondition('should-dodge-for-defense', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(true);
+      expect(result.context.reasoning).toContain('Wounded');
+    });
+
+    it('auto-dodges when no offensive option and threatened with high dodgeValue', () => {
+      (hasLineOfSight as any).mockReturnValue(true);
+      (getDistance as any).mockReturnValue(3);
+      const heroFig = makeFigure({ position: { x: 5, y: 5 } });
+      const enemy1 = makeNPCFigure({ id: 'e1', position: { x: 8, y: 5 } });
+      const gs = makeGameState(
+        [heroFig, enemy1],
+        { 'hero-1': makeHero({ equipment: { primaryWeapon: 'vibro-knife', armor: 'padded-armor', gear: [] } }) },
+        { stormtrooper: makeNPC() },
+      );
+      const gd = makeGameData();
+      // melee weapon with range Engaged = 1 tile, enemy is at distance 3
+      // so no valid targets => no offensive option
+      const weights = { ...defaultWeights(), dodgeValue: 4 };
+
+      const result = evaluateCondition('should-dodge-for-defense', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(true);
+      expect(result.context.reasoning).toContain('No targets in range');
+    });
+  });
+
+  // ==========================================================================
+  // USE CONSUMABLE
+  // ==========================================================================
+
+  describe('should-use-consumable', () => {
+    it('returns false when no consumables data', () => {
+      const heroFig = makeFigure({ position: { x: 0, y: 0 } });
+      const gs = makeGameState([heroFig], { 'hero-1': makeHero() }, {});
+      const gd = makeGameData(); // no consumables field
+      const weights = defaultWeights();
+
+      const result = evaluateCondition('should-use-consumable', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(false);
+    });
+
+    it('returns false when no actions remaining', () => {
+      const heroFig = makeFigure({ position: { x: 0, y: 0 }, actionsRemaining: 0 });
+      const gs = makeGameState([heroFig], { 'hero-1': makeHero() }, {});
+      const gd = { ...makeGameData(), consumables: { 'stim': { id: 'stim', name: 'Stim Pack', description: '', targetType: 'organic' as const, effect: 'heal_wounds' as const, baseValue: 5, diminishingReturns: true } } };
+      const weights = defaultWeights();
+
+      const result = evaluateCondition('should-use-consumable', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(false);
+    });
+
+    it('returns false when consumables list is empty', () => {
+      const heroFig = makeFigure({ position: { x: 0, y: 0 } });
+      const gs = makeGameState([heroFig], { 'hero-1': makeHero() }, {});
+      const gd = { ...makeGameData(), consumables: {} };
+      const weights = defaultWeights();
+
+      const result = evaluateCondition('should-use-consumable', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(false);
+    });
+
+    it('selects consumable for wounded self', () => {
+      const heroFig = makeFigure({
+        position: { x: 0, y: 0 },
+        woundsCurrent: 8, // 8/14 = 57% wounded, above 40% threshold
+        consumableUsesThisEncounter: {},
+      });
+      const gs = makeGameState(
+        [heroFig],
+        { 'hero-1': makeHero({ wounds: { current: 8, threshold: 14 } }) },
+        {},
+      );
+      const stimPack = {
+        id: 'stim-pack',
+        name: 'Stim Pack',
+        description: 'Heals wounds',
+        targetType: 'organic' as const,
+        effect: 'heal_wounds' as const,
+        baseValue: 5,
+        diminishingReturns: true,
+      };
+      const gd = { ...makeGameData(), consumables: { 'stim-pack': stimPack } };
+      const weights = defaultWeights();
+
+      const result = evaluateCondition('should-use-consumable', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(true);
+      expect(result.context.consumableId).toBe('stim-pack');
+    });
+
+    it('returns false when ally is not injured enough', () => {
+      const heroFig = makeFigure({
+        position: { x: 0, y: 0 },
+        woundsCurrent: 2, // 2/14 = 14% wounded, below 40% threshold
+      });
+      const gs = makeGameState(
+        [heroFig],
+        { 'hero-1': makeHero({ wounds: { current: 2, threshold: 14 } }) },
+        {},
+      );
+      const stimPack = {
+        id: 'stim-pack',
+        name: 'Stim Pack',
+        description: 'Heals wounds',
+        targetType: 'organic' as const,
+        effect: 'heal_wounds' as const,
+        baseValue: 5,
+        diminishingReturns: false,
+      };
+      const gd = { ...makeGameData(), consumables: { 'stim-pack': stimPack } };
+      const weights = defaultWeights();
+
+      const result = evaluateCondition('should-use-consumable', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(false);
+    });
+
+    it('selects consumable for adjacent ally', () => {
+      const heroFig = makeFigure({
+        id: 'fig-hero-1',
+        position: { x: 0, y: 0 },
+        woundsCurrent: 0,
+      });
+      const allyFig = makeFigure({
+        id: 'fig-hero-2',
+        entityId: 'hero-2',
+        position: { x: 1, y: 0 },
+        woundsCurrent: 10, // heavily wounded
+      });
+      const gs = makeGameState(
+        [heroFig, allyFig],
+        {
+          'hero-1': makeHero(),
+          'hero-2': makeHero({ id: 'hero-2', wounds: { current: 10, threshold: 14 } }),
+        },
+        {},
+      );
+      const stimPack = {
+        id: 'stim-pack',
+        name: 'Stim Pack',
+        description: 'Heals wounds',
+        targetType: 'any' as const,
+        effect: 'heal_wounds' as const,
+        baseValue: 5,
+        diminishingReturns: false,
+      };
+      const gd = { ...makeGameData(), consumables: { 'stim-pack': stimPack } };
+      const weights = defaultWeights();
+
+      const result = evaluateCondition('should-use-consumable', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(true);
+      expect(result.context.consumableTargetId).toBe('fig-hero-2');
+    });
+
+    it('skips ally that is too far away', () => {
+      const heroFig = makeFigure({
+        id: 'fig-hero-1',
+        position: { x: 0, y: 0 },
+        woundsCurrent: 0,
+      });
+      const allyFig = makeFigure({
+        id: 'fig-hero-2',
+        entityId: 'hero-2',
+        position: { x: 5, y: 5 }, // far away
+        woundsCurrent: 10,
+      });
+      const gs = makeGameState(
+        [heroFig, allyFig],
+        {
+          'hero-1': makeHero(),
+          'hero-2': makeHero({ id: 'hero-2', wounds: { current: 10, threshold: 14 } }),
+        },
+        {},
+      );
+      const stimPack = {
+        id: 'stim-pack',
+        name: 'Stim Pack',
+        description: 'Heals',
+        targetType: 'organic' as const,
+        effect: 'heal_wounds' as const,
+        baseValue: 5,
+        diminishingReturns: false,
+      };
+      const gd = { ...makeGameData(), consumables: { 'stim-pack': stimPack } };
+      const weights = defaultWeights();
+
+      const result = evaluateCondition('should-use-consumable', heroFig, gs, gd, weights);
+      expect(result.satisfied).toBe(false);
+    });
+  });
+
+  // ==========================================================================
+  // EXPORTED UTILITY FUNCTIONS
+  // ==========================================================================
+
+  describe('getAttackRangeInTiles', () => {
+    it('returns weapon range in tiles for hero', () => {
+      const heroFig = makeFigure({ position: { x: 0, y: 0 } });
+      const gs = makeGameState(
+        [heroFig],
+        { 'hero-1': makeHero() },
+        {},
+      );
+      const gd = makeGameData();
+      // Hero has blaster-rifle (Long range = 16 tiles)
+      const range = getAttackRangeInTiles(heroFig, gs, gd);
+      expect(range).toBe(16);
+    });
+
+    it('returns weapon range in tiles for NPC', () => {
+      const npcFig = makeNPCFigure({ position: { x: 0, y: 0 } });
+      const gs = makeGameState(
+        [npcFig],
+        {},
+        { stormtrooper: makeNPC() },
+      );
+      const gd = makeGameData();
+      // Stormtrooper has E-11 (Long range = 16 tiles)
+      const range = getAttackRangeInTiles(npcFig, gs, gd);
+      expect(range).toBe(16);
+    });
+
+    it('returns default range when figure has no entity', () => {
+      const fig = makeFigure({ entityId: 'nonexistent', entityType: 'hero' });
+      const gs = makeGameState([fig], {}, {});
+      const gd = makeGameData();
+      // No matching entity = no weapon = default 4 (Short)
+      const range = getAttackRangeInTiles(fig, gs, gd);
+      expect(range).toBe(4);
+    });
+  });
+
+  describe('getThreateningEnemies', () => {
+    it('returns enemies within range with LOS', () => {
+      (hasLineOfSight as any).mockReturnValue(true);
+      (getDistance as any).mockReturnValue(5);
+      const heroFig = makeFigure({ position: { x: 0, y: 0 } });
+      const enemy1 = makeNPCFigure({ id: 'e1', position: { x: 5, y: 0 } });
+      const enemy2 = makeNPCFigure({ id: 'e2', position: { x: 3, y: 0 } });
+      const gs = makeGameState(
+        [heroFig, enemy1, enemy2],
+        { 'hero-1': makeHero() },
+        { stormtrooper: makeNPC() },
+      );
+      const gd = makeGameData();
+
+      const threats = getThreateningEnemies(heroFig, gs, gd);
+      expect(threats).toContain('e1');
+      expect(threats).toContain('e2');
+    });
+
+    it('excludes enemies without LOS', () => {
+      (hasLineOfSight as any).mockReturnValue(false);
+      (getDistance as any).mockReturnValue(5);
+      const heroFig = makeFigure({ position: { x: 0, y: 0 } });
+      const enemyFig = makeNPCFigure({ id: 'e1', position: { x: 5, y: 0 } });
+      const gs = makeGameState(
+        [heroFig, enemyFig],
+        { 'hero-1': makeHero() },
+        { stormtrooper: makeNPC() },
+      );
+      const gd = makeGameData();
+
+      const threats = getThreateningEnemies(heroFig, gs, gd);
+      expect(threats).toEqual([]);
+    });
+
+    it('excludes enemies out of weapon range', () => {
+      (hasLineOfSight as any).mockReturnValue(true);
+      (getDistance as any).mockReturnValue(20); // Beyond Long range (16)
+      const heroFig = makeFigure({ position: { x: 0, y: 0 } });
+      const enemyFig = makeNPCFigure({ id: 'e1', position: { x: 20, y: 0 } });
+      const gs = makeGameState(
+        [heroFig, enemyFig],
+        { 'hero-1': makeHero() },
+        { stormtrooper: makeNPC() },
+      );
+      const gd = makeGameData();
+
+      const threats = getThreateningEnemies(heroFig, gs, gd);
+      expect(threats).toEqual([]);
     });
   });
 });
