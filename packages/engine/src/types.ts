@@ -374,6 +374,13 @@ export interface HeroCharacter {
 
   xp: { total: number; available: number };
 
+  /**
+   * Ability Points -- a third currency pool alongside XP and credits.
+   * AP are earned through mission performance and spent on career-specific
+   * signature abilities, faction perks, and species-unique talents.
+   */
+  abilityPoints: { total: number; available: number };
+
   /** Portrait image ID (SHA-256 hash of image bytes) for token rendering */
   portraitId?: string;
 
@@ -1098,6 +1105,8 @@ export interface MissionResult {
   lootCollected: string[];
   /** Heroes who were incapacitated */
   heroesIncapacitated: string[];
+  /** Ability Points awarded this mission */
+  apAwarded?: number;
   /** Timestamp */
   completedAt: string;
 }

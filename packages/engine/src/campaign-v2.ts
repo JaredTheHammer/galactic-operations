@@ -193,6 +193,29 @@ export function calculateMissionXP(
   };
 }
 
+/**
+ * Calculate Ability Points earned from a mission.
+ *
+ * Base: 1 AP per mission completed (victory or draw).
+ * Bonus: +1 if all objectives completed, +1 if no heroes incapacitated.
+ * Act finales: +2 bonus.
+ */
+export function calculateMissionAP(
+  outcome: 'victory' | 'defeat' | 'draw',
+  completedObjectiveIds: string[],
+  totalObjectives: number,
+  heroesIncapacitated: string[],
+  isActFinale: boolean = false,
+): number {
+  if (outcome === 'defeat') return 0;
+
+  let ap = 1; // Base award for mission completion
+  if (completedObjectiveIds.length >= totalObjectives) ap += 1; // All objectives
+  if (heroesIncapacitated.length === 0) ap += 1; // Flawless
+  if (isActFinale) ap += 2; // Act finale bonus
+  return ap;
+}
+
 // ============================================================================
 // MISSION COMPLETION
 // ============================================================================
@@ -233,6 +256,13 @@ export function completeMission(
     lootCollected, totalKills, leaderKilled, narrativeBonus,
   );
 
+  // Calculate AP
+  const isActFinale = mission.missionIndex === 4;
+  const apAwarded = calculateMissionAP(
+    outcome, completedObjectiveIds, mission.objectives.length,
+    heroesIncapacitated, isActFinale,
+  );
+
   // Build mission result
   const result: MissionResult = {
     missionId: mission.id,
@@ -240,6 +270,7 @@ export function completeMission(
     roundsPlayed,
     completedObjectiveIds,
     xpBreakdown,
+    apAwarded,
     heroKills,
     lootCollected,
     heroesIncapacitated,
@@ -278,12 +309,20 @@ export function completeMission(
     // Track missions rested (for heroes who weren't deployed)
     const missionsRested = wasDeployed ? 0 : (hero.missionsRested ?? 0) + 1;
 
+    // Backward-compat: heroes from older saves may lack abilityPoints
+    const heroAP = hero.abilityPoints ?? { total: 0, available: 0 };
+
     newHeroes[id] = {
       ...hero,
       // Award XP to each hero
       xp: {
         total: hero.xp.total + xpBreakdown.total,
         available: hero.xp.available + xpBreakdown.total,
+      },
+      // Award AP to each hero
+      abilityPoints: {
+        total: heroAP.total + apAwarded,
+        available: heroAP.available + apAwarded,
       },
       // Reset wounds and strain between missions (combat damage doesn't carry)
       wounds: { current: 0, threshold: hero.wounds.threshold },

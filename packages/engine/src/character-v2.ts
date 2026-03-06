@@ -305,6 +305,7 @@ export function createHero(
       gear: [],
     },
     xp: { total: species.startingXP, available: species.startingXP },
+    abilityPoints: { total: 0, available: 0 },
   };
 }
 
@@ -554,6 +555,13 @@ export function validateHero(
   if (hero.xp.available > hero.xp.total) {
     errors.push(
       `Available XP (${hero.xp.available}) exceeds total XP (${hero.xp.total})`,
+    );
+  }
+
+  // AP sanity: available should not exceed total
+  if (hero.abilityPoints && hero.abilityPoints.available > hero.abilityPoints.total) {
+    errors.push(
+      `Available AP (${hero.abilityPoints.available}) exceeds total AP (${hero.abilityPoints.total})`,
     );
   }
 
@@ -864,6 +872,53 @@ export function unlockSpecialization(
     ...hero,
     specializations: [...hero.specializations, specializationId],
     xp: { total: hero.xp.total, available: hero.xp.available - cost },
+  };
+}
+
+// ============================================================================
+// ABILITY POINTS
+// ============================================================================
+
+/**
+ * Award Ability Points to a hero (e.g. after mission completion).
+ * Returns a new HeroCharacter with updated AP totals.
+ */
+export function awardAbilityPoints(
+  hero: HeroCharacter,
+  amount: number,
+): HeroCharacter {
+  if (amount < 0) throw new Error('Cannot award negative AP');
+  const ap = hero.abilityPoints ?? { total: 0, available: 0 };
+  return {
+    ...hero,
+    abilityPoints: {
+      total: ap.total + amount,
+      available: ap.available + amount,
+    },
+  };
+}
+
+/**
+ * Spend Ability Points on a purchase (signature ability, faction perk, etc.).
+ * Returns a new HeroCharacter with reduced available AP.
+ */
+export function spendAbilityPoints(
+  hero: HeroCharacter,
+  cost: number,
+): HeroCharacter {
+  if (cost <= 0) throw new Error('AP cost must be positive');
+  const ap = hero.abilityPoints ?? { total: 0, available: 0 };
+  if (ap.available < cost) {
+    throw new Error(
+      `Not enough AP: need ${cost}, have ${ap.available}`,
+    );
+  }
+  return {
+    ...hero,
+    abilityPoints: {
+      total: ap.total,
+      available: ap.available - cost,
+    },
   };
 }
 

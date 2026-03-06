@@ -11,7 +11,11 @@
     "simulate:quick": "tsx scripts/run-simulations.ts --count 10 --seed 42",
     "combat-sim": "tsx scripts/run-combat-sim.ts",
     "export:cards": "tsx scripts/generate-card-pdf.ts",
-    "build-arena": "node scripts/build-combat-arena.mjs"
+    "build-arena": "node scripts/build-combat-arena.mjs",
+    "balance": "tsx scripts/run-balance-tests.ts",
+    "balance:quick": "tsx scripts/run-balance-tests.ts --tier 1 --count 20 --category weapon",
+    "balance:weak": "tsx scripts/run-balance-tests.ts --baseline weak --tier 1 --count 30 --format html --output reports/balance-cross-currency.html",
+    "balance:full": "tsx scripts/run-balance-tests.ts --tier all --count 200 --seed 42 --format html --output reports/balance.html"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["esbuild"]
