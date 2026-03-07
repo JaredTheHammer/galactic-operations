@@ -58,9 +58,11 @@ import {
 
 import {
   getKeywordValue,
+  hasKeyword,
   findGuardians,
   applyGuardianTransfer,
   applyArmorKeyword,
+  applyRetaliateKeyword,
 } from './keywords';
 
 import {
@@ -866,6 +868,16 @@ export function resolveCombatV2(
   const isNewlyWounded = reachedThreshold && defenderIsHero && !alreadyWounded;
   const isDefeated = reachedThreshold && (!defenderIsHero || alreadyWounded);
 
+  // 9. Retaliate keyword: defender deals automatic wounds to attacker when hit in melee
+  let retaliateWounds: number | undefined;
+  if (rollResult.isHit && scenario.rangeBand === 'Engaged') {
+    const retaliateValue = getKeywordValue(defender, 'Retaliate', gameState);
+    if (retaliateValue > 0) {
+      const attackerSoak = computeSoak(attacker, attackerEntity!, gameData);
+      retaliateWounds = applyRetaliateKeyword(retaliateValue, attackerSoak);
+    }
+  }
+
   return {
     rollResult,
     weaponBaseDamage: poolCtx.weapon.baseDamage,
@@ -884,6 +896,7 @@ export function resolveCombatV2(
     isDefeated,
     isNewlyWounded,
     defenderRemainingWounds: isNewlyWounded ? woundThreshold : defenderRemainingWounds,
+    retaliateWounds: retaliateWounds != null && retaliateWounds > 0 ? retaliateWounds : undefined,
   };
 }
 
@@ -1011,7 +1024,7 @@ export function applyCombatResult(
       };
     }
 
-    // --- ATTACKER (threat-based strain + consume aim tokens) ---
+    // --- ATTACKER (threat-based strain + consume aim tokens + retaliate wounds) ---
     if (fig.id === scenario.attackerId) {
       // Consume aim tokens (effect already applied in buildCombatPools)
       let updatedFig = (fig.aimTokens ?? 0) > 0
@@ -1036,13 +1049,46 @@ export function applyCombatResult(
           newConditions.push('Staggered');
         }
 
-        return {
+        updatedFig = {
           ...updatedFig,
           strainCurrent: strainThreshold !== null
             ? Math.min(newStrain, strainThreshold + 5) // cap at threshold + 5
             : updatedFig.strainCurrent,
           conditions: newConditions,
         };
+      }
+
+      // Retaliate keyword: attacker suffers automatic wounds from defender's retaliation
+      if (resolution.retaliateWounds && resolution.retaliateWounds > 0) {
+        const entity = getEntity(updatedFig, gameState);
+        const threshold = getWoundThreshold(updatedFig, entity);
+        const newWounds = updatedFig.woundsCurrent + resolution.retaliateWounds;
+        const reachedThreshold = newWounds >= threshold;
+
+        // Hero wounded mechanic applies to attacker too
+        const attackerIsHero = updatedFig.entityType === 'hero';
+        const attackerAlreadyWounded = updatedFig.isWounded;
+
+        if (reachedThreshold && attackerIsHero && !attackerAlreadyWounded) {
+          const newConditions = [...updatedFig.conditions];
+          if (!newConditions.includes('Wounded')) {
+            newConditions.push('Wounded');
+          }
+          updatedFig = {
+            ...updatedFig,
+            woundsCurrent: 0,
+            strainCurrent: 0,
+            isWounded: true,
+            isDefeated: false,
+            conditions: newConditions,
+          };
+        } else {
+          updatedFig = {
+            ...updatedFig,
+            woundsCurrent: Math.min(newWounds, threshold),
+            isDefeated: reachedThreshold,
+          };
+        }
       }
 
       return updatedFig;

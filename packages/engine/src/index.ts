@@ -70,6 +70,9 @@ export type {
   // Species Abilities
   SpeciesAbilityEffect,
   SpeciesAbility,
+  // Fog of War
+  TileVisibility,
+  FogOfWarState,
 } from './types.js';
 
 // Re-export data loader functions
@@ -182,10 +185,24 @@ export {
   npcHasKeyword,
   getNPCKeywordValue,
   applyArmorKeyword,
+  applyRetaliateKeyword,
   applyDisciplinedBonus,
   findGuardians,
   applyGuardianTransfer,
 } from './keywords.js';
+
+// Re-export fog of war system
+export {
+  createFogOfWarState,
+  getTileVisibility,
+  isFigureVisible,
+  computeVisibleTiles,
+  computeVisibleTilesWithRoomReveal,
+  updateFogOfWar,
+  updateFogAfterMove,
+  serializeFogOfWar,
+  deserializeFogOfWar,
+} from './fog-of-war.js';
 
 // Re-export AI system
 export {

@@ -149,6 +149,29 @@ export function applyDisciplinedBonus(
 }
 
 // ============================================================================
+// KEYWORD EFFECT: RETALIATE X
+// ============================================================================
+
+/**
+ * Retaliate X: When a figure with Retaliate X is hit by an attack from
+ * within Engaged range (0-1 tiles), the attacker automatically suffers X wounds.
+ * No roll needed -- this is flat, deterministic damage.
+ *
+ * Applied in combat-v2.ts applyCombatResult after hit confirmation.
+ *
+ * @param retaliateValue The Retaliate X value (automatic wounds to deal)
+ * @param attackerSoak The attacker's soak value (reduces retaliate damage)
+ * @returns Net wounds the attacker suffers (minimum 0)
+ */
+export function applyRetaliateKeyword(
+  retaliateValue: number,
+  attackerSoak: number,
+): number {
+  if (retaliateValue <= 0) return 0;
+  return Math.max(0, retaliateValue - attackerSoak);
+}
+
+// ============================================================================
 // KEYWORD EFFECT: GUARDIAN X
 // ============================================================================
 

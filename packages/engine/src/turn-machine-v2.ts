@@ -63,6 +63,7 @@ import {
   getSpeciesBonusStrainRecovery,
   isImmuneToCondition,
 } from './species-abilities.js';
+import { updateFogOfWar, createFogOfWarState } from './fog-of-war.js';
 
 // ============================================================================
 // OBJECTIVE POINT UTILITIES
@@ -100,6 +101,10 @@ export function createInitialGameStateV2(
     lootTokens?: LootToken[];
     /** Consumable inventory from campaign state. Maps item ID to quantity. */
     consumableInventory?: Record<string, number>;
+    /** Enable fog of war / progressive room reveal. Disabled by default. */
+    fogOfWar?: boolean;
+    /** Vision range in tiles for fog of war. Default 8. */
+    fogOfWarVisionRange?: number;
   },
 ): GameState {
   let map: GameMap;
@@ -180,6 +185,11 @@ export function createInitialGameStateV2(
 
     // Consumable inventory (initialized from campaign state or empty for standalone)
     consumableInventory: options?.consumableInventory ?? {},
+
+    // Fog of war (disabled by default for backward compatibility)
+    fogOfWar: options?.fogOfWar
+      ? createFogOfWarState(true, options.fogOfWarVisionRange)
+      : undefined,
   };
 }
 
@@ -299,7 +309,14 @@ export function deployFiguresV2(
     }
   }
 
-  return { ...gameState, figures };
+  let newState = { ...gameState, figures };
+
+  // Fog of war: calculate initial visibility from deployed positions
+  if (newState.fogOfWar?.enabled) {
+    newState = { ...newState, fogOfWar: updateFogOfWar(newState) };
+  }
+
+  return newState;
 }
 
 /**
@@ -1297,6 +1314,11 @@ export function executeActionV2(
       const mover = newState.figures.find(f => f.id === figure.id);
       if (mover && !mover.isDefeated) {
         newState = resolveStandbyTriggers(mover, newState, gameData);
+      }
+
+      // Fog of war: recalculate visibility after movement
+      if (newState.fogOfWar?.enabled) {
+        newState = { ...newState, fogOfWar: updateFogOfWar(newState) };
       }
       break;
     }
