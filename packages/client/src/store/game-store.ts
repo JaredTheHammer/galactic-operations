@@ -110,11 +110,23 @@ import consumablesData from '@data/consumables.json'
 import tacticsData from '@data/cards/tactics.json'
 import companionsNpcData from '@data/npcs/companions.json'
 import mercenarySpecData from '@data/specializations/mercenary.json'
+import bodyguardSpecData from '@data/specializations/bodyguard.json'
+import demolitionistSpecData from '@data/specializations/demolitionist.json'
 import smugglerSpecData from '@data/specializations/smuggler.json'
+import gunslingerSpecData from '@data/specializations/gunslinger.json'
+import charmerSpecData from '@data/specializations/charmer.json'
 import droidTechSpecData from '@data/specializations/droid-tech.json'
+import outlawTechSpecData from '@data/specializations/outlaw-tech.json'
+import slicerSpecData from '@data/specializations/slicer.json'
 import forceAdeptSpecData from '@data/specializations/force-adept.json'
+import healerSpecData from '@data/specializations/healer.json'
+import nimanDiscipleSpecData from '@data/specializations/niman-disciple.json'
 import tacticianSpecData from '@data/specializations/tactician.json'
+import figureheadSpecData from '@data/specializations/figurehead.json'
+import strategistSpecData from '@data/specializations/strategist.json'
 import assassinSpecData from '@data/specializations/assassin.json'
+import gadgeteerSpecData from '@data/specializations/gadgeteer.json'
+import survivalistSpecData from '@data/specializations/survivalist.json'
 
 // Dune mechanics data
 import contractsData from '@data/contracts.json'
@@ -221,11 +233,23 @@ function loadGameDataV2(): GameData {
   const specializations: Record<string, SpecializationDefinition & { talents: TalentCard[] }> = {}
   const specDataFiles = [
     mercenarySpecData,
+    bodyguardSpecData,
+    demolitionistSpecData,
     smugglerSpecData,
+    gunslingerSpecData,
+    charmerSpecData,
     droidTechSpecData,
+    outlawTechSpecData,
+    slicerSpecData,
     forceAdeptSpecData,
+    healerSpecData,
+    nimanDiscipleSpecData,
     tacticianSpecData,
+    figureheadSpecData,
+    strategistSpecData,
     assassinSpecData,
+    gadgeteerSpecData,
+    survivalistSpecData,
   ]
   for (const specRaw of specDataFiles) {
     const raw = specRaw as any

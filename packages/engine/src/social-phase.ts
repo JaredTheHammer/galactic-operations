@@ -13,6 +13,7 @@
 
 import type {
   CampaignState,
+  GameData,
   HeroCharacter,
   SocialPhaseLocation,
   SocialEncounter,
@@ -144,6 +145,7 @@ export function resolveSocialCheck(
   dialogueOption: SocialDialogueOption,
   npc: SocialNPC,
   rollFn: RollFn = defaultRollFn,
+  gameData?: GameData,
 ): { checkResult: SkillCheckResult; outcomes: SocialOutcome[]; narrativeText: string } {
   let checkResult: SkillCheckResult;
   const isWounded = hero.isWounded ?? false;
@@ -163,6 +165,7 @@ export function resolveSocialCheck(
       npcSkillRank,
       rollFn,
       isWounded,
+      gameData,
     );
   } else {
     // Standard check with disposition-modified difficulty
@@ -177,6 +180,7 @@ export function resolveSocialCheck(
       effectiveDifficulty,
       rollFn,
       isWounded,
+      gameData,
     );
   }
 
@@ -626,6 +630,7 @@ export function executeSocialEncounter(
   heroId: string,
   npcs: Record<string, SocialNPC>,
   rollFn: RollFn = defaultRollFn,
+  gameData?: GameData,
 ): { campaign: CampaignState; result: SocialCheckResult } {
   const hero = campaign.heroes[heroId];
   if (!hero) throw new Error(`Hero ${heroId} not found in campaign`);
@@ -637,7 +642,7 @@ export function executeSocialEncounter(
   if (!npc) throw new Error(`NPC ${encounter.npcId} not found`);
 
   // Resolve the check
-  const { checkResult, outcomes, narrativeText } = resolveSocialCheck(hero, option, npc, rollFn);
+  const { checkResult, outcomes, narrativeText } = resolveSocialCheck(hero, option, npc, rollFn, gameData);
 
   // Apply outcomes
   let updatedCampaign = applySocialOutcomes(campaign, outcomes, heroId);

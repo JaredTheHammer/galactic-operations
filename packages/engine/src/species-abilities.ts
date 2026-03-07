@@ -10,6 +10,9 @@
  * - turn-machine-v2.ts / executeActionV2 (Rest): bonus_strain_recovery (Human)
  * - social-phase.ts: social_skill_upgrade (Twi'lek), skill_bonus (Bothan)
  * - condition application: condition_immunity (Wookiee Fear, Droid Poison)
+ * - combat-v2.ts / brawl damage: natural_weapon_damage (Gamorrean, Barabel, etc.)
+ * - combat-v2.ts / ranged defense: silhouette_small (Jawa, Ewok, Chadra-Fan, etc.)
+ * - combat-v2.ts / darkness setback: dark_vision (Gand, Chiss, Givin, etc.)
  */
 
 import type {
@@ -129,6 +132,44 @@ export function getSpeciesSoakBonus(
   gameData: GameData,
 ): number {
   return getEffectValue(hero, gameData, 'soak_bonus');
+}
+
+/**
+ * Get bonus Brawl damage from natural weapons (claws, tusks, etc.).
+ * Always active on Brawl attacks (unlike wounded_melee_bonus which requires wounds).
+ * - Gamorrean Tusks, Barabel Claws, etc.
+ */
+export function getSpeciesNaturalWeaponDamage(
+  hero: HeroCharacter,
+  gameData: GameData,
+  weaponSkill: string,
+): number {
+  const isBrawl = weaponSkill === 'brawl' || weaponSkill === 'Brawl';
+  if (!isBrawl) return 0;
+  return getEffectValue(hero, gameData, 'natural_weapon_damage');
+}
+
+/**
+ * Check if a hero has dark vision (ignores darkness setback dice).
+ * - Gand, Chiss, Givin, etc.
+ */
+export function hasSpeciesDarkVision(
+  hero: HeroCharacter,
+  gameData: GameData,
+): boolean {
+  return hasSpeciesAbility(hero, gameData, 'dark_vision');
+}
+
+/**
+ * Check if a hero has small silhouette (harder to hit at range).
+ * Returns the ranged defense bonus from being a small target.
+ * - Jawa, Ewok, Chadra-Fan, Aleena, etc.
+ */
+export function getSpeciesSilhouetteDefense(
+  hero: HeroCharacter,
+  gameData: GameData,
+): number {
+  return getEffectValue(hero, gameData, 'silhouette_small');
 }
 
 // ============================================================================

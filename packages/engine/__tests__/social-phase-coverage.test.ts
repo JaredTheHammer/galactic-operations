@@ -212,6 +212,7 @@ describe('getNPCOpposedCharacteristic willpower fallback', () => {
       0, // no skill rank
       expect.anything(),
       expect.anything(),
+      undefined, // gameData (optional)
     );
   });
 });

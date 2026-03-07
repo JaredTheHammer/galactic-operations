@@ -84,7 +84,7 @@ export interface GeneratedPrompt {
 // ============================================================================
 
 const SPECIES_VISUALS: Record<string, string> = {
-  // Playable species
+  // Core playable species
   human: 'human',
   twilek: "Twi'lek alien with head-tails (lekku), colorful skin ranging from blue to green to red",
   wookiee: 'tall Wookiee covered in thick brown fur, powerful build, expressive eyes',
@@ -93,22 +93,79 @@ const SPECIES_VISUALS: Record<string, string> = {
   bothan: 'Bothan with fine fur-covered face, sharp features, keen intelligent eyes, pointed ears',
   droid: 'humanoid droid with metallic chassis, photoreceptor eyes, visible mechanical joints',
 
-  // Extended NPC species
-  zabrak: 'Zabrak with crown of cranial horns, facial tattoo markings, intense eyes',
-  togruta: 'Togruta with tall hollow horns (montrals) and striped head-tails, colorful skin markings',
-  chiss: 'Chiss with blue skin, glowing red eyes, sharp aristocratic features, blue-black hair',
-  duros: 'Duros with smooth blue-green skin, large red eyes, noseless face, tall domed head',
-  'mon-calamari': 'Mon Calamari with salmon-colored mottled skin, large bulbous eyes, webbed hands',
-  sullustan: 'Sullustan with large round eyes, jowled cheeks, mouselike ears, dark smooth skin',
-  ugnaught: 'Ugnaught, short and stout with porcine features, upturned snout, thick fingers',
-  weequay: 'Weequay with leathery brown skin, topknot braids, deep-set eyes, weathered face',
-  mirialan: 'Mirialan with olive-green skin, geometric black facial tattoos, dark hair',
-  ithorian: 'Ithorian with tall curved neck, T-shaped head, large gentle eyes, brown skin',
-  devaronian: 'Devaronian with two prominent horns, reddish skin, sharp teeth, dark goatee',
+  // Edge of the Empire species
   gand: 'Gand insectoid with chitinous exoskeleton, compound eyes, breathing apparatus',
-  jawa: 'Jawa, very small robed figure with glowing yellow eyes peering from a deep hood',
-  tusken: 'Tusken Raider wrapped in desert robes and bandages, distinctive breathing mask with eye lenses',
+  duros: 'Duros with smooth blue-green skin, large red eyes, noseless face, tall domed head',
+  gran: 'Gran with three eyestalks, goat-like snout, tan skin, gentle communal appearance',
+  ithorian: 'Ithorian with tall curved neck, T-shaped head, large gentle eyes, brown skin',
+  mon_calamari: 'Mon Calamari with salmon-colored mottled skin, large bulbous eyes, webbed hands',
+  sullustan: 'Sullustan with large round eyes, jowled cheeks, mouselike ears, dark smooth skin',
+  chiss: 'Chiss with blue skin, glowing red eyes, sharp aristocratic features, blue-black hair',
+  devaronian: 'Devaronian with two prominent horns, reddish skin, sharp teeth, dark goatee',
+  falleen: 'Falleen with green-gold reptilian skin, sharp aristocratic features, dark swept-back hair',
+  aqualish: 'Aqualish with walrus-like face, prominent tusks, dark eyes, rough leathery skin',
+  chadra_fan: 'Chadra-Fan, very small bat-like alien with large dark eyes, flat nose, large round ears',
+  dug: 'Dug walking on muscular arms, legs used as hands, wrinkled skin, aggressive posture',
   ewok: 'Ewok, small furry bear-like creature with large dark eyes, primitive leather accessories',
+  gungan: 'Gungan with long floppy ears, bill-like snout, tall gangly frame, amphibious skin',
+  jawa: 'Jawa, very small robed figure with glowing yellow eyes peering from a deep hood',
+  klatooinian: 'Klatooinian with flat canine-like face, dark leathery skin, heavy brow ridge',
+  kyuzo: 'Kyuzo with wide-brimmed war hat, dense muscular build, green-brown skin, intense eyes',
+  nikto: 'Nikto with rough reptilian skin, small horns or ridges, flat nose, scarred tough appearance',
+  quarren: 'Quarren with tentacle-covered lower face, deep-set eyes, squid-like head, mottled skin',
+  toydarian: 'Toydarian with small wings, trunk-like snout, pot belly, hovering posture, blue-grey skin',
+  weequay: 'Weequay with leathery brown skin, topknot braids, deep-set eyes, weathered face',
+  arcona: 'Arcona with flat anvil-shaped head, large marble-like eyes, serpentine features, tan skin',
+  clawdite: 'Clawdite shapeshifter with pale reptilian skin, angular features, shifting appearance',
+
+  // Force and Destiny species
+  cerean: 'Cerean with tall elongated cranium, binary brain ridges, wise features, sparse white hair',
+  kel_dor: 'Kel Dor with dark goggles, antiox breath mask, orange-red skin, black sensory organs',
+  mirialan: 'Mirialan with olive-green skin, geometric black facial tattoos, dark hair',
+  nautolan: 'Nautolan with green skin, large dark eyes, numerous head-tresses, amphibious features',
+  togruta: 'Togruta with tall hollow horns (montrals) and striped head-tails, colorful skin markings',
+  zabrak: 'Zabrak with crown of cranial horns, facial tattoo markings, intense eyes',
+  iktotchi: 'Iktotchi with large downward-curving horns, tough reddish-brown skin, stoic features',
+  aleena: 'Aleena, very small reptilian with large eyes, wide head, quick energetic posture',
+  dowutin: 'Dowutin, massive hulking alien with thick grey skin, heavy brow, immense jaw',
+  kaleesh: 'Kaleesh with bone mask over face, red-gold reptilian skin, intense yellow eyes',
+  mikkian: 'Mikkian with colorful sensory head-tendrils instead of hair, near-human features',
+  cosian: 'Cosian, elderly reptilian with long tail, wrinkled skin, kind wise eyes, hunched posture',
+  bardottan: 'Bardottan with elongated reptilian head, large eyes, thin frame, mystical bearing',
+  dathomirian: 'Dathomirian Zabrak with red and black skin, fierce cranial horns, tribal markings',
+  sathari: 'Sathari with vestigial feathered wings, avian features, graceful slender build',
+  cathar: 'Cathar with feline features, fur-covered face, mane-like hair, retractable claws',
+
+  // Age of Rebellion species
+  pantoran: 'Pantoran with blue skin, golden facial tattoo markings, near-human features, dark hair',
+  lasat: 'Lasat, large muscular alien with purple-grey fur, striped face, powerful digitigrade legs',
+  besalisk: 'Besalisk with four thick arms, wide flat head, jowled face, massive imposing frame',
+  gamorrean: 'Gamorrean with porcine green skin, prominent tusks, beady eyes, stocky powerful build',
+  geonosian: 'Geonosian insectoid with chitinous brown exoskeleton, wings, elongated snout',
+  neimoidian: 'Neimoidian with grey-green mottled skin, large red-orange eyes, tall ornate headdress',
+  pau_an: "Pau'an with grey lined skin, deep-set dark eyes, sharp teeth, tall gaunt frame",
+  umbaran: 'Umbaran with pale ghostly skin, sunken dark eyes, sharp features, unsettling presence',
+  selkath: 'Selkath with aquatic features, fin-like head crest, blue-green skin, large dark eyes',
+  kalleran: 'Kalleran with tan-brown skin, near-human features, athletic build, alert expression',
+  gotal: 'Gotal with two tall cranial cones, shaggy brown fur, large eyes, empathic demeanor',
+  shistavanen: 'Shistavanen with wolf-like face, sharp fangs, dense grey-brown fur, predatory eyes',
+  talz: 'Talz, large burly alien covered in white fur, four eyes (two large two small), gentle demeanor',
+  xexto: 'Xexto with six thin limbs, elongated neck, small head, extremely nimble posture',
+  gossam: 'Gossam, small reptilian with green skin, thin frame, pointed features, corporate attire',
+  muun: 'Muun with tall thin frame, elongated bald head, pale skin, calculating expression',
+  skakoan: 'Skakoan in bulky pressure suit, helmet with breathing apparatus, industrial appearance',
+  lannik: 'Lannik, small with large pointed ears, fierce determined expression, compact muscular build',
+  dressellian: 'Dressellian with deeply wrinkled prune-like face, determined eyes, guerrilla fighter look',
+  kaminoan: 'Kaminoan with extremely tall slender frame, long graceful neck, large dark eyes, pale skin',
+  drall: 'Drall, small furry mammalian with round body, short limbs, scholarly appearance',
+  selonian: 'Selonian with sleek weasel-like body, brown fur, long tail, alert predatory posture',
+  anx: 'Anx, very tall saurian with large head crest, thick tail, imposing but calm presence',
+  chevin: 'Chevin with massive elongated snout, thick pachydermal skin, heavy-set body',
+
+  // NPC-only species
+  'mon-calamari': 'Mon Calamari with salmon-colored mottled skin, large bulbous eyes, webbed hands',
+  ugnaught: 'Ugnaught, short and stout with porcine features, upturned snout, thick fingers',
+  tusken: 'Tusken Raider wrapped in desert robes and bandages, distinctive breathing mask with eye lenses',
   hutt: 'Hutt, massive slug-like alien with thick skin, small arms, wide mouth, imposing presence',
 };
 
@@ -442,18 +499,18 @@ function findAll(tagSet: Set<string>, candidates: string[]): string[] {
   return candidates.filter(c => tagSet.has(c));
 }
 
-/** Infer a species ID from NPC keywords. */
+/** Infer a species ID from NPC keywords. Uses SPECIES_VISUALS keys for data-driven matching. */
 function inferSpeciesFromKeywords(kw: Set<string>): string | null {
+  // Special compound keyword checks first
   if (kw.has('droid') || kw.has('probe-droid')) return 'droid';
-  if (kw.has('wookiee')) return 'wookiee';
-  if (kw.has('trandoshan')) return 'trandoshan';
-  if (kw.has('rodian')) return 'rodian';
   if (kw.has('twilek') || kw.has("twi'lek")) return 'twilek';
-  if (kw.has('zabrak')) return 'zabrak';
-  if (kw.has('chiss')) return 'chiss';
-  if (kw.has('gand')) return 'gand';
-  if (kw.has('jawa')) return 'jawa';
-  if (kw.has('tusken')) return 'tusken';
+  if (kw.has('mon-calamari') || kw.has('mon_calamari')) return 'mon_calamari';
+
+  // Data-driven: check if any keyword matches a known species ID
+  for (const speciesId of Object.keys(SPECIES_VISUALS)) {
+    if (kw.has(speciesId)) return speciesId;
+  }
+
   // Default to human for Imperial/generic units
   if (kw.has('stormtrooper') || kw.has('imperial') || kw.has('officer')) return 'human';
   return null;

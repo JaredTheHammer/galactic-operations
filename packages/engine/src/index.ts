@@ -306,6 +306,9 @@ export {
   isImmuneToCondition,
   filterImmuneConditions,
   getSpeciesSkillBonus,
+  getSpeciesNaturalWeaponDamage,
+  hasSpeciesDarkVision,
+  getSpeciesSilhouetteDefense,
 } from './species-abilities.js';
 
 // Re-export keyword system (Legion-inspired mechanical keywords)
