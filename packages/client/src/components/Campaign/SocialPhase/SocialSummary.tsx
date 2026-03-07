@@ -1,5 +1,6 @@
 /**
- * SocialSummary - Phase completion summary showing all encounters, transactions, and outcomes.
+ * SocialSummary - Phase completion summary showing all encounters, transactions,
+ * rival actions, bounty outcomes, threat clock effects, and other outcomes.
  */
 
 import React from 'react'
@@ -8,7 +9,10 @@ import { useGameStore } from '../../../store/game-store'
 import type {
   SocialPhaseLocation,
   SocialNPC,
+  SocialPhaseState,
+  RivalNPC,
 } from '../../../../../engine/src/types'
+import { getThreatClockEffects } from '../../../../../engine/src/social-phase'
 import type { SocialSessionState } from './SocialPhase'
 
 const factionDisplayNames: Record<string, string> = {
@@ -19,14 +23,24 @@ const factionDisplayNames: Record<string, string> = {
   hutt: 'Hutt Cartel',
 }
 
+const THREAT_LEVEL_LABELS: Record<string, { label: string; color: string; description: string }> = {
+  caught_off_guard: { label: 'CAUGHT OFF GUARD', color: '#44ff44', description: 'Your team gets a surprise round' },
+  normal: { label: 'NORMAL', color: '#888', description: 'Standard engagement' },
+  prepared: { label: 'PREPARED', color: '#ffaa00', description: '+1 enemy reinforcement group' },
+  fortified: { label: 'FORTIFIED', color: '#ff6600', description: '+1 reinforcement, enemies start in cover' },
+  ambush: { label: 'AMBUSH', color: '#ff2222', description: '+2 reinforcements, enemy surprise round' },
+}
+
 interface Props {
   session: SocialSessionState
   npcs: Record<string, SocialNPC>
   location: SocialPhaseLocation
+  phaseState: SocialPhaseState
+  rival?: RivalNPC
   onComplete: () => void
 }
 
-export function SocialSummary({ session, npcs, location, onComplete }: Props) {
+export function SocialSummary({ session, npcs, location, phaseState, rival, onComplete }: Props) {
   const { isMobile } = useIsMobile()
   const { encounterResults, purchaseHistory, salesHistory, healingCreditsSpent } = session
 
@@ -57,8 +71,18 @@ export function SocialSummary({ session, npcs, location, onComplete }: Props) {
       .reduce((s, o) => s + (o.xpAmount ?? 0), 0)
   }, 0)
 
+  // Expansion data
+  const clockEffects = getThreatClockEffects(phaseState.threatClock)
+  const threatInfo = THREAT_LEVEL_LABELS[clockEffects.level] ?? THREAT_LEVEL_LABELS.normal
+  const slotsUsed = phaseState.slotsTotal - phaseState.slotsRemaining
+  const rivalActions = phaseState.rivalActionsThisPhase ?? []
+  const preppedBounties = phaseState.preppedBounties ?? []
+  const acceptedBounties = phaseState.acceptedBounties ?? []
+  const rivalClaimedBounties = phaseState.rivalClaimedBounties ?? []
+
   const isEmpty = encounterResults.length === 0 && purchaseHistory.length === 0 &&
-                  salesHistory.length === 0 && healingCreditsSpent === 0
+                  salesHistory.length === 0 && healingCreditsSpent === 0 &&
+                  rivalActions.length === 0 && acceptedBounties.length === 0
 
   return (
     <div style={{
@@ -73,9 +97,175 @@ export function SocialSummary({ session, npcs, location, onComplete }: Props) {
         }}>
           PHASE COMPLETE
         </h1>
-        <div style={{ textAlign: 'center', color: '#888', fontSize: isMobile ? '13px' : '14px', marginBottom: isMobile ? '16px' : '24px' }}>
+        <div style={{ textAlign: 'center', color: '#888', fontSize: isMobile ? '13px' : '14px', marginBottom: '8px' }}>
           {location.name}
         </div>
+
+        {/* Slot usage bar */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+          marginBottom: isMobile ? '16px' : '24px',
+        }}>
+          <span style={{ fontSize: '12px', color: '#888' }}>Slots used:</span>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {Array.from({ length: phaseState.slotsTotal }).map((_, i) => (
+              <div key={i} style={{
+                width: '12px', height: '12px', borderRadius: '3px',
+                backgroundColor: i < slotsUsed ? '#4a9eff' : '#1a1a2f',
+                border: '1px solid #2a2a4f',
+              }} />
+            ))}
+          </div>
+          <span style={{ fontSize: '12px', color: '#aaa' }}>
+            {slotsUsed}/{phaseState.slotsTotal}
+            {phaseState.deployedEarly && ' (deployed early)'}
+          </span>
+        </div>
+
+        {/* Threat Clock Result */}
+        <Section title="Threat Assessment">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontSize: '13px', color: '#ccc' }}>Threat Clock</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '18px', fontWeight: 'bold', color: threatInfo.color }}>
+                {phaseState.threatClock}/10
+              </span>
+            </div>
+          </div>
+          {/* Threat bar */}
+          <div style={{
+            width: '100%', height: '8px', borderRadius: '4px',
+            backgroundColor: '#1a1a2f', overflow: 'hidden', marginBottom: '8px',
+          }}>
+            <div style={{
+              width: `${(phaseState.threatClock / 10) * 100}%`, height: '100%',
+              borderRadius: '4px',
+              background: phaseState.threatClock <= 2 ? '#44ff44'
+                : phaseState.threatClock <= 4 ? '#888'
+                : phaseState.threatClock <= 6 ? '#ffaa00'
+                : phaseState.threatClock <= 8 ? '#ff6600'
+                : '#ff2222',
+              transition: 'width 0.3s',
+            }} />
+          </div>
+          <div style={{
+            padding: '8px', borderRadius: '4px',
+            backgroundColor: `${threatInfo.color}10`,
+            border: `1px solid ${threatInfo.color}40`,
+          }}>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', color: threatInfo.color, marginBottom: '2px' }}>
+              {threatInfo.label}
+            </div>
+            <div style={{ fontSize: '11px', color: '#aaa' }}>
+              {threatInfo.description}
+            </div>
+            {clockEffects.enemiesStartInCover && (
+              <div style={{ fontSize: '11px', color: '#ff8800', marginTop: '2px' }}>
+                Enemies begin deployed in cover positions
+              </div>
+            )}
+          </div>
+        </Section>
+
+        {/* Rival Actions */}
+        {rival && rivalActions.length > 0 && (
+          <Section title={`Rival Activity -- ${rival.name}`}>
+            {rivalActions.map((action, i) => {
+              const actionColors: Record<string, string> = {
+                claim_bounty: '#ff4444',
+                poison_contact: '#ff8800',
+                buy_stock: '#ffaa00',
+                gather_intel: '#aa88ff',
+                lay_low: '#666',
+              }
+              return (
+                <div key={i} style={{
+                  padding: '6px 0',
+                  borderBottom: i < rivalActions.length - 1 ? '1px solid #1a1a2f' : 'none',
+                }}>
+                  <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  }}>
+                    <span style={{ fontSize: '13px', color: '#ccc' }}>{action.description}</span>
+                    <span style={{
+                      fontSize: '10px', padding: '2px 6px', borderRadius: '3px',
+                      backgroundColor: `${actionColors[action.type] ?? '#666'}20`,
+                      color: actionColors[action.type] ?? '#666',
+                      textTransform: 'uppercase',
+                    }}>
+                      {action.type.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </Section>
+        )}
+
+        {/* Bounty Outcomes */}
+        {(acceptedBounties.length > 0 || rivalClaimedBounties.length > 0) && (
+          <Section title="Bounty Board">
+            {acceptedBounties.map((bountyId, i) => {
+              const bounty = phaseState.availableBounties.find(b => b.id === bountyId)
+              const prep = preppedBounties.find(p => p.bountyId === bountyId)
+              return (
+                <div key={`a-${i}`} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '6px 0',
+                  borderBottom: '1px solid #1a1a2f',
+                }}>
+                  <div>
+                    <div style={{ fontSize: '13px', color: '#ccc' }}>
+                      {bounty?.name ?? bountyId}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#888' }}>
+                      {bounty?.targetName ?? 'Unknown target'}
+                      {prep && (prep.success
+                        ? ' -- intel gathered'
+                        : ' -- prep failed')}
+                      {prep?.targetWeakened && ' (target weakened)'}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    {prep ? (
+                      <span style={{
+                        fontSize: '10px', padding: '2px 6px', borderRadius: '3px',
+                        backgroundColor: prep.success ? '#44ff4420' : '#ff444420',
+                        color: prep.success ? '#44ff44' : '#ff4444',
+                      }}>
+                        {prep.success ? 'PREPPED' : 'FAILED'}
+                      </span>
+                    ) : (
+                      <span style={{
+                        fontSize: '10px', padding: '2px 6px', borderRadius: '3px',
+                        backgroundColor: '#4a9eff20', color: '#4a9eff',
+                      }}>
+                        ACCEPTED
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+            {rivalClaimedBounties.map((bountyId, i) => (
+              <div key={`r-${i}`} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '6px 0',
+                borderBottom: i < rivalClaimedBounties.length - 1 ? '1px solid #1a1a2f' : 'none',
+              }}>
+                <div style={{ fontSize: '13px', color: '#888' }}>
+                  {bountyId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                </div>
+                <span style={{
+                  fontSize: '10px', padding: '2px 6px', borderRadius: '3px',
+                  backgroundColor: '#ff444420', color: '#ff4444',
+                }}>
+                  CLAIMED BY RIVAL
+                </span>
+              </div>
+            ))}
+          </Section>
+        )}
 
         {isEmpty ? (
           <div style={{

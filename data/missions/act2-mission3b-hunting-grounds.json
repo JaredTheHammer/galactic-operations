@@ -5,22 +5,40 @@
   "narrativeIntro": "The bounty board data revealed something sickening: the Syndicate's Trandoshan allies have been kidnapping settlers and running a hunting ground in the canyons south of Nexus Station. Prisoners are released into the jungle and hunted for sport. Three captives are out there right now with Trandoshan kill-teams closing in. You have to reach the prisoners and get them to safety before the hunters finish their game.",
   "narrativeSuccess": "The last prisoner stumbles into your arms, shaking but alive. The Trandoshan hunters lie scattered across the canyon floor, their prey turned predators. One of the freed prisoners, a scarred Trandoshan named Krrssk, was being hunted by his own kind for refusing to participate. He grips your hand: 'I owe you a life-debt. Point me at the ones who did this.' The hunting grounds are shut down, and you have a new ally.",
   "narrativeFailure": "The Trandoshans close in before you can reach the last prisoners. Their hunting horns echo through the canyon as your team is forced to retreat. The survivors you couldn't reach will face another day in the arena. The Syndicate's cruelty continues unchecked.",
-
   "mapId": "jungle-canyon",
   "mapPreset": "skirmish",
   "boardsWide": 3,
   "boardsTall": 3,
-
   "difficulty": "hard",
   "roundLimit": 8,
   "recommendedHeroCount": 2,
-
   "imperialThreat": 12,
   "threatPerRound": 3,
-
   "operativeDeployZone": [
-    {"x": 16, "y": 16}, {"x": 17, "y": 16}, {"x": 18, "y": 16},
-    {"x": 16, "y": 17}, {"x": 17, "y": 17}, {"x": 18, "y": 17}
+    {
+      "x": 16,
+      "y": 16
+    },
+    {
+      "x": 17,
+      "y": 16
+    },
+    {
+      "x": 18,
+      "y": 16
+    },
+    {
+      "x": 16,
+      "y": 17
+    },
+    {
+      "x": 17,
+      "y": 17
+    },
+    {
+      "x": 18,
+      "y": 17
+    }
   ],
   "initialEnemies": [
     {
@@ -28,7 +46,14 @@
       "count": 2,
       "asMinGroup": false,
       "deployZone": [
-        {"x": 6, "y": 4}, {"x": 30, "y": 4}
+        {
+          "x": 6,
+          "y": 4
+        },
+        {
+          "x": 30,
+          "y": 4
+        }
       ]
     },
     {
@@ -36,7 +61,18 @@
       "count": 3,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 18, "y": 8}, {"x": 19, "y": 8}, {"x": 20, "y": 8}
+        {
+          "x": 18,
+          "y": 8
+        },
+        {
+          "x": 19,
+          "y": 8
+        },
+        {
+          "x": 20,
+          "y": 8
+        }
       ]
     },
     {
@@ -44,7 +80,14 @@
       "count": 2,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 10, "y": 12}, {"x": 26, "y": 12}
+        {
+          "x": 10,
+          "y": 12
+        },
+        {
+          "x": 26,
+          "y": 12
+        }
       ]
     }
   ],
@@ -57,14 +100,26 @@
           "npcProfileId": "trandoshan-hunter",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 0, "y": 8}]
+          "deployZone": [
+            {
+              "x": 0,
+              "y": 8
+            }
+          ]
         },
         {
           "npcProfileId": "nikto-gunner",
           "count": 2,
           "asMinGroup": true,
           "deployZone": [
-            {"x": 35, "y": 8}, {"x": 35, "y": 9}
+            {
+              "x": 35,
+              "y": 8
+            },
+            {
+              "x": 35,
+              "y": 9
+            }
           ]
         }
       ],
@@ -79,14 +134,18 @@
           "npcProfileId": "trandoshan-hunter",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 18, "y": 0}]
+          "deployZone": [
+            {
+              "x": 18,
+              "y": 0
+            }
+          ]
         }
       ],
       "threatCost": 4,
       "narrativeText": "The hunt leader arrives, tracking the scent of fresh blood."
     }
   ],
-
   "objectives": [
     {
       "id": "obj-free-prisoners",
@@ -110,7 +169,9 @@
     {
       "side": "Operative",
       "description": "Free all 3 prisoners.",
-      "requiredObjectiveIds": ["obj-free-prisoners"]
+      "requiredObjectiveIds": [
+        "obj-free-prisoners"
+      ]
     },
     {
       "side": "Imperial",
@@ -118,11 +179,13 @@
       "requiredObjectiveIds": []
     }
   ],
-
   "objectivePoints": [
     {
       "id": "objpt-prisoner-1",
-      "position": {"x": 4, "y": 2},
+      "position": {
+        "x": 4,
+        "y": 2
+      },
       "type": "terminal",
       "skillRequired": "athletics",
       "alternateSkill": "skulduggery",
@@ -131,7 +194,10 @@
     },
     {
       "id": "objpt-prisoner-2",
-      "position": {"x": 32, "y": 2},
+      "position": {
+        "x": 32,
+        "y": 2
+      },
       "type": "terminal",
       "skillRequired": "athletics",
       "alternateSkill": "mechanics",
@@ -140,7 +206,10 @@
     },
     {
       "id": "objpt-prisoner-3",
-      "position": {"x": 18, "y": 0},
+      "position": {
+        "x": 18,
+        "y": 0
+      },
       "type": "terminal",
       "skillRequired": "medicine",
       "alternateSkill": "athletics",
@@ -148,33 +217,53 @@
       "description": "Wounded prisoner hiding in a cave. Stabilize and extract."
     }
   ],
-
   "lootTokens": [
     {
       "id": "loot-trophy-rack",
-      "position": {"x": 18, "y": 8},
-      "reward": {"type": "credits", "value": 100}
+      "position": {
+        "x": 18,
+        "y": 8
+      },
+      "reward": {
+        "type": "credits",
+        "value": 100
+      }
     },
     {
       "id": "loot-hunter-gear",
-      "position": {"x": 6, "y": 4},
-      "reward": {"type": "equipment", "itemId": "vibro-knife"}
+      "position": {
+        "x": 6,
+        "y": 4
+      },
+      "reward": {
+        "type": "equipment",
+        "itemId": "vibro-knife"
+      }
     },
     {
       "id": "loot-supply-drop",
-      "position": {"x": 30, "y": 4},
-      "reward": {"type": "xp", "value": 3}
+      "position": {
+        "x": 30,
+        "y": 4
+      },
+      "reward": {
+        "type": "xp",
+        "value": 3
+      }
     }
   ],
-
   "campaignAct": 2,
   "missionIndex": 3,
-  "prerequisites": ["act2-m2-bounty"],
-  "unlocksNext": ["act2-m4-throne"],
-
+  "prerequisites": [
+    "act2-m2-bounty"
+  ],
+  "unlocksNext": [
+    "act2-m4-throne"
+  ],
   "baseXP": 14,
   "bonusXPPerLoot": 2,
   "bonusXPPerKill": 1,
   "maxKillXP": 6,
-  "leaderKillXP": 0
+  "leaderKillXP": 0,
+  "fogOfWar": false
 }

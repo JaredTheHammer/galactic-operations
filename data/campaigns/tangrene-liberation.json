@@ -61,5 +61,136 @@
     "act3-m3-stronghold": ["act3-m4-endgame"],
     "act3-m3-betrayal": ["act3-m4-endgame"]
   },
-  "branchingNotes": "Act 1: After Mission 2 (The Listening Post), players choose between Mission 3a (The Weapons Cache - moderate, loot-focused) or Mission 3b (Ambush at Xylo Pass - hard, rescue-focused). Both lead to the Act 1 finale. Act 2: After Mission 2 (The Bounty Board), players choose between Mission 3a (Shadow Syndicate Warehouse - hard, raid) or Mission 3b (Trandoshan Hunting Grounds - hard, survival). Both lead to the Act 2 finale: The Broker's Throne. Act 3: After Mission 2 (The Prototype Factory), players choose between Mission 3a (Assault on the Stronghold - hard, destroy droid reserves) or Mission 3b (The Betrayal - hard, confront rebel turncoats). Both lead to the Act 3 finale: Fortress Drayen."
+  "branchingNotes": "Act 1: After Mission 2 (The Listening Post), players choose between Mission 3a (The Weapons Cache - moderate, loot-focused) or Mission 3b (Ambush at Xylo Pass - hard, rescue-focused). Both lead to the Act 1 finale. Act 2: After Mission 2 (The Bounty Board), players choose between Mission 3a (Shadow Syndicate Warehouse - hard, raid) or Mission 3b (Trandoshan Hunting Grounds - hard, survival). Both lead to the Act 2 finale: The Broker's Throne. Act 3: After Mission 2 (The Prototype Factory), players choose between Mission 3a (Assault on the Stronghold - hard, destroy droid reserves) or Mission 3b (The Betrayal - hard, confront rebel turncoats). Both lead to the Act 3 finale: Fortress Drayen.",
+  "rival": {
+    "id": "rival-vex-torrin",
+    "name": "Vex Torrin",
+    "description": "A Devaronian bounty hunter with a reputation for ruthless efficiency. Vex operates in the same circles as your crew, competing for the same marks and contacts. In Act 1 he is a nuisance; by Act 3 he has become a serious threat to your operations.",
+    "archetype": "hunter",
+    "characteristics": { "willpower": 3, "presence": 2, "cunning": 3 },
+    "skills": { "discipline": 2, "cool": 2, "coercion": 1 }
+  },
+  "bounties": {
+    "act1": [
+      {
+        "id": "bounty-imperial-deserter",
+        "name": "The Deserter",
+        "description": "Lt. Korvin Harsk, an Imperial logistics officer who went AWOL with classified supply manifests. The Alliance wants him alive for the data he carries.",
+        "targetNpcId": "imperial-deserter",
+        "targetName": "Lt. Korvin Harsk",
+        "difficulty": "easy",
+        "condition": "capture",
+        "creditReward": 100,
+        "reputationReward": { "factionId": "rebel-alliance", "delta": 1 },
+        "rivalPriority": 2
+      },
+      {
+        "id": "bounty-rogue-probe-droid",
+        "name": "Rogue Probe Droid",
+        "description": "An Imperial Viper probe droid that went haywire and is broadcasting Alliance positions. Destroy it before it transmits to the sector fleet.",
+        "targetNpcId": "rogue-probe-droid",
+        "targetName": "Viper Unit X-7",
+        "difficulty": "easy",
+        "condition": "eliminate",
+        "creditReward": 75,
+        "rivalPriority": 1
+      },
+      {
+        "id": "bounty-spice-runner",
+        "name": "The Spice Runner",
+        "description": "Tano Kree runs glitterstim through the Tangrene sector. Local resistance wants him gone, but alive -- he knows Syndicate supply routes.",
+        "targetNpcId": "spice-runner",
+        "targetName": "Tano Kree",
+        "difficulty": "moderate",
+        "condition": "capture",
+        "creditReward": 200,
+        "reputationReward": { "factionId": "tangrene-resistance", "delta": 2 },
+        "rivalPriority": 4
+      }
+    ],
+    "act2": [
+      {
+        "id": "bounty-syndicate-enforcer",
+        "name": "The Enforcer",
+        "description": "Grask, a Trandoshan enforcer for the Shadow Syndicate. His elimination would destabilize Syndicate operations in the mid-rim.",
+        "targetNpcId": "syndicate-enforcer",
+        "targetName": "Grask",
+        "difficulty": "moderate",
+        "condition": "eliminate",
+        "creditReward": 250,
+        "reputationReward": { "factionId": "tangrene-resistance", "delta": 2 },
+        "rivalPriority": 3
+      },
+      {
+        "id": "bounty-data-broker",
+        "name": "The Data Broker",
+        "description": "An anonymous slicer selling Imperial comm codes on the black market. Capture and interrogate to learn the Syndicate's communication network.",
+        "targetNpcId": "data-broker",
+        "targetName": "Signal Ghost",
+        "difficulty": "hard",
+        "condition": "interrogate",
+        "creditReward": 400,
+        "reputationReward": { "factionId": "rebel-alliance", "delta": 3 },
+        "bonusReward": {
+          "type": "narrative",
+          "narrativeItemId": "syndicate-comm-codes",
+          "description": "Obtained Syndicate communication codes -- all Act 3 scout missions gain +1 bonus die."
+        },
+        "rivalPriority": 5
+      },
+      {
+        "id": "bounty-turncoat-pilot",
+        "name": "The Turncoat",
+        "description": "A former Alliance pilot who defected to the Syndicate with stolen starfighter schematics. The Alliance wants him silenced.",
+        "targetNpcId": "turncoat-pilot",
+        "targetName": "Dak Sorren",
+        "difficulty": "moderate",
+        "condition": "eliminate",
+        "creditReward": 200,
+        "rivalPriority": 2
+      }
+    ],
+    "act3": [
+      {
+        "id": "bounty-drayen-lieutenant",
+        "name": "The Warlord's Hand",
+        "description": "Commander Voss Drayen's personal enforcer and second-in-command. Eliminating her would throw Drayen's command structure into chaos before the final assault.",
+        "targetNpcId": "drayen-lieutenant",
+        "targetName": "Captain Mira Solenne",
+        "difficulty": "hard",
+        "condition": "eliminate",
+        "creditReward": 400,
+        "reputationReward": { "factionId": "rebel-alliance", "delta": 3 },
+        "rivalPriority": 4
+      },
+      {
+        "id": "bounty-droid-architect",
+        "name": "The Architect",
+        "description": "The Geonosian engineer who designed Drayen's prototype war droids. Capturing him would yield technical data to exploit weaknesses in the droid army.",
+        "targetNpcId": "droid-architect",
+        "targetName": "Poggle the Elder",
+        "difficulty": "hard",
+        "condition": "capture",
+        "creditReward": 350,
+        "bonusReward": {
+          "type": "narrative",
+          "narrativeItemId": "droid-schematics",
+          "description": "Obtained war droid schematics -- all heroes deal +1 damage to droid enemies in the finale."
+        },
+        "rivalPriority": 5
+      },
+      {
+        "id": "bounty-double-agent",
+        "name": "The Double Agent",
+        "description": "An Alliance operative suspected of feeding information to Drayen. Interrogate to confirm and extract the intelligence leak.",
+        "targetNpcId": "double-agent",
+        "targetName": "Kessa Rynn",
+        "difficulty": "moderate",
+        "condition": "interrogate",
+        "creditReward": 250,
+        "reputationReward": { "factionId": "rebel-alliance", "delta": 2 },
+        "rivalPriority": 3
+      }
+    ]
+  }
 }

@@ -73,7 +73,7 @@
       ],
       "aiArchetype": "melee",
       "keywords": ["Companion", "Trandoshan", "Fighter"],
-      "mechanicalKeywords": [],
+      "mechanicalKeywords": [{"name": "Retaliate", "value": 2}],
       "abilities": ["Regeneration: Recovers 1 wound at the start of each round"],
       "courage": 3,
       "defaultPortraitId": "krrssk"

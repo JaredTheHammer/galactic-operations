@@ -4,6 +4,11 @@
  * shopping, companion recruitment, and narrative interactions.
  *
  * Phase 9: Social Check Phase
+ *
+ * Expansion: Time Slots, Rival NPC, Threat Clock, Bounty System
+ * The social phase is a resource-constrained preparation round (~25% of gameplay).
+ * Players spend limited slots on activities while a rival NPC competes and a
+ * threat clock ticks toward enemy preparedness.
  */
 
 import type {
@@ -21,9 +26,30 @@ import type {
   ShopItem,
   SocialSkillId,
   Disposition,
+  RivalNPC,
+  RivalAction,
+  RivalActionType,
+  RivalState,
+  BountyContract,
+  BountyPrepResult,
+  SocialPhaseState,
+  SocialActivityType,
+  SocialActivity,
+  ThreatClockLevel,
+  ThreatClockEffects,
+  ExpandedSocialPhaseResult,
+  ActProgress,
 } from './types';
 
-import { DISPOSITION_DIFFICULTY, SOCIAL_SKILLS } from './types';
+import {
+  DISPOSITION_DIFFICULTY,
+  SOCIAL_SKILLS,
+  RIVAL_PRIORITIES,
+  RIVAL_SLOTS_BY_ACT,
+  ACTIVITY_CLOCK_TICKS,
+  SLOTS_PER_ACT,
+  createActProgress,
+} from './types';
 
 import {
   resolveSkillCheck,
@@ -385,10 +411,83 @@ export function applySocialOutcomes(
         }
         break;
       }
+
+      case 'cover_tracks': {
+        // Reduce exposure via act progress
+        if (outcome.exposureDelta && state.actProgress) {
+          const newExposure = Math.max(0, state.actProgress.exposure + outcome.exposureDelta);
+          state = {
+            ...state,
+            actProgress: {
+              ...state.actProgress,
+              exposure: newExposure,
+            },
+          };
+        }
+        break;
+      }
     }
   }
 
   return state;
+}
+
+/**
+ * Update campaign act progress based on a social check result.
+ * - Success: influence +1
+ * - Triumph: influence +2 (instead of +1)
+ * - Failed coercion/deception: exposure +1
+ * - Despair: exposure +2
+ * - Reputation gain outcomes: influence +1
+ * - Companion recruited outcomes: influence +2
+ */
+export function updateActProgressFromSocialCheck(
+  campaign: CampaignState,
+  checkResult: SocialCheckResult,
+): CampaignState {
+  let actProgress = campaign.actProgress ?? createActProgress(campaign.currentAct);
+
+  let exposureDelta = 0;
+  let influenceDelta = 0;
+
+  if (checkResult.isSuccess) {
+    // Triumph gives +2, regular success gives +1
+    influenceDelta += checkResult.triumphs > 0 ? 2 : 1;
+  } else {
+    // Failed coercion/deception: +1 exposure
+    if (checkResult.skillUsed === 'coercion' || checkResult.skillUsed === 'deception') {
+      exposureDelta += 1;
+    }
+  }
+
+  // Despair: +2 exposure
+  if (checkResult.despairs > 0) {
+    exposureDelta += checkResult.despairs * 2;
+  }
+
+  // Check outcomes for reputation and companion gains
+  for (const outcome of checkResult.outcomesApplied) {
+    if (outcome.type === 'reputation' && outcome.reputationDelta && outcome.reputationDelta > 0) {
+      influenceDelta += 1;
+    }
+    if (outcome.type === 'companion') {
+      influenceDelta += 2;
+    }
+  }
+
+  if (exposureDelta === 0 && influenceDelta === 0) return campaign;
+
+  const newExposure = Math.max(0, Math.min(10, actProgress.exposure + exposureDelta));
+  const newInfluence = actProgress.influence + influenceDelta;
+
+  return {
+    ...campaign,
+    actProgress: {
+      ...actProgress,
+      exposure: newExposure,
+      influence: newInfluence,
+    },
+  };
 }
 
 // ============================================================================
@@ -546,7 +645,7 @@ export function executeSocialEncounter(
   const { checkResult, outcomes, narrativeText } = resolveSocialCheck(hero, option, npc, rollFn, gameData);
 
   // Apply outcomes
-  const updatedCampaign = applySocialOutcomes(campaign, outcomes, heroId);
+  let updatedCampaign = applySocialOutcomes(campaign, outcomes, heroId);
 
   const result: SocialCheckResult = {
     encounterId: encounter.id,
@@ -561,6 +660,9 @@ export function executeSocialEncounter(
     outcomesApplied: outcomes,
     narrativeText,
   };
+
+  // Update act progress (exposure/influence) based on check result
+  updatedCampaign = updateActProgressFromSocialCheck(updatedCampaign, result);
 
   return { campaign: updatedCampaign, result };
 }
@@ -630,4 +732,651 @@ export function getSocialPhaseSummary(
     availableEncounters,
     shops: location.shops,
   };
+}
+
+// ============================================================================
+// SOCIAL PHASE EXPANSION: Time Slots, Rival, Threat Clock, Bounties
+// ============================================================================
+
+/**
+ * Disposition ordering for stepping negative/positive.
+ */
+const DISPOSITION_ORDER: Disposition[] = ['friendly', 'neutral', 'unfriendly', 'hostile'];
+
+/**
+ * Step a disposition toward hostile by `steps`.
+ */
+export function shiftDisposition(current: Disposition, steps: number): Disposition {
+  const idx = DISPOSITION_ORDER.indexOf(current);
+  const newIdx = Math.min(DISPOSITION_ORDER.length - 1, Math.max(0, idx + steps));
+  return DISPOSITION_ORDER[newIdx];
+}
+
+/**
+ * Initialize the social phase state with slots, clock, rival, and bounties.
+ */
+export function initializeSocialPhase(
+  campaign: CampaignState,
+  act: number,
+  bounties: BountyContract[],
+  bonusSlots: number = 0,
+): SocialPhaseState {
+  const slotsTotal = (SLOTS_PER_ACT[act] ?? 4) + bonusSlots;
+  const rivalSlots = RIVAL_SLOTS_BY_ACT[act] ?? 2;
+
+  // Filter out bounties already completed
+  const completedBountyIds = new Set(campaign.completedBounties ?? []);
+  const availableBounties = bounties.filter(b => !completedBountyIds.has(b.id));
+
+  return {
+    slotsRemaining: slotsTotal,
+    slotsTotal,
+    threatClock: 0,
+    rivalSlotsRemaining: rivalSlots,
+    rivalActionsThisPhase: [],
+    availableBounties,
+    acceptedBounties: [],
+    preppedBounties: [],
+    rivalClaimedBounties: [],
+    activities: [],
+    dispositionOverrides: {},
+    rivalBoughtItems: [],
+    deployedEarly: false,
+    act,
+  };
+}
+
+/**
+ * Accept a bounty (free action, no slot cost).
+ * Returns updated state or null if bounty not available.
+ */
+export function acceptBounty(
+  state: SocialPhaseState,
+  bountyId: string,
+): SocialPhaseState | null {
+  const bounty = state.availableBounties.find(b => b.id === bountyId);
+  if (!bounty) return null;
+  if (state.acceptedBounties.includes(bountyId)) return null;
+  if (state.rivalClaimedBounties.includes(bountyId)) return null;
+  // Max 2 active bounties
+  if (state.acceptedBounties.length >= 2) return null;
+
+  return {
+    ...state,
+    acceptedBounties: [...state.acceptedBounties, bountyId],
+  };
+}
+
+/**
+ * Resolve a rival action based on archetype priorities and available targets.
+ */
+export function resolveRivalAction(
+  state: SocialPhaseState,
+  rival: RivalNPC,
+  location: SocialPhaseLocation,
+): RivalAction {
+  const priorities = RIVAL_PRIORITIES[rival.archetype];
+
+  for (const actionType of priorities) {
+    switch (actionType) {
+      case 'claim_bounty': {
+        // Find an unclaimed, un-accepted bounty sorted by rival priority
+        const targets = state.availableBounties
+          .filter(b =>
+            !state.acceptedBounties.includes(b.id) &&
+            !state.rivalClaimedBounties.includes(b.id),
+          )
+          .sort((a, b) => b.rivalPriority - a.rivalPriority);
+
+        if (targets.length > 0) {
+          return {
+            type: 'claim_bounty',
+            targetId: targets[0].id,
+            description: `${rival.name} claimed the bounty on ${targets[0].targetName}.`,
+          };
+        }
+        break;
+      }
+
+      case 'poison_contact': {
+        // Find an NPC whose disposition isn't already hostile
+        const poisonSteps = state.act >= 2 ? 2 : 1;
+        for (const enc of location.encounters) {
+          const npcId = enc.npcId;
+          const currentDisp = state.dispositionOverrides[npcId];
+          // Only poison if not already hostile
+          if (currentDisp !== 'hostile' && !state.rivalActionsThisPhase.some(
+            a => a.type === 'poison_contact' && a.targetId === npcId,
+          )) {
+            // Find the NPC's name from encounter for description
+            return {
+              type: 'poison_contact',
+              targetId: npcId,
+              description: `${rival.name} undermined your contact -- an NPC's disposition has shifted.`,
+            };
+          }
+        }
+        break;
+      }
+
+      case 'buy_stock': {
+        // Buy the most expensive item from a shop that still has stock
+        for (const shop of location.shops) {
+          const buyable = shop.inventory
+            .filter(item => item.stock > 0 && !state.rivalBoughtItems.includes(item.itemId))
+            .sort((a, b) => b.basePrice - a.basePrice);
+
+          if (buyable.length > 0) {
+            return {
+              type: 'buy_stock',
+              targetId: buyable[0].itemId,
+              description: `${rival.name} bought out ${buyable[0].itemId} from ${shop.name}.`,
+            };
+          }
+        }
+        break;
+      }
+
+      case 'gather_intel': {
+        return {
+          type: 'gather_intel',
+          description: `${rival.name} gathered intelligence -- the enemy is better prepared.`,
+        };
+      }
+    }
+  }
+
+  // Fallback: no valid targets
+  return {
+    type: 'lay_low',
+    description: `${rival.name} kept a low profile.`,
+  };
+}
+
+/**
+ * Apply a rival action to the social phase state.
+ */
+export function applyRivalAction(
+  state: SocialPhaseState,
+  action: RivalAction,
+  npcs: Record<string, SocialNPC>,
+): SocialPhaseState {
+  let updated = {
+    ...state,
+    rivalSlotsRemaining: state.rivalSlotsRemaining - 1,
+    rivalActionsThisPhase: [...state.rivalActionsThisPhase, action],
+  };
+
+  switch (action.type) {
+    case 'claim_bounty': {
+      if (action.targetId) {
+        updated = {
+          ...updated,
+          rivalClaimedBounties: [...updated.rivalClaimedBounties, action.targetId],
+        };
+      }
+      break;
+    }
+
+    case 'poison_contact': {
+      if (action.targetId) {
+        const npc = npcs[action.targetId];
+        const currentDisp = updated.dispositionOverrides[action.targetId]
+          ?? npc?.disposition
+          ?? 'neutral';
+        const steps = updated.act >= 2 ? 2 : 1;
+        updated = {
+          ...updated,
+          dispositionOverrides: {
+            ...updated.dispositionOverrides,
+            [action.targetId]: shiftDisposition(currentDisp, steps),
+          },
+        };
+      }
+      break;
+    }
+
+    case 'buy_stock': {
+      if (action.targetId) {
+        updated = {
+          ...updated,
+          rivalBoughtItems: [...updated.rivalBoughtItems, action.targetId],
+        };
+      }
+      break;
+    }
+
+    case 'gather_intel': {
+      // Extra clock tick from rival intelligence gathering
+      updated = {
+        ...updated,
+        threatClock: Math.min(10, updated.threatClock + 1),
+      };
+      break;
+    }
+  }
+
+  return updated;
+}
+
+/**
+ * Spend a slot on an activity. Advances the threat clock and triggers rival action.
+ * Returns updated state.
+ */
+export function spendSlot(
+  state: SocialPhaseState,
+  activity: SocialActivityType,
+  targetId: string | undefined,
+  heroId: string | undefined,
+  rival: RivalNPC | undefined,
+  location: SocialPhaseLocation,
+  npcs: Record<string, SocialNPC>,
+  resultText: string = '',
+): SocialPhaseState {
+  if (state.slotsRemaining <= 0) {
+    throw new Error('No slots remaining');
+  }
+  if (state.deployedEarly) {
+    throw new Error('Already deployed early');
+  }
+
+  const clockTicks = ACTIVITY_CLOCK_TICKS[activity];
+  const activityRecord: SocialActivity = {
+    type: activity,
+    targetId,
+    heroId,
+    clockTicks,
+    result: resultText,
+  };
+
+  let updated: SocialPhaseState = {
+    ...state,
+    slotsRemaining: state.slotsRemaining - 1,
+    threatClock: Math.min(10, state.threatClock + clockTicks),
+    activities: [...state.activities, activityRecord],
+  };
+
+  // Trigger rival action if rival has slots remaining
+  if (rival && updated.rivalSlotsRemaining > 0) {
+    const rivalAction = resolveRivalAction(updated, rival, location);
+    updated = applyRivalAction(updated, rivalAction, npcs);
+  }
+
+  return updated;
+}
+
+/**
+ * Prep a bounty target (costs 1 slot). Skill check determines intel quality.
+ */
+export function prepBounty(
+  state: SocialPhaseState,
+  bountyId: string,
+  hero: HeroCharacter,
+  rival: RivalNPC | undefined,
+  location: SocialPhaseLocation,
+  npcs: Record<string, SocialNPC>,
+  rollFn: RollFn = defaultRollFn,
+): { state: SocialPhaseState; prepResult: BountyPrepResult } {
+  if (!state.acceptedBounties.includes(bountyId)) {
+    throw new Error(`Bounty ${bountyId} not accepted`);
+  }
+
+  const bounty = state.availableBounties.find(b => b.id === bountyId);
+  if (!bounty) {
+    throw new Error(`Bounty ${bountyId} not found`);
+  }
+
+  // Use Streetwise for bounty prep
+  const isWounded = hero.isWounded ?? false;
+  const checkResult = resolveSkillCheck(hero, 'streetwise' as SocialSkillId, 2, rollFn, isWounded);
+
+  const prepResult: BountyPrepResult = {
+    bountyId,
+    success: checkResult.isSuccess,
+    intelRevealed: checkResult.isSuccess
+      ? `Target ${bounty.targetName} located. Condition: ${bounty.condition}.`
+      : undefined,
+    targetWeakened: checkResult.triumphs > 0,
+  };
+
+  let updated = {
+    ...state,
+    preppedBounties: [...state.preppedBounties, prepResult],
+  };
+
+  // Spend the slot
+  const resultText = checkResult.isSuccess
+    ? `Gathered intel on ${bounty.targetName}.`
+    : `Failed to track ${bounty.targetName}.`;
+
+  updated = spendSlot(
+    updated,
+    'bounty_prep',
+    bountyId,
+    hero.id,
+    rival,
+    location,
+    npcs,
+    resultText,
+  );
+
+  return { state: updated, prepResult };
+}
+
+/**
+ * Scout the next mission (costs 1 slot). Success reduces clock, failure increases it.
+ */
+export function scoutMission(
+  state: SocialPhaseState,
+  hero: HeroCharacter,
+  rival: RivalNPC | undefined,
+  location: SocialPhaseLocation,
+  npcs: Record<string, SocialNPC>,
+  rollFn: RollFn = defaultRollFn,
+): { state: SocialPhaseState; success: boolean; clockDelta: number } {
+  const isWounded = hero.isWounded ?? false;
+  // Perception check, difficulty 2
+  const checkResult = resolveSkillCheck(
+    hero,
+    'streetwise' as SocialSkillId,
+    2,
+    rollFn,
+    isWounded,
+  );
+
+  // On success: reduce clock by 2. On failure: +1 additional tick (on top of the slot's +1).
+  const clockDelta = checkResult.isSuccess ? -2 : 1;
+
+  let updated = {
+    ...state,
+    threatClock: Math.max(0, Math.min(10, state.threatClock + clockDelta)),
+  };
+
+  const resultText = checkResult.isSuccess
+    ? 'Scouting successful -- threat clock reduced.'
+    : 'Scouting failed -- the enemy noticed your recon.';
+
+  updated = spendSlot(
+    updated,
+    'scout_mission',
+    undefined,
+    hero.id,
+    rival,
+    location,
+    npcs,
+    resultText,
+  );
+
+  return {
+    state: updated,
+    success: checkResult.isSuccess,
+    clockDelta,
+  };
+}
+
+/**
+ * Confront the rival (costs 1 slot, 2 clock ticks).
+ * Opposed social check. Success blocks rival's next action.
+ */
+export function confrontRival(
+  state: SocialPhaseState,
+  hero: HeroCharacter,
+  rival: RivalNPC,
+  location: SocialPhaseLocation,
+  npcs: Record<string, SocialNPC>,
+  rollFn: RollFn = defaultRollFn,
+): { state: SocialPhaseState; success: boolean; triumph: boolean; despair: boolean } {
+  const isWounded = hero.isWounded ?? false;
+
+  // Opposed check: hero's coercion vs rival's discipline
+  const rivalCharacteristic = rival.characteristics.willpower;
+  const rivalSkillRank = rival.skills.discipline ?? 0;
+  const checkResult = resolveOpposedSkillCheck(
+    hero,
+    'coercion',
+    rivalCharacteristic,
+    rivalSkillRank,
+    rollFn,
+    isWounded,
+  );
+
+  let updated = { ...state };
+  let resultText: string;
+
+  if (checkResult.isSuccess) {
+    // Block rival's next action (remove a rival slot)
+    updated = {
+      ...updated,
+      rivalSlotsRemaining: Math.max(0, updated.rivalSlotsRemaining - 1),
+    };
+    resultText = `Confronted ${rival.name} successfully -- their operations are disrupted.`;
+
+    // Triumph: also reveal rival plans + reduce clock
+    if (checkResult.triumphs > 0) {
+      updated = {
+        ...updated,
+        threatClock: Math.max(0, updated.threatClock - 1),
+      };
+      resultText += ' Triumph! Disrupted their intel network.';
+    }
+
+    // Restore one poisoned contact disposition
+    const poisonedNpcIds = Object.keys(updated.dispositionOverrides);
+    if (poisonedNpcIds.length > 0) {
+      const restored = { ...updated.dispositionOverrides };
+      const npcId = poisonedNpcIds[0];
+      const npc = npcs[npcId];
+      if (npc) {
+        restored[npcId] = npc.disposition; // reset to original
+        updated = { ...updated, dispositionOverrides: restored };
+      }
+    }
+  } else {
+    // Failure: rival gets a bonus action
+    resultText = `Failed to confront ${rival.name} -- they seized the initiative.`;
+
+    if (updated.rivalSlotsRemaining <= 0) {
+      // Give the rival a bonus slot
+      updated = { ...updated, rivalSlotsRemaining: 1 };
+    }
+    const bonusAction = resolveRivalAction(updated, rival, location);
+    updated = applyRivalAction(updated, bonusAction, npcs);
+
+    // Despair: additional poison + bonus action
+    if (checkResult.despairs > 0) {
+      resultText += ' Despair! They turned your contacts against you.';
+      if (updated.rivalSlotsRemaining <= 0) {
+        updated = { ...updated, rivalSlotsRemaining: 1 };
+      }
+      const extraAction = resolveRivalAction(updated, rival, location);
+      updated = applyRivalAction(updated, extraAction, npcs);
+    }
+  }
+
+  // Spend the slot (confront_rival costs 2 clock ticks via ACTIVITY_CLOCK_TICKS)
+  updated = spendSlot(
+    updated,
+    'confront_rival',
+    rival.id,
+    hero.id,
+    undefined, // Don't trigger another rival action from this slot
+    location,
+    npcs,
+    resultText,
+  );
+
+  return {
+    state: updated,
+    success: checkResult.isSuccess,
+    triumph: checkResult.triumphs > 0,
+    despair: checkResult.despairs > 0,
+  };
+}
+
+/**
+ * Deploy early: forfeit remaining slots to freeze the threat clock.
+ */
+export function deployEarly(state: SocialPhaseState): SocialPhaseState {
+  return {
+    ...state,
+    slotsRemaining: 0,
+    deployedEarly: true,
+  };
+}
+
+/**
+ * Convert a threat clock value to its level name.
+ */
+export function getThreatClockLevel(clockValue: number): ThreatClockLevel {
+  if (clockValue <= 2) return 'caught_off_guard';
+  if (clockValue <= 4) return 'normal';
+  if (clockValue <= 6) return 'prepared';
+  if (clockValue <= 8) return 'fortified';
+  return 'ambush';
+}
+
+/**
+ * Get the tactical effects of the current threat clock value.
+ */
+export function getThreatClockEffects(clockValue: number): ThreatClockEffects {
+  const level = getThreatClockLevel(clockValue);
+  const clamped = Math.max(0, Math.min(10, clockValue));
+
+  switch (level) {
+    case 'caught_off_guard':
+      return {
+        level, clockValue: clamped,
+        bonusReinforcements: 0,
+        enemySurpriseRound: false,
+        operativeSurpriseRound: true,
+        enemiesStartInCover: false,
+      };
+    case 'normal':
+      return {
+        level, clockValue: clamped,
+        bonusReinforcements: 0,
+        enemySurpriseRound: false,
+        operativeSurpriseRound: false,
+        enemiesStartInCover: false,
+      };
+    case 'prepared':
+      return {
+        level, clockValue: clamped,
+        bonusReinforcements: 1,
+        enemySurpriseRound: false,
+        operativeSurpriseRound: false,
+        enemiesStartInCover: false,
+      };
+    case 'fortified':
+      return {
+        level, clockValue: clamped,
+        bonusReinforcements: 1,
+        enemySurpriseRound: false,
+        operativeSurpriseRound: false,
+        enemiesStartInCover: true,
+      };
+    case 'ambush':
+      return {
+        level, clockValue: clamped,
+        bonusReinforcements: 2,
+        enemySurpriseRound: true,
+        operativeSurpriseRound: false,
+        enemiesStartInCover: true,
+      };
+  }
+}
+
+/**
+ * Finalize the expanded social phase, producing the result record
+ * and updating campaign state with rival/bounty data.
+ */
+export function finalizeExpandedSocialPhase(
+  state: SocialPhaseState,
+  campaign: CampaignState,
+  locationId: string,
+  encounterResults: SocialCheckResult[],
+  purchases: Array<{ itemId: string; price: number }>,
+  sales: Array<{ itemId: string; revenue: number }>,
+  healingCreditsSpent: number,
+): { campaign: CampaignState; result: ExpandedSocialPhaseResult } {
+  const clockEffects = getThreatClockEffects(state.threatClock);
+
+  const result: ExpandedSocialPhaseResult = {
+    locationId,
+    encounterResults,
+    itemsPurchased: purchases,
+    itemsSold: sales,
+    creditsSpentOnHealing: healingCreditsSpent,
+    completedAt: new Date().toISOString(),
+    slotsUsed: state.slotsTotal - state.slotsRemaining,
+    slotsTotal: state.slotsTotal,
+    deployedEarly: state.deployedEarly,
+    rivalActions: state.rivalActionsThisPhase,
+    threatClockFinal: state.threatClock,
+    threatClockEffects: clockEffects,
+    bountiesAccepted: state.acceptedBounties,
+    bountiesPrepped: state.preppedBounties,
+    bountiesClaimedByRival: state.rivalClaimedBounties,
+  };
+
+  // Update campaign with bounty/rival data
+  const activeBounties = state.availableBounties.filter(
+    b => state.acceptedBounties.includes(b.id),
+  );
+
+  // Update rival state
+  const existingRivalState = campaign.rivalState;
+  const updatedRivalState: RivalState | undefined = existingRivalState
+    ? {
+        ...existingRivalState,
+        claimedBounties: [
+          ...existingRivalState.claimedBounties,
+          ...state.rivalClaimedBounties,
+        ],
+        poisonedContacts: [
+          ...existingRivalState.poisonedContacts,
+          ...Object.keys(state.dispositionOverrides),
+        ],
+        intelGathered: [
+          ...existingRivalState.intelGathered,
+          ...state.rivalActionsThisPhase
+            .filter(a => a.type === 'gather_intel')
+            .map(() => locationId),
+        ],
+      }
+    : undefined;
+
+  const history = campaign.socialPhaseResults ?? [];
+
+  const updatedCampaign: CampaignState = {
+    ...campaign,
+    socialPhaseResults: [...history, result],
+    activeBounties,
+    bountyPrepResults: state.preppedBounties,
+    rivalState: updatedRivalState ?? campaign.rivalState,
+  };
+
+  return { campaign: updatedCampaign, result };
+}
+
+/**
+ * Get the effective disposition of an NPC, accounting for rival poisoning.
+ */
+export function getEffectiveDisposition(
+  npc: SocialNPC,
+  state: SocialPhaseState,
+): Disposition {
+  return state.dispositionOverrides[npc.id] ?? npc.disposition;
+}
+
+/**
+ * Check if a shop item is available (not bought out by rival).
+ */
+export function isItemAvailable(
+  item: ShopItem,
+  state: SocialPhaseState,
+): boolean {
+  if (item.stock === 0) return false;
+  if (state.rivalBoughtItems.includes(item.itemId)) return false;
+  return true;
 }

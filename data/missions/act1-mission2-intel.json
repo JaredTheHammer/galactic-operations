@@ -5,22 +5,36 @@
   "narrativeIntro": "Deep in the Tangrene Sector, an Imperial listening station has intercepted coded transmissions from rebel cells across the Outer Rim. If the Imperials decode those messages, dozens of operatives will be compromised. Your team must infiltrate the station, slice into the central terminal to purge the intercepts, and escape before the garrison responds.",
   "narrativeSuccess": "The terminal flickers as the purge completes. Rebel communications are safe, for now. As alarms blare throughout the station, your team slips out through the ventilation shafts. On the way out, you notice something interesting in the purged data: coordinates for an Imperial weapons cache.",
   "narrativeFailure": "The Imperial garrison locks down the station before you can finish the purge. As you retreat under heavy fire, you know the intercepted transmissions will reach Imperial Intelligence within hours. The entire Tangrene network will need to go dark.",
-
   "mapId": "station-interior",
   "mapPreset": "skirmish",
   "boardsWide": 3,
   "boardsTall": 3,
-
   "difficulty": "moderate",
   "roundLimit": 10,
   "recommendedHeroCount": 2,
-
   "imperialThreat": 10,
   "threatPerRound": 2,
-
   "operativeDeployZone": [
-    {"x": 0, "y": 16}, {"x": 1, "y": 16}, {"x": 2, "y": 16},
-    {"x": 0, "y": 17}, {"x": 1, "y": 17}
+    {
+      "x": 0,
+      "y": 16
+    },
+    {
+      "x": 1,
+      "y": 16
+    },
+    {
+      "x": 2,
+      "y": 16
+    },
+    {
+      "x": 0,
+      "y": 17
+    },
+    {
+      "x": 1,
+      "y": 17
+    }
   ],
   "initialEnemies": [
     {
@@ -28,20 +42,45 @@
       "count": 3,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 16, "y": 10}, {"x": 17, "y": 10}, {"x": 18, "y": 10}
+        {
+          "x": 16,
+          "y": 10
+        },
+        {
+          "x": 17,
+          "y": 10
+        },
+        {
+          "x": 18,
+          "y": 10
+        }
       ]
     },
     {
       "npcProfileId": "imperial-officer",
       "count": 1,
       "asMinGroup": false,
-      "deployZone": [{"x": 18, "y": 18}]
+      "deployZone": [
+        {
+          "x": 18,
+          "y": 18
+        }
+      ]
     },
     {
       "npcProfileId": "probe-droid",
       "count": 2,
       "asMinGroup": true,
-      "deployZone": [{"x": 8, "y": 8}, {"x": 28, "y": 8}]
+      "deployZone": [
+        {
+          "x": 8,
+          "y": 8
+        },
+        {
+          "x": 28,
+          "y": 8
+        }
+      ]
     }
   ],
   "reinforcements": [
@@ -54,7 +93,22 @@
           "count": 4,
           "asMinGroup": true,
           "deployZone": [
-            {"x": 35, "y": 16}, {"x": 35, "y": 17}, {"x": 34, "y": 16}, {"x": 34, "y": 17}
+            {
+              "x": 35,
+              "y": 16
+            },
+            {
+              "x": 35,
+              "y": 17
+            },
+            {
+              "x": 34,
+              "y": 16
+            },
+            {
+              "x": 34,
+              "y": 17
+            }
           ]
         }
       ],
@@ -69,14 +123,22 @@
           "npcProfileId": "stormtrooper-elite",
           "count": 2,
           "asMinGroup": false,
-          "deployZone": [{"x": 0, "y": 0}, {"x": 1, "y": 0}]
+          "deployZone": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0
+            }
+          ]
         }
       ],
       "threatCost": 6,
       "narrativeText": "Elite troopers rappel in through the skylights!"
     }
   ],
-
   "objectives": [
     {
       "id": "obj-terminal",
@@ -93,8 +155,26 @@
       "side": "Operative",
       "description": "After purging, extract all heroes to the entry zone.",
       "zoneCoordinates": [
-        {"x": 0, "y": 16}, {"x": 1, "y": 16}, {"x": 2, "y": 16},
-        {"x": 0, "y": 17}, {"x": 1, "y": 17}
+        {
+          "x": 0,
+          "y": 16
+        },
+        {
+          "x": 1,
+          "y": 16
+        },
+        {
+          "x": 2,
+          "y": 16
+        },
+        {
+          "x": 0,
+          "y": 17
+        },
+        {
+          "x": 1,
+          "y": 17
+        }
       ],
       "priority": "primary",
       "xpReward": 0
@@ -113,7 +193,10 @@
     {
       "side": "Operative",
       "description": "Purge the terminal and extract all heroes.",
-      "requiredObjectiveIds": ["obj-terminal", "obj-extract"]
+      "requiredObjectiveIds": [
+        "obj-terminal",
+        "obj-extract"
+      ]
     },
     {
       "side": "Imperial",
@@ -121,11 +204,13 @@
       "requiredObjectiveIds": []
     }
   ],
-
   "objectivePoints": [
     {
       "id": "objpt-central-terminal",
-      "position": {"x": 18, "y": 18},
+      "position": {
+        "x": 18,
+        "y": 18
+      },
       "type": "terminal",
       "skillRequired": "computers",
       "alternateSkill": "mechanics",
@@ -135,7 +220,10 @@
     },
     {
       "id": "objpt-security-panel",
-      "position": {"x": 10, "y": 10},
+      "position": {
+        "x": 10,
+        "y": 10
+      },
       "type": "console",
       "skillRequired": "computers",
       "difficulty": 2,
@@ -144,7 +232,10 @@
     },
     {
       "id": "objpt-blast-door",
-      "position": {"x": 26, "y": 14},
+      "position": {
+        "x": 26,
+        "y": 14
+      },
       "type": "lock",
       "skillRequired": "skulduggery",
       "alternateSkill": "mechanics",
@@ -152,28 +243,45 @@
       "description": "Reinforced blast door -- bypass to access extraction route."
     }
   ],
-
   "lootTokens": [
     {
       "id": "loot-datapad",
-      "position": {"x": 20, "y": 18},
-      "reward": {"type": "narrative", "itemId": "weapons-cache-coords", "description": "Coordinates to a hidden Imperial weapons cache"}
+      "position": {
+        "x": 20,
+        "y": 18
+      },
+      "reward": {
+        "type": "narrative",
+        "itemId": "weapons-cache-coords",
+        "description": "Coordinates to a hidden Imperial weapons cache"
+      }
     },
     {
       "id": "loot-medkit",
-      "position": {"x": 10, "y": 5},
-      "reward": {"type": "xp", "value": 2}
+      "position": {
+        "x": 10,
+        "y": 5
+      },
+      "reward": {
+        "type": "xp",
+        "value": 2
+      }
     }
   ],
-
   "campaignAct": 1,
   "missionIndex": 2,
-  "prerequisites": ["act1-m1-arrival"],
-  "unlocksNext": ["act1-m3-cache", "act1-m3-ambush"],
-
+  "prerequisites": [
+    "act1-m1-arrival"
+  ],
+  "unlocksNext": [
+    "act1-m3-cache",
+    "act1-m3-ambush"
+  ],
   "baseXP": 10,
   "bonusXPPerLoot": 2,
   "bonusXPPerKill": 1,
   "maxKillXP": 5,
-  "leaderKillXP": 5
+  "leaderKillXP": 5,
+  "fogOfWar": true,
+  "fogOfWarVisionRange": 6
 }

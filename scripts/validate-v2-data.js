@@ -41,6 +41,7 @@ const npcFiles = [
   'data/npcs/bounty-hunters.json',
   'data/npcs/warlord-forces.json',
   'data/npcs/companions.json',
+  'data/npcs/bounty-targets.json',
 ];
 
 const missionFiles = [
@@ -209,7 +210,7 @@ for (const [id, npc] of Object.entries(allNpcs)) {
     if (typeof npc.courage !== 'number' || npc.courage < 1) fail('NPC ' + id + ' courage must be a positive number');
   }
   // Mechanical keywords (optional array, validate names)
-  const validKeywords = ['Armor', 'Agile', 'Relentless', 'Cumbersome', 'Disciplined', 'Dauntless', 'Guardian'];
+  const validKeywords = ['Armor', 'Agile', 'Relentless', 'Cumbersome', 'Disciplined', 'Dauntless', 'Guardian', 'Droid', 'Elusive', 'Adversary', 'Retaliate', 'Pierce', 'Shield', 'Steadfast'];
   if (npc.mechanicalKeywords) {
     if (!Array.isArray(npc.mechanicalKeywords)) fail('NPC ' + id + ' mechanicalKeywords must be an array');
     for (const kw of npc.mechanicalKeywords) {
@@ -219,8 +220,58 @@ for (const [id, npc] of Object.entries(allNpcs)) {
       }
     }
   }
+  // Boss hit locations (optional, validate structure when present)
+  if (npc.isBoss) {
+    if (npc.bossHitLocations) {
+      if (!Array.isArray(npc.bossHitLocations)) fail('Boss NPC ' + id + ' bossHitLocations must be an array');
+      const locIds = new Set();
+      for (const loc of npc.bossHitLocations) {
+        if (!loc.id || typeof loc.id !== 'string') fail('Boss NPC ' + id + ' hit location missing id');
+        if (!loc.name || typeof loc.name !== 'string') fail('Boss NPC ' + id + ' hit location missing name');
+        if (typeof loc.woundCapacity !== 'number' || loc.woundCapacity < 1) {
+          fail('Boss NPC ' + id + ' hit location ' + loc.id + ' woundCapacity must be a positive number');
+        }
+        if (!loc.disabledEffects || typeof loc.disabledEffects !== 'object') {
+          fail('Boss NPC ' + id + ' hit location ' + loc.id + ' missing disabledEffects');
+        }
+        if (locIds.has(loc.id)) fail('Boss NPC ' + id + ' has duplicate hit location id: ' + loc.id);
+        locIds.add(loc.id);
+        // Validate disabled weapon references
+        if (loc.disabledEffects.disabledWeapons) {
+          for (const wepId of loc.disabledEffects.disabledWeapons) {
+            if (!npc.weapons.some(w => w.weaponId === wepId)) {
+              fail('Boss NPC ' + id + ' hit location ' + loc.id + ' references unknown weapon: ' + wepId);
+            }
+          }
+        }
+      }
+    }
+    if (npc.bossPhaseTransitions) {
+      if (!Array.isArray(npc.bossPhaseTransitions)) fail('Boss NPC ' + id + ' bossPhaseTransitions must be an array');
+      for (const pt of npc.bossPhaseTransitions) {
+        if (typeof pt.disabledLocationsRequired !== 'number' || pt.disabledLocationsRequired < 1) {
+          fail('Boss NPC ' + id + ' phase transition has invalid disabledLocationsRequired');
+        }
+        if (!pt.newAiArchetype || typeof pt.newAiArchetype !== 'string') {
+          fail('Boss NPC ' + id + ' phase transition missing newAiArchetype');
+        }
+        // Validate optional statBonuses structure
+        if (pt.statBonuses) {
+          const validKeys = ['attackPoolBonus', 'defensePoolBonus', 'soakBonus', 'speedBonus', 'damageBonus'];
+          for (const key of Object.keys(pt.statBonuses)) {
+            if (!validKeys.includes(key)) {
+              fail('Boss NPC ' + id + ' phase transition has unknown statBonuses key: ' + key);
+            }
+            if (typeof pt.statBonuses[key] !== 'number') {
+              fail('Boss NPC ' + id + ' phase transition statBonuses.' + key + ' must be a number');
+            }
+          }
+        }
+      }
+    }
+  }
 }
-console.log('OK: All ' + Object.keys(allNpcs).length + ' NPC stat blocks valid (pools, strain, weapons, courage, keywords)');
+console.log('OK: All ' + Object.keys(allNpcs).length + ' NPC stat blocks valid (pools, strain, weapons, courage, keywords, boss)');
 
 // 8. AI profile mappings: every NPC has an archetype
 const unitMapping = aiProfiles.unitMapping;
@@ -265,6 +316,15 @@ for (const mf of missionFiles) {
   for (const wave of (mission.reinforcements || [])) {
     for (const group of wave.groups) {
       if (!allNpcs[group.npcProfileId]) fail(mf + ' reinforcement references unknown NPC: ' + group.npcProfileId);
+    }
+  }
+  // Fog of war config validation
+  if (mission.fogOfWar !== undefined && typeof mission.fogOfWar !== 'boolean') {
+    fail(mf + ' fogOfWar must be a boolean');
+  }
+  if (mission.fogOfWarVisionRange !== undefined) {
+    if (typeof mission.fogOfWarVisionRange !== 'number' || mission.fogOfWarVisionRange < 1 || mission.fogOfWarVisionRange > 20) {
+      fail(mf + ' fogOfWarVisionRange must be a number between 1 and 20');
     }
   }
 }

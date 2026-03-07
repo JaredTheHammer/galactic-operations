@@ -1,0 +1,201 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "description": "Critical injury definitions for the Pandemic Legacy-inspired persistent consequence system. Injuries are rolled on a d66 table with stacking modifiers."
+  },
+  "injuries": {
+    "rattled": {
+      "id": "rattled",
+      "name": "Rattled",
+      "description": "A close call leaves the hero shaken but mostly unharmed. Minor disorientation persists.",
+      "severity": "minor",
+      "rollRange": [11, 15],
+      "effects": [
+        { "type": "reduce_strain_threshold", "value": 1, "description": "Strain threshold reduced by 1" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 1,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 25,
+      "naturalRecoveryMissions": 1
+    },
+    "minor-laceration": {
+      "id": "minor-laceration",
+      "name": "Minor Laceration",
+      "description": "A superficial cut that stings but won't slow down an experienced operative.",
+      "severity": "minor",
+      "rollRange": [16, 20],
+      "effects": [
+        { "type": "skill_penalty", "value": 1, "target": "athletics", "description": "Athletics checks suffer -1" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 1,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 25,
+      "naturalRecoveryMissions": 1
+    },
+    "stinger": {
+      "id": "stinger",
+      "name": "Stinger",
+      "description": "A painful but non-critical hit to a limb. Movement is somewhat impaired.",
+      "severity": "minor",
+      "rollRange": [21, 25],
+      "effects": [
+        { "type": "reduce_speed", "value": 1, "description": "Speed reduced by 1" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 1,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 25,
+      "naturalRecoveryMissions": 1
+    },
+    "bruised-ribs": {
+      "id": "bruised-ribs",
+      "name": "Bruised Ribs",
+      "description": "Impact damage to the torso. Deep breaths and heavy exertion cause pain.",
+      "severity": "minor",
+      "rollRange": [26, 30],
+      "effects": [
+        { "type": "reduce_characteristic", "value": 1, "target": "brawn", "description": "Brawn reduced by 1" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 1,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 30,
+      "naturalRecoveryMissions": 2
+    },
+    "ringing-ears": {
+      "id": "ringing-ears",
+      "name": "Ringing Ears",
+      "description": "An explosion or blaster bolt too close to the head. Hearing is impaired.",
+      "severity": "minor",
+      "rollRange": [31, 35],
+      "effects": [
+        { "type": "skill_penalty", "value": 1, "target": "vigilance", "description": "Vigilance checks suffer -1" },
+        { "type": "skill_penalty", "value": 1, "target": "perception", "description": "Perception checks suffer -1" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 1,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 30,
+      "naturalRecoveryMissions": 2
+    },
+    "torn-muscle": {
+      "id": "torn-muscle",
+      "name": "Torn Muscle",
+      "description": "A muscle group is strained badly. Physical actions are compromised.",
+      "severity": "moderate",
+      "rollRange": [36, 40],
+      "effects": [
+        { "type": "reduce_characteristic", "value": 1, "target": "agility", "description": "Agility reduced by 1" },
+        { "type": "reduce_speed", "value": 1, "description": "Speed reduced by 1" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 2,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 75,
+      "naturalRecoveryMissions": 3
+    },
+    "fractured-wrist": {
+      "id": "fractured-wrist",
+      "name": "Fractured Wrist",
+      "description": "The dominant hand is compromised. Weapon handling suffers noticeably.",
+      "severity": "moderate",
+      "rollRange": [41, 45],
+      "effects": [
+        { "type": "upgrade_difficulty", "value": 1, "target": "attack", "description": "Upgrade difficulty of all attack checks by 1" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 2,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 75,
+      "naturalRecoveryMissions": 3
+    },
+    "concussion": {
+      "id": "concussion",
+      "name": "Concussion",
+      "description": "A blow to the head leaves lasting cognitive effects. Focus is impaired.",
+      "severity": "moderate",
+      "rollRange": [46, 50],
+      "effects": [
+        { "type": "reduce_characteristic", "value": 1, "target": "intellect", "description": "Intellect reduced by 1" },
+        { "type": "reduce_strain_threshold", "value": 2, "description": "Strain threshold reduced by 2" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 2,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 100,
+      "naturalRecoveryMissions": 3
+    },
+    "internal-bleeding": {
+      "id": "internal-bleeding",
+      "name": "Internal Bleeding",
+      "description": "Serious internal damage. The hero weakens over time without treatment.",
+      "severity": "moderate",
+      "rollRange": [51, 55],
+      "effects": [
+        { "type": "reduce_wound_threshold", "value": 2, "description": "Wound threshold reduced by 2" },
+        { "type": "condition_vulnerability", "value": 1, "target": "Bleeding", "description": "Bleeding condition lasts 1 extra round" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 3,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 100,
+      "naturalRecoveryMissions": 4
+    },
+    "shattered-armor": {
+      "id": "shattered-armor",
+      "name": "Shattered Armor Fragments",
+      "description": "Armor shrapnel embedded in the body. Protection is compromised and movement painful.",
+      "severity": "severe",
+      "rollRange": [56, 60],
+      "effects": [
+        { "type": "reduce_soak", "value": 1, "description": "Soak reduced by 1" },
+        { "type": "reduce_characteristic", "value": 1, "target": "brawn", "description": "Brawn reduced by 1" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 3,
+      "treatmentChallengeDice": 1,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 150,
+      "naturalRecoveryMissions": 0
+    },
+    "nerve-damage": {
+      "id": "nerve-damage",
+      "name": "Nerve Damage",
+      "description": "Critical nerve pathways are damaged. Fine motor control and reactions are severely impacted.",
+      "severity": "severe",
+      "rollRange": [61, 63],
+      "effects": [
+        { "type": "reduce_characteristic", "value": 1, "target": "agility", "description": "Agility reduced by 1" },
+        { "type": "reduce_characteristic", "value": 1, "target": "cunning", "description": "Cunning reduced by 1" },
+        { "type": "upgrade_difficulty", "value": 1, "target": "attack", "description": "Upgrade difficulty of attack checks by 1" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 3,
+      "treatmentChallengeDice": 1,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 200,
+      "naturalRecoveryMissions": 0
+    },
+    "crippling-wound": {
+      "id": "crippling-wound",
+      "name": "Crippling Wound",
+      "description": "A devastating injury that fundamentally limits the hero's combat effectiveness until treated.",
+      "severity": "severe",
+      "rollRange": [64, 66],
+      "effects": [
+        { "type": "reduce_wound_threshold", "value": 3, "description": "Wound threshold reduced by 3" },
+        { "type": "reduce_characteristic", "value": 1, "target": "brawn", "description": "Brawn reduced by 1" },
+        { "type": "lose_free_maneuver", "value": 1, "description": "Must suffer 2 strain for first maneuver each turn" },
+        { "type": "reduce_speed", "value": 1, "description": "Speed reduced by 1" }
+      ],
+      "recoverable": true,
+      "treatmentDifficulty": 4,
+      "treatmentChallengeDice": 1,
+      "treatmentSkill": "medicine",
+      "treatmentCost": 250,
+      "naturalRecoveryMissions": 0
+    }
+  }
+}

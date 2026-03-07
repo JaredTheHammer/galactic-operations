@@ -34,6 +34,7 @@ import type {
   ObjectivePoint,
   ObjectivePointTemplate,
   ConsumableItem,
+  LootToken,
 } from './types.js';
 
 import { RANGE_BAND_TILES, computeDiminishedHealing } from './types.js';
@@ -62,6 +63,9 @@ import {
   getSpeciesRegeneration,
   getSpeciesBonusStrainRecovery,
 } from './species-abilities.js';
+import { updateFogOfWar, createFogOfWarState } from './fog-of-war.js';
+import { recoverFocus, initFocusResource, spendFocus } from './focus-resource.js';
+import { initBossHitLocations } from './boss-mechanics.js';
 
 // ============================================================================
 // OBJECTIVE POINT UTILITIES
@@ -99,6 +103,12 @@ export function createInitialGameStateV2(
     lootTokens?: LootToken[];
     /** Consumable inventory from campaign state. Maps item ID to quantity. */
     consumableInventory?: Record<string, number>;
+    /** Enable fog of war / progressive room reveal. Disabled by default. */
+    fogOfWar?: boolean;
+    /** Vision range in tiles for fog of war. Default 8. */
+    fogOfWarVisionRange?: number;
+    /** Spirit Island optional subsystem configuration */
+    spiritIsland?: import('./types.js').SpiritIslandState;
   },
 ): GameState {
   let map: GameMap;
@@ -179,6 +189,13 @@ export function createInitialGameStateV2(
 
     // Consumable inventory (initialized from campaign state or empty for standalone)
     consumableInventory: options?.consumableInventory ?? {},
+
+    // Fog of war (disabled by default for backward compatibility)
+    fogOfWar: options?.fogOfWar
+      ? createFogOfWarState(true, options.fogOfWarVisionRange)
+      : undefined,
+    // Spirit Island optional subsystems (all toggleable, disabled by default)
+    spiritIsland: options?.spiritIsland,
   };
 }
 
@@ -233,13 +250,25 @@ export function deployFiguresV2(
   }
 
   // Deploy Imperial NPCs
-  const impZones = hasZones
+  let impZones = hasZones
     ? getAvailablePositions(gameState.map.deploymentZones.imperial)
     : getAvailablePositions(
       Array.from({ length: gameState.map.height }, (_, y) =>
         [0, 1, 2].map(x => ({ x, y }))
       ).flat()
     );
+
+  // If enemies start in cover (threat clock effect), sort cover tiles first
+  if (gameState.threatClockEffects?.enemiesStartInCover) {
+    const coverRank = (pos: { x: number; y: number }) => {
+      const tile = gameState.map.tiles[pos.y]?.[pos.x];
+      if (!tile) return 0;
+      if (tile.cover === 'Heavy') return 3;
+      if (tile.cover === 'Light') return 2;
+      return 0;
+    };
+    impZones.sort((a, b) => coverRank(b) - coverRank(a));
+  }
 
   let impIdx = 0;
   for (const entry of army.imperial) {
@@ -298,7 +327,14 @@ export function deployFiguresV2(
     }
   }
 
-  return { ...gameState, figures };
+  let newState = { ...gameState, figures };
+
+  // Fog of war: calculate initial visibility from deployed positions
+  if (newState.fogOfWar?.enabled) {
+    newState = { ...newState, fogOfWar: updateFogOfWar(newState) };
+  }
+
+  return newState;
 }
 
 /**
@@ -332,7 +368,7 @@ function createNPCFigure(
   position: { x: number; y: number },
   npc: NPCProfile,
 ): Figure {
-  return {
+  let fig: Figure = {
     id,
     entityType: 'npc',
     entityId,
@@ -364,6 +400,13 @@ function createNPCFigure(
     suppressionTokens: 0,
     courage: getNPCCourage(npc),
   };
+
+  // Initialize boss hit locations if this is a boss NPC
+  if (npc.isBoss && npc.bossHitLocations?.length) {
+    fig = initBossHitLocations(fig, npc);
+  }
+
+  return fig;
 }
 
 function createHeroFigure(
@@ -373,7 +416,7 @@ function createHeroFigure(
   position: { x: number; y: number },
   hero: HeroCharacter,
 ): Figure {
-  return {
+  let fig: Figure = {
     id,
     entityType: 'hero',
     entityId,
@@ -404,6 +447,11 @@ function createHeroFigure(
     suppressionTokens: 0,
     courage: getHeroCourage(hero),
   };
+
+  // Initialize Focus resource for heroes
+  fig = initFocusResource(fig, hero);
+
+  return fig;
 }
 
 // ============================================================================
@@ -538,9 +586,9 @@ function getReinforcementPurchases(
     return npc && npc.tier === 'Nemesis';
   });
 
-  // Build purchasable lists by tier
+  // Build purchasable lists by tier (exclude cost-0 units like bounty targets)
   const allUnits = Object.values(npcProfiles)
-    .filter(npc => npc.side === 'imperial')
+    .filter(npc => (npc.side as string).toLowerCase() === 'imperial')
     .map(npc => ({
       npcId: npc.id,
       cost: npc.threatCost ?? DEFAULT_THREAT_COSTS[npc.tier] ?? 3,
@@ -548,6 +596,7 @@ function getReinforcementPurchases(
       name: npc.name,
       speed: npc.speed ?? 4,
     }))
+    .filter(u => u.cost > 0)
     .sort((a, b) => a.cost - b.cost);
 
   const minions = allUnits.filter(p => p.tier === 'Minion');
@@ -997,6 +1046,17 @@ export function buildActivationOrderV2(gameState: GameState): string[] {
     .filter(f => gameState.players.find(p => p.id === f.playerId)?.role === 'Operative')
     .sort((a, b) => getFigureSpeed(b, gameState) - getFigureSpeed(a, gameState));
 
+  const effects = gameState.threatClockEffects;
+  const isRound1 = gameState.roundNumber <= 1;
+
+  // Surprise round: only the surprising side activates on round 1
+  if (isRound1 && effects?.operativeSurpriseRound) {
+    return operatives.map(f => f.id);
+  }
+  if (isRound1 && effects?.enemySurpriseRound) {
+    return imperials.map(f => f.id);
+  }
+
   // Interleave: Imperial first (they won initiative in canon), then alternate
   const order: string[] = [];
   const maxLen = Math.max(imperials.length, operatives.length);
@@ -1007,12 +1067,21 @@ export function buildActivationOrderV2(gameState: GameState): string[] {
   return order;
 }
 
-function getFigureSpeed(figure: Figure, gameState: GameState): number {
+export function getFigureSpeed(figure: Figure, gameState: GameState): number {
+  let speed = 4;
   if (figure.entityType === 'npc') {
     const npc = gameState.npcProfiles[figure.entityId];
-    return npc?.speed ?? 4;
+    speed = npc?.speed ?? 4;
   }
-  return 4;
+  // Boss phase transition speed bonus
+  if (figure.bossPhaseStatBonuses?.speedBonus) {
+    speed += figure.bossPhaseStatBonuses.speedBonus;
+  }
+  // Focus bonus move (+2 speed)
+  if (figure.focusBonusMove) {
+    speed += 2;
+  }
+  return speed;
 }
 
 // ============================================================================
@@ -1053,9 +1122,24 @@ export function resetForActivation(
   gameState?: GameState,
   gameData?: GameData,
 ): Figure {
+  // --- Damage-over-time conditions (Gloomhaven-inspired) ---
+  let dotWounds = 0;
+
+  // Bleeding: suffer 1 wound at start of activation
+  if (figure.conditions.includes('Bleeding')) {
+    dotWounds += 1;
+  }
+
+  // Burning: suffer 1 wound at start of activation
+  if (figure.conditions.includes('Burning')) {
+    dotWounds += 1;
+  }
+
+  // Remove transient conditions that expire at activation start
   const newConditions = figure.conditions.filter(c =>
-    // Remove transient conditions that expire at activation start
-    c !== 'Disoriented'
+    c !== 'Disoriented' &&
+    c !== 'Stunned' &&    // Stunned: lose action then clears
+    c !== 'Staggered'     // Staggered: lose action then clears
   );
 
   // Graduated suppression rally step: roll 1d6 per suppression token.
@@ -1122,6 +1206,11 @@ export function resetForActivation(
     maneuversRemaining = 1;
   }
 
+  // Stunned / Staggered: lose Action for this activation (condition already cleared above)
+  if (figure.conditions.includes('Stunned') || figure.conditions.includes('Staggered')) {
+    actionsRemaining = 0;
+  }
+
   // Species regeneration (e.g., Trandoshan: recover 1 wound at activation start)
   let woundsCurrent = figure.woundsCurrent;
   if (gameState && gameData && figure.entityType === 'hero') {
@@ -1134,6 +1223,25 @@ export function resetForActivation(
     }
   }
 
+  // Apply DOT wounds (Bleeding/Burning) after regeneration
+  if (dotWounds > 0) {
+    woundsCurrent += dotWounds;
+  }
+
+  // Burning clears on successful rally (4+ on 1d6)
+  if (figure.conditions.includes('Burning')) {
+    const roll = rollFn ?? (() => Math.ceil(Math.random() * 6));
+    if (roll() >= 4) {
+      const burnIdx = newConditions.indexOf('Burning');
+      if (burnIdx >= 0) newConditions.splice(burnIdx, 1);
+    }
+  }
+  // Focus recovery (heroes only): recover Focus points at activation start
+  let focusCurrent = figure.focusCurrent;
+  if (figure.entityType === 'hero' && figure.focusMax !== undefined && focusCurrent !== undefined) {
+    focusCurrent = Math.min(figure.focusMax, focusCurrent + (figure.focusRecovery ?? 0));
+  }
+
   return {
     ...figure,
     actionsRemaining,
@@ -1144,11 +1252,15 @@ export function resetForActivation(
     hasStandby: false,       // standby consumed/cleared at new activation
     standbyWeaponId: null,
     dodgeTokens: 0,          // dodge tokens cleared at new activation (aim persists)
+    focusBonusMove: false,   // Focus movement bonus cleared at new activation
+    focusBonusDamage: false, // Focus damage bonus cleared (should already be consumed by attack)
+    focusBonusDefense: false, // Focus defense bonus cleared at new activation
     isActivated: false,
     conditions: newConditions,
     suppressionTokens,
     strainCurrent,
     woundsCurrent,
+    focusCurrent,
   };
 }
 
@@ -1280,6 +1392,10 @@ export function executeActionV2(
   switch (action.type) {
     // ---- MANEUVERS (consume maneuversRemaining) ----
     case 'Move': {
+      // Immobilized: cannot perform Move maneuvers
+      if (figure.conditions.includes('Immobilized')) {
+        break;
+      }
       const { path } = action.payload;
       newState = moveFigure(figure, path, newState);
       // Decrement maneuversRemaining and set move tracking flag
@@ -1296,6 +1412,11 @@ export function executeActionV2(
       const mover = newState.figures.find(f => f.id === figure.id);
       if (mover && !mover.isDefeated) {
         newState = resolveStandbyTriggers(mover, newState, gameData);
+      }
+
+      // Fog of war: recalculate visibility after movement
+      if (newState.fogOfWar?.enabled) {
+        newState = { ...newState, fogOfWar: updateFogOfWar(newState) };
       }
       break;
     }
@@ -1548,8 +1669,10 @@ export function executeActionV2(
         }
       } else {
         const heroEntity = newState.heroes[figure.entityId];
-        if (heroEntity?.equipment?.weapons?.length) {
-          standbyWpnId = heroEntity.equipment.weapons[0];
+        if (heroEntity?.equipment?.primaryWeapon) {
+          standbyWpnId = heroEntity.equipment.primaryWeapon;
+        } else if ((heroEntity?.equipment as any)?.weapons?.length) {
+          standbyWpnId = (heroEntity.equipment as any).weapons[0];
         }
       }
 
@@ -1695,6 +1818,15 @@ export function executeActionV2(
         ...newState.figures[figIdx],
         actionsRemaining: Math.max(0, figure.actionsRemaining - 1),
       };
+      break;
+    }
+
+    // ---- FOCUS (free action, no action/maneuver cost) ----
+    case 'SpendFocus': {
+      const result = spendFocus(figure, action.payload.effect, newState);
+      if (result) {
+        newState.figures[figIdx] = result.figure;
+      }
       break;
     }
 
