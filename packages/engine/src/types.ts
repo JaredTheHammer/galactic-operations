@@ -727,7 +727,9 @@ export type GameAction =
   | { type: 'InteractTerminal'; figureId: string; payload: { terminalId: string } }
   | { type: 'AimManeuver';   figureId: string; payload: {} }
   | { type: 'StrainForManeuver'; figureId: string; payload: {} }
-  | { type: 'UseConsumable'; figureId: string; payload: UseConsumablePayload };
+  | { type: 'UseConsumable'; figureId: string; payload: UseConsumablePayload }
+  | { type: 'RevealExploration'; figureId: string; payload: { tokenId: string } }
+  | { type: 'SpendCommandToken'; figureId: string; payload: SpendCommandTokenPayload };
 
 export interface UseConsumablePayload {
   /** Consumable item ID */
@@ -937,6 +939,15 @@ export interface GameState {
 
   // Tactic card deck state (hands, draw pile, discard)
   tacticDeck?: TacticDeckState;
+
+  // Exploration tokens on the map (face-down markers flipped on discovery)
+  explorationTokens?: ExplorationToken[];
+
+  // Command token pools for the current round
+  commandTokens?: CommandTokenState;
+
+  // Secret objectives drawn for this mission
+  secretObjectives?: MissionSecretObjectiveState;
 }
 
 // ============================================================================
@@ -955,6 +966,14 @@ export interface GameData {
   tacticCards?: Record<string, TacticCard>;
   /** Maps social companion IDs (e.g. 'drez-venn') to combat NPC profile IDs (e.g. 'companion-drez-venn') */
   companionProfiles?: Record<string, string>;
+  /** Secret objective definitions (loaded from JSON) */
+  secretObjectives?: Record<string, SecretObjectiveDefinition>;
+  /** Exploration token definitions (loaded from JSON) */
+  explorationTokenTypes?: Record<string, ExplorationTokenType>;
+  /** Relic definitions for fragment forging (loaded from JSON) */
+  relicDefinitions?: Record<string, RelicDefinition>;
+  /** Agenda directive definitions (loaded from JSON) */
+  agendaDirectives?: Record<string, AgendaDirectiveDefinition>;
 }
 
 // ============================================================================
@@ -1203,6 +1222,21 @@ export interface CampaignState {
 
   /** Active shop discounts (percentage, from social outcomes) */
   activeDiscounts?: Record<string, number>;
+
+  /** Relic fragment inventory: fragment type -> count */
+  relicFragments?: Record<RelicFragmentType, number>;
+
+  /** Forged relics (permanent powerful items) */
+  forgedRelics?: ForgedRelic[];
+
+  /** Secret objectives completed across the campaign (for XP/AP tracking) */
+  completedSecretObjectives?: CompletedSecretObjective[];
+
+  /** Agenda directives currently in effect (from Agenda Phase voting) */
+  activeDirectives?: AgendaDirective[];
+
+  /** History of agenda votes */
+  agendaHistory?: AgendaVoteResult[];
 }
 
 /** Campaign save file format (serializable to JSON) */
@@ -1538,6 +1572,321 @@ export interface SocialPhaseResult {
   itemsSold: Array<{ itemId: string; revenue: number }>;
   creditsSpentOnHealing: number;
   completedAt: string;
+}
+
+// ============================================================================
+// TWILIGHT IMPERIUM-INSPIRED MECHANICS
+// Secret Objectives, Command Tokens, Exploration, Relic Fragments, Agenda Phase
+// ============================================================================
+
+// --- SECRET OBJECTIVES ---
+
+/** Categories of secret objectives */
+export type SecretObjectiveCategory = 'combat' | 'exploration' | 'social' | 'survival' | 'tactical';
+
+/** Condition types for secret objective completion */
+export type SecretObjectiveConditionType =
+  | 'kill_nemesis'          // Deal killing blow to a Nemesis-tier NPC
+  | 'kill_count'            // Kill N enemies in a single mission
+  | 'zero_strain_finish'    // End mission with 0 strain
+  | 'zero_wounds_finish'    // End mission with 0 wounds
+  | 'interact_objectives'   // Interact with N objective points
+  | 'collect_loot'          // Collect N loot tokens
+  | 'explore_tokens'        // Reveal N exploration tokens
+  | 'no_incapacitation'     // Complete mission without any hero being incapacitated
+  | 'first_kill'            // Score the first enemy kill of the mission
+  | 'last_standing'         // Be the last hero to activate in final round
+  | 'high_combo'            // Roll a Trips or better Yahtzee combo
+  | 'use_talent'            // Use an active talent at least N times
+  | 'heal_ally'             // Heal another hero for N+ wounds
+  | 'collect_fragments';    // Collect N relic fragments in a mission
+
+/** Definition of a secret objective (loaded from JSON) */
+export interface SecretObjectiveDefinition {
+  id: string;
+  name: string;
+  description: string;
+  category: SecretObjectiveCategory;
+  condition: SecretObjectiveConditionType;
+  /** Numeric threshold for the condition (e.g., kill 3 enemies) */
+  threshold?: number;
+  /** XP reward on completion */
+  xpReward: number;
+  /** AP reward on completion */
+  apReward: number;
+  /** Credits reward on completion */
+  creditsReward?: number;
+}
+
+/** A secret objective assigned to a hero for the current mission */
+export interface AssignedSecretObjective {
+  objectiveId: string;
+  heroId: string;
+  progress: number;
+  isCompleted: boolean;
+}
+
+/** State of secret objectives for a mission */
+export interface MissionSecretObjectiveState {
+  /** Objectives assigned to each hero (1 per hero) */
+  assignments: AssignedSecretObjective[];
+  /** Available deck (IDs not yet drawn) */
+  availableDeck: string[];
+}
+
+/** Record of a completed secret objective (stored in CampaignState) */
+export interface CompletedSecretObjective {
+  objectiveId: string;
+  heroId: string;
+  missionId: string;
+  xpAwarded: number;
+  apAwarded: number;
+  creditsAwarded: number;
+  completedAt: string;
+}
+
+// --- COMMAND TOKENS ---
+
+/** Command token usage types */
+export type CommandTokenUsage =
+  | 'coordinate'    // Two heroes activate back-to-back (interrupt alternating activation)
+  | 'bonus_maneuver' // Grant a hero an extra maneuver without strain cost
+  | 'tactical_order' // Execute a pre-defined coordinated action
+  | 'focus_fire'     // Next attack by this hero adds +1 attack die
+  | 'defensive_stance'; // Grant all allies within Short range +1 defense die until next round
+
+/** Payload for SpendCommandToken action */
+export interface SpendCommandTokenPayload {
+  usage: CommandTokenUsage;
+  /** For 'coordinate': the second hero to activate immediately after */
+  coordinateTargetId?: string;
+  /** For 'tactical_order': the order ID */
+  orderId?: string;
+}
+
+/** Command token pool state for a mission */
+export interface CommandTokenState {
+  /** Tokens available for the Operative side this round */
+  operativeTokens: number;
+  /** Tokens available for the Imperial side this round (AI-managed) */
+  imperialTokens: number;
+  /** Maximum tokens per round (based on hero count + Commander talents) */
+  operativeMaxPerRound: number;
+  imperialMaxPerRound: number;
+  /** Tokens spent this round (for tracking) */
+  operativeSpentThisRound: number;
+  imperialSpentThisRound: number;
+}
+
+/** Configuration for command token generation */
+export const COMMAND_TOKEN_CONFIG = {
+  /** Base tokens per round for Operative (before Commander bonuses) */
+  baseOperativeTokens: 2,
+  /** Additional token per hero beyond the first */
+  tokensPerExtraHero: 0,
+  /** Bonus tokens from Commander career heroes */
+  commanderBonus: 1,
+  /** Base tokens per round for Imperial (scales with threat level) */
+  baseImperialTokens: 1,
+  /** Imperial gets +1 token per N threat */
+  imperialTokensPerThreat: 5,
+} as const;
+
+// --- EXPLORATION TOKENS ---
+
+/** Types of exploration token results */
+export type ExplorationResultType =
+  | 'supply_cache'    // Gain a consumable item
+  | 'credits_stash'   // Gain credits
+  | 'booby_trap'      // Make a Cunning/Perception check or take damage
+  | 'intel_fragment'   // Gain a narrative item (feeds into social phase)
+  | 'relic_fragment'   // Gain a relic fragment (feeds into forging system)
+  | 'ambush'           // Spawn reinforcement NPCs
+  | 'abandoned_gear'   // Gain a piece of equipment
+  | 'medical_cache'    // Heal wounds on the discovering hero
+  | 'nothing';         // Empty -- just narrative flavor
+
+/** Definition of an exploration token type (loaded from JSON) */
+export interface ExplorationTokenType {
+  id: string;
+  name: string;
+  description: string;
+  resultType: ExplorationResultType;
+  /** For supply_cache: consumable ID to grant */
+  consumableId?: string;
+  /** For credits_stash: credit amount */
+  creditsValue?: number;
+  /** For booby_trap: damage on failed check */
+  trapDamage?: number;
+  /** For booby_trap: skill required to avoid (default: 'perception') */
+  trapSkill?: string;
+  /** For booby_trap: difficulty dice count */
+  trapDifficulty?: number;
+  /** For intel_fragment: narrative item ID */
+  narrativeItemId?: string;
+  /** For relic_fragment: fragment type */
+  fragmentType?: RelicFragmentType;
+  /** For ambush: NPC profile IDs to spawn */
+  ambushNpcIds?: string[];
+  /** For abandoned_gear: equipment/weapon ID */
+  gearItemId?: string;
+  /** For medical_cache: wounds healed */
+  healValue?: number;
+  /** Relative weight in the token pool (higher = more common) */
+  weight: number;
+}
+
+/** An exploration token placed on the map */
+export interface ExplorationToken {
+  id: string;
+  position: GridCoordinate;
+  /** The token type ID (face-down until revealed) */
+  tokenTypeId: string;
+  /** Whether this token has been revealed */
+  isRevealed: boolean;
+  /** Result of revealing (populated after flip) */
+  revealResult?: ExplorationRevealResult;
+}
+
+/** Result of revealing an exploration token */
+export interface ExplorationRevealResult {
+  tokenTypeId: string;
+  resultType: ExplorationResultType;
+  /** Narrative text shown to player */
+  narrativeText: string;
+  /** Whether a skill check was required and its outcome */
+  skillCheckResult?: {
+    skill: string;
+    isSuccess: boolean;
+    netSuccesses: number;
+  };
+  /** Items/effects gained */
+  rewards: ExplorationReward[];
+}
+
+/** A reward from exploring */
+export type ExplorationReward =
+  | { type: 'consumable'; itemId: string; quantity: number }
+  | { type: 'credits'; value: number }
+  | { type: 'narrative_item'; itemId: string }
+  | { type: 'relic_fragment'; fragmentType: RelicFragmentType }
+  | { type: 'equipment'; itemId: string }
+  | { type: 'healing'; value: number }
+  | { type: 'damage'; value: number; avoidable: boolean };
+
+// --- RELIC FRAGMENTS AND FORGING ---
+
+/** The four relic fragment types (parallel to game pillars) */
+export type RelicFragmentType = 'combat' | 'tech' | 'force' | 'intel';
+
+/** All fragment types as constant array */
+export const RELIC_FRAGMENT_TYPES: RelicFragmentType[] = ['combat', 'tech', 'force', 'intel'];
+
+/** Number of matching fragments required to forge a relic */
+export const FRAGMENTS_TO_FORGE = 3;
+
+/** Definition of a forgeable relic (loaded from JSON) */
+export interface RelicDefinition {
+  id: string;
+  name: string;
+  description: string;
+  /** Which fragment type is needed to forge this relic */
+  fragmentType: RelicFragmentType;
+  /** The relic's mechanical effect */
+  effect: RelicEffect;
+  /** Narrative flavor text */
+  lore: string;
+}
+
+/** Relic effect types */
+export type RelicEffect =
+  | { type: 'attack_bonus'; dice: number; duration: 'mission' | 'permanent' }
+  | { type: 'defense_bonus'; dice: number; duration: 'mission' | 'permanent' }
+  | { type: 'soak_bonus'; value: number; duration: 'mission' | 'permanent' }
+  | { type: 'heal_all'; value: number }
+  | { type: 'bonus_command_tokens'; value: number }
+  | { type: 'threat_reduction'; value: number }
+  | { type: 'free_reroll'; uses: number }
+  | { type: 'xp_multiplier'; multiplier: number; nextMissionOnly: boolean }
+  | { type: 'fragment_magnet'; extraFragmentChance: number };
+
+/** A relic that has been forged (stored in CampaignState) */
+export interface ForgedRelic {
+  relicId: string;
+  forgedAt: string;
+  /** Which hero is carrying this relic (null = unassigned) */
+  assignedHeroId: string | null;
+  /** For limited-use relics: remaining uses */
+  usesRemaining?: number;
+}
+
+// --- AGENDA PHASE (IMPERIAL SENATE DIRECTIVES) ---
+
+/** Agenda directive effect targets */
+export type DirectiveTarget = 'operative' | 'imperial' | 'both';
+
+/** Definition of an agenda directive (loaded from JSON) */
+export interface AgendaDirectiveDefinition {
+  id: string;
+  name: string;
+  description: string;
+  /** Which side benefits from this directive (or both) */
+  target: DirectiveTarget;
+  /** Mechanical effects applied during the next mission */
+  effects: DirectiveEffect[];
+  /** Influence cost to vote for this directive (higher = harder to pass) */
+  influenceCost: number;
+  /** Narrative flavor */
+  flavorText: string;
+}
+
+/** Directive effect types */
+export type DirectiveEffect =
+  | { type: 'reinforcement_timing'; roundDelta: number }   // Imperial reinforcements arrive earlier/later
+  | { type: 'starting_consumables'; itemId: string; quantity: number } // Heroes start with extra consumables
+  | { type: 'threat_modifier'; value: number }             // Modify imperial threat per round
+  | { type: 'shop_discount'; percent: number }             // Discount at shops
+  | { type: 'xp_bonus'; value: number }                    // Bonus XP for next mission
+  | { type: 'morale_modifier'; side: Side; value: number } // Starting morale adjustment
+  | { type: 'exploration_bonus'; extraTokens: number }     // More exploration tokens on next map
+  | { type: 'command_token_bonus'; value: number };         // Extra command tokens per round
+
+/** An active directive with remaining duration */
+export interface AgendaDirective {
+  directiveId: string;
+  /** Number of missions this directive remains active (decremented each mission) */
+  missionsRemaining: number;
+  effects: DirectiveEffect[];
+}
+
+/** How influence is calculated for agenda voting */
+export const AGENDA_INFLUENCE_CONFIG = {
+  /** Base influence per hero */
+  basePerHero: 1,
+  /** Bonus influence from Presence characteristic (per point above 2) */
+  presenceBonus: 1,
+  /** Bonus influence from Leadership skill ranks */
+  leadershipBonus: 1,
+  /** Imperial influence = threat level * this multiplier */
+  imperialThreatMultiplier: 0.5,
+  /** Minimum imperial influence */
+  imperialMinInfluence: 3,
+} as const;
+
+/** Result of an agenda phase vote */
+export interface AgendaVoteResult {
+  /** The two directives that were up for vote */
+  directiveChoices: [string, string];
+  /** Which directive won */
+  winnerId: string;
+  /** Operative influence spent */
+  operativeInfluence: number;
+  /** Imperial influence (AI-determined) */
+  imperialInfluence: number;
+  /** Per-hero influence breakdown */
+  heroInfluence: Record<string, number>;
+  /** When this vote occurred */
+  votedAt: string;
 }
 
 // ============================================================================

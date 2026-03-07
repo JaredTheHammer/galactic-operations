@@ -1,0 +1,147 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Exploration token type definitions (TI4 PoK-inspired map discovery)"
+  },
+  "explorationTokenTypes": {
+    "supply-stim": {
+      "id": "supply-stim",
+      "name": "Stim Pack Cache",
+      "description": "A hidden supply crate containing a stim pack.",
+      "resultType": "supply_cache",
+      "consumableId": "stim-pack",
+      "weight": 15
+    },
+    "supply-repair": {
+      "id": "supply-repair",
+      "name": "Repair Kit Cache",
+      "description": "A supply crate containing repair materials.",
+      "resultType": "supply_cache",
+      "consumableId": "repair-patch",
+      "weight": 10
+    },
+    "credits-small": {
+      "id": "credits-small",
+      "name": "Hidden Credits",
+      "description": "A small stash of credits tucked away.",
+      "resultType": "credits_stash",
+      "creditsValue": 25,
+      "weight": 15
+    },
+    "credits-large": {
+      "id": "credits-large",
+      "name": "Credit Vault",
+      "description": "A secured container with a substantial credit stash.",
+      "resultType": "credits_stash",
+      "creditsValue": 75,
+      "weight": 5
+    },
+    "trap-mine": {
+      "id": "trap-mine",
+      "name": "Proximity Mine",
+      "description": "A concealed proximity mine. Make a Perception check to avoid.",
+      "resultType": "booby_trap",
+      "trapDamage": 4,
+      "trapSkill": "perception",
+      "trapDifficulty": 2,
+      "weight": 12
+    },
+    "trap-gas": {
+      "id": "trap-gas",
+      "name": "Gas Trap",
+      "description": "A gas canister rigged to release on disturbance. Make a Perception check.",
+      "resultType": "booby_trap",
+      "trapDamage": 3,
+      "trapSkill": "perception",
+      "trapDifficulty": 1,
+      "weight": 8
+    },
+    "intel-datapad": {
+      "id": "intel-datapad",
+      "name": "Imperial Datapad",
+      "description": "A datapad containing Imperial intelligence.",
+      "resultType": "intel_fragment",
+      "narrativeItemId": "imperial-intel",
+      "weight": 10
+    },
+    "intel-holodisk": {
+      "id": "intel-holodisk",
+      "name": "Encrypted Holodisk",
+      "description": "An encrypted holodisk with valuable intelligence.",
+      "resultType": "intel_fragment",
+      "narrativeItemId": "encrypted-holodisk",
+      "weight": 5
+    },
+    "fragment-combat": {
+      "id": "fragment-combat",
+      "name": "Combat Relic Fragment",
+      "description": "A fragment of an ancient weapon. Collect three to forge a combat relic.",
+      "resultType": "relic_fragment",
+      "fragmentType": "combat",
+      "weight": 5
+    },
+    "fragment-tech": {
+      "id": "fragment-tech",
+      "name": "Tech Relic Fragment",
+      "description": "A piece of advanced technology. Collect three to forge a tech relic.",
+      "resultType": "relic_fragment",
+      "fragmentType": "tech",
+      "weight": 5
+    },
+    "fragment-force": {
+      "id": "fragment-force",
+      "name": "Force Relic Fragment",
+      "description": "A shard resonating with the Force. Collect three to forge a Force relic.",
+      "resultType": "relic_fragment",
+      "fragmentType": "force",
+      "weight": 4
+    },
+    "fragment-intel": {
+      "id": "fragment-intel",
+      "name": "Intel Relic Fragment",
+      "description": "A fragment of a lost intelligence archive. Collect three to forge an intel relic.",
+      "resultType": "relic_fragment",
+      "fragmentType": "intel",
+      "weight": 5
+    },
+    "ambush-troopers": {
+      "id": "ambush-troopers",
+      "name": "Stormtrooper Ambush",
+      "description": "Imperial Stormtroopers emerge from hiding!",
+      "resultType": "ambush",
+      "ambushNpcIds": ["stormtrooper", "stormtrooper"],
+      "weight": 8
+    },
+    "ambush-scout": {
+      "id": "ambush-scout",
+      "name": "Scout Trooper Ambush",
+      "description": "An Imperial scout trooper attacks from concealment!",
+      "resultType": "ambush",
+      "ambushNpcIds": ["scout-trooper"],
+      "weight": 5
+    },
+    "gear-blaster": {
+      "id": "gear-blaster",
+      "name": "Abandoned Blaster",
+      "description": "A discarded but functional blaster pistol.",
+      "resultType": "abandoned_gear",
+      "gearItemId": "blaster-pistol",
+      "weight": 5
+    },
+    "medical-cache": {
+      "id": "medical-cache",
+      "name": "Medical Station",
+      "description": "An operational medical station. Heals 4 wounds.",
+      "resultType": "medical_cache",
+      "healValue": 4,
+      "weight": 8
+    },
+    "empty-cache": {
+      "id": "empty-cache",
+      "name": "Empty Container",
+      "description": "Just an empty container. Nothing useful here.",
+      "resultType": "nothing",
+      "weight": 10
+    }
+  }
+}
