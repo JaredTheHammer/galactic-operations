@@ -474,6 +474,8 @@ export default function PostMission() {
               </div>
             </div>
           );
+        })()}
+
         {/* Supply Network Consequences */}
         {campaignState?.supplyNetwork && (() => {
           const sectorMap = sectorMapData as SectorMapDefinition

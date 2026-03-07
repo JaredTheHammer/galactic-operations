@@ -110,7 +110,6 @@ function App() {
     overworldDef,
     closeCampaignOverworld,
     travelToSector,
-    campaignState,
     showStrategicCommand,
   } = useGameStore()
 
