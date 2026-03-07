@@ -110,13 +110,62 @@ for (const [id, die] of Object.entries(dice)) {
 console.log('OK: All 4 dice have 6 faces');
 
 // 4. Species: characteristic totals = 12 (droids are exception: 10 points + extra XP)
+const validAbilityEffectTypes = [
+  'bonus_strain_recovery', 'social_skill_upgrade', 'wounded_melee_bonus',
+  'condition_immunity', 'first_attack_bonus', 'regeneration',
+  'skill_bonus', 'soak_bonus', 'natural_weapon_damage', 'dark_vision', 'silhouette_small',
+];
+const requiredCharFields = ['brawn', 'agility', 'intellect', 'cunning', 'willpower', 'presence'];
+let speciesAbilityCount = 0;
 for (const [id, sp] of Object.entries(species)) {
+  // Required fields
+  if (!sp.name) fail('Species ' + id + ' missing name');
+  if (!sp.description) fail('Species ' + id + ' missing description');
+  if (typeof sp.woundBase !== 'number' || sp.woundBase < 1) fail('Species ' + id + ' invalid woundBase');
+  if (typeof sp.strainBase !== 'number' || sp.strainBase < 1) fail('Species ' + id + ' invalid strainBase');
+  if (typeof sp.speed !== 'number' || sp.speed < 1) fail('Species ' + id + ' invalid speed');
+  if (typeof sp.startingXP !== 'number' || sp.startingXP < 1) fail('Species ' + id + ' invalid startingXP');
+  // Characteristics
   const c = sp.characteristics;
+  for (const f of requiredCharFields) {
+    if (typeof c[f] !== 'number' || c[f] < 1 || c[f] > 5) fail('Species ' + id + ' characteristic ' + f + '=' + c[f] + ' out of range [1-5]');
+  }
   const total = c.brawn + c.agility + c.intellect + c.cunning + c.willpower + c.presence;
-  const expectedTotal = sp.specialAbility === 'droid_chassis' ? 10 : 12;
+  const expectedTotal = sp.creatureType === 'droid' ? 10 : 12;
   if (total !== expectedTotal) fail('Species ' + id + ' total=' + total + ' (expected ' + expectedTotal + ')');
+  // Abilities
+  if (sp.abilities && Array.isArray(sp.abilities)) {
+    for (const ab of sp.abilities) {
+      speciesAbilityCount++;
+      if (!ab.id) fail('Species ' + id + ' has ability missing id');
+      if (!ab.name) fail('Species ' + id + ' has ability missing name');
+      if (!ab.description) fail('Species ' + id + ' has ability missing description');
+      if (ab.type !== 'passive') fail('Species ' + id + ' ability ' + ab.id + ' has unexpected type: ' + ab.type);
+      if (!ab.effect || !ab.effect.type) fail('Species ' + id + ' ability ' + ab.id + ' missing effect.type');
+      if (!validAbilityEffectTypes.includes(ab.effect.type)) {
+        fail('Species ' + id + ' ability ' + ab.id + ' has unknown effect type: ' + ab.effect.type);
+      }
+      // Validate effect-specific fields
+      if (ab.effect.type === 'condition_immunity' && !ab.effect.condition) {
+        fail('Species ' + id + ' ability ' + ab.id + ' condition_immunity missing condition field');
+      }
+      if (ab.effect.type === 'skill_bonus') {
+        if (!Array.isArray(ab.effect.skills) || ab.effect.skills.length === 0) {
+          fail('Species ' + id + ' ability ' + ab.id + ' skill_bonus missing skills array');
+        }
+        if (typeof ab.effect.value !== 'number') {
+          fail('Species ' + id + ' ability ' + ab.id + ' skill_bonus missing numeric value');
+        }
+      }
+      const valueTypes = ['bonus_strain_recovery', 'social_skill_upgrade', 'wounded_melee_bonus',
+        'first_attack_bonus', 'regeneration', 'soak_bonus', 'natural_weapon_damage', 'dark_vision', 'silhouette_small'];
+      if (valueTypes.includes(ab.effect.type) && typeof ab.effect.value !== 'number') {
+        fail('Species ' + id + ' ability ' + ab.id + ' ' + ab.effect.type + ' missing numeric value');
+      }
+    }
+  }
 }
-console.log('OK: All species have correct characteristic point totals');
+console.log('OK: All ' + Object.keys(species).length + ' species valid (characteristics, fields, ' + speciesAbilityCount + ' abilities)');
 
 // 5. Careers: 3 specializations each
 for (const [id, career] of Object.entries(careers)) {
