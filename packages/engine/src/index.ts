@@ -39,6 +39,7 @@ export type {
   // Turn and Actions
   TurnPhase,
   ActionType,
+  AttackPayload,
   GameAction,
   ActionLog,
   // Players
@@ -61,6 +62,14 @@ export type {
   // Species Abilities
   SpeciesAbilityEffect,
   SpeciesAbility,
+  // Boss Hit Location Types
+  BossHitLocationDef,
+  BossHitLocationState,
+  BossPhaseTransition,
+  // Focus Resource Types
+  FocusConfig,
+  FocusEffect,
+  SpendFocusPayload,
   // Supply Network
   SupplyNodeType,
   SupplyNode,
@@ -199,6 +208,7 @@ export {
   getSuppressionState,
   getNPCCourage,
   getHeroCourage,
+  getFigureSpeed,
 } from './turn-machine-v2.js';
 export type { ArmyCompositionV2, SuppressionState } from './turn-machine-v2.js';
 
@@ -329,6 +339,37 @@ export type {
   BalanceFlag,
 } from './power-ranking.js';
 
+// Re-export boss mechanics (Oathsworn-inspired hit location system)
+export {
+  initBossHitLocations,
+  routeWoundsToHitLocations,
+  getBossAttackPoolPenalty,
+  getBossDefensePoolPenalty,
+  getBossSoakPenalty,
+  getBossSpeedPenalty,
+  getDisabledBossWeapons,
+  getDisabledLocationConditions,
+  applyTargetedShotPenalty,
+  applyBossAttackPenalties,
+  applyBossDefensePenalties,
+  checkBossPhaseTransition,
+  applyBossPhaseTransition,
+  isBossWeaponAvailable,
+  getBossLocationSummary,
+} from './boss-mechanics.js';
+
+// Re-export Focus resource system (Oathsworn Animus-inspired)
+export {
+  getFocusConfigForHero,
+  initFocusResource,
+  recoverFocus,
+  canSpendFocus,
+  getAvailableFocusEffects,
+  spendFocus,
+  hasFocusResource,
+  getFocusPercent,
+  getFocusEffectLabel,
+} from './focus-resource.js';
 // Re-export Dune-inspired mechanics
 
 // Contracts system

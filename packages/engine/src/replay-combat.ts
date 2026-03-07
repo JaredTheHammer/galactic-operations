@@ -144,6 +144,7 @@ class ReplayRecorder {
       if (f.entityType === 'hero') {
         const hero = this.state.heroes?.[f.entityId];
         if (!portraitId && hero?.portraitId) portraitId = hero.portraitId;
+        if (!baseSize && f.baseSize) baseSize = f.baseSize;
         // Heroes don't have baseSize; it only exists on Figure and NPCProfile
       } else {
         const npc = this.gameData.npcProfiles[f.entityId];

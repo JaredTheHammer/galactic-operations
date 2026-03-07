@@ -5,6 +5,7 @@
 
 import type {
   GameData,
+  V1_UnitDefinition,
   TacticCard,
   NPCProfile,
   WeaponDefinition,
@@ -78,16 +79,16 @@ export function loadGameDataFromObjects(data: {
   equipment: any;
 }): Record<string, unknown> {
   // Merge imperial and operative units into a single Record
-  const units: Record<string, UnitDefinition> = {
+  const units: Record<string, V1_UnitDefinition> = {
     ...data.imperials,
     ...data.operatives,
   };
 
   // Build dice definitions map
-  const dice = {} as Record<DieColor, DieDefinition>;
+  const dice: Record<string, any> = {};
   if (Array.isArray(data.dice)) {
     for (const die of data.dice) {
-      dice[die.color as DieColor] = die;
+      dice[die.color] = die;
     }
   } else {
     // If dice is already a Record
@@ -105,7 +106,7 @@ export function loadGameDataFromObjects(data: {
   }
 
   // Build equipment map
-  const equipment: Record<string, Equipment> = {};
+  const equipment: Record<string, any> = {};
   if (Array.isArray(data.equipment)) {
     for (const item of data.equipment) {
       equipment[item.id] = item;
@@ -120,7 +121,7 @@ export function loadGameDataFromObjects(data: {
     weapons: {}, // Weapons are derived from units for now
     tacticCards,
     equipment,
-  };
+  } as any;
 }
 
 /**

@@ -245,7 +245,51 @@
         "Adversary 2: Upgrade difficulty of all combat checks against this target by 2.",
         "Last Stand: When reduced below half wounds, Drayen gains +2 soak and all his attacks gain Pierce 2."
       ],
-      "threatCost": 10
+      "threatCost": 10,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "command-relay",
+          "name": "Command Relay",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Disoriented"
+          }
+        },
+        {
+          "id": "armor-plating",
+          "name": "Armor Plating",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "soakModifier": -3,
+            "defensePoolModifier": -1
+          }
+        },
+        {
+          "id": "weapon-arm",
+          "name": "Weapon Arm",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "disabledWeapons": ["commanders-blaster-rifle"]
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 1,
+          "newAiArchetype": "elite",
+          "narrativeText": "Drayen adapts his tactics, barking orders to his remaining forces!",
+          "statBonuses": { "defensePoolBonus": 1, "soakBonus": 1 }
+        },
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "elite",
+          "narrativeText": "Badly damaged, Drayen fights with desperate precision!",
+          "statBonuses": { "attackPoolBonus": 1, "damageBonus": 2, "speedBonus": 1 }
+        }
+      ]
     }
   }
 }

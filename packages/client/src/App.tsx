@@ -46,6 +46,8 @@ import { useAutoPhase } from './hooks/useAutoPhase'
 import { useAutosave } from './hooks/useAutosave'
 import { AutosaveToast } from './components/HUD/AutosaveToast'
 import { ShortcutHelp } from './components/HUD/ShortcutHelp'
+import { BossHitLocations } from './components/HUD/BossHitLocations'
+import { FocusBar } from './components/HUD/FocusBar'
 
 /** Brief victory/defeat overlay shown on the tactical grid before PostMission transition */
 const MissionOutcomeOverlay: React.FC<{ winner: string; victoryCondition?: string }> = ({ winner, victoryCondition }) => {
@@ -105,6 +107,9 @@ function App() {
     showMapEditor,
     showCombatArena,
     showActTransition,
+    pendingBossAttack,
+    confirmBossAttack,
+    cancelBossAttack,
     showCampaignOverworld,
     campaignState,
     overworldDef,
@@ -322,6 +327,11 @@ function App() {
           <FloatingCombatTextOverlay />
         </div>
 
+        {/* Focus Bar (shown for activating hero during player turn) */}
+        {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
+          <FocusBar figure={selectedFigure} compact />
+        )}
+
         {/* Action buttons strip (hidden during Imperial AI turns) */}
         {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
           <ActionButtons selectedFigure={selectedFigure} compact />
@@ -331,6 +341,22 @@ function App() {
         {selectedFigure && (
           <InfoPanel selectedFigure={selectedFigure} gameState={gameState} compact />
         )}
+
+        {/* Boss Hit Locations (shown when selecting a boss or targeting) */}
+        {(selectedFigure || pendingBossAttack) && (() => {
+          const bossFigure = pendingBossAttack
+            ? gameState.figures.find(f => f.id === pendingBossAttack.targetId) ?? null
+            : selectedFigure
+          return bossFigure?.hitLocations?.length ? (
+            <BossHitLocations
+              figure={bossFigure}
+              targeting={!!pendingBossAttack}
+              onSelectLocation={confirmBossAttack}
+              onCancelTargeting={cancelBossAttack}
+              compact={!pendingBossAttack}
+            />
+          ) : null
+        })()}
 
         {/* Combat log overlay */}
         <CombatLog messages={combatLog} compact visible={showCombatLog} onClose={() => setShowCombatLog(false)} />
@@ -434,6 +460,26 @@ function App() {
       {/* Top Right: Selected Figure Info */}
       {selectedFigure && (
         <InfoPanel selectedFigure={selectedFigure} gameState={gameState} />
+      )}
+
+      {/* Top Right (below InfoPanel): Boss Hit Locations (shown when selecting a boss or targeting) */}
+      {(selectedFigure || pendingBossAttack) && (() => {
+        const bossFigure = pendingBossAttack
+          ? gameState.figures.find(f => f.id === pendingBossAttack.targetId) ?? null
+          : selectedFigure
+        return bossFigure?.hitLocations?.length ? (
+          <BossHitLocations
+            figure={bossFigure}
+            targeting={!!pendingBossAttack}
+            onSelectLocation={confirmBossAttack}
+            onCancelTargeting={cancelBossAttack}
+          />
+        ) : null
+      })()}
+
+      {/* Bottom Center (above Action Buttons): Focus Bar (shown for activating hero) */}
+      {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
+        <FocusBar figure={selectedFigure} />
       )}
 
       {/* Bottom Center: Action Buttons (hidden during Imperial AI turns) */}

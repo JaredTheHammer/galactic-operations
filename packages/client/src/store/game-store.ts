@@ -578,6 +578,11 @@ export interface GameStore {
   // Camera control: set to pan the tactical grid camera to a grid position
   cameraTarget: GridCoordinate | null
 
+  // Boss hit location targeting: pending attack awaiting location selection
+  pendingBossAttack: { targetId: string } | null
+  confirmBossAttack: (targetLocationId?: string) => void
+  cancelBossAttack: () => void
+
   // Actions
   initGame: (players: Player[], mapConfig?: MapConfig) => void
   startHeroCreation: (players: Player[], mapConfig?: MapConfig) => void
@@ -587,6 +592,7 @@ export interface GameStore {
   selectFigure: (figureId: string | null) => void
   moveFigure: (destination: GridCoordinate) => void
   startAttack: (targetId: string) => void
+  _executeAttack: (targetId: string, targetLocationId?: string) => void
   rallyFigure: () => void
   aimFigure: () => void
   dodgeFigure: () => void
@@ -597,6 +603,7 @@ export interface GameStore {
   guardedStance: () => void
   useTalent: (talentId: string) => void
   useConsumable: (itemId: string, targetId?: string) => void
+  spendFocus: (effect: import('@engine/types.js').FocusEffect) => void
   getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => void
   playTacticCardAltMode: (cardId: string) => void
@@ -762,6 +769,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // Imperial AI state (campaign combat)
   imperialAIPhase: null,
+
+  // Boss hit location targeting
+  pendingBossAttack: null,
 
   // Camera control
   cameraTarget: null,
@@ -1169,7 +1179,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
+  confirmBossAttack: (targetLocationId?: string) => {
+    const { pendingBossAttack } = get()
+    if (!pendingBossAttack) return
+
+    const targetId = pendingBossAttack.targetId
+    set({ pendingBossAttack: null })
+
+    // Re-enter startAttack with the location selected (bypass boss check via internal helper)
+    const store = get()
+    store._executeAttack(targetId, targetLocationId)
+  },
+
+  cancelBossAttack: () => {
+    set({ pendingBossAttack: null })
+  },
+
   startAttack: (targetId: string) => {
+    const { gameState } = get()
+    if (!gameState) return
+
+    // Check if target is a boss with active hit locations
+    const defender = gameState.figures.find(f => f.id === targetId)
+    if (defender?.hitLocations?.some(loc => !loc.isDisabled)) {
+      // Show location picker instead of attacking immediately
+      set({ pendingBossAttack: { targetId } })
+      return
+    }
+
+    get()._executeAttack(targetId)
+  },
+
+  _executeAttack: (targetId: string, targetLocationId?: string) => {
     const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
 
@@ -1184,7 +1225,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const attackAction = {
         type: 'Attack' as const,
         figureId: selectedFigureId,
-        payload: { targetId, weaponId },
+        payload: { targetId, weaponId, ...(targetLocationId ? { targetLocationId } : {}) },
       }
       const newGameState = executeActionV2(gameState, attackAction, gameData)
       set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
@@ -1244,6 +1285,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
             .map(id => gameData.tacticCards?.[id]?.name ?? id)
             .join(', ')
           addCombatLog(`  Tactic cards: ${names}`)
+        }
+
+        // Boss hit location feedback
+        if (resolution.targetedLocationName) {
+          addCombatLog(`  Targeted: ${resolution.targetedLocationName} (+1 difficulty)`)
+        }
+        if (resolution.locationWoundsAbsorbed && resolution.locationWoundsAbsorbed > 0) {
+          addCombatLog(`  Location absorbed ${resolution.locationWoundsAbsorbed} wounds`)
+        }
+        if (resolution.locationsDisabledNames && resolution.locationsDisabledNames.length > 0) {
+          for (const name of resolution.locationsDisabledNames) {
+            addCombatLog(`  !! ${name} DISABLED!`)
+            const { addFloatingText: addFloat } = get()
+            addFloat({
+              gridX: defender.position.x, gridY: defender.position.y,
+              text: `${name} DISABLED`,
+              color: '#ff6600',
+              type: 'damage',
+            })
+          }
+        }
+        if (resolution.bossPhaseTransitioned) {
+          addCombatLog(`  !! Boss enters Phase ${resolution.newBossPhase}!`)
+          if (resolution.bossPhaseNarrativeText) {
+            addCombatLog(`  "${resolution.bossPhaseNarrativeText}"`)
+          }
+          const { addFloatingText: addFloat } = get()
+          setTimeout(() => addFloat({
+            gridX: defender.position.x, gridY: defender.position.y,
+            text: `PHASE ${resolution.newBossPhase}`,
+            color: '#ff8844',
+            type: 'critical',
+          }), 400)
         }
       } else {
         addCombatLog(`Combat: ${attacker.id} vs ${defender.id}`)
@@ -1496,6 +1570,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ validMoves: moves, validTargets: targets })
     } else {
       set({ validMoves: [], validTargets: [] })
+    }
+  },
+
+  spendFocus: (effect) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure) return
+
+    const focusAction = {
+      type: 'SpendFocus' as const,
+      figureId: selectedFigureId,
+      payload: { effect },
+    }
+    const newGameState = executeActionV2(gameState, focusAction, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+
+    addCombatLog(`${selectedFigureId} spent Focus: ${effect}`)
+
+    // Re-select to update valid moves (bonus_move changes movement range)
+    const updatedFigure = newGameState.figures.find(f => f.id === selectedFigureId)
+    if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
+      const moves = getValidMoves(updatedFigure, newGameState)
+      const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
+      set({ validMoves: moves, validTargets: targets })
     }
   },
 
@@ -2647,6 +2747,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       activeMission: null,
       triggeredWaveIds: [],
       imperialAIPhase: null,
+      pendingBossAttack: null,
       cameraTarget: null,
       showSetup: true,
       gameState: null,

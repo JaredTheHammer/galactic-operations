@@ -179,7 +179,53 @@
         "Parry: When hit by melee, suffer 3 strain to reduce damage by 5.",
         "Adversary 2: Upgrade difficulty of all combat checks against this target by 2."
       ],
-      "threatCost": 9
+      "threatCost": 9,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "saber-arm",
+          "name": "Saber Arm",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -2,
+            "disabledWeapons": ["lightsaber"],
+            "conditionInflicted": "Staggered"
+          }
+        },
+        {
+          "id": "force-focus",
+          "name": "Force Focus",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "soakModifier": -2,
+            "conditionInflicted": "Disoriented"
+          }
+        },
+        {
+          "id": "leg-servos",
+          "name": "Leg Servos",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "conditionInflicted": "Immobilized"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 1,
+          "newAiArchetype": "melee",
+          "narrativeText": "The Inquisitor snarls in pain, drawing deeper on the Dark Side!",
+          "statBonuses": { "attackPoolBonus": 1, "damageBonus": 1, "speedBonus": 1 }
+        },
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Wounded and desperate, the Inquisitor fights with reckless fury!",
+          "statBonuses": { "attackPoolBonus": 1, "damageBonus": 2 }
+        }
+      ]
     }
   }
 }

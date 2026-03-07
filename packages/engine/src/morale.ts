@@ -79,7 +79,7 @@ export function applyMoraleChange(
 export function checkMoraleEffect(
   figure: Figure,
   moraleState: MoraleState,
-  actionType: ActionType
+  actionType: string
 ): boolean {
   // If morale is Broken, only Move and Rest are allowed
   if (moraleState === 'Broken') {
