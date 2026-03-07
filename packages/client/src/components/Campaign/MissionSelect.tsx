@@ -7,6 +7,11 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult, CriticalInjuryDefinition, ActProgress } from '../../../../engine/src/types'
+import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult, SectorMapDefinition } from '../../../../engine/src/types'
+import { getCampaignStats } from '../../../../engine/src/campaign-v2'
+import { getNetworkUnlockedMissions, getNetworkSummary } from '../../../../engine/src/supply-network'
+import sectorMapData from '../../../../../data/sector-map.json'
 import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult, ActProgress } from '../../../../engine/src/types'
 import { getExposureStatus } from '../../../../engine/src/types'
 import { getCampaignStats, getFinaleExposureModifiers, getCampaignEpilogue } from '../../../../engine/src/campaign-v2'
@@ -14,6 +19,9 @@ import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
 import { usePortraitStore } from '../../store/portrait-store'
 import { listSaveSlots, MAX_SLOTS, findEmptySlot, type SaveSlotMeta } from '../../services/save-slots'
+import { MomentumIndicator } from './MomentumIndicator'
+import { SectorControlDisplay } from './SectorControlDisplay'
+import { CriticalInjuryPanel } from './CriticalInjuryPanel'
 import { CampaignVictory } from './CampaignVictory'
 
 // ============================================================================
@@ -160,6 +168,28 @@ function CampaignStatsPanel({ campaign }: { campaign: CampaignState }) {
         <div>Credits: <span style={{ color: '#ffd700' }}>{campaign.credits}</span></div>
         <div>Threat Level: {campaign.threatLevel}</div>
         <div>Difficulty: {campaign.difficulty}</div>
+      </div>
+    </div>
+  )
+}
+
+function NetworkStatsWidget({ campaign }: { campaign: CampaignState }) {
+  const summary = getNetworkSummary(campaign.supplyNetwork, sectorMapData as SectorMapDefinition)
+
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <h3 style={{ color: '#44ff44', margin: '0 0 8px 0', fontSize: '14px' }}>Supply Network</h3>
+      <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+        <div>Nodes: {summary.activeNodes} active{summary.severedNodes > 0 ? `, ${summary.severedNodes} severed` : ''}</div>
+        <div>Income: <span style={{ color: '#ffd700' }}>+{summary.networkIncome}</span>/mission</div>
+        <div>Upkeep: <span style={{ color: '#ff8844' }}>-{summary.totalUpkeep}</span>/mission</div>
+        {summary.threatReduction > 0 && (
+          <div>Threat reduction: <span style={{ color: '#44ff44' }}>-{summary.threatReduction}</span></div>
+        )}
+        {summary.reinforcementBonus > 0 && (
+          <div>Reinforce bonus: <span style={{ color: '#4a9eff' }}>+{summary.reinforcementBonus}</span></div>
+        )}
+        <div>Locations: {summary.connectedLocations.length}</div>
       </div>
     </div>
   )
@@ -433,21 +463,48 @@ function MissionCard({
   mission,
   isSelected,
   onClick,
+  isNetworkUnlocked,
+  isNetworkLocked,
 }: {
   mission: MissionDefinition
   isSelected: boolean
   onClick: () => void
+  isNetworkUnlocked?: boolean
+  isNetworkLocked?: boolean
 }) {
   const diffColor = difficultyColors[mission.difficulty] ?? '#888'
   return (
     <div
-      style={isSelected ? selectedCardStyle : cardStyle}
+      style={{
+        ...(isSelected ? selectedCardStyle : cardStyle),
+        ...(isNetworkLocked ? { opacity: 0.5 } : {}),
+      }}
       onClick={onClick}
       onMouseEnter={(e) => { if (!isSelected) (e.currentTarget.style.borderColor = '#3a3a5f') }}
       onMouseLeave={(e) => { if (!isSelected) (e.currentTarget.style.borderColor = '#2a2a3f') }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-        <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{mission.name}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{mission.name}</span>
+          {isNetworkLocked && (
+            <span style={{
+              fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase',
+              padding: '2px 6px', borderRadius: '3px',
+              backgroundColor: '#2a1a1a', color: '#ff4444', border: '1px solid #4a2a2a',
+            }}>
+              LOCKED
+            </span>
+          )}
+          {isNetworkUnlocked && !isNetworkLocked && (
+            <span style={{
+              fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase',
+              padding: '2px 6px', borderRadius: '3px',
+              backgroundColor: '#1a2a1a', color: '#44ff44', border: '1px solid #2a4a2a',
+            }}>
+              NETWORK
+            </span>
+          )}
+        </div>
         <span style={{ color: diffColor, fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase' }}>
           {mission.difficulty}
         </span>
@@ -747,8 +804,13 @@ export default function MissionSelect() {
     openSocialPhase,
     openHeroProgression,
     openPortraitManager,
+    openSectorMap,
     openCampaignStats,
     openCampaignJournal,
+    openCampaignOverworld,
+    travelToSector,
+    treatCriticalInjury,
+    criticalInjuryDefs,
     openStrategicCommand,
   } = useGameStore()
 
@@ -790,10 +852,27 @@ export default function MissionSelect() {
     .map(id => campaignMissions[id])
     .filter(Boolean)
 
+  const networkUnlockedIds = new Set(
+    campaignState.supplyNetwork
+      ? getNetworkUnlockedMissions(campaignState.supplyNetwork, sectorMapData as SectorMapDefinition)
+      : [],
+  )
+
+  // Build set of all missions that require network connections to launch
+  const sectorMap = sectorMapData as SectorMapDefinition
+  const networkGatedMissionIds = new Set(
+    sectorMap.locations.flatMap(loc => loc.unlocksMissions ?? [])
+  )
+
   const selectedMission = selectedMissionId ? campaignMissions[selectedMissionId] : null
 
+  // A mission is locked if it's network-gated but not yet unlocked by the player's network
+  const isSelectedMissionLocked = selectedMissionId
+    ? networkGatedMissionIds.has(selectedMissionId) && !networkUnlockedIds.has(selectedMissionId)
+    : false
+
   const handleLaunchMission = () => {
-    if (!selectedMissionId) return
+    if (!selectedMissionId || isSelectedMissionLocked) return
     showMissionBriefingScreen(selectedMissionId)
   }
 
@@ -911,6 +990,20 @@ export default function MissionSelect() {
             onClick={openPortraitManager}
           >
             PORTRAITS
+          </button>
+          {campaignState.overworld && (
+            <button
+              style={{ ...buttonStyle, backgroundColor: '#2a1a3a', color: '#bb66ff', flex: isMobile ? '1 1 auto' : undefined }}
+              onClick={openCampaignOverworld}
+            >
+              OVERWORLD
+            </button>
+          )}
+          <button
+            style={{ ...buttonStyle, backgroundColor: '#1a2a2a', color: '#44ddaa', flex: isMobile ? '1 1 auto' : undefined }}
+            onClick={openSectorMap}
+          >
+            SECTOR MAP
           </button>
           <button
             style={{ ...buttonStyle, backgroundColor: '#1a2a3a', color: '#cc8800', flex: isMobile ? '1 1 auto' : undefined }}
@@ -1071,6 +1164,9 @@ export default function MissionSelect() {
         <div style={sidebarResponsive}>
           <CampaignStatsPanel campaign={campaignState} />
 
+          {campaignState.supplyNetwork && campaignState.supplyNetwork.nodes.length > 0 && (
+            <NetworkStatsWidget campaign={campaignState} />
+          )}
           {campaignState.actProgress && (
             <RebellionStatusPanel actProgress={campaignState.actProgress} />
           )}
@@ -1078,6 +1174,21 @@ export default function MissionSelect() {
           {campaignState.factionReputation && Object.keys(campaignState.factionReputation).length > 0 && (
             <FactionReputationPanel reputation={campaignState.factionReputation} />
           )}
+
+          <MomentumIndicator campaign={campaignState} />
+
+          <SectorControlDisplay
+            campaign={campaignState}
+            onTravelToSector={travelToSector}
+          />
+
+          <CriticalInjuryPanel
+            heroes={heroes}
+            injuryDefs={criticalInjuryDefs}
+            compact
+            onTreatInjury={treatCriticalInjury}
+            credits={campaignState.credits}
+          />
 
           <InventoryPanel campaign={campaignState} />
 
@@ -1116,6 +1227,8 @@ export default function MissionSelect() {
                     mission={mission}
                     isSelected={selectedMissionId === mission.id}
                     onClick={() => setSelectedMissionId(mission.id)}
+                    isNetworkUnlocked={networkUnlockedIds.has(mission.id)}
+                    isNetworkLocked={networkGatedMissionIds.has(mission.id) && !networkUnlockedIds.has(mission.id)}
                   />
                 ))}
               </div>
@@ -1334,16 +1447,18 @@ export default function MissionSelect() {
                     <button
                       style={{
                         ...buttonStyle,
-                        backgroundColor: '#4a9eff',
-                        color: '#fff',
+                        backgroundColor: isSelectedMissionLocked ? '#333' : '#4a9eff',
+                        color: isSelectedMissionLocked ? '#666' : '#fff',
+                        cursor: isSelectedMissionLocked ? 'not-allowed' : 'pointer',
                         width: '100%',
                         marginTop: '16px',
                         fontSize: '16px',
                         padding: '12px',
                       }}
                       onClick={handleLaunchMission}
+                      disabled={isSelectedMissionLocked}
                     >
-                      LAUNCH MISSION
+                      {isSelectedMissionLocked ? 'REQUIRES NETWORK CONNECTION' : 'LAUNCH MISSION'}
                     </button>
                   </div>
                 ) : (

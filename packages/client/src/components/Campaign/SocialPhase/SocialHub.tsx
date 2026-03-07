@@ -2,7 +2,7 @@
  * SocialHub - Main hub view showing location, NPC encounters, shops, and hero status.
  */
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useIsMobile } from '../../../hooks/useIsMobile'
 import type {
   CampaignState,
@@ -11,11 +11,14 @@ import type {
   SocialNPC,
   HeroCharacter,
   Disposition,
+  SectorMapDefinition,
 } from '../../../../../engine/src/types'
 import { getAvailableEncounters } from '../../../../../engine/src/social-phase'
 import { MEDICAL_RECOVERY_COST } from '../../../../../engine/src/campaign-v2'
 import type { SocialSessionState } from './SocialPhase'
 import { HeroPortrait } from '../../Portrait/HeroPortrait'
+import { SupplyNetworkPanel } from './SupplyNetworkPanel'
+import sectorMapData from '../../../../../../data/sector-map.json'
 
 interface Props {
   location: SocialPhaseLocation
@@ -27,6 +30,7 @@ interface Props {
   onHealHero: (heroId: string) => void
   onComplete: () => void
   onSkip: () => void
+  onUpdateCampaign: (campaign: CampaignState) => void
 }
 
 const dispositionColors: Record<Disposition, string> = {
@@ -43,8 +47,9 @@ const dispositionLabels: Record<Disposition, string> = {
   hostile: 'Hostile',
 }
 
-export function SocialHub({ location, npcs, campaign, session, onSelectEncounter, onSelectShop, onHealHero, onComplete, onSkip }: Props) {
+export function SocialHub({ location, npcs, campaign, session, onSelectEncounter, onSelectShop, onHealHero, onComplete, onSkip, onUpdateCampaign }: Props) {
   const { isMobile } = useIsMobile()
+  const [showNetwork, setShowNetwork] = useState(false)
   const availableEncounters = getAvailableEncounters(location, campaign, session.completedEncounterIds)
   const allEncounters = location.encounters
   const heroes = Object.values(campaign.heroes) as HeroCharacter[]
@@ -146,6 +151,33 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
             </div>
           )}
 
+          {/* Supply Network toggle */}
+          <div style={{ marginBottom: '16px' }}>
+            <button
+              onClick={() => setShowNetwork(!showNetwork)}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: `1px solid ${showNetwork ? '#4a9eff' : '#2a2a3f'}`,
+                backgroundColor: showNetwork ? '#1a1a3f' : '#12121f',
+                color: showNetwork ? '#4a9eff' : '#888',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textTransform: 'uppercase',
+                textAlign: 'left',
+                transition: 'all 0.2s',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <span>Supply Network</span>
+              <span style={{ fontSize: '10px' }}>{showNetwork ? '\u25B2' : '\u25BC'}</span>
+            </button>
+          </div>
+
           {/* Hero roster */}
           <div style={{ fontSize: '12px', color: '#888', textTransform: 'uppercase', marginBottom: '8px' }}>Hero Roster</div>
           {heroes.map(hero => (
@@ -170,6 +202,18 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
           }}>
             {location.narrativeIntro}
           </div>
+
+          {/* Supply Network Panel (expanded) */}
+          {showNetwork && (
+            <div style={{ marginBottom: '24px' }}>
+              <h2 style={{ color: '#fff', margin: '0 0 16px 0', fontSize: '18px' }}>Supply Network</h2>
+              <SupplyNetworkPanel
+                campaign={campaign}
+                sectorMap={sectorMapData as SectorMapDefinition}
+                onUpdateCampaign={onUpdateCampaign}
+              />
+            </div>
+          )}
 
           {/* NPC Encounters */}
           <h2 style={{ color: '#fff', margin: '0 0 16px 0', fontSize: '18px' }}>Encounters</h2>

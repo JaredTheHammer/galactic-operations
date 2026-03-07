@@ -1,0 +1,178 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "description": "Legacy event definitions for the Pandemic Legacy-inspired narrative event deck. Events trigger based on campaign state and permanently alter the campaign."
+  },
+  "events": {
+    "imperial-crackdown": {
+      "id": "imperial-crackdown",
+      "name": "Imperial Crackdown",
+      "narrativeText": "In response to rebel activity, Imperial command has authorized a sector-wide crackdown. Patrols are doubled and civilian movement is restricted. The cost of resistance just went up.",
+      "triggers": [
+        { "type": "missions_played", "count": 3 }
+      ],
+      "effects": [
+        { "type": "modify_sector_control", "sectorId": "industrial-zone", "delta": 1 },
+        { "type": "modify_sector_control", "sectorId": "garrison-perimeter", "delta": 1 },
+        { "type": "add_narrative_item", "itemId": "intel:crackdown-orders" }
+      ],
+      "oneShot": true,
+      "priority": 10,
+      "act": 1,
+      "isRevealed": true
+    },
+    "underground-contact": {
+      "id": "underground-contact",
+      "name": "Underground Contact",
+      "narrativeText": "A coded transmission arrives from an unknown source: 'The shipment you're looking for is in the warehouse district. Second dock, third container. Don't be late.' Someone is watching -- and helping.",
+      "triggers": [
+        { "type": "mission_complete", "missionId": "act1-m2-intel", "outcome": "victory" }
+      ],
+      "effects": [
+        { "type": "add_narrative_item", "itemId": "intel:warehouse-tip" },
+        { "type": "award_credits", "amount": 50 }
+      ],
+      "oneShot": true,
+      "priority": 8,
+      "act": 1,
+      "isRevealed": true
+    },
+    "wounded-rally": {
+      "id": "wounded-rally",
+      "name": "Wounded but Unbroken",
+      "narrativeText": "Word of your team's injuries has spread through the resistance network. Inspired by your sacrifice, local cells have pooled resources to support the cause.",
+      "triggers": [
+        { "type": "hero_wounded", "heroCount": 2 }
+      ],
+      "effects": [
+        { "type": "award_credits", "amount": 100 },
+        { "type": "modify_momentum", "delta": -1 }
+      ],
+      "oneShot": true,
+      "priority": 5,
+      "act": 1,
+      "isRevealed": true
+    },
+    "act2-escalation": {
+      "id": "act2-escalation",
+      "name": "The Empire Strikes Back",
+      "narrativeText": "Imperial High Command has taken notice of Tangrene. A Star Destroyer enters orbit, and ground forces receive significant reinforcements. The liberation just got harder.",
+      "triggers": [
+        { "type": "act_start", "act": 2 }
+      ],
+      "effects": [
+        { "type": "modify_threat_multiplier", "delta": 0.15 },
+        { "type": "modify_sector_control", "sectorId": "garrison-perimeter", "delta": 1 },
+        { "type": "modify_sector_control", "sectorId": "command-sector", "delta": 1 },
+        { "type": "add_narrative_item", "itemId": "intel:star-destroyer-presence" }
+      ],
+      "oneShot": true,
+      "priority": 15,
+      "act": 2,
+      "isRevealed": true
+    },
+    "defector-opportunity": {
+      "id": "defector-opportunity",
+      "name": "A Crack in the Armor",
+      "narrativeText": "An Imperial officer has made contact through back channels. She wants out, and she has the access codes to the garrison's shield generator. But trust is a luxury in wartime.",
+      "triggers": [
+        { "type": "sector_control", "sectorId": "garrison-perimeter", "minLevel": 3 },
+        { "type": "narrative_item", "itemId": "intel:star-destroyer-presence" }
+      ],
+      "effects": [
+        { "type": "unlock_mission", "missionId": "act3-m1-defection" },
+        { "type": "add_narrative_item", "itemId": "contact:imperial-defector" }
+      ],
+      "oneShot": true,
+      "priority": 12,
+      "act": 2,
+      "isRevealed": true
+    },
+    "losing-ground": {
+      "id": "losing-ground",
+      "name": "Losing Ground",
+      "narrativeText": "Repeated setbacks have taken their toll. Resistance fighters are deserting, supply lines are compromised, and the Empire is emboldened. You must turn the tide soon.",
+      "triggers": [
+        { "type": "momentum_threshold", "maxMomentum": -2 }
+      ],
+      "effects": [
+        { "type": "modify_sector_control", "sectorId": "docking-district", "delta": 1 },
+        { "type": "modify_sector_control", "sectorId": "market-quarter", "delta": 1 },
+        { "type": "add_rule_change", "ruleId": "desperate-measures" }
+      ],
+      "oneShot": true,
+      "priority": 7,
+      "act": 1,
+      "isRevealed": true
+    },
+    "momentum-surge": {
+      "id": "momentum-surge",
+      "name": "The Tide Turns",
+      "narrativeText": "Your victories have inspired a wave of resistance across the system. Civilians are openly supporting the rebellion, and even some Imperial conscripts are reconsidering their loyalties.",
+      "triggers": [
+        { "type": "momentum_threshold", "minMomentum": 2 }
+      ],
+      "effects": [
+        { "type": "modify_sector_control", "sectorId": "market-quarter", "delta": -1 },
+        { "type": "modify_sector_control", "sectorId": "old-town", "delta": -1 },
+        { "type": "award_credits", "amount": 75 }
+      ],
+      "oneShot": true,
+      "priority": 7,
+      "act": 1,
+      "isRevealed": true
+    },
+    "critical-injury-event": {
+      "id": "critical-injury-event",
+      "name": "Field Hospital",
+      "narrativeText": "A sympathetic doctor operates a hidden clinic in the old town. Word reaches you that she can treat even severe battlefield injuries -- for a price, or a favor.",
+      "triggers": [
+        { "type": "hero_critical_injury", "severity": "severe" }
+      ],
+      "effects": [
+        { "type": "add_narrative_item", "itemId": "contact:field-doctor" },
+        { "type": "unlock_shop_item", "shopId": "medical-supplies", "itemId": "bacta-patch" }
+      ],
+      "oneShot": true,
+      "priority": 9,
+      "act": 1,
+      "isRevealed": true
+    },
+    "act3-final-push": {
+      "id": "act3-final-push",
+      "name": "Final Push",
+      "narrativeText": "The moment of truth approaches. All resistance cells have been activated. The fleet is standing by. Everything hinges on the assault on the command sector.",
+      "triggers": [
+        { "type": "act_start", "act": 3 }
+      ],
+      "effects": [
+        { "type": "modify_threat_multiplier", "delta": 0.1 },
+        { "type": "award_xp", "amount": 10 },
+        { "type": "award_credits", "amount": 200 },
+        { "type": "add_narrative_item", "itemId": "intel:final-assault-plans" }
+      ],
+      "oneShot": true,
+      "priority": 15,
+      "act": 3,
+      "isRevealed": true
+    },
+    "companion-betrayal": {
+      "id": "companion-betrayal",
+      "name": "Betrayal",
+      "narrativeText": "Not everyone fighting alongside you shares your ideals. Sometimes loyalty is just another commodity on the black market.",
+      "triggers": [
+        { "type": "companion_recruited", "companionId": "drez-venn" },
+        { "type": "sector_control", "sectorId": "command-sector", "minLevel": 4 }
+      ],
+      "effects": [
+        { "type": "remove_companion", "companionId": "drez-venn" },
+        { "type": "modify_sector_control", "sectorId": "old-town", "delta": 2 },
+        { "type": "add_narrative_item", "itemId": "event:drez-betrayal" }
+      ],
+      "oneShot": true,
+      "priority": 14,
+      "act": 2,
+      "isRevealed": true
+    }
+  }
+}

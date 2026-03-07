@@ -33,6 +33,9 @@ import type {
   ObjectivePointTemplate,
   ConsumableItem,
   TacticCard,
+  CriticalInjuryDefinition,
+  LegacyEventDefinition,
+  CampaignOverworldDefinition,
 } from '@engine/types.js'
 import { MAP_PRESETS, computeGameScale } from '@engine/types.js'
 import {
@@ -62,7 +65,7 @@ import {
 import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization, equipItem, unequipItem } from '@engine/character-v2.js'
 import type { HeroCreationInput, EquipmentSlot } from '@engine/character-v2.js'
 import { getEquippedTalents, canActivateTalent } from '@engine/talent-v2.js'
-import { initializeTacticDeck, drawCardsForBothSides, playCard } from '@engine/tactic-cards.js'
+import { initializeTacticDeck, drawCardsForBothSides, playCard, playCardAltMode } from '@engine/tactic-cards.js'
 import {
   createCampaign,
   getAvailableMissions,
@@ -80,6 +83,12 @@ import {
   getFinaleExposureModifiers,
 } from '@engine/campaign-v2.js'
 import type { MissionCompletionInput } from '@engine/campaign-v2.js'
+import { initializeCampaignOverworld, travelToSector as travelToSectorFn } from '@engine/campaign-overworld.js'
+import { initializeLegacyDeck, acknowledgePendingEvents } from '@engine/legacy-events.js'
+import { professionalTreatment } from '@engine/critical-injuries.js'
+import { initializeNetwork, applyNetworkUpkeep, getNetworkThreatReduction, getNetworkReinforcementBonus, severNodesAtLocation } from '@engine/supply-network.js'
+import type { SectorMapDefinition } from '@engine/types.js'
+import sectorMapData from '../../../../data/sector-map.json'
 import { combatAnimations } from '../canvas/animation-manager'
 import { saveToSlot, loadFromSlot, deleteSlot, AUTO_SAVE_SLOT, findEmptySlot, migrateLegacySave } from '../services/save-slots'
 
@@ -127,6 +136,9 @@ import act3Mission3aData from '@data/missions/act3-mission3a-stronghold.json'
 import act3Mission3bData from '@data/missions/act3-mission3b-betrayal.json'
 import act3Mission4Data from '@data/missions/act3-mission4-endgame.json'
 import campaignData from '@data/campaigns/tangrene-liberation.json'
+import overworldData from '@data/campaigns/tangrene-overworld.json'
+import criticalInjuryData from '@data/critical-injuries.json'
+import legacyEventData from '@data/legacy-events.json'
 
 // v1 data still used for board templates
 import openGround from '@data/boards/open-ground.json'
@@ -268,6 +280,42 @@ function loadCampaignMissions(): Record<string, MissionDefinition> {
     missions[m.id] = m
   }
   return missions
+}
+
+function loadCriticalInjuryDefs(): Record<string, CriticalInjuryDefinition> {
+  const defs: Record<string, CriticalInjuryDefinition> = {}
+  const injuries = (criticalInjuryData as any).injuries ?? criticalInjuryData
+  if (Array.isArray(injuries)) {
+    for (const inj of injuries) {
+      defs[inj.id] = inj as CriticalInjuryDefinition
+    }
+  } else {
+    for (const [id, inj] of Object.entries(injuries)) {
+      defs[id] = inj as CriticalInjuryDefinition
+    }
+  }
+  return defs
+}
+
+function loadLegacyEventDefs(): Record<string, LegacyEventDefinition> {
+  const defs: Record<string, LegacyEventDefinition> = {}
+  const events = (legacyEventData as any).events ?? legacyEventData
+  if (Array.isArray(events)) {
+    for (const evt of events) {
+      defs[evt.id] = evt as LegacyEventDefinition
+    }
+  } else {
+    for (const [id, evt] of Object.entries(events)) {
+      defs[id] = evt as LegacyEventDefinition
+    }
+  }
+  return defs
+}
+
+function loadOverworldDef(): CampaignOverworldDefinition | null {
+  const raw = (overworldData as any).overworld ?? overworldData
+  if (!raw || !raw.id) return null
+  return raw as CampaignOverworldDefinition
 }
 
 const CAMPAIGN_STORAGE_KEY = 'galactic-ops-campaign-save'
@@ -462,6 +510,7 @@ export interface GameStore {
   actTransitionData: { fromAct: number; toAct: number } | null
   showHeroProgression: boolean
   showPortraitManager: boolean
+  showSectorMap: boolean
   showCampaignStats: boolean
   showStrategicCommand: boolean
   showMapEditor: boolean
@@ -470,6 +519,13 @@ export interface GameStore {
   activeMissionDef: MissionDefinition | null // current mission definition for reinforcement waves
   triggeredWaveIds: string[] // mission reinforcement waves already deployed
   activeMission: Mission | null // lightweight mission object for victory checking (useAITurn reads this)
+
+  // Pandemic Legacy system state
+  showCampaignOverworld: boolean
+  showLegacyEvents: boolean
+  criticalInjuryDefs: Record<string, CriticalInjuryDefinition>
+  legacyEventDefs: Record<string, LegacyEventDefinition>
+  overworldDef: CampaignOverworldDefinition | null
 
   // AI visualization state
   aiMovePath: GridCoordinate[] | null
@@ -522,6 +578,11 @@ export interface GameStore {
   // Camera control: set to pan the tactical grid camera to a grid position
   cameraTarget: GridCoordinate | null
 
+  // Boss hit location targeting: pending attack awaiting location selection
+  pendingBossAttack: { targetId: string } | null
+  confirmBossAttack: (targetLocationId?: string) => void
+  cancelBossAttack: () => void
+
   // Actions
   initGame: (players: Player[], mapConfig?: MapConfig) => void
   startHeroCreation: (players: Player[], mapConfig?: MapConfig) => void
@@ -531,6 +592,7 @@ export interface GameStore {
   selectFigure: (figureId: string | null) => void
   moveFigure: (destination: GridCoordinate) => void
   startAttack: (targetId: string) => void
+  _executeAttack: (targetId: string, targetLocationId?: string) => void
   rallyFigure: () => void
   aimFigure: () => void
   dodgeFigure: () => void
@@ -541,8 +603,10 @@ export interface GameStore {
   guardedStance: () => void
   useTalent: (talentId: string) => void
   useConsumable: (itemId: string, targetId?: string) => void
+  spendFocus: (effect: import('@engine/types.js').FocusEffect) => void
   getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => void
+  playTacticCardAltMode: (cardId: string) => void
   dismissCombat: () => void
   endActivation: () => void
   advancePhase: () => void
@@ -580,6 +644,13 @@ export interface GameStore {
   closeSocialPhase: () => void
   updateCampaignState: (cs: CampaignState) => void
 
+  // Pandemic Legacy actions
+  openCampaignOverworld: () => void
+  closeCampaignOverworld: () => void
+  travelToSector: (sectorId: string) => void
+  treatCriticalInjury: (heroId: string, injuryIndex: number) => void
+  acknowledgeLegacyEvents: () => void
+
   // Hero progression actions
   openHeroProgression: () => void
   closeHeroProgression: () => void
@@ -608,6 +679,10 @@ export interface GameStore {
   // Portrait manager actions
   openPortraitManager: () => void
   closePortraitManager: () => void
+
+  // Sector map actions
+  openSectorMap: () => void
+  closeSectorMap: () => void
   purchaseHeroTalent: (heroId: string, talentId: string, tier: 1 | 2 | 3 | 4 | 5, position: number) => void
   purchaseHeroSkillRank: (heroId: string, skillId: string) => void
   unlockHeroSpecialization: (heroId: string, specializationId: string) => void
@@ -666,6 +741,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   actTransitionData: null,
   showHeroProgression: false,
   showPortraitManager: false,
+  showSectorMap: false,
   showCampaignStats: false,
   showStrategicCommand: false,
   showMapEditor: false,
@@ -674,6 +750,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   activeMissionDef: null,
   triggeredWaveIds: [],
   activeMission: null,
+
+  // Pandemic Legacy system state
+  showCampaignOverworld: false,
+  showLegacyEvents: false,
+  criticalInjuryDefs: loadCriticalInjuryDefs(),
+  legacyEventDefs: loadLegacyEventDefs(),
+  overworldDef: loadOverworldDef(),
 
   // AI visualization state
   aiMovePath: null,
@@ -686,6 +769,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // Imperial AI state (campaign combat)
   imperialAIPhase: null,
+
+  // Boss hit location targeting
+  pendingBossAttack: null,
 
   // Camera control
   cameraTarget: null,
@@ -1093,7 +1179,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
+  confirmBossAttack: (targetLocationId?: string) => {
+    const { pendingBossAttack } = get()
+    if (!pendingBossAttack) return
+
+    const targetId = pendingBossAttack.targetId
+    set({ pendingBossAttack: null })
+
+    // Re-enter startAttack with the location selected (bypass boss check via internal helper)
+    const store = get()
+    store._executeAttack(targetId, targetLocationId)
+  },
+
+  cancelBossAttack: () => {
+    set({ pendingBossAttack: null })
+  },
+
   startAttack: (targetId: string) => {
+    const { gameState } = get()
+    if (!gameState) return
+
+    // Check if target is a boss with active hit locations
+    const defender = gameState.figures.find(f => f.id === targetId)
+    if (defender?.hitLocations?.some(loc => !loc.isDisabled)) {
+      // Show location picker instead of attacking immediately
+      set({ pendingBossAttack: { targetId } })
+      return
+    }
+
+    get()._executeAttack(targetId)
+  },
+
+  _executeAttack: (targetId: string, targetLocationId?: string) => {
     const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
 
@@ -1108,7 +1225,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const attackAction = {
         type: 'Attack' as const,
         figureId: selectedFigureId,
-        payload: { targetId, weaponId },
+        payload: { targetId, weaponId, ...(targetLocationId ? { targetLocationId } : {}) },
       }
       const newGameState = executeActionV2(gameState, attackAction, gameData)
       set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
@@ -1168,6 +1285,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
             .map(id => gameData.tacticCards?.[id]?.name ?? id)
             .join(', ')
           addCombatLog(`  Tactic cards: ${names}`)
+        }
+
+        // Boss hit location feedback
+        if (resolution.targetedLocationName) {
+          addCombatLog(`  Targeted: ${resolution.targetedLocationName} (+1 difficulty)`)
+        }
+        if (resolution.locationWoundsAbsorbed && resolution.locationWoundsAbsorbed > 0) {
+          addCombatLog(`  Location absorbed ${resolution.locationWoundsAbsorbed} wounds`)
+        }
+        if (resolution.locationsDisabledNames && resolution.locationsDisabledNames.length > 0) {
+          for (const name of resolution.locationsDisabledNames) {
+            addCombatLog(`  !! ${name} DISABLED!`)
+            const { addFloatingText: addFloat } = get()
+            addFloat({
+              gridX: defender.position.x, gridY: defender.position.y,
+              text: `${name} DISABLED`,
+              color: '#ff6600',
+              type: 'damage',
+            })
+          }
+        }
+        if (resolution.bossPhaseTransitioned) {
+          addCombatLog(`  !! Boss enters Phase ${resolution.newBossPhase}!`)
+          if (resolution.bossPhaseNarrativeText) {
+            addCombatLog(`  "${resolution.bossPhaseNarrativeText}"`)
+          }
+          const { addFloatingText: addFloat } = get()
+          setTimeout(() => addFloat({
+            gridX: defender.position.x, gridY: defender.position.y,
+            text: `PHASE ${resolution.newBossPhase}`,
+            color: '#ff8844',
+            type: 'critical',
+          }), 400)
         }
       } else {
         addCombatLog(`Combat: ${attacker.id} vs ${defender.id}`)
@@ -1423,6 +1573,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
+  spendFocus: (effect) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure) return
+
+    const focusAction = {
+      type: 'SpendFocus' as const,
+      figureId: selectedFigureId,
+      payload: { effect },
+    }
+    const newGameState = executeActionV2(gameState, focusAction, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+
+    addCombatLog(`${selectedFigureId} spent Focus: ${effect}`)
+
+    // Re-select to update valid moves (bonus_move changes movement range)
+    const updatedFigure = newGameState.figures.find(f => f.id === selectedFigureId)
+    if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
+      const moves = getValidMoves(updatedFigure, newGameState)
+      const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
+      set({ validMoves: moves, validTargets: targets })
+    }
+  },
+
   getAvailableConsumables: (figure: Figure) => {
     const { gameState, gameData } = get()
     if (!gameState || !gameData?.consumables) return []
@@ -1459,6 +1635,51 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
     })
     addCombatLog(`Played tactic card: ${cardId}`)
+  },
+
+  playTacticCardAltMode: (cardId: string) => {
+    const { gameState, gameData, addCombatLog } = get()
+    if (!gameState?.tacticDeck || !gameData) return
+
+    const result = playCardAltMode(gameState.tacticDeck, gameData, 'Operative', cardId)
+    if (!result) {
+      addCombatLog(`Cannot play ${cardId} in alt mode`)
+      return
+    }
+
+    // Apply alt mode effects to the current figure
+    const figures = [...gameState.figures]
+    const currentFigureId = gameState.activationOrder?.[gameState.currentActivationIndex]
+    if (currentFigureId) {
+      const figIdx = figures.findIndex(f => f.id === currentFigureId)
+      if (figIdx >= 0) {
+        const fig = { ...figures[figIdx] }
+        if (result.result.movementBonus > 0) {
+          fig.maneuversRemaining = Math.min(2, (fig.maneuversRemaining ?? 0) + 1) as 0 | 1 | 2
+        }
+        if (result.result.actionPointBonus > 0) {
+          fig.actionsRemaining = Math.min(2, (fig.actionsRemaining ?? 0) + 1) as 0 | 1
+        }
+        if (result.result.strainRecovery > 0) {
+          fig.strainCurrent = Math.max(0, (fig.strainCurrent ?? 0) - result.result.strainRecovery)
+        }
+        if (result.result.defenseBonus > 0 && !fig.conditions.includes('DefenseStance')) {
+          fig.conditions = [...fig.conditions, 'DefenseStance']
+        }
+        figures[figIdx] = fig
+      }
+    }
+
+    set({
+      gameState: {
+        ...gameState,
+        tacticDeck: result.deck,
+        figures,
+      },
+    })
+
+    const modeLabel = result.result.altMode.type.replace(/_/g, ' ')
+    addCombatLog(`Used ${result.result.cardName} alt mode: ${modeLabel} +${result.result.altMode.value}`)
   },
 
   dismissCombat: () => {
@@ -2000,13 +2221,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { createdHeroes, campaignState, campaignMissions } = get()
     if (!campaignState || createdHeroes.length === 0) return
 
-    const campaign = createCampaign({
+    let campaign = createCampaign({
       name: (campaignData as any).name ?? 'Campaign',
       difficulty: campaignState.difficulty,
       heroes: createdHeroes,
       startingMissionId: (campaignData as any).startingMissionId ?? 'act1-m1-arrival',
       startingCredits: (campaignData as any).startingCredits ?? 0,
     })
+
+    // Initialize pandemic legacy systems
+    const { overworldDef, legacyEventDefs } = get()
+    if (overworldDef) {
+      campaign = initializeCampaignOverworld(campaign, overworldDef, 'docking-district')
+    }
+    if (Object.keys(legacyEventDefs).length > 0) {
+      campaign = { ...campaign, legacyDeck: initializeLegacyDeck() }
+    }
+    // Initialize momentum at 0 (opt-in by setting the field)
+    campaign = { ...campaign, momentum: 0 }
+    // Initialize supply network with starting location
+    campaign.supplyNetwork = initializeNetwork(sectorMapData as SectorMapDefinition)
 
     // Find an empty slot for the new campaign
     const newSlot = findEmptySlot() ?? 1
@@ -2059,6 +2293,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const mission = campaignMissions[missionId]
     if (!mission) return
 
+    // Apply supply network upkeep (collect income, deduct costs, sever unpaid nodes)
+    let updatedCampaignForMission = campaignState
+    if (campaignState.supplyNetwork) {
+      updatedCampaignForMission = applyNetworkUpkeep(campaignState)
+      set({ campaignState: updatedCampaignForMission })
+    }
+
     const gameData = loadGameDataV2()
     const mapConfig: MapConfig = {
       preset: mission.mapPreset as any,
@@ -2067,8 +2308,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
     const generatedMap = generateMap(mapConfig, BOARD_TEMPLATES)
 
-    // Prepare heroes from campaign roster
-    const heroes = prepareHeroesForMission(campaignState)
+    // Prepare heroes from campaign roster (use updated campaign with upkeep applied)
+    const heroes = prepareHeroesForMission(updatedCampaignForMission)
     const heroesRegistry: Record<string, HeroCharacter> = {}
     for (const hero of heroes) {
       heroesRegistry[hero.id] = hero
@@ -2080,6 +2321,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
       { id: 1, name: 'Player', role: 'Operative', isLocal: true, isAI: false },
     ]
 
+    // Apply supply network threat reduction (safehouses) and reinforcement disruption (supply routes)
+    const networkThreatReduction = updatedCampaignForMission.supplyNetwork
+      ? getNetworkThreatReduction(updatedCampaignForMission.supplyNetwork)
+      : 0
+    const networkReinforcementBonus = updatedCampaignForMission.supplyNetwork
+      ? getNetworkReinforcementBonus(updatedCampaignForMission.supplyNetwork)
+      : 0
+    const effectiveThreat = Math.max(0, mission.imperialThreat - networkThreatReduction)
+    const effectiveThreatPerRound = Math.max(0, mission.threatPerRound - Math.floor(networkThreatReduction / 2) - networkReinforcementBonus)
     // Apply exposure modifiers for act finales (missionIndex 4)
     const isActFinale = mission.missionIndex === 4
     const exposureModifiers = isActFinale && campaignState.actProgress
@@ -2113,7 +2363,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         npcProfiles: gameData.npcProfiles,
         objectivePointTemplates: mission.objectivePoints,
         lootTokens: mission.lootTokens,
-        consumableInventory: { ...(campaignState.consumableInventory ?? {}) },
+        consumableInventory: { ...(updatedCampaignForMission.consumableInventory ?? {}) },
       },
     )
 
@@ -2184,12 +2434,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       isAIBattle: false,
       activeMissionDef: effectiveMissionDef,
       triggeredWaveIds: [],
-      combatLog: isActFinale && exposureModifiers.threatBonus > 0
-        ? [
-            `Mission started: ${mission.name}`,
-            `** IMPERIAL ALERT: Exposure level has drawn additional forces! **`,
-          ]
-        : [`Mission started: ${mission.name}`],
+      combatLog: [
+        `Mission started: ${mission.name}`,
+        ...(isActFinale && exposureModifiers.threatBonus > 0 ? [`** IMPERIAL ALERT: Exposure level has drawn additional forces! **`] : []),
+        ...(networkThreatReduction > 0 ? [`Supply network reduces Imperial threat by ${networkThreatReduction}`] : []),
+        ...(networkReinforcementBonus > 0 ? [`Supply routes disrupt reinforcements: -${networkReinforcementBonus} threat/round`] : []),
+      ],
       gameStateHistory: [],
     })
   },
@@ -2206,17 +2456,35 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ? { ...campaignState, consumableInventory: { ...gameState.consumableInventory } }
       : campaignState
 
-    const previousAct = updatedCampaign.currentAct
+    // On defeat, sever supply nodes at the mission's sector location
+    let campaignForCompletion = updatedCampaign
+    if (input.outcome === 'defeat' && updatedCampaign.supplyNetwork) {
+      const sectorMap = sectorMapData as SectorMapDefinition
+      const missionId = gameState?.activeMissionId ?? input.missionId
+      // Reverse-lookup: find which sector location unlocks this mission
+      const missionLocation = sectorMap.locations.find(
+        loc => loc.unlocksMissions?.includes(missionId)
+      )
+      if (missionLocation) {
+        campaignForCompletion = severNodesAtLocation(campaignForCompletion, missionLocation.id)
+      }
+    }
+
+    const previousAct = campaignForCompletion.currentAct
     const { campaign: newCampaign, result } = completeMission(
-      updatedCampaign,
+      campaignForCompletion,
       input,
       campaignMissions,
     )
+
+    // Show legacy event reveal if there are pending events
+    const hasPendingEvents = (newCampaign.legacyDeck?.pendingEventIds?.length ?? 0) > 0
 
     set({
       campaignState: newCampaign,
       lastMissionResult: result,
       showPostMission: true,
+      showLegacyEvents: hasPendingEvents,
       isInitialized: false,
       gameState: null,
       // Flag act transition if act advanced
@@ -2412,9 +2680,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
+      showSectorMap: false,
       showCampaignStats: false,
       showStrategicCommand: false,
       showMapEditor: false,
+      showCampaignOverworld: false,
+      showLegacyEvents: false,
       // Clear stale combat state from previous campaign
       gameState: null,
       selectedFigureId: null,
@@ -2465,14 +2736,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
+      showSectorMap: false,
       showCampaignStats: false,
       showStrategicCommand: false,
       showMapEditor: false,
+      showCampaignOverworld: false,
+      showLegacyEvents: false,
       campaignHeroCreation: false,
       activeMissionDef: null,
       activeMission: null,
       triggeredWaveIds: [],
       imperialAIPhase: null,
+      pendingBossAttack: null,
       cameraTarget: null,
       showSetup: true,
       gameState: null,
@@ -2541,6 +2816,64 @@ export const useGameStore = create<GameStore>((set, get) => ({
     get().saveCampaignToStorage()
   },
 
+  // ---- Pandemic Legacy Actions ----
+
+  openCampaignOverworld: () => {
+    set({
+      showMissionSelect: false,
+      showCampaignOverworld: true,
+    })
+  },
+
+  closeCampaignOverworld: () => {
+    set({
+      showCampaignOverworld: false,
+      showMissionSelect: true,
+    })
+  },
+
+  travelToSector: (sectorId: string) => {
+    const { campaignState } = get()
+    if (!campaignState?.overworld) return
+    try {
+      const updated = travelToSectorFn(campaignState, sectorId)
+      set({ campaignState: updated })
+      get().saveCampaignToStorage()
+    } catch (e) {
+      console.error('Failed to travel to sector:', e)
+    }
+  },
+
+  treatCriticalInjury: (heroId: string, injuryIndex: number) => {
+    const { campaignState, criticalInjuryDefs } = get()
+    if (!campaignState) return
+    const hero = campaignState.heroes[heroId]
+    if (!hero || !hero.criticalInjuries || injuryIndex >= hero.criticalInjuries.length) return
+
+    const injury = hero.criticalInjuries[injuryIndex]
+    const def = criticalInjuryDefs[injury.injuryId]
+    if (!def || campaignState.credits < def.treatmentCost) return
+
+    try {
+      const updatedCampaign = professionalTreatment(campaignState, heroId, injuryIndex, criticalInjuryDefs)
+      set({ campaignState: updatedCampaign })
+      get().saveCampaignToStorage()
+    } catch (e) {
+      console.error('Failed to treat injury:', e)
+    }
+  },
+
+  acknowledgeLegacyEvents: () => {
+    const { campaignState } = get()
+    if (!campaignState?.legacyDeck) return
+    const updated = acknowledgePendingEvents(campaignState)
+    set({
+      campaignState: updated,
+      showLegacyEvents: false,
+    })
+    get().saveCampaignToStorage()
+  },
+
   // ---- Hero Progression ----
 
   openHeroProgression: () => {
@@ -2582,6 +2915,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   closePortraitManager: () => {
     set({
       showPortraitManager: false,
+      showMissionSelect: true,
+    })
+  },
+
+  // ---- Sector Map ----
+
+  openSectorMap: () => {
+    set({
+      showMissionSelect: false,
+      showSectorMap: true,
+    })
+  },
+
+  closeSectorMap: () => {
+    set({
+      showSectorMap: false,
       showMissionSelect: true,
     })
   },

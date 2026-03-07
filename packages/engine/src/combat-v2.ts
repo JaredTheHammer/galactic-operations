@@ -10,6 +10,7 @@
 
 import type {
   AttackPool,
+  BossHitLocationState,
   DefensePool,
   CombatResolution,
   CombatScenario,
@@ -68,6 +69,17 @@ import {
   getSpeciesWoundedMeleeBonus,
   getSpeciesSoakBonus,
 } from './species-abilities';
+
+import {
+  routeWoundsToHitLocations,
+  checkBossPhaseTransition,
+  applyBossPhaseTransition,
+  applyBossAttackPenalties,
+  applyBossDefensePenalties,
+  getBossSoakPenalty,
+  applyTargetedShotPenalty,
+  isBossWeaponAvailable,
+} from './boss-mechanics.js';
 
 // ============================================================================
 // HELPER: RESOLVE ENTITY BACKING A FIGURE
@@ -167,7 +179,9 @@ function computeSoak(
   gameData: GameData,
 ): number {
   if (isNPC(entity)) {
-    return entity.soak;
+    // Apply boss hit location soak penalties
+    const bossPenalty = getBossSoakPenalty(figure);
+    return Math.max(0, entity.soak + bossPenalty);
   }
 
   // Hero soak: Brawn + Resilience rank + armor bonus + talent bonus
@@ -313,6 +327,19 @@ export function buildCombatPools(
     ability: attackPool.ability + effectiveAim,
   };
 
+  // Boss hit location penalties: reduce attack pool if locations are disabled
+  if (attacker.hitLocations) {
+    attackPool = applyBossAttackPenalties(attackPool, attacker);
+  }
+
+  // Boss phase transition stat bonuses (enrage): add extra attack dice
+  if (attacker.bossPhaseStatBonuses?.attackPoolBonus) {
+    attackPool = {
+      ...attackPool,
+      ability: attackPool.ability + attacker.bossPhaseStatBonuses.attackPoolBonus,
+    };
+  }
+
   // Graduated suppression: if suppression tokens >= courage, downgrade 1 yellow to green
   if (attacker.suppressionTokens >= attacker.courage && attacker.courage > 0) {
     if (attackPool.proficiency > 0) {
@@ -397,10 +424,39 @@ export function buildCombatPools(
     }
   }
 
+  // DefenseStance (tactic card alt mode): add difficulty dice
+  if (defenderConditions.includes('DefenseStance')) {
+    defensePool = {
+      ...defensePool,
+      difficulty: defensePool.difficulty + 1,
+    };
+  }
+
   // Passive talent defense pool modifiers (hero defenders only)
   if (isHero(defenderEntity)) {
     const defMods = getPassiveDefensePoolModifiers(defenderEntity, gameData);
     defensePool = applyTalentDefensePoolModifiers(defensePool, defMods);
+  }
+
+  // Focus bonus defense: +1 Challenge die (from spending Focus)
+  if (defender.focusBonusDefense) {
+    defensePool = {
+      ...defensePool,
+      challenge: defensePool.challenge + 1,
+    };
+  }
+
+  // Boss hit location penalties: reduce defense pool if locations are disabled
+  if (defender.hitLocations) {
+    defensePool = applyBossDefensePenalties(defensePool, defender);
+  }
+
+  // Boss phase transition stat bonuses (enrage): add extra defense dice
+  if (defender.bossPhaseStatBonuses?.defensePoolBonus) {
+    defensePool = {
+      ...defensePool,
+      difficulty: defensePool.difficulty + defender.bossPhaseStatBonuses.defensePoolBonus,
+    };
   }
 
   // Minimum defense: always at least 1 difficulty die
@@ -409,7 +465,12 @@ export function buildCombatPools(
   }
 
   // --- SOAK ---
-  const soak = computeSoak(defender, defenderEntity, gameData);
+  let soak = computeSoak(defender, defenderEntity, gameData);
+
+  // Boss phase transition soak bonus
+  if (defender.bossPhaseStatBonuses?.soakBonus) {
+    soak += defender.bossPhaseStatBonuses.soakBonus;
+  }
 
   return { attackPool, defensePool, soak, weapon };
 }
@@ -837,8 +898,14 @@ export function resolveCombatV2(
   // 6. Auto-spend advantages/threats
   const spending = autoSpendAdvantagesThreats(rollResult, poolCtx.weapon);
 
-  // Add advantage-based + talent bonus damage to wounds
-  const totalGrossDamage = damageResult.grossDamage + spending.bonusDamage + talentBonusDamage;
+  // Focus bonus damage (+3 from spending Focus)
+  const focusBonusDamage = (attacker.focusBonusDamage && rollResult.isHit) ? 3 : 0;
+
+  // Boss phase enrage damage bonus
+  const phaseDamageBonus = attacker.bossPhaseStatBonuses?.damageBonus ?? 0;
+
+  // Add advantage-based + talent bonus damage + Focus bonus + phase bonus to wounds
+  const totalGrossDamage = damageResult.grossDamage + spending.bonusDamage + talentBonusDamage + focusBonusDamage + phaseDamageBonus;
   const totalWoundsDealt = rollResult.isHit
     ? Math.max(0, totalGrossDamage - damageResult.effectiveSoak)
     : 0;
@@ -925,10 +992,89 @@ export function applyCombatResult(
     }
   }
 
+  // Pre-compute boss hit location routing for the defender (outside .map for TypeScript narrowing)
+  interface HitLocationResult {
+    actualWoundsToBody: number;
+    updatedHitLocations: BossHitLocationState[] | undefined;
+    updatedBossPhase: number | undefined;
+    updatedBossPhaseStatBonuses?: Figure['bossPhaseStatBonuses'];
+    feedback: {
+      targetedLocationId?: string;
+      targetedLocationName?: string;
+      locationWoundsAbsorbed: number;
+      locationsDisabled: string[];
+      locationsDisabledNames: string[];
+      bossPhaseTransitioned: boolean;
+      newBossPhase?: number;
+      narrativeText?: string;
+    };
+  }
+
+  let hitLocationResult: HitLocationResult | null = null;
+  const defenderFig = gameState.figures.find(f => f.id === scenario.defenderId);
+  if (defenderFig?.hitLocations && defenderFig.hitLocations.length > 0 && defenderEffectiveWounds > 0) {
+    const targetLocId = (scenario as CombatScenario & { targetLocationId?: string }).targetLocationId;
+    const routeResult = routeWoundsToHitLocations(
+      defenderFig.hitLocations,
+      defenderEffectiveWounds,
+      targetLocId,
+    );
+
+    const targetedLoc = targetLocId
+      ? defenderFig.hitLocations.find(l => l.id === targetLocId)
+      : undefined;
+    const disabledNames = routeResult.newlyDisabled.map(id => {
+      const loc = routeResult.updatedLocations.find(l => l.id === id);
+      return loc?.name ?? id;
+    });
+
+    let phaseTransitioned = false;
+    let newBossPhase = defenderFig.bossPhase;
+    let newBossPhaseStatBonuses = defenderFig.bossPhaseStatBonuses;
+    let phaseNarrativeText: string | undefined;
+    if (routeResult.newlyDisabled.length > 0) {
+      const npcProfile = gameState.npcProfiles[defenderFig.entityId];
+      if (npcProfile) {
+        const tempFig = { ...defenderFig, hitLocations: routeResult.updatedLocations, bossPhase: newBossPhase };
+        const transition = checkBossPhaseTransition(tempFig, npcProfile);
+        if (transition) {
+          const transitioned = applyBossPhaseTransition(tempFig, transition);
+          newBossPhase = transitioned.bossPhase;
+          newBossPhaseStatBonuses = transitioned.bossPhaseStatBonuses;
+          phaseTransitioned = true;
+          phaseNarrativeText = transition.narrativeText;
+        }
+      }
+    }
+
+    hitLocationResult = {
+      actualWoundsToBody: routeResult.overflowWounds,
+      updatedHitLocations: routeResult.updatedLocations,
+      updatedBossPhase: newBossPhase,
+      updatedBossPhaseStatBonuses: newBossPhaseStatBonuses,
+      feedback: {
+        targetedLocationId: targetLocId,
+        targetedLocationName: targetedLoc?.name,
+        locationWoundsAbsorbed: defenderEffectiveWounds - routeResult.overflowWounds,
+        locationsDisabled: routeResult.newlyDisabled,
+        locationsDisabledNames: disabledNames,
+        bossPhaseTransitioned: phaseTransitioned,
+        newBossPhase: phaseTransitioned ? newBossPhase : undefined,
+        narrativeText: phaseNarrativeText,
+      },
+    };
+  }
+
   const newFigures = gameState.figures.map((fig) => {
     // --- DEFENDER ---
     if (fig.id === scenario.defenderId) {
-      const newWounds = fig.woundsCurrent + defenderEffectiveWounds;
+      // Boss Hit Location routing: use pre-computed result
+      const actualWoundsToBody = hitLocationResult?.actualWoundsToBody ?? defenderEffectiveWounds;
+      const updatedHitLocations = hitLocationResult?.updatedHitLocations ?? fig.hitLocations;
+      const updatedBossPhase = hitLocationResult?.updatedBossPhase ?? fig.bossPhase;
+      const updatedBossPhaseStatBonuses = hitLocationResult?.updatedBossPhaseStatBonuses ?? fig.bossPhaseStatBonuses;
+
+      const newWounds = fig.woundsCurrent + actualWoundsToBody;
       const entity = getEntity(fig, gameState);
       const threshold = getWoundThreshold(fig, entity);
       const reachedThreshold = newWounds >= threshold && defenderEffectiveWounds > 0;
@@ -946,12 +1092,25 @@ export function applyCombatResult(
         }
       }
 
+      // Apply conditions from newly-disabled boss hit locations (e.g. Disoriented, Immobilized)
+      if (hitLocationResult?.feedback.locationsDisabled.length) {
+        for (const disabledId of hitLocationResult.feedback.locationsDisabled) {
+          const loc = updatedHitLocations?.find(l => l.id === disabledId);
+          if (loc?.disabledEffects.conditionInflicted) {
+            const cond = loc.disabledEffects.conditionInflicted as Condition;
+            if (!newConditions.includes(cond)) {
+              newConditions.push(cond);
+            }
+          }
+        }
+      }
+
       // Graduated suppression: ranged hits add suppression tokens
       let suppressionGain = 0;
       if (isRangedAttack && resolution.rollResult.isHit) {
         suppressionGain = 1; // base: +1 per ranged hit
         // Triumph adds +1 extra suppression
-        if (resolution.rollResult.triumph > 0) {
+        if (((resolution.rollResult as any).triumph ?? resolution.rollResult.totalTriumphs ?? 0) > 0) {
           suppressionGain += 1;
         }
         // Yahtzee combo bonus suppression (e.g., Quad = +2)
@@ -963,6 +1122,10 @@ export function applyCombatResult(
 
       // Consume dodge token if defender had one (effect already applied in resolveCombatV2)
       const newDodgeTokens = (fig.dodgeTokens ?? 0) > 0 ? fig.dodgeTokens - 1 : fig.dodgeTokens ?? 0;
+
+      // Consume DefenseStance (tactic card alt mode, one-shot)
+      const dsIdx = newConditions.indexOf('DefenseStance');
+      if (dsIdx >= 0) newConditions.splice(dsIdx, 1);
 
       // Imperial Assault wounded hero mechanic:
       const figIsHero = fig.entityType === 'hero';
@@ -982,6 +1145,9 @@ export function applyCombatResult(
           conditions: newConditions,
           suppressionTokens: newSuppression,
           dodgeTokens: newDodgeTokens,
+          hitLocations: updatedHitLocations,
+          bossPhase: updatedBossPhase,
+          bossPhaseStatBonuses: updatedBossPhaseStatBonuses,
         };
       }
 
@@ -993,6 +1159,9 @@ export function applyCombatResult(
         conditions: newConditions,
         suppressionTokens: newSuppression,
         dodgeTokens: newDodgeTokens,
+        hitLocations: updatedHitLocations,
+        bossPhase: updatedBossPhase,
+        bossPhaseStatBonuses: updatedBossPhaseStatBonuses,
       };
     }
 
@@ -1011,12 +1180,17 @@ export function applyCombatResult(
       };
     }
 
-    // --- ATTACKER (threat-based strain + consume aim tokens) ---
+    // --- ATTACKER (threat-based strain + consume aim tokens + consume Focus bonus) ---
     if (fig.id === scenario.attackerId) {
       // Consume aim tokens (effect already applied in buildCombatPools)
       let updatedFig = (fig.aimTokens ?? 0) > 0
         ? { ...fig, aimTokens: 0 }
         : fig;
+
+      // Consume Focus bonus damage flag (effect already applied in resolveCombatV2)
+      if (updatedFig.focusBonusDamage) {
+        updatedFig = { ...updatedFig, focusBonusDamage: false };
+      }
 
       // Apply strain from net threats
       const netThreats = resolution.rollResult.netAdvantages < 0
@@ -1051,11 +1225,28 @@ export function applyCombatResult(
     return fig;
   });
 
+  // Enrich resolution with hit location feedback
+  const enrichedResolution: CombatResolution = hitLocationResult
+    ? {
+        ...resolution,
+        targetedLocationId: hitLocationResult.feedback.targetedLocationId,
+        targetedLocationName: hitLocationResult.feedback.targetedLocationName,
+        locationWoundsAbsorbed: hitLocationResult.feedback.locationWoundsAbsorbed,
+        locationsDisabled: hitLocationResult.feedback.locationsDisabled.length > 0
+          ? hitLocationResult.feedback.locationsDisabled : undefined,
+        locationsDisabledNames: hitLocationResult.feedback.locationsDisabledNames.length > 0
+          ? hitLocationResult.feedback.locationsDisabledNames : undefined,
+        bossPhaseTransitioned: hitLocationResult.feedback.bossPhaseTransitioned || undefined,
+        newBossPhase: hitLocationResult.feedback.newBossPhase,
+        bossPhaseNarrativeText: hitLocationResult.feedback.narrativeText,
+      }
+    : resolution;
+
   // Update activeCombat scenario to Complete
   const completedScenario: CombatScenario = {
     ...scenario,
     state: 'Complete' as CombatState,
-    resolution,
+    resolution: enrichedResolution,
   };
 
   // Update tactic deck: move played cards from hands to discard pile

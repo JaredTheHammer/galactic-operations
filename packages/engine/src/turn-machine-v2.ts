@@ -34,6 +34,7 @@ import type {
   ObjectivePoint,
   ObjectivePointTemplate,
   ConsumableItem,
+  LootToken,
 } from './types.js';
 
 import { RANGE_BAND_TILES, computeDiminishedHealing } from './types.js';
@@ -63,6 +64,8 @@ import {
   getSpeciesBonusStrainRecovery,
   isImmuneToCondition,
 } from './species-abilities.js';
+import { recoverFocus, initFocusResource, spendFocus } from './focus-resource.js';
+import { initBossHitLocations } from './boss-mechanics.js';
 
 // ============================================================================
 // OBJECTIVE POINT UTILITIES
@@ -338,7 +341,7 @@ function createNPCFigure(
   position: { x: number; y: number },
   npc: NPCProfile,
 ): Figure {
-  return {
+  let fig: Figure = {
     id,
     entityType: 'npc',
     entityId,
@@ -370,6 +373,13 @@ function createNPCFigure(
     suppressionTokens: 0,
     courage: getNPCCourage(npc),
   };
+
+  // Initialize boss hit locations if this is a boss NPC
+  if (npc.isBoss && npc.bossHitLocations?.length) {
+    fig = initBossHitLocations(fig, npc);
+  }
+
+  return fig;
 }
 
 function createHeroFigure(
@@ -379,7 +389,7 @@ function createHeroFigure(
   position: { x: number; y: number },
   hero: HeroCharacter,
 ): Figure {
-  return {
+  let fig: Figure = {
     id,
     entityType: 'hero',
     entityId,
@@ -410,6 +420,11 @@ function createHeroFigure(
     suppressionTokens: 0,
     courage: getHeroCourage(hero),
   };
+
+  // Initialize Focus resource for heroes
+  fig = initFocusResource(fig, hero);
+
+  return fig;
 }
 
 // ============================================================================
@@ -546,7 +561,7 @@ function getReinforcementPurchases(
 
   // Build purchasable lists by tier
   const allUnits = Object.values(npcProfiles)
-    .filter(npc => npc.side === 'imperial')
+    .filter(npc => (npc.side as string).toLowerCase() === 'imperial')
     .map(npc => ({
       npcId: npc.id,
       cost: npc.threatCost ?? DEFAULT_THREAT_COSTS[npc.tier] ?? 3,
@@ -1013,12 +1028,21 @@ export function buildActivationOrderV2(gameState: GameState): string[] {
   return order;
 }
 
-function getFigureSpeed(figure: Figure, gameState: GameState): number {
+export function getFigureSpeed(figure: Figure, gameState: GameState): number {
+  let speed = 4;
   if (figure.entityType === 'npc') {
     const npc = gameState.npcProfiles[figure.entityId];
-    return npc?.speed ?? 4;
+    speed = npc?.speed ?? 4;
   }
-  return 4;
+  // Boss phase transition speed bonus
+  if (figure.bossPhaseStatBonuses?.speedBonus) {
+    speed += figure.bossPhaseStatBonuses.speedBonus;
+  }
+  // Focus bonus move (+2 speed)
+  if (figure.focusBonusMove) {
+    speed += 2;
+  }
+  return speed;
 }
 
 // ============================================================================
@@ -1140,6 +1164,12 @@ export function resetForActivation(
     }
   }
 
+  // Focus recovery (heroes only): recover Focus points at activation start
+  let focusCurrent = figure.focusCurrent;
+  if (figure.entityType === 'hero' && figure.focusMax !== undefined && focusCurrent !== undefined) {
+    focusCurrent = Math.min(figure.focusMax, focusCurrent + (figure.focusRecovery ?? 0));
+  }
+
   return {
     ...figure,
     actionsRemaining,
@@ -1150,11 +1180,15 @@ export function resetForActivation(
     hasStandby: false,       // standby consumed/cleared at new activation
     standbyWeaponId: null,
     dodgeTokens: 0,          // dodge tokens cleared at new activation (aim persists)
+    focusBonusMove: false,   // Focus movement bonus cleared at new activation
+    focusBonusDamage: false, // Focus damage bonus cleared (should already be consumed by attack)
+    focusBonusDefense: false, // Focus defense bonus cleared at new activation
     isActivated: false,
     conditions: newConditions,
     suppressionTokens,
     strainCurrent,
     woundsCurrent,
+    focusCurrent,
   };
 }
 
@@ -1554,8 +1588,10 @@ export function executeActionV2(
         }
       } else {
         const heroEntity = newState.heroes[figure.entityId];
-        if (heroEntity?.equipment?.weapons?.length) {
-          standbyWpnId = heroEntity.equipment.weapons[0];
+        if (heroEntity?.equipment?.primaryWeapon) {
+          standbyWpnId = heroEntity.equipment.primaryWeapon;
+        } else if ((heroEntity?.equipment as any)?.weapons?.length) {
+          standbyWpnId = (heroEntity.equipment as any).weapons[0];
         }
       }
 
@@ -1701,6 +1737,15 @@ export function executeActionV2(
         ...newState.figures[figIdx],
         actionsRemaining: Math.max(0, figure.actionsRemaining - 1),
       };
+      break;
+    }
+
+    // ---- FOCUS (free action, no action/maneuver cost) ----
+    case 'SpendFocus': {
+      const result = spendFocus(figure, action.payload.effect, newState);
+      if (result) {
+        newState.figures[figIdx] = result.figure;
+      }
       break;
     }
 
