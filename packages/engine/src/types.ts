@@ -1513,6 +1513,26 @@ export interface TacticDeckState {
   imperialHand: string[];
 }
 
+/** A confrontation encounter dialogue option (skill-based) */
+export interface ConfrontationDialogueOption {
+  id: string;
+  text: string;
+  skillId: SocialSkillId;
+  description: string;
+}
+
+/** Confrontation encounter data for the rival NPC */
+export interface ConfrontationEncounter {
+  id: string;
+  name: string;
+  description: string;
+  narrativeIntro: string;
+  dialogueOptions: ConfrontationDialogueOption[];
+  successNarrative: string;
+  failureNarrative: string;
+  despairNarrative: string;
+}
+
 /** A social phase location (the "hub" between missions) */
 export interface SocialPhaseLocation {
   id: string;
@@ -1528,6 +1548,8 @@ export interface SocialPhaseLocation {
   campaignAct: number;
   /** Which missions unlock this location (empty = always available in its act) */
   availableAfterMissions?: string[];
+  /** Optional confrontation encounter for the rival NPC */
+  confrontationEncounter?: ConfrontationEncounter;
 }
 
 /** Result of resolving a social dialogue option */

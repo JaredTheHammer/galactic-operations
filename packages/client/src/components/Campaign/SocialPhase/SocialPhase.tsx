@@ -19,6 +19,7 @@ import type {
   SocialPhaseState,
   RivalNPC,
   BountyContract,
+  ConfrontationEncounter,
 } from '../../../../../engine/src/types'
 import {
   applySocialOutcomes,
@@ -55,8 +56,11 @@ import { SocialEncounter as SocialEncounterView } from './SocialEncounter'
 import { SocialCheckResult as SocialCheckResultView } from './SocialCheckResult'
 import { SocialShop } from './SocialShop'
 import { SocialSummary } from './SocialSummary'
+import { ConfrontationView } from './ConfrontationView'
+import { ActionResultView } from './ActionResultView'
+import type { ActionResultData } from './ActionResultView'
 
-export type SocialView = 'hub' | 'encounter' | 'check-result' | 'shop' | 'summary'
+export type SocialView = 'hub' | 'encounter' | 'check-result' | 'shop' | 'summary' | 'confrontation' | 'action-result'
 
 export interface SocialSessionState {
   completedEncounterIds: Set<string>
@@ -70,6 +74,7 @@ export interface SocialSessionState {
   lastOutcomes: SocialOutcome[] | null
   lastNarrativeText: string | null
   activeShopId: string | null
+  lastActionResult: ActionResultData | null
 }
 
 const getContainerStyle = (isMobile: boolean): React.CSSProperties => ({
@@ -113,6 +118,7 @@ export function SocialPhase() {
     lastOutcomes: null,
     lastNarrativeText: null,
     activeShopId: null,
+    lastActionResult: null,
   }))
 
   // Load location data based on current campaign act
@@ -257,25 +263,112 @@ export function SocialPhase() {
     })
   }, [campaignState, rival, location, npcs])
 
-  // Scout mission (spends a slot)
+  // Scout mission (spends a slot, shows result)
   const onScoutMission = useCallback((heroId: string) => {
     const hero = campaignState.heroes[heroId]
     if (!hero) return
+    let scoutSuccess = false
+    let scoutDelta = 0
     setPhaseState(prev => {
-      const { state } = engineScoutMission(prev, hero, rival, location, npcs)
+      const { state, success, clockDelta } = engineScoutMission(prev, hero, rival, location, npcs)
+      scoutSuccess = success
+      scoutDelta = clockDelta
       return state
     })
+    setSession(prev => ({
+      ...prev,
+      lastActionResult: {
+        actionType: 'scout_mission',
+        title: 'Scout Mission',
+        success: scoutSuccess,
+        narrativeText: scoutSuccess
+          ? 'Your reconnaissance paid off. You identified patrol routes, supply lines, and weak points in the enemy perimeter. The threat clock has been reduced.'
+          : 'Your scouting attempt was detected. Enemy patrols tightened security in response, making the next mission harder.',
+        clockDelta: scoutDelta,
+      },
+    }))
+    setView('action-result')
   }, [campaignState, rival, location, npcs])
 
-  // Confront rival (spends a slot)
-  const onConfrontRival = useCallback((heroId: string) => {
+  // Open confrontation encounter view
+  const onConfrontRival = useCallback((_heroId: string) => {
+    if (!rival) return
+    const confrontEncounter = location.confrontationEncounter
+    if (confrontEncounter) {
+      setView('confrontation')
+    } else {
+      // Fallback: no encounter data, resolve directly with first hero
+      const hero = campaignState.heroes[_heroId]
+      if (!hero) return
+      let confrontSuccess = false
+      let confrontTriumph = false
+      let confrontDespair = false
+      setPhaseState(prev => {
+        const { state, success, triumph, despair } = engineConfrontRival(prev, hero, rival, location, npcs)
+        confrontSuccess = success
+        confrontTriumph = triumph
+        confrontDespair = despair
+        return state
+      })
+      setSession(prev => ({
+        ...prev,
+        lastActionResult: {
+          actionType: 'confrontation',
+          title: `Confronting ${rival.name}`,
+          success: confrontSuccess,
+          triumph: confrontTriumph,
+          despair: confrontDespair,
+          narrativeText: confrontSuccess
+            ? `You confronted ${rival.name} and forced them to back down.`
+            : `Your confrontation with ${rival.name} failed. They seized the initiative.`,
+        },
+      }))
+      setView('action-result')
+    }
+  }, [campaignState, rival, location, npcs])
+
+  // Resolve confrontation encounter (from ConfrontationView)
+  const onResolveConfrontation = useCallback((heroId: string, _skillId: string) => {
     if (!rival) return
     const hero = campaignState.heroes[heroId]
     if (!hero) return
+    const confrontEncounter = location.confrontationEncounter
+    let confrontSuccess = false
+    let confrontTriumph = false
+    let confrontDespair = false
     setPhaseState(prev => {
-      const { state } = engineConfrontRival(prev, hero, rival, location, npcs)
+      const { state, success, triumph, despair } = engineConfrontRival(prev, hero, rival, location, npcs)
+      confrontSuccess = success
+      confrontTriumph = triumph
+      confrontDespair = despair
       return state
     })
+
+    let narrativeText: string
+    if (confrontEncounter) {
+      narrativeText = confrontSuccess
+        ? confrontEncounter.successNarrative
+        : confrontDespair
+          ? confrontEncounter.despairNarrative
+          : confrontEncounter.failureNarrative
+    } else {
+      narrativeText = confrontSuccess
+        ? `You confronted ${rival.name} and forced them to back down.`
+        : `Your confrontation with ${rival.name} failed.`
+    }
+
+    setSession(prev => ({
+      ...prev,
+      lastActionResult: {
+        actionType: 'confrontation',
+        title: confrontEncounter?.name ?? `Confronting ${rival.name}`,
+        success: confrontSuccess,
+        triumph: confrontTriumph,
+        despair: confrontDespair,
+        narrativeText,
+      },
+    }))
+    setView('action-result')
   }, [campaignState, rival, location, npcs])
 
   // Deploy early (forfeit remaining slots)
@@ -354,6 +447,21 @@ export function SocialPhase() {
           onPurchase={onPurchase}
           onSell={onSell}
           onBack={goToHub}
+        />
+      )}
+      {view === 'confrontation' && rival && location.confrontationEncounter && (
+        <ConfrontationView
+          encounter={location.confrontationEncounter}
+          rival={rival}
+          campaign={campaignState}
+          onResolve={onResolveConfrontation}
+          onBack={goToHub}
+        />
+      )}
+      {view === 'action-result' && session.lastActionResult && (
+        <ActionResultView
+          result={session.lastActionResult}
+          onContinue={goToHub}
         />
       )}
       {view === 'summary' && (
