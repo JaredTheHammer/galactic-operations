@@ -160,7 +160,7 @@ for (const [id, npc] of Object.entries(allNpcs)) {
     if (typeof npc.courage !== 'number' || npc.courage < 1) fail('NPC ' + id + ' courage must be a positive number');
   }
   // Mechanical keywords (optional array, validate names)
-  const validKeywords = ['Armor', 'Agile', 'Relentless', 'Cumbersome', 'Disciplined', 'Dauntless', 'Guardian'];
+  const validKeywords = ['Armor', 'Agile', 'Relentless', 'Cumbersome', 'Disciplined', 'Dauntless', 'Guardian', 'Retaliate'];
   if (npc.mechanicalKeywords) {
     if (!Array.isArray(npc.mechanicalKeywords)) fail('NPC ' + id + ' mechanicalKeywords must be an array');
     for (const kw of npc.mechanicalKeywords) {
@@ -216,6 +216,15 @@ for (const mf of missionFiles) {
   for (const wave of (mission.reinforcements || [])) {
     for (const group of wave.groups) {
       if (!allNpcs[group.npcProfileId]) fail(mf + ' reinforcement references unknown NPC: ' + group.npcProfileId);
+    }
+  }
+  // Fog of war config validation
+  if (mission.fogOfWar !== undefined && typeof mission.fogOfWar !== 'boolean') {
+    fail(mf + ' fogOfWar must be a boolean');
+  }
+  if (mission.fogOfWarVisionRange !== undefined) {
+    if (typeof mission.fogOfWarVisionRange !== 'number' || mission.fogOfWarVisionRange < 1 || mission.fogOfWarVisionRange > 20) {
+      fail(mf + ' fogOfWarVisionRange must be a number between 1 and 20');
     }
   }
 }

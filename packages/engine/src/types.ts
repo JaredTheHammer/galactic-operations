@@ -1157,6 +1157,11 @@ export interface MissionDefinition {
   bonusXPPerKill: number;
   maxKillXP: number;
   leaderKillXP: number;
+
+  /** Fog of war: enable progressive room reveal for this mission. Default false. */
+  fogOfWar?: boolean;
+  /** Vision range in tiles when fog of war is enabled. Default 8. */
+  fogOfWarVisionRange?: number;
 }
 
 // ============================================================================

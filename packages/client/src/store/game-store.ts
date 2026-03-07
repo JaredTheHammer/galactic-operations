@@ -2096,6 +2096,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         objectivePointTemplates: mission.objectivePoints,
         lootTokens: mission.lootTokens,
         consumableInventory: { ...(campaignState.consumableInventory ?? {}) },
+        fogOfWar: mission.fogOfWar,
+        fogOfWarVisionRange: mission.fogOfWarVisionRange,
       },
     )
 

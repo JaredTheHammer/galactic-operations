@@ -171,6 +171,12 @@ export default function MissionBriefing() {
             <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Threat</div>
             <div style={{ fontSize: '14px', color: '#ff6644', fontWeight: 'bold' }}>{mission.imperialThreat}</div>
           </div>
+          {mission.fogOfWar && (
+            <div style={infoCardStyle}>
+              <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Visibility</div>
+              <div style={{ fontSize: '14px', color: '#6699cc', fontWeight: 'bold' }}>Fog of War</div>
+            </div>
+          )}
         </div>
 
         {/* Objectives */}

@@ -5,22 +5,40 @@
   "narrativeIntro": "With the Imperial garrison in retreat, a new threat has filled the vacuum. The Shadow Syndicate has claimed Nexus Station as their territory, extorting merchants and running protection rackets. Reports say a shakedown crew is roughing up traders in the upper market ring right now. Your rebel cell deploys to make first contact with this new enemy and send a message that the sector isn't theirs to take.",
   "narrativeSuccess": "The Syndicate Lieutenant hits the deck, and your team secures the marketplace. As you tend to the rattled merchants, you find a datapad on the unconscious officer. It references someone called 'The Broker' and a bounty board operation run out of a nearby station. The Shadow Syndicate is far more organized than a simple protection racket. This runs deep.",
   "narrativeFailure": "The Syndicate crew overwhelms your position, and the merchants scatter in panic. The upper market is now firmly under criminal control. Word spreads fast: the rebels couldn't even protect a handful of traders. The Shadow Syndicate tightens its grip on Nexus Station.",
-
   "mapId": "station-market",
   "mapPreset": "skirmish",
   "boardsWide": 3,
   "boardsTall": 3,
-
   "difficulty": "easy",
   "roundLimit": 8,
   "recommendedHeroCount": 2,
-
   "imperialThreat": 8,
   "threatPerRound": 1,
-
   "operativeDeployZone": [
-    {"x": 0, "y": 16}, {"x": 1, "y": 16}, {"x": 2, "y": 16},
-    {"x": 0, "y": 17}, {"x": 1, "y": 17}, {"x": 2, "y": 17}
+    {
+      "x": 0,
+      "y": 16
+    },
+    {
+      "x": 1,
+      "y": 16
+    },
+    {
+      "x": 2,
+      "y": 16
+    },
+    {
+      "x": 0,
+      "y": 17
+    },
+    {
+      "x": 1,
+      "y": 17
+    },
+    {
+      "x": 2,
+      "y": 17
+    }
   ],
   "initialEnemies": [
     {
@@ -28,7 +46,22 @@
       "count": 4,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 14, "y": 10}, {"x": 15, "y": 10}, {"x": 16, "y": 10}, {"x": 17, "y": 10}
+        {
+          "x": 14,
+          "y": 10
+        },
+        {
+          "x": 15,
+          "y": 10
+        },
+        {
+          "x": 16,
+          "y": 10
+        },
+        {
+          "x": 17,
+          "y": 10
+        }
       ]
     },
     {
@@ -36,14 +69,26 @@
       "count": 2,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 20, "y": 16}, {"x": 21, "y": 16}
+        {
+          "x": 20,
+          "y": 16
+        },
+        {
+          "x": 21,
+          "y": 16
+        }
       ]
     },
     {
       "npcProfileId": "syndicate-lieutenant",
       "count": 1,
       "asMinGroup": false,
-      "deployZone": [{"x": 18, "y": 14}]
+      "deployZone": [
+        {
+          "x": 18,
+          "y": 14
+        }
+      ]
     }
   ],
   "reinforcements": [
@@ -56,7 +101,18 @@
           "count": 3,
           "asMinGroup": true,
           "deployZone": [
-            {"x": 34, "y": 0}, {"x": 35, "y": 0}, {"x": 34, "y": 1}
+            {
+              "x": 34,
+              "y": 0
+            },
+            {
+              "x": 35,
+              "y": 0
+            },
+            {
+              "x": 34,
+              "y": 1
+            }
           ]
         }
       ],
@@ -71,14 +127,18 @@
           "npcProfileId": "trandoshan-hunter",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 35, "y": 17}]
+          "deployZone": [
+            {
+              "x": 35,
+              "y": 17
+            }
+          ]
         }
       ],
       "threatCost": 4,
       "narrativeText": "A Trandoshan Hunter stalks through the market gates, scattergun raised."
     }
   ],
-
   "objectives": [
     {
       "id": "obj-eliminate",
@@ -102,7 +162,9 @@
     {
       "side": "Operative",
       "description": "Eliminate all Shadow Syndicate forces.",
-      "requiredObjectiveIds": ["obj-eliminate"]
+      "requiredObjectiveIds": [
+        "obj-eliminate"
+      ]
     },
     {
       "side": "Imperial",
@@ -110,11 +172,13 @@
       "requiredObjectiveIds": []
     }
   ],
-
   "objectivePoints": [
     {
       "id": "objpt-merchant-1",
-      "position": {"x": 10, "y": 12},
+      "position": {
+        "x": 10,
+        "y": 12
+      },
       "type": "terminal",
       "skillRequired": "charm",
       "alternateSkill": "coercion",
@@ -123,7 +187,10 @@
     },
     {
       "id": "objpt-merchant-2",
-      "position": {"x": 18, "y": 8},
+      "position": {
+        "x": 18,
+        "y": 8
+      },
       "type": "terminal",
       "skillRequired": "charm",
       "alternateSkill": "leadership",
@@ -132,7 +199,10 @@
     },
     {
       "id": "objpt-merchant-3",
-      "position": {"x": 26, "y": 14},
+      "position": {
+        "x": 26,
+        "y": 14
+      },
       "type": "terminal",
       "skillRequired": "medicine",
       "alternateSkill": "charm",
@@ -140,33 +210,53 @@
       "description": "Injured Ithorian shopkeeper bleeding from a vibro-knife wound."
     }
   ],
-
   "lootTokens": [
     {
       "id": "loot-market-1",
-      "position": {"x": 10, "y": 12},
-      "reward": {"type": "credits", "value": 75}
+      "position": {
+        "x": 10,
+        "y": 12
+      },
+      "reward": {
+        "type": "credits",
+        "value": 75
+      }
     },
     {
       "id": "loot-market-2",
-      "position": {"x": 26, "y": 14},
-      "reward": {"type": "credits", "value": 75}
+      "position": {
+        "x": 26,
+        "y": 14
+      },
+      "reward": {
+        "type": "credits",
+        "value": 75
+      }
     },
     {
       "id": "loot-datapad",
-      "position": {"x": 18, "y": 14},
-      "reward": {"type": "xp", "value": 3}
+      "position": {
+        "x": 18,
+        "y": 14
+      },
+      "reward": {
+        "type": "xp",
+        "value": 3
+      }
     }
   ],
-
   "campaignAct": 2,
   "missionIndex": 1,
-  "prerequisites": ["act1-m4-finale"],
-  "unlocksNext": ["act2-m2-bounty"],
-
+  "prerequisites": [
+    "act1-m4-finale"
+  ],
+  "unlocksNext": [
+    "act2-m2-bounty"
+  ],
   "baseXP": 10,
   "bonusXPPerLoot": 2,
   "bonusXPPerKill": 1,
   "maxKillXP": 4,
-  "leaderKillXP": 0
+  "leaderKillXP": 0,
+  "fogOfWar": false
 }
