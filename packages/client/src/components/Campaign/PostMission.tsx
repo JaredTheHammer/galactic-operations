@@ -11,6 +11,9 @@ import { getExposureStatus } from '../../../../engine/src/types'
 import { calculateMissionExposure, calculateMissionInfluence, calculateMissionControl } from '../../../../engine/src/campaign-v2'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { t } from '../../styles/theme'
+import { CriticalInjuryPanel } from './CriticalInjuryPanel'
+import { MomentumIndicator } from './MomentumIndicator'
+import { LegacyEventReveal } from './LegacyEventReveal'
 import sectorMapData from '../../../../../data/sector-map.json'
 
 const containerStyle: React.CSSProperties = {
@@ -130,7 +133,11 @@ function HeroStatusCard({
 // ============================================================================
 
 export default function PostMission() {
-  const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState, activeMissionDef, campaignMissions } = useGameStore()
+  const {
+    lastMissionResult, returnToMissionSelect, openSocialPhase,
+    campaignState, activeMissionDef, campaignMissions,
+    criticalInjuryDefs, legacyEventDefs, showLegacyEvents, acknowledgeLegacyEvents,
+  } = useGameStore()
   const { isMobile } = useIsMobile()
 
   if (!lastMissionResult) {
@@ -383,6 +390,92 @@ export default function PostMission() {
           </div>
         )}
 
+        {/* Critical Injuries */}
+        {campaignState && heroes.length > 0 && Object.keys(criticalInjuryDefs).length > 0 && (
+          <CriticalInjuryPanel
+            heroes={heroes}
+            injuryDefs={criticalInjuryDefs}
+            compact
+          />
+        )}
+
+        {/* Momentum */}
+        {campaignState && (
+          <MomentumIndicator campaign={campaignState} />
+        )}
+        {/* Rebellion Mechanics Deltas */}
+        {campaignState?.actProgress && activeMissionDef && (() => {
+          const totalKillsAll = Object.values(result.heroKills).reduce((sum, k) => sum + k, 0);
+          const exposureDelta = calculateMissionExposure(
+            activeMissionDef, result.outcome, result.heroesIncapacitated,
+            result.completedObjectiveIds, totalKillsAll, result.roundsPlayed,
+          );
+          const influenceDelta = calculateMissionInfluence(result.outcome, result.completedObjectiveIds);
+          const controlDelta = calculateMissionControl(result.outcome, result.heroesIncapacitated);
+          const ap = campaignState.actProgress!;
+          const status = getExposureStatus(ap.exposure);
+          const statusColors: Record<string, string> = {
+            ghost: t.accentGreen, detected: t.accentOrange, hunted: t.accentRed,
+          };
+          const statusLabels: Record<string, string> = {
+            ghost: 'GHOST', detected: 'DETECTED', hunted: 'HUNTED',
+          };
+
+          return (
+            <div style={{
+              marginBottom: isMobile ? '12px' : '16px',
+              backgroundColor: t.bgSurface2,
+              borderRadius: t.radiusMd,
+              padding: isMobile ? '10px' : '14px',
+              border: `1px solid ${t.borderSubtle}`,
+            }}>
+              <h3 style={{ ...sectionHeaderStyle, color: t.accentBlue, marginBottom: '12px' }}>
+                Rebellion Status (Act {ap.act})
+              </h3>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                {exposureDelta !== 0 && (
+                  <span style={{
+                    ...pillStyle,
+                    color: exposureDelta > 0 ? t.accentRed : t.accentGreen,
+                    borderColor: `${exposureDelta > 0 ? t.accentRed : t.accentGreen}40`,
+                  }}>
+                    Exposure {exposureDelta > 0 ? '+' : ''}{exposureDelta}
+                  </span>
+                )}
+                {influenceDelta > 0 && (
+                  <span style={{
+                    ...pillStyle,
+                    color: t.accentBlue,
+                    borderColor: `${t.accentBlue}40`,
+                  }}>
+                    Influence +{influenceDelta}
+                  </span>
+                )}
+                {controlDelta > 0 && (
+                  <span style={{
+                    ...pillStyle,
+                    color: t.accentRed,
+                    borderColor: `${t.accentRed}40`,
+                  }}>
+                    Control +{controlDelta}
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: t.textMuted }}>
+                <span>
+                  Exposure: {ap.exposure}/10{' '}
+                  <span style={{ color: statusColors[status], fontWeight: 'bold' }}>
+                    [{statusLabels[status]}]
+                  </span>
+                </span>
+                <span>
+                  Influence {ap.influence} vs Control {ap.control}
+                </span>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Supply Network Consequences */}
         {campaignState?.supplyNetwork && (() => {
           const sectorMap = sectorMapData as SectorMapDefinition
@@ -474,79 +567,6 @@ export default function PostMission() {
           return null
         })()}
 
-        {/* Rebellion Mechanics Deltas */}
-        {campaignState?.actProgress && activeMissionDef && (() => {
-          const totalKillsAll = Object.values(result.heroKills).reduce((sum, k) => sum + k, 0);
-          const exposureDelta = calculateMissionExposure(
-            activeMissionDef, result.outcome, result.heroesIncapacitated,
-            result.completedObjectiveIds, totalKillsAll, result.roundsPlayed,
-          );
-          const influenceDelta = calculateMissionInfluence(result.outcome, result.completedObjectiveIds);
-          const controlDelta = calculateMissionControl(result.outcome, result.heroesIncapacitated);
-          const ap = campaignState.actProgress!;
-          const status = getExposureStatus(ap.exposure);
-          const statusColors: Record<string, string> = {
-            ghost: t.accentGreen, detected: t.accentOrange, hunted: t.accentRed,
-          };
-          const statusLabels: Record<string, string> = {
-            ghost: 'GHOST', detected: 'DETECTED', hunted: 'HUNTED',
-          };
-
-          return (
-            <div style={{
-              marginBottom: isMobile ? '12px' : '16px',
-              backgroundColor: t.bgSurface2,
-              borderRadius: t.radiusMd,
-              padding: isMobile ? '10px' : '14px',
-              border: `1px solid ${t.borderSubtle}`,
-            }}>
-              <h3 style={{ ...sectionHeaderStyle, color: t.accentBlue, marginBottom: '12px' }}>
-                Rebellion Status (Act {ap.act})
-              </h3>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                {exposureDelta !== 0 && (
-                  <span style={{
-                    ...pillStyle,
-                    color: exposureDelta > 0 ? t.accentRed : t.accentGreen,
-                    borderColor: `${exposureDelta > 0 ? t.accentRed : t.accentGreen}40`,
-                  }}>
-                    Exposure {exposureDelta > 0 ? '+' : ''}{exposureDelta}
-                  </span>
-                )}
-                {influenceDelta > 0 && (
-                  <span style={{
-                    ...pillStyle,
-                    color: t.accentBlue,
-                    borderColor: `${t.accentBlue}40`,
-                  }}>
-                    Influence +{influenceDelta}
-                  </span>
-                )}
-                {controlDelta > 0 && (
-                  <span style={{
-                    ...pillStyle,
-                    color: t.accentRed,
-                    borderColor: `${t.accentRed}40`,
-                  }}>
-                    Control +{controlDelta}
-                  </span>
-                )}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: t.textMuted }}>
-                <span>
-                  Exposure: {ap.exposure}/10{' '}
-                  <span style={{ color: statusColors[status], fontWeight: 'bold' }}>
-                    [{statusLabels[status]}]
-                  </span>
-                </span>
-                <span>
-                  Influence {ap.influence} vs Control {ap.control}
-                </span>
-              </div>
-            </div>
-          );
-        })()}
-
         {/* Continue button */}
         <button
           style={{
@@ -559,6 +579,15 @@ export default function PostMission() {
           {campaignState ? 'CONTINUE TO CANTINA' : 'CONTINUE TO CAMPAIGN'}
         </button>
       </div>
+
+      {/* Legacy Event Reveal overlay */}
+      {showLegacyEvents && campaignState && (
+        <LegacyEventReveal
+          campaign={campaignState}
+          eventDefs={legacyEventDefs}
+          onAcknowledge={acknowledgeLegacyEvents}
+        />
+      )}
     </div>
   )
 }

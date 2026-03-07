@@ -449,6 +449,12 @@ export interface HeroCharacter {
    * At 1+ missions rested, a wounded hero recovers automatically.
    */
   missionsRested?: number;
+
+  /**
+   * Active critical injuries sustained across campaign missions.
+   * Stacking injuries compound penalties without permadeath.
+   */
+  criticalInjuries?: ActiveCriticalInjury[];
 }
 
 // ============================================================================
@@ -577,6 +583,14 @@ export interface NPCProfile {
 
   /** Physical base size. Defaults to 'standard' if unset. */
   baseSize?: BaseSize;
+
+  // Boss Hit Location System (Oathsworn-inspired)
+  /** If true, this NPC is a boss with targetable hit locations */
+  isBoss?: boolean;
+  /** Hit location definitions for boss NPCs */
+  bossHitLocations?: BossHitLocationDef[];
+  /** Phase transition rules triggered by disabled hit locations */
+  bossPhaseTransitions?: BossPhaseTransition[];
 }
 
 // ============================================================================
@@ -668,6 +682,14 @@ export interface Figure {
   aimTokens: number;    // 0-2, each adds +1 Ability die to next attack. Persist across activations.
   dodgeTokens: number;  // 0-1, cancel 1 net success when hit. Cleared at next activation.
 
+  // Focus effect flags (set by SpendFocus action, consumed by resolution systems)
+  /** +2 speed this activation (consumed after Move maneuver, cleared at activation end) */
+  focusBonusMove?: boolean;
+  /** +3 damage on next attack (consumed after Attack action) */
+  focusBonusDamage?: boolean;
+  /** +1 Challenge die to defense (persists until next activation) */
+  focusBonusDefense?: boolean;
+
   isActivated: boolean;
   isDefeated: boolean;
   isWounded: boolean;          // Imperial Assault style: hero wounded but still in play
@@ -697,6 +719,27 @@ export interface Figure {
   // Graduated suppression (Legion-inspired)
   suppressionTokens: number;  // accumulated from ranged hits; rally removes
   courage: number;            // threshold before losing action; 2x = panic. Derived from NPC tier or hero Willpower.
+
+  // Boss Hit Location runtime state (only populated for boss NPCs)
+  hitLocations?: BossHitLocationState[];
+  /** Current boss AI phase (0-indexed, advances as hit locations are disabled) */
+  bossPhase?: number;
+  /** Cumulative stat bonuses from boss phase transitions */
+  bossPhaseStatBonuses?: {
+    attackPoolBonus?: number;
+    defensePoolBonus?: number;
+    soakBonus?: number;
+    speedBonus?: number;
+    damageBonus?: number;
+  };
+
+  // Focus resource (Oathsworn Animus-inspired, heroes only)
+  /** Current Focus points available to spend */
+  focusCurrent?: number;
+  /** Maximum Focus capacity */
+  focusMax?: number;
+  /** Focus recovered per activation */
+  focusRecovery?: number;
 }
 
 // ============================================================================
@@ -728,6 +771,8 @@ export interface MovePayload {
 export interface AttackPayload {
   targetId: string;
   weaponId: string;
+  /** Target a specific boss hit location (omit for random/body shot) */
+  targetLocationId?: string;
 }
 
 export interface UseSkillPayload {
@@ -763,7 +808,8 @@ export type GameAction =
   | { type: 'InteractTerminal'; figureId: string; payload: { terminalId: string } }
   | { type: 'AimManeuver';   figureId: string; payload: {} }
   | { type: 'StrainForManeuver'; figureId: string; payload: {} }
-  | { type: 'UseConsumable'; figureId: string; payload: UseConsumablePayload };
+  | { type: 'UseConsumable'; figureId: string; payload: UseConsumablePayload }
+  | { type: 'SpendFocus';   figureId: string; payload: SpendFocusPayload };
 
 export interface UseConsumablePayload {
   /** Consumable item ID */
@@ -771,6 +817,33 @@ export interface UseConsumablePayload {
   /** Target figure ID (self if omitted) */
   targetId?: string;
 }
+
+/**
+ * Focus spending effects (Oathsworn Animus-inspired).
+ * Each effect costs a specific amount of Focus.
+ */
+export type FocusEffect =
+  | 'bonus_move'       // Cost 1: +2 speed this activation
+  | 'bonus_aim'        // Cost 1: +1 Ability die on next attack (stacks with aim tokens)
+  | 'bonus_damage'     // Cost 2: +3 damage on next attack this activation
+  | 'bonus_defense'    // Cost 2: +1 Challenge die to defense until next activation
+  | 'recover_strain'   // Cost 1: recover 2 strain immediately
+  | 'shake_condition'  // Cost 3: remove one non-Wounded condition immediately
+  ;
+
+export interface SpendFocusPayload {
+  effect: FocusEffect;
+}
+
+/** Focus cost table */
+export const FOCUS_COSTS: Record<FocusEffect, number> = {
+  bonus_move: 1,
+  bonus_aim: 1,
+  bonus_damage: 2,
+  bonus_defense: 2,
+  recover_strain: 1,
+  shake_condition: 3,
+};
 
 export interface ActionLog {
   action: GameAction;
@@ -823,6 +896,23 @@ export interface CombatResolution {
 
   // Retaliate keyword: automatic wounds dealt back to attacker
   retaliateWounds?: number;
+  // Boss hit location results
+  /** ID of the targeted hit location (if targeted shot) */
+  targetedLocationId?: string;
+  /** Name of the targeted hit location */
+  targetedLocationName?: string;
+  /** Wounds absorbed by hit locations (not applied to main body) */
+  locationWoundsAbsorbed?: number;
+  /** Location IDs newly disabled by this attack */
+  locationsDisabled?: string[];
+  /** Names of newly disabled locations */
+  locationsDisabledNames?: string[];
+  /** Whether a boss phase transition was triggered */
+  bossPhaseTransitioned?: boolean;
+  /** New boss phase number after transition */
+  newBossPhase?: number;
+  /** Narrative text for the phase transition */
+  bossPhaseNarrativeText?: string;
 }
 
 /** Active combat encounter */
@@ -979,6 +1069,8 @@ export interface GameState {
 
   // Fog of war / progressive room reveal
   fogOfWar?: FogOfWarState;
+  // Spirit Island-inspired optional subsystems (all toggleable)
+  spiritIsland?: SpiritIslandState;
   // Active contracts being tracked this mission (Dune: contracts system)
   activeContracts?: ActiveContract[];
 }
@@ -1253,6 +1345,20 @@ export interface CampaignState {
   /** Active shop discounts (percentage, from social outcomes) */
   activeDiscounts?: Record<string, number>;
 
+  // --- Pandemic Legacy Systems ---
+
+  /** Active critical injuries on heroes (keyed by hero ID) */
+  criticalInjuries?: Record<string, ActiveCriticalInjury[]>;
+
+  /** Campaign overworld state (sector control, mutations, party position) */
+  overworld?: CampaignOverworldState;
+
+  /** Legacy event deck state (triggered events, pending reveals, rule changes) */
+  legacyDeck?: LegacyDeckState;
+
+  /** Campaign momentum (-3 to +3): negative = losing streak, positive = winning streak */
+  momentum?: number;
+
   /** Supply network: player-built infrastructure of contacts, safe houses, and supply routes */
   supplyNetwork?: SupplyNetwork;
   /** Per-act rebellion mechanics (Exposure + Influence/Control, reset each act) */
@@ -1260,6 +1366,9 @@ export interface CampaignState {
 
   /** Historical act outcomes (carry consequences forward between acts) */
   actOutcomes?: ActOutcome[];
+
+  /** Dune: Imperium inspired mechanics (contracts, intel, deck-building, research, mercenaries) */
+  duneMechanics?: DuneMechanicsState;
 }
 
 // ============================================================================
@@ -1764,6 +1873,660 @@ export interface SocialPhaseResult {
   itemsSold: Array<{ itemId: string; revenue: number }>;
   creditsSpentOnHealing: number;
   completedAt: string;
+}
+
+// ============================================================================
+// SPIRIT ISLAND SUBSYSTEMS (all toggleable via OptionalSubsystems)
+// ============================================================================
+
+/** Master toggle for optional subsystems. All default to false (off). */
+export interface OptionalSubsystems {
+  /** #1 Disruption Track: accumulating fear shifts victory conditions */
+  disruptionTrack?: boolean;
+  /** #2 Dual-Timing: talents/abilities tagged as Fast (before enemies) or Slow (after, stronger) */
+  dualTiming?: boolean;
+  /** #3 Imperial Threat Cadence: predictable Scout->Fortify->Strike cycle */
+  threatCadence?: boolean;
+  /** #4 Element Synergy: abilities generate elements that fuel innate power thresholds */
+  elementSynergy?: boolean;
+  /** #5 Collateral Damage: environmental destruction with cascade effects */
+  collateralDamage?: boolean;
+}
+
+// --- #1 Disruption Track ---
+
+/** Terror level thresholds that shift victory conditions */
+export type TerrorLevel = 1 | 2 | 3;
+
+/** A tiered victory condition that activates at a specific terror level */
+export interface TieredVictoryCondition {
+  terrorLevel: TerrorLevel;
+  side: Side;
+  description: string;
+  condition: string;
+  /** Objectives required at this terror level (fewer = easier) */
+  objectiveThreshold?: number;
+}
+
+/** Runtime state for the Disruption Track */
+export interface DisruptionTrackState {
+  /** Current disruption points (0+) */
+  disruption: number;
+  /** Points needed to reach each terror level */
+  thresholds: [number, number, number]; // [TL1, TL2, TL3]
+  /** Current terror level (starts at 1) */
+  terrorLevel: TerrorLevel;
+  /** Tiered victory conditions that replace base conditions at higher terror */
+  tieredConditions: TieredVictoryCondition[];
+  /** Log of disruption events this mission */
+  eventLog: Array<{ round: number; source: string; amount: number }>;
+}
+
+/** Events that generate disruption points */
+export type DisruptionEvent =
+  | 'elite_defeated'      // +3: Rival/Nemesis taken out
+  | 'leader_defeated'     // +5: mission leader killed
+  | 'objective_completed' // +2: any objective completed
+  | 'terminal_hacked'     // +1: terminal interaction
+  | 'loot_secured'        // +1: loot token collected
+  | 'morale_broken';      // +4: enemy morale hits Broken
+
+/** Disruption point values per event */
+export const DISRUPTION_VALUES: Record<DisruptionEvent, number> = {
+  elite_defeated: 3,
+  leader_defeated: 5,
+  objective_completed: 2,
+  terminal_hacked: 1,
+  loot_secured: 1,
+  morale_broken: 4,
+};
+
+// --- #2 Dual-Timing Actions ---
+
+/** Timing classification for abilities */
+export type ActionTiming = 'fast' | 'slow';
+
+/** A queued slow action waiting for end-of-round resolution */
+export interface QueuedSlowAction {
+  figureId: string;
+  action: GameAction;
+  /** Bonus applied when the slow action resolves */
+  slowBonus: SlowBonus;
+  /** Round it was queued */
+  queuedRound: number;
+}
+
+/** Bonuses applied to slow actions when they resolve */
+export interface SlowBonus {
+  bonusDamage?: number;
+  bonusPierce?: number;
+  bonusHealing?: number;
+  upgradePool?: number; // upgrade N green dice to yellow
+  freeManeuver?: boolean;
+}
+
+/** Runtime state for dual-timing system */
+export interface DualTimingState {
+  /** Slow actions queued this round, resolved at end of Activation phase */
+  slowQueue: QueuedSlowAction[];
+  /** Slow actions that were cancelled (figure defeated before resolution) */
+  cancelledThisRound: string[]; // figure IDs
+}
+
+// --- #3 Imperial Threat Cadence ---
+
+/** The three phases of the Imperial threat cycle */
+export type ThreatCadencePhase = 'Scout' | 'Fortify' | 'Strike';
+
+/** Runtime state for the threat cadence system */
+export interface ThreatCadenceState {
+  /** Current phase in the cycle */
+  currentPhase: ThreatCadencePhase;
+  /** Cycle count (increments every 3 rounds) */
+  cycleCount: number;
+  /** Whether the current phase was disrupted by operative action */
+  phaseDisrupted: boolean;
+  /** Regions/zones scouted this cycle (tile coordinates) */
+  scoutedZones: GridCoordinate[];
+  /** Fortification bonuses applied this cycle */
+  fortifications: Array<{ position: GridCoordinate; defenseBonus: number }>;
+}
+
+/** Phase effects that modify AI behavior and game state */
+export interface ThreatCadenceEffect {
+  phase: ThreatCadencePhase;
+  /** AI behavior modifier for this phase */
+  aiBehavior: 'cautious' | 'defensive' | 'aggressive';
+  /** Reinforcement modifier (multiplier on threat income) */
+  threatIncomeMultiplier: number;
+  /** Defense modifier for Imperial figures during this phase */
+  imperialDefenseBonus: number;
+  /** Attack modifier for Imperial figures during this phase */
+  imperialAttackBonus: number;
+}
+
+/** Default phase effects */
+export const THREAT_CADENCE_EFFECTS: Record<ThreatCadencePhase, ThreatCadenceEffect> = {
+  Scout: {
+    phase: 'Scout',
+    aiBehavior: 'cautious',
+    threatIncomeMultiplier: 0.5,
+    imperialDefenseBonus: 0,
+    imperialAttackBonus: 0,
+  },
+  Fortify: {
+    phase: 'Fortify',
+    aiBehavior: 'defensive',
+    threatIncomeMultiplier: 1.5,
+    imperialDefenseBonus: 1,
+    imperialAttackBonus: 0,
+  },
+  Strike: {
+    phase: 'Strike',
+    aiBehavior: 'aggressive',
+    threatIncomeMultiplier: 1.0,
+    imperialDefenseBonus: 0,
+    imperialAttackBonus: 1,
+  },
+};
+
+// --- #4 Element Synergy System ---
+
+/** Element types generated by abilities and talents */
+export type SynergyElement =
+  | 'Aggression'  // offensive combat actions
+  | 'Precision'   // aimed shots, skill checks
+  | 'Fortitude'   // defensive actions, healing
+  | 'Cunning'     // stealth, hacking, social
+  | 'Force';      // Force-powered abilities
+
+/** Threshold requirement for an innate power */
+export interface ElementThreshold {
+  element: SynergyElement;
+  count: number;
+}
+
+/** An innate power that activates when element thresholds are met */
+export interface InnatePower {
+  id: string;
+  name: string;
+  description: string;
+  /** Required element counts to activate (all must be met) */
+  thresholds: ElementThreshold[];
+  /** Effect when activated */
+  effect: InnatePowerEffect;
+}
+
+/** Effects that innate powers can produce */
+export interface InnatePowerEffect {
+  /** Flat bonus damage on all attacks for the rest of the mission */
+  bonusDamage?: number;
+  /** Pierce bonus on all attacks */
+  bonusPierce?: number;
+  /** Bonus soak until end of mission */
+  bonusSoak?: number;
+  /** Heal wounds */
+  healWounds?: number;
+  /** Recover strain */
+  recoverStrain?: number;
+  /** Free maneuver at start of each activation */
+  freeManeuver?: boolean;
+  /** Upgrade N attack dice (green -> yellow) */
+  upgradeAttack?: number;
+  /** Upgrade N defense dice (purple -> red) */
+  upgradeDefense?: number;
+}
+
+/** Per-hero element tracking for a mission */
+export interface ElementTracker {
+  /** Elements accumulated this mission, per hero */
+  heroElements: Record<string, Record<SynergyElement, number>>;
+  /** Innate powers that have been activated this mission, per hero */
+  activatedPowers: Record<string, string[]>; // heroId -> innatePowerId[]
+}
+
+/** Element generation config: which action types produce which elements */
+export const ELEMENT_GENERATION: Record<string, SynergyElement> = {
+  Attack: 'Aggression',
+  Aim: 'Precision',
+  AimManeuver: 'Precision',
+  GuardedStance: 'Fortitude',
+  Rally: 'Fortitude',
+  TakeCover: 'Fortitude',
+  Dodge: 'Fortitude',
+  UseSkill: 'Cunning',
+  Interact: 'Cunning',
+  InteractTerminal: 'Cunning',
+  CollectLoot: 'Cunning',
+};
+
+// --- #5 Collateral Damage System ---
+
+/** Collateral damage level for a tile */
+export type CollateralLevel = 0 | 1 | 2 | 3; // 0=pristine, 3=destroyed
+
+/** A tile that has taken collateral damage */
+export interface DamagedTile {
+  position: GridCoordinate;
+  level: CollateralLevel;
+  /** Source of the damage */
+  source: string;
+}
+
+/** Runtime state for the collateral damage system */
+export interface CollateralDamageState {
+  /** Damaged tiles on the map */
+  damagedTiles: DamagedTile[];
+  /** Total collateral points accumulated */
+  totalCollateral: number;
+  /** Threshold for mission penalty */
+  penaltyThreshold: number;
+  /** Whether penalty has been triggered */
+  penaltyTriggered: boolean;
+  /** XP penalty multiplier (1.0 = no penalty, 0.5 = half XP) */
+  xpMultiplier: number;
+}
+
+/** Weapons/effects that generate collateral damage */
+export interface CollateralSource {
+  /** Weapon quality that causes collateral */
+  quality: string;
+  /** Base collateral points generated */
+  baseCollateral: number;
+  /** Whether this causes cascade to adjacent tiles */
+  cascades: boolean;
+}
+
+/** Default collateral sources */
+export const COLLATERAL_SOURCES: CollateralSource[] = [
+  { quality: 'Blast', baseCollateral: 2, cascades: true },
+  { quality: 'Burn', baseCollateral: 1, cascades: true },
+  { quality: 'Breach', baseCollateral: 1, cascades: false },
+  { quality: 'Sunder', baseCollateral: 1, cascades: false },
+];
+
+/** Collateral effects at each damage level */
+export const COLLATERAL_EFFECTS: Record<CollateralLevel, string> = {
+  0: 'Pristine',
+  1: 'Damaged: light cover removed',
+  2: 'Wrecked: becomes difficult terrain',
+  3: 'Destroyed: impassable rubble, cascades to adjacent',
+};
+
+// --- Spirit Island State on GameState ---
+
+/** Combined state for all Spirit Island subsystems */
+export interface SpiritIslandState {
+  subsystems: OptionalSubsystems;
+  disruption?: DisruptionTrackState;
+  dualTiming?: DualTimingState;
+  threatCadence?: ThreatCadenceState;
+  elementSynergy?: ElementTracker;
+  collateralDamage?: CollateralDamageState;
+}
+
+// ============================================================================
+// BOSS HIT LOCATION TYPES (Oathsworn-inspired targetable boss locations)
+// ============================================================================
+
+/**
+ * Definition of a hit location on a boss NPC (data-driven from NPC JSON).
+ * Each location has its own wound pool. When all wounds are dealt, the
+ * location is "disabled" and applies permanent penalties to the boss.
+ */
+export interface BossHitLocationDef {
+  id: string;
+  name: string;                 // e.g., "Chin Cannon", "Left Leg Actuator", "Force Core"
+  woundCapacity: number;        // wounds to disable this location
+  /** Penalties applied to the boss when this location is disabled */
+  disabledEffects: {
+    /** Reduce boss attack pool: negative = remove dice */
+    attackPoolModifier?: number;
+    /** Reduce boss defense pool: negative = remove dice */
+    defensePoolModifier?: number;
+    /** Reduce boss soak */
+    soakModifier?: number;
+    /** Reduce boss speed */
+    speedModifier?: number;
+    /** Condition inflicted on the boss permanently */
+    conditionInflicted?: Condition;
+    /** Weapon IDs disabled (boss can no longer use these weapons) */
+    disabledWeapons?: string[];
+  };
+}
+
+/**
+ * Runtime state of a hit location during combat (tracked on Figure).
+ * Extends BossHitLocationDef with mutable wound tracking.
+ */
+export interface BossHitLocationState {
+  id: string;
+  name: string;
+  woundCapacity: number;
+  woundsCurrent: number;        // wounds dealt to this location so far
+  isDisabled: boolean;
+  disabledEffects: BossHitLocationDef['disabledEffects'];
+}
+
+/**
+ * Boss phase definition: when a certain number of hit locations are disabled,
+ * the boss transitions to a new AI phase with different behavior.
+ */
+export interface BossPhaseTransition {
+  /** Number of hit locations that must be disabled to trigger this phase */
+  disabledLocationsRequired: number;
+  /** New AI archetype to use after transition (references ai-profiles.json) */
+  newAiArchetype: string;
+  /** Narrative text displayed on phase transition */
+  narrativeText?: string;
+  /** Stat bonuses applied when entering this phase (cumulative with previous phases) */
+  statBonuses?: {
+    /** Additional attack pool dice (positive = more dangerous) */
+    attackPoolBonus?: number;
+    /** Additional defense pool dice */
+    defensePoolBonus?: number;
+    /** Soak modifier (positive = tougher) */
+    soakBonus?: number;
+    /** Speed modifier (positive = faster) */
+    speedBonus?: number;
+    /** Bonus damage on all attacks */
+    damageBonus?: number;
+  };
+}
+
+// ============================================================================
+// FOCUS RESOURCE TYPES (Oathsworn Animus-inspired regenerating resource)
+// ============================================================================
+
+/**
+ * Focus resource configuration for a hero.
+ * Focus regenerates each activation and is spent on powerful abilities.
+ * Heroes must choose between spending Focus on movement bonuses or abilities.
+ */
+export interface FocusConfig {
+  /** Maximum Focus a hero can hold */
+  max: number;
+  /** Focus recovered at the start of each activation */
+  recoveryPerActivation: number;
+}
+
+/**
+ * Default Focus values by career archetype.
+ * Combat careers get less Focus (they rely on raw dice pools).
+ * Support/cunning careers get more Focus for utility.
+ */
+export const DEFAULT_FOCUS_BY_CAREER: Record<string, FocusConfig> = {
+  soldier:     { max: 3, recoveryPerActivation: 1 },
+  bounty_hunter: { max: 4, recoveryPerActivation: 2 },
+  smuggler:    { max: 5, recoveryPerActivation: 2 },
+  technician:  { max: 5, recoveryPerActivation: 2 },
+  commander:   { max: 4, recoveryPerActivation: 2 },
+  force_sensitive: { max: 6, recoveryPerActivation: 3 },
+};
+
+/** Fallback Focus config when career is not mapped */
+export const DEFAULT_FOCUS_CONFIG: FocusConfig = { max: 4, recoveryPerActivation: 2 };
+// CRITICAL INJURY SYSTEM (Pandemic Legacy-inspired persistent consequences)
+// ============================================================================
+
+/** Severity tiers for critical injuries */
+export type CriticalInjurySeverity = 'minor' | 'moderate' | 'severe';
+
+/** Categories of mechanical effects a critical injury can impose */
+export type CriticalInjuryEffectType =
+  | 'reduce_characteristic'    // -1 to a specific characteristic
+  | 'reduce_wound_threshold'   // Lower max wounds
+  | 'reduce_strain_threshold'  // Lower max strain
+  | 'reduce_speed'             // -1 movement
+  | 'reduce_soak'              // -1 soak
+  | 'skill_penalty'            // -1 to specific skill checks
+  | 'upgrade_difficulty'       // Upgrade 1 difficulty die on specific action types
+  | 'lose_free_maneuver'       // Must spend strain to get first maneuver on some turns
+  | 'condition_vulnerability'  // Easier to apply specific condition
+  | 'limit_actions';           // Cannot perform a specific action type
+
+/** A single mechanical effect from a critical injury */
+export interface CriticalInjuryEffect {
+  type: CriticalInjuryEffectType;
+  /** Numeric magnitude of the effect (e.g., -1 for characteristic reduction) */
+  value: number;
+  /** Target of the effect (characteristic name, skill id, action type, condition, etc.) */
+  target?: string;
+  /** Optional description of the mechanical impact */
+  description?: string;
+}
+
+/** Definition of a critical injury (loaded from JSON data) */
+export interface CriticalInjuryDefinition {
+  id: string;
+  name: string;
+  description: string;
+  severity: CriticalInjurySeverity;
+  /** d66 roll range: [min, max] inclusive (e.g., [1, 10] for minor injuries) */
+  rollRange: [number, number];
+  /** Mechanical effects applied while this injury is active */
+  effects: CriticalInjuryEffect[];
+  /** Whether this injury can be recovered from (all can, but some are harder) */
+  recoverable: boolean;
+  /** Difficulty (purple dice) for the Medicine/Mechanics check to treat */
+  treatmentDifficulty: number;
+  /** Challenge dice (red) added to the treatment check */
+  treatmentChallengeDice?: number;
+  /** Skill used for treatment (medicine for organic, mechanics for droid) */
+  treatmentSkill: 'medicine' | 'mechanics';
+  /** Credit cost for professional medical treatment (bypasses skill check) */
+  treatmentCost: number;
+  /** Number of rest missions required for natural recovery (0 = never heals naturally) */
+  naturalRecoveryMissions: number;
+}
+
+/** An active critical injury on a hero */
+export interface ActiveCriticalInjury {
+  /** Reference to the CriticalInjuryDefinition.id */
+  injuryId: string;
+  /** When this injury was sustained (mission ID) */
+  sustainedInMission: string;
+  /** Number of missions rested since sustaining this injury */
+  missionsRested: number;
+  /** Whether treatment has been attempted (to prevent repeated free attempts) */
+  treatmentAttempted: boolean;
+}
+
+// ============================================================================
+// SECTOR CONTROL SYSTEM (Pandemic Legacy-inspired escalating threat)
+// ============================================================================
+
+/** Control level of a sector (higher = more Imperial control) */
+export type SectorControlLevel = 0 | 1 | 2 | 3 | 4 | 5;
+
+/** Labels for sector control levels */
+export const SECTOR_CONTROL_LABELS: Record<SectorControlLevel, string> = {
+  0: 'Liberated',
+  1: 'Contested',
+  2: 'Occupied',
+  3: 'Fortified',
+  4: 'Lockdown',
+  5: 'Crushed',
+};
+
+/** Effects applied at each sector control level */
+export const SECTOR_CONTROL_EFFECTS: Record<SectorControlLevel, {
+  threatBonus: number;
+  reinforcementBonus: number;
+  shopPriceMultiplier: number;
+  socialDifficultyMod: number;
+  description: string;
+}> = {
+  0: { threatBonus: -2, reinforcementBonus: 0, shopPriceMultiplier: 0.8, socialDifficultyMod: -1, description: 'Rebel-friendly zone. Reduced threat, cheaper supplies.' },
+  1: { threatBonus: 0, reinforcementBonus: 0, shopPriceMultiplier: 1.0, socialDifficultyMod: 0, description: 'Active resistance. Standard conditions.' },
+  2: { threatBonus: 1, reinforcementBonus: 0, shopPriceMultiplier: 1.1, socialDifficultyMod: 0, description: 'Imperial presence increasing. Slightly elevated threat.' },
+  3: { threatBonus: 2, reinforcementBonus: 1, shopPriceMultiplier: 1.25, socialDifficultyMod: 1, description: 'Heavy garrison. Extra reinforcements, social checks harder.' },
+  4: { threatBonus: 3, reinforcementBonus: 2, shopPriceMultiplier: 1.5, socialDifficultyMod: 1, description: 'Martial law. Significant reinforcements, supply shortages.' },
+  5: { threatBonus: 5, reinforcementBonus: 3, shopPriceMultiplier: 2.0, socialDifficultyMod: 2, description: 'Total Imperial domination. Maximum threat and restrictions.' },
+};
+
+/** A sector on the campaign overworld */
+export interface CampaignSector {
+  id: string;
+  name: string;
+  description: string;
+  /** Current Imperial control level (0-5) */
+  controlLevel: SectorControlLevel;
+  /** Mission IDs that take place in this sector */
+  missionIds: string[];
+  /** Social hub ID for this sector (if any) */
+  socialHubId?: string;
+  /** Adjacent sector IDs (for spread mechanics) */
+  adjacentSectorIds: string[];
+  /** Whether this sector has been visited */
+  visited: boolean;
+  /** Persistent map mutations applied to this sector */
+  mutations: SectorMutation[];
+}
+
+/** A persistent mutation to a sector's map/state */
+export interface SectorMutation {
+  id: string;
+  type: 'destroyed' | 'fortified' | 'secured' | 'contaminated' | 'reinforced';
+  /** Description of what changed */
+  description: string;
+  /** Position on the campaign map (for visual rendering) */
+  position?: GridCoordinate;
+  /** Mission that caused this mutation */
+  causedByMission: string;
+  /** Mechanical effect on missions in this sector */
+  effect?: {
+    /** Additional initial enemies */
+    bonusEnemies?: NPCSpawnGroup[];
+    /** Terrain modifications */
+    terrainOverrides?: Array<{ position: GridCoordinate; terrain: TerrainType }>;
+    /** Deploy zone restrictions */
+    deployZoneRestrictions?: GridCoordinate[];
+  };
+}
+
+// ============================================================================
+// LEGACY EVENT DECK (Pandemic Legacy-inspired triggered narrative events)
+// ============================================================================
+
+/** Trigger conditions for legacy events */
+export type LegacyEventTrigger =
+  | { type: 'mission_complete'; missionId: string; outcome?: 'victory' | 'defeat' }
+  | { type: 'act_start'; act: number }
+  | { type: 'act_end'; act: number }
+  | { type: 'hero_wounded'; heroCount?: number }
+  | { type: 'hero_critical_injury'; severity?: CriticalInjurySeverity }
+  | { type: 'sector_control'; sectorId: string; minLevel: SectorControlLevel }
+  | { type: 'narrative_item'; itemId: string }
+  | { type: 'momentum_threshold'; minMomentum?: number; maxMomentum?: number }
+  | { type: 'missions_played'; count: number }
+  | { type: 'companion_recruited'; companionId: string };
+
+/** Effects that a legacy event can apply */
+export type LegacyEventEffect =
+  | { type: 'unlock_mission'; missionId: string }
+  | { type: 'add_narrative_item'; itemId: string }
+  | { type: 'remove_narrative_item'; itemId: string }
+  | { type: 'modify_sector_control'; sectorId: string; delta: number }
+  | { type: 'award_credits'; amount: number }
+  | { type: 'award_xp'; amount: number }
+  | { type: 'add_critical_injury'; heroSelector: 'random' | 'most_wounded' | 'all'; injuryId: string }
+  | { type: 'heal_critical_injury'; heroSelector: 'random' | 'most_injured' | 'all'; injuryId?: string }
+  | { type: 'modify_momentum'; delta: number }
+  | { type: 'add_sector_mutation'; sectorId: string; mutation: SectorMutation }
+  | { type: 'unlock_shop_item'; shopId: string; itemId: string }
+  | { type: 'modify_threat_multiplier'; delta: number }
+  | { type: 'add_companion'; companionId: string }
+  | { type: 'remove_companion'; companionId: string }
+  | { type: 'add_rule_change'; ruleId: string };
+
+/** A single legacy event definition */
+export interface LegacyEventDefinition {
+  id: string;
+  name: string;
+  /** Narrative text shown to the player when the event triggers */
+  narrativeText: string;
+  /** Conditions that must ALL be met for this event to trigger */
+  triggers: LegacyEventTrigger[];
+  /** Effects applied when the event fires */
+  effects: LegacyEventEffect[];
+  /** Whether this event can only fire once per campaign */
+  oneShot: boolean;
+  /** Priority for ordering when multiple events trigger simultaneously */
+  priority: number;
+  /** Campaign act this event belongs to (for deck ordering) */
+  act: number;
+  /** If true, event is revealed to player before effects apply (dossier-style) */
+  isRevealed: boolean;
+}
+
+/** State of the legacy event deck in a campaign */
+export interface LegacyDeckState {
+  /** Events that have been triggered and resolved */
+  resolvedEventIds: string[];
+  /** Active rule changes from legacy events */
+  activeRuleChanges: string[];
+  /** Events waiting to be revealed (triggered but not yet shown to player) */
+  pendingEventIds: string[];
+}
+
+// ============================================================================
+// MOMENTUM SYSTEM (Pandemic Legacy-inspired win/loss rubber-banding)
+// ============================================================================
+
+/** Momentum level thresholds and their effects */
+export const MOMENTUM_EFFECTS: Record<number, {
+  label: string;
+  bonusTacticCards: number;
+  bonusCredits: number;
+  bonusDeployPoints: number;
+  threatReduction: number;
+  description: string;
+}> = {
+  [-3]: { label: 'Desperate', bonusTacticCards: 3, bonusCredits: 150, bonusDeployPoints: 2, threatReduction: 3, description: 'Rebel forces receive significant reinforcements and supply drops.' },
+  [-2]: { label: 'Struggling', bonusTacticCards: 2, bonusCredits: 100, bonusDeployPoints: 1, threatReduction: 2, description: 'Allied networks provide extra support.' },
+  [-1]: { label: 'Disadvantaged', bonusTacticCards: 1, bonusCredits: 50, bonusDeployPoints: 0, threatReduction: 1, description: 'Sympathizers offer modest assistance.' },
+  [0]: { label: 'Balanced', bonusTacticCards: 0, bonusCredits: 0, bonusDeployPoints: 0, threatReduction: 0, description: 'Standard operations. No adjustment.' },
+  [1]: { label: 'Advantaged', bonusTacticCards: 0, bonusCredits: -25, bonusDeployPoints: 0, threatReduction: -1, description: 'Imperial forces respond to rebel successes with increased patrols.' },
+  [2]: { label: 'Dominant', bonusTacticCards: 0, bonusCredits: -50, bonusDeployPoints: 0, threatReduction: -2, description: 'Empire redirects resources to counter rebel momentum.' },
+  [3]: { label: 'Overwhelming', bonusTacticCards: -1, bonusCredits: -75, bonusDeployPoints: 0, threatReduction: -3, description: 'Full Imperial counterstrike. Prepare for heavy resistance.' },
+};
+
+/** Clamp range for momentum value */
+export const MOMENTUM_MIN = -3;
+export const MOMENTUM_MAX = 3;
+
+// ============================================================================
+// CAMPAIGN OVERWORLD MAP (Pandemic Legacy-inspired persistent world)
+// ============================================================================
+
+/** Campaign overworld map definition (loaded from JSON) */
+export interface CampaignOverworldDefinition {
+  id: string;
+  name: string;
+  description: string;
+  /** Sectors that make up the overworld */
+  sectors: CampaignSector[];
+  /** Visual layout data for rendering the overworld map */
+  sectorPositions: Record<string, { x: number; y: number }>;
+  /** Connections between sectors (for adjacency rendering) */
+  connections: Array<{ from: string; to: string }>;
+}
+
+/** Runtime overworld state stored in CampaignState */
+export interface CampaignOverworldState {
+  /** Current sector states (keyed by sector ID) */
+  sectors: Record<string, CampaignSector>;
+  /** ID of the sector the party is currently in */
+  currentSectorId: string;
+  /** History of sector control changes */
+  controlHistory: Array<{
+    sectorId: string;
+    previousLevel: SectorControlLevel;
+    newLevel: SectorControlLevel;
+    causedByMission: string;
+    timestamp: string;
+  }>;
 }
 
 // ============================================================================

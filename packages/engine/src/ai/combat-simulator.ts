@@ -403,9 +403,9 @@ function recomputeDerivedStats(hero: HeroCharacter, gameData: GameData): void {
 
       const eff = talent.mechanicalEffect;
       if (eff.type === 'modify_stat') {
-        if (eff.stat === 'woundThreshold') woundBonus += (eff.value ?? 0) * (eff.perRank ? 1 : 1);
-        if (eff.stat === 'strainThreshold') strainBonus += (eff.value ?? 0) * (eff.perRank ? 1 : 1);
-        if (eff.stat === 'soak') soakBonus += (eff.value ?? 0) * (eff.perRank ? 1 : 1);
+        if (eff.stat === 'woundThreshold') woundBonus += Number(eff.value ?? 0) * (eff.perRank ? 1 : 1);
+        if (eff.stat === 'strainThreshold') strainBonus += Number(eff.value ?? 0) * (eff.perRank ? 1 : 1);
+        if (eff.stat === 'soak') soakBonus += Number(eff.value ?? 0) * (eff.perRank ? 1 : 1);
       }
     }
   }

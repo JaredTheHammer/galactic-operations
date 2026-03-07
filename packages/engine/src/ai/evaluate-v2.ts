@@ -62,6 +62,7 @@ import { RANGE_BAND_TILES } from '../types.js';
 
 import { findGuardians, hasKeyword, npcHasKeyword, getNPCKeywordValue } from '../keywords.js';
 import { isFigureVisible } from '../fog-of-war.js';
+import { isBossWeaponAvailable } from '../boss-mechanics.js';
 
 import type {
   ConditionResult,
@@ -265,7 +266,9 @@ function getPrimaryWeapon(
 
   if (isNPC(entity)) {
     if (entity.weapons.length === 0) return null;
-    const npcW = entity.weapons[0];
+    // Skip weapons disabled by boss hit locations
+    const available = entity.weapons.filter(w => isBossWeaponAvailable(figure, w.weaponId));
+    const npcW = available.length > 0 ? available[0] : entity.weapons[0];
     // Synthesize a WeaponDefinition from NPC weapon
     return {
       id: npcW.weaponId,

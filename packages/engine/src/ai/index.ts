@@ -72,6 +72,7 @@ export {
   buildAimAction,
   buildDodgeAction,
   buildActionsForAIAction,
+  chooseBossHitLocation,
 } from './actions-v2.js';
 
 // ============================================================================
