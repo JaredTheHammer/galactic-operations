@@ -15,6 +15,9 @@ import {
   getActOutcomeConsequences,
   applyActOutcomeConsequences,
   getFinaleExposureModifiers,
+  campaignToJSON,
+  campaignFromJSON,
+  getCampaignEpilogue,
 } from '../src/campaign-v2';
 
 import type {
@@ -637,5 +640,140 @@ describe('createActProgress', () => {
     expect(progress.influence).toBe(0);
     expect(progress.control).toBe(0);
     expect(progress.exposureThresholdsTriggered).toEqual([]);
+  });
+});
+
+// ============================================================================
+// SERIALIZATION
+// ============================================================================
+
+describe('serialization', () => {
+  it('preserves actProgress and actOutcomes through JSON round-trip', () => {
+    const campaign = makeCampaignWithProgress({
+      actProgress: {
+        act: 2,
+        exposure: 5,
+        influence: 7,
+        control: 3,
+        exposureThresholdsTriggered: [4],
+      },
+      actOutcomes: [
+        { act: 1, exposure: 4, influence: 6, control: 4, delta: 2, tier: 'favorable' },
+      ],
+    });
+
+    const json = campaignToJSON(campaign);
+    const restored = campaignFromJSON(json);
+
+    expect(restored.actProgress).toEqual(campaign.actProgress);
+    expect(restored.actOutcomes).toEqual(campaign.actOutcomes);
+  });
+
+  it('loads older saves without actProgress gracefully', () => {
+    const campaign = makeCampaignWithProgress();
+    delete campaign.actProgress;
+    delete campaign.actOutcomes;
+
+    const json = campaignToJSON(campaign);
+    const restored = campaignFromJSON(json);
+
+    expect(restored.actProgress).toBeUndefined();
+    expect(restored.actOutcomes).toBeUndefined();
+  });
+});
+
+// ============================================================================
+// CAMPAIGN EPILOGUE
+// ============================================================================
+
+describe('getCampaignEpilogue', () => {
+  it('returns null when no act outcomes exist', () => {
+    const campaign = makeCampaignWithProgress({ actOutcomes: [] });
+    expect(getCampaignEpilogue(campaign)).toBeNull();
+  });
+
+  it('returns null when actOutcomes is undefined', () => {
+    const campaign = makeCampaignWithProgress();
+    delete campaign.actOutcomes;
+    expect(getCampaignEpilogue(campaign)).toBeNull();
+  });
+
+  it('returns legendary for all dominant acts (score 6)', () => {
+    const campaign = makeCampaignWithProgress({
+      actOutcomes: [
+        { act: 1, exposure: 1, influence: 8, control: 2, delta: 6, tier: 'dominant' },
+        { act: 2, exposure: 2, influence: 7, control: 1, delta: 6, tier: 'dominant' },
+        { act: 3, exposure: 0, influence: 9, control: 3, delta: 6, tier: 'dominant' },
+      ],
+    });
+    const epilogue = getCampaignEpilogue(campaign)!;
+    expect(epilogue.tier).toBe('legendary');
+    expect(epilogue.cumulativeScore).toBe(6);
+    expect(epilogue.actSummaries).toHaveLength(3);
+    expect(epilogue.title).toBe('A New Dawn');
+  });
+
+  it('returns heroic for mostly favorable acts (score 2-3)', () => {
+    const campaign = makeCampaignWithProgress({
+      actOutcomes: [
+        { act: 1, exposure: 3, influence: 5, control: 2, delta: 3, tier: 'favorable' },
+        { act: 2, exposure: 4, influence: 4, control: 4, delta: 0, tier: 'contested' },
+        { act: 3, exposure: 2, influence: 6, control: 3, delta: 3, tier: 'favorable' },
+      ],
+    });
+    const epilogue = getCampaignEpilogue(campaign)!;
+    expect(epilogue.tier).toBe('heroic');
+    expect(epilogue.cumulativeScore).toBe(2);
+  });
+
+  it('returns pyrrhic for mixed results (score -1 to 1)', () => {
+    const campaign = makeCampaignWithProgress({
+      actOutcomes: [
+        { act: 1, exposure: 5, influence: 4, control: 4, delta: 0, tier: 'contested' },
+        { act: 2, exposure: 6, influence: 3, control: 4, delta: -1, tier: 'contested' },
+        { act: 3, exposure: 3, influence: 5, control: 5, delta: 0, tier: 'contested' },
+      ],
+    });
+    const epilogue = getCampaignEpilogue(campaign)!;
+    expect(epilogue.tier).toBe('pyrrhic');
+    expect(epilogue.cumulativeScore).toBe(0);
+  });
+
+  it('returns bittersweet for mostly unfavorable (score -2 to -3)', () => {
+    const campaign = makeCampaignWithProgress({
+      actOutcomes: [
+        { act: 1, exposure: 7, influence: 2, control: 5, delta: -3, tier: 'unfavorable' },
+        { act: 2, exposure: 5, influence: 4, control: 4, delta: 0, tier: 'contested' },
+        { act: 3, exposure: 6, influence: 2, control: 4, delta: -2, tier: 'unfavorable' },
+      ],
+    });
+    const epilogue = getCampaignEpilogue(campaign)!;
+    expect(epilogue.tier).toBe('bittersweet');
+    expect(epilogue.cumulativeScore).toBe(-2);
+  });
+
+  it('returns fallen for all dire acts (score -6)', () => {
+    const campaign = makeCampaignWithProgress({
+      actOutcomes: [
+        { act: 1, exposure: 10, influence: 1, control: 7, delta: -6, tier: 'dire' },
+        { act: 2, exposure: 9, influence: 0, control: 8, delta: -8, tier: 'dire' },
+        { act: 3, exposure: 10, influence: 1, control: 9, delta: -8, tier: 'dire' },
+      ],
+    });
+    const epilogue = getCampaignEpilogue(campaign)!;
+    expect(epilogue.tier).toBe('fallen');
+    expect(epilogue.cumulativeScore).toBe(-6);
+    expect(epilogue.title).toBe('Imperial Dominion');
+  });
+
+  it('works with partial act outcomes (mid-campaign)', () => {
+    const campaign = makeCampaignWithProgress({
+      actOutcomes: [
+        { act: 1, exposure: 3, influence: 6, control: 2, delta: 4, tier: 'favorable' },
+      ],
+    });
+    const epilogue = getCampaignEpilogue(campaign)!;
+    expect(epilogue.tier).toBe('pyrrhic'); // score 1 -> pyrrhic
+    expect(epilogue.actSummaries).toHaveLength(1);
   });
 });

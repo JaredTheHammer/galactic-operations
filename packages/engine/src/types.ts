@@ -1272,6 +1272,16 @@ export function createActProgress(act: number): ActProgress {
   };
 }
 
+export type CampaignEpilogueTier = 'legendary' | 'heroic' | 'pyrrhic' | 'bittersweet' | 'fallen';
+
+export interface CampaignEpilogue {
+  tier: CampaignEpilogueTier;
+  title: string;
+  narrative: string;
+  actSummaries: { act: number; tier: ActOutcomeTier }[];
+  cumulativeScore: number;
+}
+
 /** Campaign save file format (serializable to JSON) */
 export interface CampaignSaveFile {
   version: string;

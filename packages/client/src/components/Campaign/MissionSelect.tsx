@@ -9,7 +9,7 @@ import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult, ActProgress } from '../../../../engine/src/types'
 import { getExposureStatus } from '../../../../engine/src/types'
-import { getCampaignStats, getFinaleExposureModifiers } from '../../../../engine/src/campaign-v2'
+import { getCampaignStats, getFinaleExposureModifiers, getCampaignEpilogue } from '../../../../engine/src/campaign-v2'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
 import { usePortraitStore } from '../../store/portrait-store'
@@ -490,6 +490,17 @@ function CampaignCompleteScreen({
     ? campaign.completedMissions.reduce((sum, r) => sum + (r.heroKills[bestHero.id] ?? 0), 0)
     : 0
 
+  const epilogue = getCampaignEpilogue(campaign)
+  const epilogueTierColors: Record<string, string> = {
+    legendary: '#ffd700', heroic: '#44ff44', pyrrhic: '#ffaa00',
+    bittersweet: '#ff8844', fallen: '#ff4444',
+  }
+  const epilogueColor = epilogue ? (epilogueTierColors[epilogue.tier] ?? '#ffd700') : '#ffd700'
+  const actTierColors: Record<string, string> = {
+    dominant: '#44ff44', favorable: '#88ccff',
+    contested: '#ffaa00', unfavorable: '#ff8844', dire: '#ff4444',
+  }
+
   return (
     <div style={{
       flex: 1,
@@ -508,16 +519,40 @@ function CampaignCompleteScreen({
         {'\u2728'}
       </div>
       <h1 style={{
-        color: '#ffd700',
+        color: epilogueColor,
         margin: '0 0 8px 0',
         fontSize: isMobile ? '24px' : '32px',
-        textShadow: '0 0 30px #ffd70040',
+        textShadow: `0 0 30px ${epilogueColor}40`,
       }}>
-        CAMPAIGN COMPLETE
+        {epilogue ? epilogue.title.toUpperCase() : 'CAMPAIGN COMPLETE'}
       </h1>
-      <p style={{ color: '#aaa', margin: '0 0 32px 0', maxWidth: '500px', lineHeight: '1.5' }}>
-        Your operatives have completed their mission. The galaxy shifts in the wake of their actions.
-      </p>
+      {epilogue ? (
+        <div style={{ margin: '0 0 24px 0', maxWidth: '550px' }}>
+          <p style={{ color: '#ccc', lineHeight: '1.7', fontSize: '14px', margin: '0 0 16px 0' }}>
+            {epilogue.narrative}
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            {epilogue.actSummaries.map(s => (
+              <span key={s.act} style={{
+                padding: '4px 12px',
+                backgroundColor: '#12121f',
+                border: `1px solid ${actTierColors[s.tier] ?? '#888'}40`,
+                borderRadius: '4px',
+                fontSize: '11px',
+                color: actTierColors[s.tier] ?? '#888',
+                fontWeight: 'bold',
+                letterSpacing: '1px',
+              }}>
+                Act {s.act}: {s.tier.toUpperCase()}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p style={{ color: '#aaa', margin: '0 0 32px 0', maxWidth: '500px', lineHeight: '1.5' }}>
+          Your operatives have completed their mission. The galaxy shifts in the wake of their actions.
+        </p>
+      )}
 
       {/* Stats grid */}
       <div style={{

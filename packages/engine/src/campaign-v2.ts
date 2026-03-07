@@ -23,6 +23,8 @@ import type {
   ActOutcome,
   ActOutcomeTier,
   ExposureStatus,
+  CampaignEpilogue,
+  CampaignEpilogueTier,
 } from './types';
 
 import {
@@ -1174,6 +1176,94 @@ export function getCampaignStats(campaign: CampaignState): {
     totalCredits: campaign.credits,
     heroCount: Object.keys(campaign.heroes).length,
     averageMissionXP: campaign.missionsPlayed > 0 ? Math.round(totalXPEarned / campaign.missionsPlayed) : 0,
+  };
+}
+
+// ============================================================================
+// CAMPAIGN EPILOGUE
+// ============================================================================
+
+const TIER_SCORES: Record<string, number> = {
+  dominant: 2,
+  favorable: 1,
+  contested: 0,
+  unfavorable: -1,
+  dire: -2,
+};
+
+const EPILOGUE_DATA: Record<CampaignEpilogueTier, { title: string; narrative: string }> = {
+  legendary: {
+    title: 'A New Dawn',
+    narrative:
+      'Against all odds, the operatives have shattered Imperial control across the sector. ' +
+      'Their names are whispered in cantinas and shouted in celebrations from Coruscant to the Outer Rim. ' +
+      'The sector is free, and the seeds of a new galactic order have been planted. ' +
+      'The Empire will remember this defeat -- and the galaxy will remember these heroes.',
+  },
+  heroic: {
+    title: 'The Tide Turns',
+    narrative:
+      'The operatives have dealt a serious blow to Imperial operations in the sector. ' +
+      'While pockets of resistance remain, the balance of power has shifted decisively. ' +
+      'New allies rally to the cause daily, and the local population dares to hope again. ' +
+      'The fight is not over, but the hardest part may be behind them.',
+  },
+  pyrrhic: {
+    title: 'The Long War',
+    narrative:
+      'Victory and defeat have traded blows throughout the campaign. ' +
+      'The sector remains contested -- neither fully liberated nor fully subjugated. ' +
+      'The operatives have survived, and as long as they draw breath, the fight continues. ' +
+      'But the cost has been high, and the road ahead is uncertain.',
+  },
+  bittersweet: {
+    title: 'Fading Light',
+    narrative:
+      'The Empire has tightened its grip on the sector despite the operatives\' efforts. ' +
+      'Allies have scattered, safe houses have been compromised, and the network is fraying. ' +
+      'Yet the operatives persist, carrying the flame of resistance into darker days. ' +
+      'Perhaps another sector, another time, will see the tide turn.',
+  },
+  fallen: {
+    title: 'Imperial Dominion',
+    narrative:
+      'The Empire\'s iron fist has crushed the resistance. The operatives are scattered, ' +
+      'hunted, and nearly broken. The sector has been made an example -- a warning to any ' +
+      'who would defy Imperial authority. But even in the darkest hour, a spark remains. ' +
+      'Somewhere, someone remembers what these operatives fought for.',
+  },
+};
+
+function getEpilogueTier(score: number): CampaignEpilogueTier {
+  if (score >= 4) return 'legendary';
+  if (score >= 2) return 'heroic';
+  if (score >= -1) return 'pyrrhic';
+  if (score >= -3) return 'bittersweet';
+  return 'fallen';
+}
+
+/**
+ * Compute the campaign epilogue from accumulated act outcomes.
+ * Combines all act tier scores into a cumulative score that determines
+ * the overall campaign ending narrative.
+ */
+export function getCampaignEpilogue(campaign: CampaignState): CampaignEpilogue | null {
+  const outcomes = campaign.actOutcomes ?? [];
+  if (outcomes.length === 0) return null;
+
+  const actSummaries = outcomes.map(o => ({ act: o.act, tier: o.tier }));
+  const cumulativeScore = outcomes.reduce(
+    (sum, o) => sum + (TIER_SCORES[o.tier] ?? 0), 0,
+  );
+  const tier = getEpilogueTier(cumulativeScore);
+  const data = EPILOGUE_DATA[tier];
+
+  return {
+    tier,
+    title: data.title,
+    narrative: data.narrative,
+    actSummaries,
+    cumulativeScore,
   };
 }
 

@@ -75,6 +75,8 @@ export type {
   ActOutcome,
   ActOutcomeTier,
   ExposureStatus,
+  CampaignEpilogue,
+  CampaignEpilogueTier,
 } from './types.js';
 
 // Re-export rebellion mechanics helpers from types
