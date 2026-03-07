@@ -7,8 +7,10 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult } from '../../../../engine/src/types'
+import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult, SectorMapDefinition } from '../../../../engine/src/types'
 import { getCampaignStats } from '../../../../engine/src/campaign-v2'
+import { getNetworkUnlockedMissions, getNetworkSummary } from '../../../../engine/src/supply-network'
+import sectorMapData from '../../../../../data/sector-map.json'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
 import { usePortraitStore } from '../../store/portrait-store'
@@ -158,6 +160,28 @@ function CampaignStatsPanel({ campaign }: { campaign: CampaignState }) {
         <div>Credits: <span style={{ color: '#ffd700' }}>{campaign.credits}</span></div>
         <div>Threat Level: {campaign.threatLevel}</div>
         <div>Difficulty: {campaign.difficulty}</div>
+      </div>
+    </div>
+  )
+}
+
+function NetworkStatsWidget({ campaign }: { campaign: CampaignState }) {
+  const summary = getNetworkSummary(campaign.supplyNetwork, sectorMapData as SectorMapDefinition)
+
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <h3 style={{ color: '#44ff44', margin: '0 0 8px 0', fontSize: '14px' }}>Supply Network</h3>
+      <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+        <div>Nodes: {summary.activeNodes} active{summary.severedNodes > 0 ? `, ${summary.severedNodes} severed` : ''}</div>
+        <div>Income: <span style={{ color: '#ffd700' }}>+{summary.networkIncome}</span>/mission</div>
+        <div>Upkeep: <span style={{ color: '#ff8844' }}>-{summary.totalUpkeep}</span>/mission</div>
+        {summary.threatReduction > 0 && (
+          <div>Threat reduction: <span style={{ color: '#44ff44' }}>-{summary.threatReduction}</span></div>
+        )}
+        {summary.reinforcementBonus > 0 && (
+          <div>Reinforce bonus: <span style={{ color: '#4a9eff' }}>+{summary.reinforcementBonus}</span></div>
+        )}
+        <div>Locations: {summary.connectedLocations.length}</div>
       </div>
     </div>
   )
@@ -325,10 +349,12 @@ function MissionCard({
   mission,
   isSelected,
   onClick,
+  isNetworkUnlocked,
 }: {
   mission: MissionDefinition
   isSelected: boolean
   onClick: () => void
+  isNetworkUnlocked?: boolean
 }) {
   const diffColor = difficultyColors[mission.difficulty] ?? '#888'
   return (
@@ -339,7 +365,18 @@ function MissionCard({
       onMouseLeave={(e) => { if (!isSelected) (e.currentTarget.style.borderColor = '#2a2a3f') }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-        <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{mission.name}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{mission.name}</span>
+          {isNetworkUnlocked && (
+            <span style={{
+              fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase',
+              padding: '2px 6px', borderRadius: '3px',
+              backgroundColor: '#1a2a1a', color: '#44ff44', border: '1px solid #2a4a2a',
+            }}>
+              NETWORK
+            </span>
+          )}
+        </div>
         <span style={{ color: diffColor, fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase' }}>
           {mission.difficulty}
         </span>
@@ -646,6 +683,12 @@ export default function MissionSelect() {
     .map(id => campaignMissions[id])
     .filter(Boolean)
 
+  const networkUnlockedIds = new Set(
+    campaignState.supplyNetwork
+      ? getNetworkUnlockedMissions(campaignState.supplyNetwork, sectorMapData as SectorMapDefinition)
+      : [],
+  )
+
   const selectedMission = selectedMissionId ? campaignMissions[selectedMissionId] : null
 
   const handleLaunchMission = () => {
@@ -921,6 +964,10 @@ export default function MissionSelect() {
         <div style={sidebarResponsive}>
           <CampaignStatsPanel campaign={campaignState} />
 
+          {campaignState.supplyNetwork && campaignState.supplyNetwork.nodes.length > 0 && (
+            <NetworkStatsWidget campaign={campaignState} />
+          )}
+
           {campaignState.factionReputation && Object.keys(campaignState.factionReputation).length > 0 && (
             <FactionReputationPanel reputation={campaignState.factionReputation} />
           )}
@@ -963,6 +1010,7 @@ export default function MissionSelect() {
                     mission={mission}
                     isSelected={selectedMissionId === mission.id}
                     onClick={() => setSelectedMissionId(mission.id)}
+                    isNetworkUnlocked={networkUnlockedIds.has(mission.id)}
                   />
                 ))}
               </div>

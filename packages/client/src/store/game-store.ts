@@ -62,7 +62,7 @@ import {
 import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization, equipItem, unequipItem } from '@engine/character-v2.js'
 import type { HeroCreationInput, EquipmentSlot } from '@engine/character-v2.js'
 import { getEquippedTalents, canActivateTalent } from '@engine/talent-v2.js'
-import { initializeTacticDeck, drawCardsForBothSides, playCard } from '@engine/tactic-cards.js'
+import { initializeTacticDeck, drawCardsForBothSides, playCard, playCardAltMode } from '@engine/tactic-cards.js'
 import {
   createCampaign,
   getAvailableMissions,
@@ -79,6 +79,9 @@ import {
   removeFromInventory,
 } from '@engine/campaign-v2.js'
 import type { MissionCompletionInput } from '@engine/campaign-v2.js'
+import { initializeNetwork } from '@engine/supply-network.js'
+import type { SectorMapDefinition } from '@engine/types.js'
+import sectorMapData from '../../../../data/sector-map.json'
 import { combatAnimations } from '../canvas/animation-manager'
 import { saveToSlot, loadFromSlot, deleteSlot, AUTO_SAVE_SLOT, findEmptySlot, migrateLegacySave } from '../services/save-slots'
 
@@ -536,6 +539,7 @@ export interface GameStore {
   useConsumable: (itemId: string, targetId?: string) => void
   getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => void
+  playTacticCardAltMode: (cardId: string) => void
   dismissCombat: () => void
   endActivation: () => void
   advancePhase: () => void
@@ -1449,6 +1453,48 @@ export const useGameStore = create<GameStore>((set, get) => ({
     addCombatLog(`Played tactic card: ${cardId}`)
   },
 
+  playTacticCardAltMode: (cardId: string) => {
+    const { gameState, gameData, addCombatLog } = get()
+    if (!gameState?.tacticDeck || !gameData) return
+
+    const result = playCardAltMode(gameState.tacticDeck, gameData, 'Operative', cardId)
+    if (!result) {
+      addCombatLog(`Cannot play ${cardId} in alt mode`)
+      return
+    }
+
+    // Apply alt mode effects to the current figure
+    const figures = [...gameState.figures]
+    const currentFigureId = gameState.activationOrder?.[gameState.currentActivationIndex]
+    if (currentFigureId) {
+      const figIdx = figures.findIndex(f => f.id === currentFigureId)
+      if (figIdx >= 0) {
+        const fig = { ...figures[figIdx] }
+        if (result.result.movementBonus > 0) {
+          fig.maneuversRemaining = Math.min(2, (fig.maneuversRemaining ?? 0) + 1) as 0 | 1 | 2
+        }
+        if (result.result.actionPointBonus > 0) {
+          fig.actionsRemaining = Math.min(2, (fig.actionsRemaining ?? 0) + 1) as 0 | 1
+        }
+        if (result.result.strainRecovery > 0) {
+          fig.strainCurrent = Math.max(0, (fig.strainCurrent ?? 0) - result.result.strainRecovery)
+        }
+        figures[figIdx] = fig
+      }
+    }
+
+    set({
+      gameState: {
+        ...gameState,
+        tacticDeck: result.deck,
+        figures,
+      },
+    })
+
+    const modeLabel = result.result.altMode.type.replace(/_/g, ' ')
+    addCombatLog(`Used ${result.result.cardName} alt mode: ${modeLabel} +${result.result.altMode.value}`)
+  },
+
   dismissCombat: () => {
     const { gameState } = get()
     if (!gameState) return
@@ -1995,6 +2041,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       startingMissionId: (campaignData as any).startingMissionId ?? 'act1-m1-arrival',
       startingCredits: (campaignData as any).startingCredits ?? 0,
     })
+
+    // Initialize supply network with starting location
+    campaign.supplyNetwork = initializeNetwork(sectorMapData as SectorMapDefinition)
 
     // Find an empty slot for the new campaign
     const newSlot = findEmptySlot() ?? 1

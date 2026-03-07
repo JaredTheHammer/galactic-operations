@@ -214,6 +214,7 @@ export function SocialPhase() {
           onHealHero={onHealHero}
           onComplete={goToSummary}
           onSkip={onSkip}
+          onUpdateCampaign={updateCampaignState}
         />
       )}
       {view === 'encounter' && session.currentEncounter && (
