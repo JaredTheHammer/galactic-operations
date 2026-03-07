@@ -46,6 +46,37 @@ export interface DeploymentZone {
   operative: GridCoordinate[];
 }
 
+// ============================================================================
+// FOG OF WAR / PROGRESSIVE ROOM REVEAL
+// ============================================================================
+
+/**
+ * Visibility state for a single tile.
+ * - 'hidden':   Never seen, fully obscured (black fog)
+ * - 'explored': Previously seen but no friendly figure has LOS (dimmed/desaturated)
+ * - 'visible':  Currently in LOS of a friendly figure (fully rendered)
+ */
+export type TileVisibility = 'hidden' | 'explored' | 'visible';
+
+/**
+ * Per-side fog-of-war state. Tracks which tiles each side can see.
+ * Uses flat string keys ("x,y") for efficient Set lookups.
+ */
+export interface FogOfWarState {
+  /** Tiles currently visible to Imperial side (recalculated each activation) */
+  imperialVisible: Set<string>;
+  /** Tiles currently visible to Operative side (recalculated each activation) */
+  operativeVisible: Set<string>;
+  /** Tiles that have been explored (ever visible) by Imperial side */
+  imperialExplored: Set<string>;
+  /** Tiles that have been explored (ever visible) by Operative side */
+  operativeExplored: Set<string>;
+  /** Whether fog of war is enabled for this mission */
+  enabled: boolean;
+  /** Vision range in tiles (Chebyshev distance). Default 8. */
+  visionRange: number;
+}
+
 export interface GameMap {
   id: string;
   name: string;
@@ -506,7 +537,11 @@ export type UnitKeywordName =
   | 'Cumbersome'   // Cannot attack if a Move maneuver was performed this activation
   | 'Disciplined'  // Remove X additional suppression tokens during rally step
   | 'Dauntless'    // May suffer 1 strain to remove 1 suppression token when activating
-  | 'Guardian';    // When friendly within range is hit by ranged, absorb up to X wounds
+  | 'Guardian'     // When friendly within range is hit by ranged, absorb up to X wounds
+  | 'Retaliate'    // When hit by attack within Engaged range, attacker suffers X automatic wounds
+  | 'Pierce'       // Ignore X points of target's Soak when dealing damage
+  | 'Shield'       // Gain X automatic block results added to defense roll
+  | 'Steadfast';   // Immune to Stunned and Immobilized conditions
 
 export interface UnitKeyword {
   name: UnitKeywordName;
@@ -859,6 +894,8 @@ export interface CombatResolution {
   isNewlyWounded: boolean;     // true if hero just became Wounded (first wound threshold)
   defenderRemainingWounds: number;
 
+  // Retaliate keyword: automatic wounds dealt back to attacker
+  retaliateWounds?: number;
   // Boss hit location results
   /** ID of the targeted hit location (if targeted shot) */
   targetedLocationId?: string;
@@ -1030,6 +1067,8 @@ export interface GameState {
   // Tactic card deck state (hands, draw pile, discard)
   tacticDeck?: TacticDeckState;
 
+  // Fog of war / progressive room reveal
+  fogOfWar?: FogOfWarState;
   // Spirit Island-inspired optional subsystems (all toggleable)
   spiritIsland?: SpiritIslandState;
   // Active contracts being tracked this mission (Dune: contracts system)
@@ -1216,6 +1255,11 @@ export interface MissionDefinition {
   bonusXPPerKill: number;
   maxKillXP: number;
   leaderKillXP: number;
+
+  /** Fog of war: enable progressive room reveal for this mission. Default false. */
+  fogOfWar?: boolean;
+  /** Vision range in tiles when fog of war is enabled. Default 8. */
+  fogOfWarVisionRange?: number;
 }
 
 // ============================================================================

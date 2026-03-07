@@ -62,6 +62,9 @@ export type {
   // Species Abilities
   SpeciesAbilityEffect,
   SpeciesAbility,
+  // Fog of War
+  TileVisibility,
+  FogOfWarState,
   // Boss Hit Location Types
   BossHitLocationDef,
   BossHitLocationState,
@@ -235,10 +238,24 @@ export {
   npcHasKeyword,
   getNPCKeywordValue,
   applyArmorKeyword,
+  applyRetaliateKeyword,
   applyDisciplinedBonus,
   findGuardians,
   applyGuardianTransfer,
 } from './keywords.js';
+
+// Re-export fog of war system
+export {
+  createFogOfWarState,
+  getTileVisibility,
+  isFigureVisible,
+  computeVisibleTiles,
+  computeVisibleTilesWithRoomReveal,
+  updateFogOfWar,
+  updateFogAfterMove,
+  serializeFogOfWar,
+  deserializeFogOfWar,
+} from './fog-of-war.js';
 
 // Re-export AI system
 export {
@@ -253,6 +270,7 @@ export {
   calculateThreatLevel,
   evaluateCondition,
   getEnemies,
+  getVisibleEnemies,
   getAllies,
   getFigureSide,
   getValidTargetsV2,

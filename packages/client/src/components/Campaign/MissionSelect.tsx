@@ -511,6 +511,7 @@ function MissionCard({
       </div>
       <div style={{ fontSize: '12px', color: '#888', marginBottom: '4px' }}>
         Act {mission.campaignAct}, Mission {mission.missionIndex}
+        {mission.fogOfWar && <span style={{ color: '#6699cc', marginLeft: '6px' }}>[FOG]</span>}
       </div>
       <div style={{ fontSize: '12px', color: '#aaa' }}>{mission.description}</div>
     </div>
@@ -1245,6 +1246,9 @@ export default function MissionSelect() {
                       marginBottom: '12px',
                     }}>
                       {selectedMission.difficulty.toUpperCase()} \u2022 Round Limit: {selectedMission.roundLimit}
+                      {selectedMission.fogOfWar && (
+                        <span style={{ color: '#6699cc', marginLeft: '8px' }}>\u2022 FOG OF WAR</span>
+                      )}
                     </div>
 
                     <p style={{ color: '#ccc', fontSize: '13px', lineHeight: '1.5', margin: '0 0 12px 0' }}>

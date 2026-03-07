@@ -64,6 +64,7 @@ import {
   getSpeciesBonusStrainRecovery,
   isImmuneToCondition,
 } from './species-abilities.js';
+import { updateFogOfWar, createFogOfWarState } from './fog-of-war.js';
 import { recoverFocus, initFocusResource, spendFocus } from './focus-resource.js';
 import { initBossHitLocations } from './boss-mechanics.js';
 
@@ -103,6 +104,10 @@ export function createInitialGameStateV2(
     lootTokens?: LootToken[];
     /** Consumable inventory from campaign state. Maps item ID to quantity. */
     consumableInventory?: Record<string, number>;
+    /** Enable fog of war / progressive room reveal. Disabled by default. */
+    fogOfWar?: boolean;
+    /** Vision range in tiles for fog of war. Default 8. */
+    fogOfWarVisionRange?: number;
     /** Spirit Island optional subsystem configuration */
     spiritIsland?: import('./types.js').SpiritIslandState;
   },
@@ -186,6 +191,10 @@ export function createInitialGameStateV2(
     // Consumable inventory (initialized from campaign state or empty for standalone)
     consumableInventory: options?.consumableInventory ?? {},
 
+    // Fog of war (disabled by default for backward compatibility)
+    fogOfWar: options?.fogOfWar
+      ? createFogOfWarState(true, options.fogOfWarVisionRange)
+      : undefined,
     // Spirit Island optional subsystems (all toggleable, disabled by default)
     spiritIsland: options?.spiritIsland,
   };
@@ -307,7 +316,14 @@ export function deployFiguresV2(
     }
   }
 
-  return { ...gameState, figures };
+  let newState = { ...gameState, figures };
+
+  // Fog of war: calculate initial visibility from deployed positions
+  if (newState.fogOfWar?.enabled) {
+    newState = { ...newState, fogOfWar: updateFogOfWar(newState) };
+  }
+
+  return newState;
 }
 
 /**
@@ -1083,9 +1099,24 @@ export function resetForActivation(
   gameState?: GameState,
   gameData?: GameData,
 ): Figure {
+  // --- Damage-over-time conditions (Gloomhaven-inspired) ---
+  let dotWounds = 0;
+
+  // Bleeding: suffer 1 wound at start of activation
+  if (figure.conditions.includes('Bleeding')) {
+    dotWounds += 1;
+  }
+
+  // Burning: suffer 1 wound at start of activation
+  if (figure.conditions.includes('Burning')) {
+    dotWounds += 1;
+  }
+
+  // Remove transient conditions that expire at activation start
   const newConditions = figure.conditions.filter(c =>
-    // Remove transient conditions that expire at activation start
-    c !== 'Disoriented'
+    c !== 'Disoriented' &&
+    c !== 'Stunned' &&    // Stunned: lose action then clears
+    c !== 'Staggered'     // Staggered: lose action then clears
   );
 
   // Graduated suppression rally step: roll 1d6 per suppression token.
@@ -1152,6 +1183,11 @@ export function resetForActivation(
     maneuversRemaining = 1;
   }
 
+  // Stunned / Staggered: lose Action for this activation (condition already cleared above)
+  if (figure.conditions.includes('Stunned') || figure.conditions.includes('Staggered')) {
+    actionsRemaining = 0;
+  }
+
   // Species regeneration (e.g., Trandoshan: recover 1 wound at activation start)
   let woundsCurrent = figure.woundsCurrent;
   if (gameState && gameData && figure.entityType === 'hero') {
@@ -1164,6 +1200,18 @@ export function resetForActivation(
     }
   }
 
+  // Apply DOT wounds (Bleeding/Burning) after regeneration
+  if (dotWounds > 0) {
+    woundsCurrent += dotWounds;
+  }
+
+  // Burning clears on successful rally (4+ on 1d6)
+  if (figure.conditions.includes('Burning')) {
+    const roll = rollFn ?? (() => Math.ceil(Math.random() * 6));
+    if (roll() >= 4) {
+      const burnIdx = newConditions.indexOf('Burning');
+      if (burnIdx >= 0) newConditions.splice(burnIdx, 1);
+    }
   // Focus recovery (heroes only): recover Focus points at activation start
   let focusCurrent = figure.focusCurrent;
   if (figure.entityType === 'hero' && figure.focusMax !== undefined && focusCurrent !== undefined) {
@@ -1320,6 +1368,10 @@ export function executeActionV2(
   switch (action.type) {
     // ---- MANEUVERS (consume maneuversRemaining) ----
     case 'Move': {
+      // Immobilized: cannot perform Move maneuvers
+      if (figure.conditions.includes('Immobilized')) {
+        break;
+      }
       const { path } = action.payload;
       newState = moveFigure(figure, path, newState);
       // Decrement maneuversRemaining and set move tracking flag
@@ -1336,6 +1388,11 @@ export function executeActionV2(
       const mover = newState.figures.find(f => f.id === figure.id);
       if (mover && !mover.isDefeated) {
         newState = resolveStandbyTriggers(mover, newState, gameData);
+      }
+
+      // Fog of war: recalculate visibility after movement
+      if (newState.fogOfWar?.enabled) {
+        newState = { ...newState, fogOfWar: updateFogOfWar(newState) };
       }
       break;
     }

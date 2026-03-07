@@ -359,7 +359,7 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ selectedFigure, gameState,
         const kwColors: Record<string, string> = {
           Armor: '#8899aa', Agile: '#00cccc', Relentless: '#cc3333',
           Cumbersome: '#cc8833', Disciplined: '#4477cc', Dauntless: '#9944cc',
-          Guardian: '#ccaa00',
+          Guardian: '#ccaa00', Retaliate: '#ff6644',
         }
         return (
           <div style={sectionStyle}>

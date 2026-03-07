@@ -59,9 +59,11 @@ import {
 
 import {
   getKeywordValue,
+  hasKeyword,
   findGuardians,
   applyGuardianTransfer,
   applyArmorKeyword,
+  applyRetaliateKeyword,
 } from './keywords';
 
 import {
@@ -527,6 +529,7 @@ export function calculateDamage(
   weapon: WeaponDefinition,
   soak: number,
   attackerBrawn: number = 0,
+  attackerKeywordPierceValue: number = 0,
 ): DamageResult {
   if (!rollResult.isHit) {
     return {
@@ -549,6 +552,9 @@ export function calculateDamage(
   // Weapon Pierce quality (stacks with combo pierce)
   const weaponPierce = getWeaponQualityValue(weapon, 'Pierce');
 
+  // Pierce keyword on attacker (stacks with weapon and combo pierce)
+  const keywordPierce = attackerKeywordPierceValue;
+
   // Brawn bonus for melee/brawl
   const brawnBonus = weapon.damageAddBrawn ? attackerBrawn : 0;
 
@@ -561,7 +567,7 @@ export function calculateDamage(
   if (pierceValue === 'all') {
     effectiveSoak = 0;
   } else {
-    const totalPierce = (pierceValue as number) + weaponPierce;
+    const totalPierce = (pierceValue as number) + weaponPierce + keywordPierce;
     effectiveSoak = Math.max(0, soak - totalPierce);
   }
 
@@ -819,6 +825,17 @@ export function resolveCombatV2(
     };
   }
 
+  // 3b2. Shield X keyword: cancel up to X net successes (automatic blocks)
+  const shieldValue = getKeywordValue(defender, 'Shield', gameState);
+  if (shieldValue > 0 && rollResult.isHit) {
+    const reduced = Math.max(0, rollResult.netSuccesses - shieldValue);
+    rollResult = {
+      ...rollResult,
+      netSuccesses: reduced,
+      isHit: reduced > 0,
+    };
+  }
+
   // 3c. Dodge token: defender spends 1 dodge token to cancel 1 net success
   if ((defender.dodgeTokens ?? 0) > 0 && rollResult.isHit) {
     const reduced = rollResult.netSuccesses - 1;
@@ -871,11 +888,13 @@ export function resolveCombatV2(
     : 0; // NPCs have brawn baked into baseDamage
 
   // 5. Calculate base damage
+  const attackerPierceKeyword = getKeywordValue(attacker, 'Pierce', gameState);
   const damageResult = calculateDamage(
     rollResult,
     poolCtx.weapon,
     poolCtx.soak - tacticPierce, // Apply tactic card pierce to soak reduction
     attackerBrawn,
+    attackerPierceKeyword,
   );
 
   // 5b. Talent passive damage modifiers (heroes only)
@@ -933,6 +952,16 @@ export function resolveCombatV2(
   const isNewlyWounded = reachedThreshold && defenderIsHero && !alreadyWounded;
   const isDefeated = reachedThreshold && (!defenderIsHero || alreadyWounded);
 
+  // 9. Retaliate keyword: defender deals automatic wounds to attacker when hit in melee
+  let retaliateWounds: number | undefined;
+  if (rollResult.isHit && scenario.rangeBand === 'Engaged') {
+    const retaliateValue = getKeywordValue(defender, 'Retaliate', gameState);
+    if (retaliateValue > 0) {
+      const attackerSoak = computeSoak(attacker, attackerEntity!, gameData);
+      retaliateWounds = applyRetaliateKeyword(retaliateValue, attackerSoak);
+    }
+  }
+
   return {
     rollResult,
     weaponBaseDamage: poolCtx.weapon.baseDamage,
@@ -951,6 +980,7 @@ export function resolveCombatV2(
     isDefeated,
     isNewlyWounded,
     defenderRemainingWounds: isNewlyWounded ? woundThreshold : defenderRemainingWounds,
+    retaliateWounds: retaliateWounds != null && retaliateWounds > 0 ? retaliateWounds : undefined,
   };
 }
 
@@ -1084,8 +1114,11 @@ export function applyCombatResult(
         ? aggregateComboEffects(resolution.rollResult.combos)
         : null;
       const newConditions = [...fig.conditions];
+      // Steadfast keyword: immune to Stunned and Immobilized
+      const isSteadfast = hasKeyword(fig, 'Steadfast', gameState);
       if (comboEffects) {
         for (const cond of comboEffects.conditions) {
+          if (isSteadfast && (cond === 'Stunned' || cond === 'Immobilized')) continue;
           if (!newConditions.includes(cond as Condition)) {
             newConditions.push(cond as Condition);
           }
@@ -1180,6 +1213,7 @@ export function applyCombatResult(
       };
     }
 
+    // --- ATTACKER (threat-based strain + consume aim tokens + retaliate wounds) ---
     // --- ATTACKER (threat-based strain + consume aim tokens + consume Focus bonus) ---
     if (fig.id === scenario.attackerId) {
       // Consume aim tokens (effect already applied in buildCombatPools)
@@ -1210,13 +1244,46 @@ export function applyCombatResult(
           newConditions.push('Staggered');
         }
 
-        return {
+        updatedFig = {
           ...updatedFig,
           strainCurrent: strainThreshold !== null
             ? Math.min(newStrain, strainThreshold + 5) // cap at threshold + 5
             : updatedFig.strainCurrent,
           conditions: newConditions,
         };
+      }
+
+      // Retaliate keyword: attacker suffers automatic wounds from defender's retaliation
+      if (resolution.retaliateWounds && resolution.retaliateWounds > 0) {
+        const entity = getEntity(updatedFig, gameState);
+        const threshold = getWoundThreshold(updatedFig, entity);
+        const newWounds = updatedFig.woundsCurrent + resolution.retaliateWounds;
+        const reachedThreshold = newWounds >= threshold;
+
+        // Hero wounded mechanic applies to attacker too
+        const attackerIsHero = updatedFig.entityType === 'hero';
+        const attackerAlreadyWounded = updatedFig.isWounded;
+
+        if (reachedThreshold && attackerIsHero && !attackerAlreadyWounded) {
+          const newConditions = [...updatedFig.conditions];
+          if (!newConditions.includes('Wounded')) {
+            newConditions.push('Wounded');
+          }
+          updatedFig = {
+            ...updatedFig,
+            woundsCurrent: 0,
+            strainCurrent: 0,
+            isWounded: true,
+            isDefeated: false,
+            conditions: newConditions,
+          };
+        } else {
+          updatedFig = {
+            ...updatedFig,
+            woundsCurrent: Math.min(newWounds, threshold),
+            isDefeated: reachedThreshold,
+          };
+        }
       }
 
       return updatedFig;
