@@ -35,6 +35,7 @@ import { CampaignOverworld } from './components/Campaign/CampaignOverworld'
 import { FloatingCombatTextOverlay } from './components/HUD/FloatingCombatText'
 const CampaignJournal = React.lazy(() => import('./components/Campaign/CampaignJournal'))
 const CampaignStats = React.lazy(() => import('./components/Campaign/CampaignStats'))
+const StrategicCommand = React.lazy(() => import('./components/Campaign/StrategicCommand/StrategicCommand'))
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useCampaignAI } from './hooks/useCampaignAI'
 import { useIsMobile } from './hooks/useIsMobile'
@@ -107,6 +108,7 @@ function App() {
     overworldDef,
     closeCampaignOverworld,
     travelToSector,
+    showStrategicCommand,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -124,7 +126,7 @@ function App() {
   // Keyboard shortcuts for tactical combat (disabled on non-combat screens and mobile)
   const inTacticalCombat = !!gameState && isInitialized && !isAIBattle && !showSetup && !showHeroCreation
     && !showMissionSelect && !showPostMission && !showSocialPhase && !showHeroProgression
-    && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition && !showCampaignOverworld
+    && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition && !showCampaignOverworld && !showStrategicCommand
   useCombatKeys(inTacticalCombat && !isMobile)
 
   // Auto-execute Imperial AI turns in campaign combat (not AI Battle mode)
@@ -221,6 +223,20 @@ function App() {
       }>
         <AudioControls />
         <CampaignStats />
+      </React.Suspense>
+    )
+  }
+
+  // Campaign: strategic command (contracts, intel, deck-building, research, mercenaries)
+  if (showStrategicCommand) {
+    return (
+      <React.Suspense fallback={
+        <div style={{ width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a0f' }}>
+          <div style={{ color: '#cc8800', fontSize: '16px' }}>Loading strategic command...</div>
+        </div>
+      }>
+        <AudioControls />
+        <StrategicCommand />
       </React.Suspense>
     )
   }

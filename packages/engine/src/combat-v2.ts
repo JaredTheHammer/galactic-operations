@@ -951,7 +951,7 @@ export function applyCombatResult(
       if (isRangedAttack && resolution.rollResult.isHit) {
         suppressionGain = 1; // base: +1 per ranged hit
         // Triumph adds +1 extra suppression
-        if (resolution.rollResult.triumph > 0) {
+        if (resolution.rollResult.totalTriumphs > 0) {
           suppressionGain += 1;
         }
         // Yahtzee combo bonus suppression (e.g., Quad = +2)

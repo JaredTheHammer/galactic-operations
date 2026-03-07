@@ -7,8 +7,9 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult, CriticalInjuryDefinition } from '../../../../engine/src/types'
-import { getCampaignStats } from '../../../../engine/src/campaign-v2'
+import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult, CriticalInjuryDefinition, ActProgress } from '../../../../engine/src/types'
+import { getExposureStatus } from '../../../../engine/src/types'
+import { getCampaignStats, getFinaleExposureModifiers, getCampaignEpilogue } from '../../../../engine/src/campaign-v2'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
 import { usePortraitStore } from '../../store/portrait-store'
@@ -16,6 +17,7 @@ import { listSaveSlots, MAX_SLOTS, findEmptySlot, type SaveSlotMeta } from '../.
 import { MomentumIndicator } from './MomentumIndicator'
 import { SectorControlDisplay } from './SectorControlDisplay'
 import { CriticalInjuryPanel } from './CriticalInjuryPanel'
+import { CampaignVictory } from './CampaignVictory'
 
 // ============================================================================
 // STYLES
@@ -161,6 +163,112 @@ function CampaignStatsPanel({ campaign }: { campaign: CampaignState }) {
         <div>Credits: <span style={{ color: '#ffd700' }}>{campaign.credits}</span></div>
         <div>Threat Level: {campaign.threatLevel}</div>
         <div>Difficulty: {campaign.difficulty}</div>
+      </div>
+    </div>
+  )
+}
+
+function RebellionStatusPanel({ actProgress }: { actProgress: ActProgress }) {
+  const exposureStatus = getExposureStatus(actProgress.exposure)
+  const exposurePct = (actProgress.exposure / 10) * 100
+  const delta = actProgress.influence - actProgress.control
+
+  const statusConfig = {
+    ghost: { label: 'GHOST', color: '#44ff44', icon: '\u{1F47B}' },
+    detected: { label: 'DETECTED', color: '#ffaa00', icon: '\u26A0' },
+    hunted: { label: 'HUNTED', color: '#ff4444', icon: '\u{1F6A8}' },
+  }
+  const status = statusConfig[exposureStatus]
+
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <h3 style={{ color: '#4a9eff', margin: '0 0 8px 0', fontSize: '14px' }}>Rebellion Status</h3>
+
+      {/* Exposure tracker */}
+      <div style={{
+        padding: '8px',
+        marginBottom: '6px',
+        backgroundColor: '#0a0a1a',
+        borderRadius: '4px',
+        fontSize: '12px',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+          <span style={{ color: '#888' }}>Exposure</span>
+          <span style={{ color: status.color, fontWeight: 'bold', fontSize: '11px' }}>
+            {status.icon} {status.label}
+          </span>
+        </div>
+        <div style={{
+          width: '100%',
+          height: '6px',
+          backgroundColor: '#1a1a2e',
+          borderRadius: '3px',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            width: `${exposurePct}%`,
+            height: '100%',
+            backgroundColor: status.color,
+            borderRadius: '3px',
+            transition: 'width 0.3s, background-color 0.3s',
+            boxShadow: `0 0 6px ${status.color}40`,
+          }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2px', fontSize: '10px', color: '#555' }}>
+          <span>0</span>
+          <span>{actProgress.exposure}/10</span>
+        </div>
+      </div>
+
+      {/* Influence vs Control */}
+      <div style={{
+        padding: '8px',
+        backgroundColor: '#0a0a1a',
+        borderRadius: '4px',
+        fontSize: '12px',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+          <span style={{ color: '#4a9eff' }}>Influence: {actProgress.influence}</span>
+          <span style={{ color: '#ff6666' }}>Control: {actProgress.control}</span>
+        </div>
+        {/* Tug-of-war bar */}
+        <div style={{
+          width: '100%',
+          height: '8px',
+          backgroundColor: '#1a1a2e',
+          borderRadius: '4px',
+          overflow: 'hidden',
+          display: 'flex',
+        }}>
+          {(() => {
+            const total = actProgress.influence + actProgress.control
+            const influencePct = total > 0 ? (actProgress.influence / total) * 100 : 50
+            return (
+              <>
+                <div style={{
+                  width: `${influencePct}%`,
+                  height: '100%',
+                  backgroundColor: '#4a9eff',
+                  transition: 'width 0.3s',
+                }} />
+                <div style={{
+                  flex: 1,
+                  height: '100%',
+                  backgroundColor: '#ff444480',
+                }} />
+              </>
+            )
+          })()}
+        </div>
+        <div style={{
+          textAlign: 'center',
+          marginTop: '4px',
+          fontSize: '11px',
+          color: delta > 0 ? '#4a9eff' : delta < 0 ? '#ff6666' : '#888',
+          fontWeight: 'bold',
+        }}>
+          {delta > 0 ? `+${delta} Rebellion` : delta < 0 ? `${delta} Imperial` : 'Contested'}
+        </div>
       </div>
     </div>
   )
@@ -386,6 +494,17 @@ function CampaignCompleteScreen({
     ? campaign.completedMissions.reduce((sum, r) => sum + (r.heroKills[bestHero.id] ?? 0), 0)
     : 0
 
+  const epilogue = getCampaignEpilogue(campaign)
+  const epilogueTierColors: Record<string, string> = {
+    legendary: '#ffd700', heroic: '#44ff44', pyrrhic: '#ffaa00',
+    bittersweet: '#ff8844', fallen: '#ff4444',
+  }
+  const epilogueColor = epilogue ? (epilogueTierColors[epilogue.tier] ?? '#ffd700') : '#ffd700'
+  const actTierColors: Record<string, string> = {
+    dominant: '#44ff44', favorable: '#88ccff',
+    contested: '#ffaa00', unfavorable: '#ff8844', dire: '#ff4444',
+  }
+
   return (
     <div style={{
       flex: 1,
@@ -404,16 +523,40 @@ function CampaignCompleteScreen({
         {'\u2728'}
       </div>
       <h1 style={{
-        color: '#ffd700',
+        color: epilogueColor,
         margin: '0 0 8px 0',
         fontSize: isMobile ? '24px' : '32px',
-        textShadow: '0 0 30px #ffd70040',
+        textShadow: `0 0 30px ${epilogueColor}40`,
       }}>
-        CAMPAIGN COMPLETE
+        {epilogue ? epilogue.title.toUpperCase() : 'CAMPAIGN COMPLETE'}
       </h1>
-      <p style={{ color: '#aaa', margin: '0 0 32px 0', maxWidth: '500px', lineHeight: '1.5' }}>
-        Your operatives have completed their mission. The galaxy shifts in the wake of their actions.
-      </p>
+      {epilogue ? (
+        <div style={{ margin: '0 0 24px 0', maxWidth: '550px' }}>
+          <p style={{ color: '#ccc', lineHeight: '1.7', fontSize: '14px', margin: '0 0 16px 0' }}>
+            {epilogue.narrative}
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            {epilogue.actSummaries.map(s => (
+              <span key={s.act} style={{
+                padding: '4px 12px',
+                backgroundColor: '#12121f',
+                border: `1px solid ${actTierColors[s.tier] ?? '#888'}40`,
+                borderRadius: '4px',
+                fontSize: '11px',
+                color: actTierColors[s.tier] ?? '#888',
+                fontWeight: 'bold',
+                letterSpacing: '1px',
+              }}>
+                Act {s.act}: {s.tier.toUpperCase()}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p style={{ color: '#aaa', margin: '0 0 32px 0', maxWidth: '500px', lineHeight: '1.5' }}>
+          Your operatives have completed their mission. The galaxy shifts in the wake of their actions.
+        </p>
+      )}
 
       {/* Stats grid */}
       <div style={{
@@ -613,6 +756,7 @@ export default function MissionSelect() {
     travelToSector,
     treatCriticalInjury,
     criticalInjuryDefs,
+    openStrategicCommand,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -756,6 +900,12 @@ export default function MissionSelect() {
             onClick={openSocialPhase}
           >
             VISIT CANTINA
+          </button>
+          <button
+            style={{ ...buttonStyle, backgroundColor: '#2a1a1a', color: '#cc8800', flex: isMobile ? '1 1 auto' : undefined }}
+            onClick={openStrategicCommand}
+          >
+            COMMAND
           </button>
           <button
             style={{ ...buttonStyle, backgroundColor: '#2a2a3a', color: '#bb99ff', flex: isMobile ? '1 1 auto' : undefined }}
@@ -936,6 +1086,10 @@ export default function MissionSelect() {
         <div style={sidebarResponsive}>
           <CampaignStatsPanel campaign={campaignState} />
 
+          {campaignState.actProgress && (
+            <RebellionStatusPanel actProgress={campaignState.actProgress} />
+          )}
+
           {campaignState.factionReputation && Object.keys(campaignState.factionReputation).length > 0 && (
             <FactionReputationPanel reputation={campaignState.factionReputation} />
           )}
@@ -977,11 +1131,10 @@ export default function MissionSelect() {
           </h2>
 
           {availableMissions.length === 0 ? (
-            <CampaignCompleteScreen
+            <CampaignVictory
               campaign={campaignState}
               onNewCampaign={exitCampaign}
               onExport={handleExport}
-              isMobile={isMobile}
             />
           ) : (
             <div style={{ display: 'flex', gap: isMobile ? '16px' : '24px', flexDirection: isMobile ? 'column' : 'row' }}>
@@ -1173,6 +1326,40 @@ export default function MissionSelect() {
                         </div>
                       </div>
                     )}
+
+                    {/* Exposure warning for act finales */}
+                    {selectedMission.missionIndex === 4 && campaignState.actProgress && (() => {
+                      const status = getExposureStatus(campaignState.actProgress.exposure);
+                      if (status === 'ghost') return null;
+                      const mods = getFinaleExposureModifiers(campaignState.actProgress.exposure);
+                      const color = status === 'hunted' ? '#ff4444' : '#ffaa00';
+                      const icon = status === 'hunted' ? '\u26A0' : '\u26A0';
+                      const label = status === 'hunted' ? 'HUNTED' : 'DETECTED';
+                      return (
+                        <div style={{
+                          marginTop: '12px',
+                          padding: '10px 12px',
+                          backgroundColor: `${color}10`,
+                          border: `1px solid ${color}40`,
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                        }}>
+                          <div style={{ color, fontWeight: 'bold', marginBottom: '6px' }}>
+                            {icon} Imperial Alert: {label}
+                          </div>
+                          <div style={{ color: '#aaa', lineHeight: '1.5' }}>
+                            {status === 'hunted'
+                              ? 'The Empire has prepared an ambush. Expect heavy resistance.'
+                              : 'Imperial garrison is on alert. Increased patrols expected.'}
+                          </div>
+                          <div style={{ marginTop: '6px', display: 'flex', gap: '12px', color: '#999', fontSize: '11px' }}>
+                            {mods.threatBonus > 0 && <span style={{ color }}>+{mods.threatBonus} Threat</span>}
+                            {mods.roundLimitModifier < 0 && <span style={{ color }}>{mods.roundLimitModifier} Round Limit</span>}
+                            {mods.extraReinforcements > 0 && <span style={{ color }}>+{mods.extraReinforcements} Extra Wave{mods.extraReinforcements > 1 ? 's' : ''}</span>}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     <button
                       style={{

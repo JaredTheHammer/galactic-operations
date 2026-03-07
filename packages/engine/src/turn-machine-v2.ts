@@ -34,6 +34,7 @@ import type {
   ObjectivePoint,
   ObjectivePointTemplate,
   ConsumableItem,
+  LootToken,
 } from './types.js';
 
 import { RANGE_BAND_TILES, computeDiminishedHealing } from './types.js';
@@ -541,7 +542,7 @@ function getReinforcementPurchases(
 
   // Build purchasable lists by tier
   const allUnits = Object.values(npcProfiles)
-    .filter(npc => npc.side === 'imperial')
+    .filter(npc => (npc.side as string).toLowerCase() === 'imperial')
     .map(npc => ({
       npcId: npc.id,
       cost: npc.threatCost ?? DEFAULT_THREAT_COSTS[npc.tier] ?? 3,
@@ -1549,8 +1550,8 @@ export function executeActionV2(
         }
       } else {
         const heroEntity = newState.heroes[figure.entityId];
-        if (heroEntity?.equipment?.weapons?.length) {
-          standbyWpnId = heroEntity.equipment.weapons[0];
+        if (heroEntity?.equipment?.primaryWeapon) {
+          standbyWpnId = heroEntity.equipment.primaryWeapon;
         }
       }
 
