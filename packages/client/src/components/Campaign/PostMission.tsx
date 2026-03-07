@@ -390,6 +390,19 @@ export default function PostMission() {
           </div>
         )}
 
+        {/* TI4 Systems Summary */}
+        {campaignState && (campaignState.completedSecretObjectives?.length || 0) > 0 && (
+          <div style={{ marginTop: '16px' }}>
+            <h3 style={{ ...sectionHeaderStyle, color: '#cc77ff' }}>Secret Objectives</h3>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {(campaignState.completedSecretObjectives ?? []).slice(-4).map((so, i) => (
+                <span key={i} style={{
+                  ...pillStyle,
+                  color: '#44ff44',
+                  borderColor: '#44ff4466',
+                }}>
+                  {so.objectiveId.replace(/-/g, ' ')} (+{so.xpAwarded}XP)
+                </span>
         {/* Bounty Completions */}
         {lastBountyCompletions.length > 0 && (
           <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
@@ -428,6 +441,39 @@ export default function PostMission() {
                     )}
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {campaignState?.relicFragments && Object.values(campaignState.relicFragments).some(v => v > 0) && (
+          <div style={{ marginTop: '16px' }}>
+            <h3 style={{ ...sectionHeaderStyle, color: t.accentGold }}>Relic Fragments</h3>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              {Object.entries(campaignState.relicFragments).map(([type, count]) => count > 0 && (
+                <span key={type} style={{
+                  fontSize: '12px',
+                  color: type === 'combat' ? '#ff4444' : type === 'tech' ? '#00ccff' : type === 'force' ? '#cc77ff' : '#44ff44',
+                }}>
+                  {type}: {count}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {campaignState?.activeDirectives && campaignState.activeDirectives.length > 0 && (
+          <div style={{ marginTop: '16px' }}>
+            <h3 style={{ ...sectionHeaderStyle, color: '#cc77ff' }}>Active Directives</h3>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {campaignState.activeDirectives.map((d, i) => (
+                <span key={i} style={{
+                  ...pillStyle,
+                  color: '#cc77ff',
+                  borderColor: '#cc77ff66',
+                }}>
+                  {d.directiveId.replace(/-/g, ' ')} ({d.missionsRemaining}m)
+                </span>
               ))}
             </div>
           </div>

@@ -140,6 +140,30 @@ export type {
   // Species Abilities
   SpeciesAbilityEffect,
   SpeciesAbility,
+  // TI4-Inspired Mechanics
+  SecretObjectiveCategory,
+  SecretObjectiveConditionType,
+  SecretObjectiveDefinition,
+  AssignedSecretObjective,
+  MissionSecretObjectiveState,
+  CompletedSecretObjective,
+  CommandTokenUsage,
+  SpendCommandTokenPayload,
+  CommandTokenState,
+  ExplorationResultType,
+  ExplorationTokenType,
+  ExplorationToken,
+  ExplorationRevealResult,
+  ExplorationReward,
+  RelicFragmentType,
+  RelicDefinition,
+  RelicEffect,
+  ForgedRelic,
+  DirectiveTarget,
+  AgendaDirectiveDefinition,
+  AgendaDirective,
+  DirectiveEffect,
+  AgendaVoteResult,
   // Fog of War
   TileVisibility,
   FogOfWarState,
@@ -382,6 +406,80 @@ export {
   runCombatBatch,
 } from './ai/index.js';
 
+// Re-export secret objectives system (TI4-inspired)
+export {
+  initializeSecretObjectives,
+  updateSecretObjectiveProgress,
+  resolveSecretObjectives,
+  applySecretObjectiveRewards,
+  getHeroSecretObjective,
+  getObjectiveDefinition,
+} from './secret-objectives.js';
+export type { SecretObjectiveEvent } from './secret-objectives.js';
+
+// Re-export command token system (TI4-inspired)
+export {
+  initializeCommandTokens,
+  calculateOperativeTokens,
+  calculateImperialTokens,
+  refreshCommandTokens,
+  canSpendToken,
+  spendCommandToken,
+  validateTokenUsage,
+  applyTokenEffect,
+  getTokensRemaining,
+  applyDirectiveBonus,
+} from './command-tokens.js';
+
+// Re-export exploration token system (TI4 PoK-inspired)
+export {
+  generateExplorationTokens,
+  getRevealableTokens,
+  revealExplorationToken,
+  applyExplorationReveal,
+  getUnrevealedTokenCount,
+  getCollectedRewards,
+} from './exploration-tokens.js';
+
+// Re-export relic fragment system (TI4 PoK-inspired)
+export {
+  addFragment,
+  getFragmentCounts,
+  getForgeableTypes,
+  canForge,
+  getAvailableRelics,
+  forgeRelic,
+  assignRelic,
+  unassignRelic,
+  getHeroRelics,
+  useRelic,
+  getActiveRelicEffects,
+  getRelicAttackBonus,
+  getRelicDefenseBonus,
+  getRelicSoakBonus,
+  getTotalFragments,
+} from './relic-fragments.js';
+
+// Re-export agenda phase system (TI4-inspired)
+export {
+  calculateHeroInfluence,
+  calculateOperativeInfluence,
+  calculateOperativeInfluenceBreakdown,
+  calculateImperialInfluence,
+  drawAgendaDirectives,
+  resolveAgendaVote,
+  applyAgendaDirective,
+  decrementDirectiveDurations,
+  getActiveDirectiveEffects,
+  getDirectiveThreatModifier,
+  getDirectiveReinforcementModifier,
+  getDirectiveStartingConsumables,
+  getDirectiveShopDiscount,
+  getDirectiveMoraleModifier,
+  getDirectiveExplorationBonus,
+  getDirectiveCommandTokenBonus,
+  getDirectiveXPBonus,
+} from './agenda-phase.js';
 // Re-export supply network system (Brass: Birmingham-inspired)
 export {
   createSupplyNetwork,

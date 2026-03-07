@@ -63,6 +63,19 @@ import {
   getSpeciesRegeneration,
   getSpeciesBonusStrainRecovery,
 } from './species-abilities.js';
+import {
+  getRevealableTokens,
+  revealExplorationToken,
+  applyExplorationReveal,
+} from './exploration-tokens.js';
+import {
+  validateTokenUsage,
+  applyTokenEffect,
+  refreshCommandTokens,
+} from './command-tokens.js';
+import {
+  updateSecretObjectiveProgress,
+} from './secret-objectives.js';
 import { updateFogOfWar, createFogOfWarState } from './fog-of-war.js';
 import { recoverFocus, initFocusResource, spendFocus } from './focus-resource.js';
 import { initBossHitLocations } from './boss-mechanics.js';
@@ -491,14 +504,21 @@ export function advancePhaseV2(gameState: GameState): GameState {
     case 'Status':
       return { ...gameState, turnPhase: 'Reinforcement' };
 
-    case 'Reinforcement':
+    case 'Reinforcement': {
+      // Refresh command tokens at the start of each new round
+      const refreshedTokens = gameState.commandTokens
+        ? refreshCommandTokens(gameState.commandTokens)
+        : undefined;
+
       return {
         ...gameState,
         turnPhase: 'Initiative',
         roundNumber: gameState.roundNumber + 1,
         activationOrder: [],
         currentActivationIndex: 0,
+        commandTokens: refreshedTokens,
       };
+    }
 
     case 'GameOver':
     default:
@@ -1844,8 +1864,81 @@ export function executeActionV2(
       break;
     }
 
+    // ---- TI4-INSPIRED ACTIONS ----
+    case 'RevealExploration': {
+      const { tokenId } = action.payload;
+      const tokens = newState.explorationTokens ?? [];
+      const token = tokens.find(t => t.id === tokenId);
+
+      if (token && !token.isRevealed) {
+        const result = revealExplorationToken(token, figure, gameData);
+        newState = applyExplorationReveal(newState, tokenId, result);
+      }
+
+      // Reveal is free (no action/maneuver cost)
+      break;
+    }
+
+    case 'SpendCommandToken': {
+      const { usage } = action.payload;
+      const tokenPlayer = newState.players.find(p => p.id === figure.playerId);
+      const side = (tokenPlayer?.role ?? 'Imperial') as Side;
+
+      const validation = validateTokenUsage(usage, action.payload, newState, figure.id);
+      if (validation.valid) {
+        const { gameState: updated, description } = applyTokenEffect(
+          newState, side, usage, action.payload,
+        );
+        newState = updated;
+      }
+      // Token spending is free (no action/maneuver cost)
+      break;
+    }
+
     default:
       break;
+  }
+
+  // --- Secret Objective Progress Tracking ---
+  // After each action, detect relevant events and update secret objective progress.
+  if (newState.secretObjectives && figure.entityType === 'hero') {
+    const heroId = figure.entityId;
+    let soState = newState.secretObjectives;
+
+    // Detect newly killed enemies (compare before/after defeated status)
+    if (action.type === 'Attack') {
+      for (const fig of newState.figures) {
+        if (fig.isDefeated && fig.playerId !== figure.playerId) {
+          const oldFig = gameState.figures.find(f => f.id === fig.id);
+          if (oldFig && !oldFig.isDefeated) {
+            const npcTier = fig.entityType === 'npc'
+              ? (newState.npcProfiles[fig.entityId]?.tier ?? 'Minion')
+              : 'hero';
+            soState = updateSecretObjectiveProgress(soState, { type: 'enemy_killed', heroId, enemyTier: npcTier }, gameData);
+            // Check for nemesis kills
+            if (npcTier === 'Nemesis') {
+              soState = updateSecretObjectiveProgress(soState, { type: 'nemesis_killed', heroId }, gameData);
+            }
+          }
+        }
+      }
+    }
+
+    if (action.type === 'CollectLoot') {
+      soState = updateSecretObjectiveProgress(soState, { type: 'loot_collected', heroId }, gameData);
+    }
+
+    if (action.type === 'InteractTerminal') {
+      soState = updateSecretObjectiveProgress(soState, { type: 'objective_interacted', heroId }, gameData);
+    }
+
+    if (action.type === 'RevealExploration') {
+      soState = updateSecretObjectiveProgress(soState, { type: 'exploration_revealed', heroId }, gameData);
+    }
+
+    if (soState !== newState.secretObjectives) {
+      newState = { ...newState, secretObjectives: soState };
+    }
   }
 
   return newState;

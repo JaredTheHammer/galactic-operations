@@ -33,6 +33,7 @@ import type {
   ObjectivePointTemplate,
   ConsumableItem,
   TacticCard,
+  CommandTokenUsage,
   ExpandedSocialPhaseResult,
   CriticalInjuryDefinition,
   LegacyEventDefinition,
@@ -66,6 +67,19 @@ import {
 import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization, equipItem, unequipItem } from '@engine/character-v2.js'
 import type { HeroCreationInput, EquipmentSlot } from '@engine/character-v2.js'
 import { getEquippedTalents, canActivateTalent } from '@engine/talent-v2.js'
+import { initializeTacticDeck, drawCardsForBothSides, playCard } from '@engine/tactic-cards.js'
+import { generateExplorationTokens } from '@engine/exploration-tokens.js'
+import { initializeCommandTokens } from '@engine/command-tokens.js'
+import { initializeSecretObjectives } from '@engine/secret-objectives.js'
+import {
+  getDirectiveThreatModifier,
+  getDirectiveReinforcementModifier,
+  getDirectiveStartingConsumables,
+  getDirectiveShopDiscount,
+  getDirectiveMoraleModifier,
+  getDirectiveExplorationBonus,
+  getDirectiveCommandTokenBonus,
+} from '@engine/agenda-phase.js'
 import { initializeTacticDeck, drawCardsForBothSides, playCard, playCardAltMode } from '@engine/tactic-cards.js'
 import {
   createCampaign,
@@ -109,6 +123,13 @@ import aiProfilesRaw from '@data/ai-profiles.json'
 import consumablesData from '@data/consumables.json'
 import tacticsData from '@data/cards/tactics.json'
 import companionsNpcData from '@data/npcs/companions.json'
+
+// TI4-inspired data
+import secretObjectivesData from '@data/secret-objectives.json'
+import explorationTokensData from '@data/exploration-tokens.json'
+import relicsData from '@data/relics.json'
+import agendaDirectivesData from '@data/agenda-directives.json'
+
 import mercenarySpecData from '@data/specializations/mercenary.json'
 import bodyguardSpecData from '@data/specializations/bodyguard.json'
 import demolitionistSpecData from '@data/specializations/demolitionist.json'
@@ -290,6 +311,10 @@ function loadGameDataV2(): GameData {
     consumables,
     tacticCards,
     companionProfiles,
+    secretObjectives: (secretObjectivesData as any).secretObjectives ?? secretObjectivesData,
+    explorationTokenTypes: (explorationTokensData as any).explorationTokenTypes ?? explorationTokensData,
+    relicDefinitions: (relicsData as any).relicDefinitions ?? relicsData,
+    agendaDirectives: (agendaDirectivesData as any).agendaDirectives ?? agendaDirectivesData,
   }
 }
 
@@ -634,6 +659,8 @@ export interface GameStore {
   useConsumable: (itemId: string, targetId?: string) => void
   spendFocus: (effect: import('@engine/types.js').FocusEffect) => void
   getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
+  revealExploration: (tokenId: string) => void
+  spendCommandToken: (usage: CommandTokenUsage, coordinateTargetId?: string) => void
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => void
   playTacticCardAltMode: (cardId: string) => void
   dismissCombat: () => void
@@ -1646,6 +1673,41 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return results
   },
 
+  revealExploration: (tokenId: string) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const action = {
+      type: 'RevealExploration' as const,
+      figureId: selectedFigureId,
+      payload: { tokenId },
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+
+    const token = newGameState.explorationTokens?.find(t => t.id === tokenId)
+    if (token?.isRevealed && token.revealResult) {
+      const rewardText = token.revealResult.rewards.map(r => r.type).join(', ')
+      addCombatLog(`${selectedFigureId} explored: ${token.revealResult.tokenType} (${rewardText})`)
+    } else {
+      addCombatLog(`${selectedFigureId} revealed exploration token`)
+    }
+  },
+
+  spendCommandToken: (usage: CommandTokenUsage, coordinateTargetId?: string) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const action = {
+      type: 'SpendCommandToken' as const,
+      figureId: selectedFigureId,
+      payload: { usage, coordinateTargetId },
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+    addCombatLog(`${selectedFigureId} spent command token: ${usage.replace(/_/g, ' ')}`)
+  },
+
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => {
     const { gameState, addCombatLog } = get()
     if (!gameState?.tacticDeck) return
@@ -1980,6 +2042,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
           // Delayed transition to PostMission (gives player time to see the result)
           setTimeout(() => {
+            // Collect exploration rewards from revealed tokens
+            const explorationRewards = (newGameState.explorationTokens ?? [])
+              .filter(t => t.isRevealed && t.revealResult?.rewards)
+              .flatMap(t => t.revealResult!.rewards)
             get().completeCampaignMission({
               mission,
               outcome: outcome as 'victory' | 'defeat',
@@ -1990,6 +2056,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
               heroesIncapacitated,
               leaderKilled,
               narrativeBonus: outcome === 'victory' ? 2 : 0,
+              explorationRewards,
+              secretObjectiveState: newGameState.secretObjectives,
               defeatedNpcIds,
             })
           }, 3000)
@@ -2503,6 +2571,74 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameState.tacticDeck = initializeTacticDeck(gameData)
     }
 
+    // Apply agenda directive effects to mission parameters
+    const threatMod = getDirectiveThreatModifier(campaignState)
+    if (threatMod !== 0) {
+      gameState.reinforcementPoints = Math.max(0, (gameState.reinforcementPoints ?? 0) + threatMod)
+    }
+
+    const moraleMod_imp = getDirectiveMoraleModifier(campaignState, 'Imperial')
+    const moraleMod_op = getDirectiveMoraleModifier(campaignState, 'Operative')
+    if (moraleMod_imp !== 0 && gameState.imperialMorale) {
+      gameState.imperialMorale = {
+        ...gameState.imperialMorale,
+        value: Math.max(0, gameState.imperialMorale.value + moraleMod_imp),
+      }
+    }
+    if (moraleMod_op !== 0 && gameState.operativeMorale) {
+      gameState.operativeMorale = {
+        ...gameState.operativeMorale,
+        value: Math.max(0, gameState.operativeMorale.value + moraleMod_op),
+      }
+    }
+
+    // Add directive starting consumables to inventory
+    const directiveConsumables = getDirectiveStartingConsumables(campaignState)
+    if (directiveConsumables.length > 0 && gameState.consumableInventory) {
+      for (const { itemId, quantity } of directiveConsumables) {
+        gameState.consumableInventory[itemId] = (gameState.consumableInventory[itemId] ?? 0) + quantity
+      }
+    }
+
+    // Apply shop discount from directives to campaign (for social phase)
+    const shopDiscount = getDirectiveShopDiscount(campaignState)
+    if (shopDiscount > 0) {
+      const discounts = { ...(campaignState.activeDiscounts ?? {}), agenda_directive: shopDiscount }
+      set({ campaignState: { ...campaignState, activeDiscounts: discounts } })
+    }
+
+    // Initialize TI4-inspired systems
+    // Exploration tokens: place on valid map tiles with directive bonus
+    const explorationBonus = getDirectiveExplorationBonus(campaignState)
+    const defaultTokenCount = Math.max(3, Math.floor((gameState.map.width * gameState.map.height) / 50))
+    const explorationTokens = generateExplorationTokens(
+      gameState.map, gameData,
+      explorationBonus !== 0 ? defaultTokenCount + explorationBonus : undefined,
+    )
+    if (explorationTokens.length > 0) {
+      gameState.explorationTokens = explorationTokens
+    }
+
+    // Command tokens: per-mission resource with directive bonus
+    const commandTokens = initializeCommandTokens(
+      heroesRegistry,
+      campaignState.threatLevel,
+    )
+    const tokenBonus = getDirectiveCommandTokenBonus(campaignState)
+    if (tokenBonus > 0) {
+      commandTokens.operativeTokens += tokenBonus
+      commandTokens.operativeMaxPerRound += tokenBonus
+    }
+    gameState.commandTokens = commandTokens
+
+    // Secret objectives: draw one per hero from the available deck
+    const heroIds = Object.keys(heroesRegistry)
+    const previouslyCompleted = (campaignState.completedSecretObjectives ?? []).map(so => so.objectiveId)
+    const secretObjectives = initializeSecretObjectives(gameData, heroIds, previouslyCompleted)
+    if (secretObjectives.assignments.length > 0) {
+      gameState.secretObjectives = secretObjectives
+    }
+
     // Build activation order
     gameState.activationOrder = buildActivationOrderV2(gameState)
     gameState.currentActivationIndex = 0
@@ -2574,6 +2710,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ? { ...campaignState, consumableInventory: { ...gameState.consumableInventory } }
       : campaignState
 
+    const previousAct = updatedCampaign.currentAct
+    const gameData = loadGameDataV2()
+    const { campaign: newCampaign, result } = completeMission(
+      updatedCampaign,
     // On defeat, sever supply nodes at the mission's sector location
     let campaignForCompletion = updatedCampaign
     if (input.outcome === 'defeat' && updatedCampaign.supplyNetwork) {
@@ -2593,6 +2733,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       campaignForCompletion,
       input,
       campaignMissions,
+      gameData,
     )
 
     // Show legacy event reveal if there are pending events

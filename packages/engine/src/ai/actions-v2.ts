@@ -354,6 +354,12 @@ export function buildActionsForAIAction(
     case 'use-consumable':
       return buildUseConsumable(figure, context);
 
+    case 'reveal-exploration-token':
+      return buildRevealExplorationToken(figure, context, gameState);
+
+    case 'spend-command-token':
+      return buildSpendCommandToken(figure, context);
+
     default:
       return [];
   }
@@ -1190,6 +1196,52 @@ function buildUseConsumable(
     payload: {
       itemId: context.consumableId,
       targetId: context.consumableTargetId,
+    },
+  }];
+}
+
+/**
+ * Build a RevealExploration action, optionally preceded by a Move.
+ */
+function buildRevealExplorationToken(
+  figure: Figure,
+  context: ConditionContext,
+  gameState: GameState,
+): GameAction[] {
+  if (!context.explorationTokenId) return [];
+
+  const actions: GameAction[] = [];
+
+  // Move first if needed (token not yet adjacent)
+  if (context.destination) {
+    const move = buildMoveAction(figure, context.destination, gameState);
+    if (move) actions.push(move);
+  }
+
+  actions.push({
+    type: 'RevealExploration' as const,
+    figureId: figure.id,
+    payload: { tokenId: context.explorationTokenId },
+  });
+
+  return actions;
+}
+
+/**
+ * Build a SpendCommandToken action.
+ */
+function buildSpendCommandToken(
+  figure: Figure,
+  context: ConditionContext,
+): GameAction[] {
+  if (!context.commandTokenUsage) return [];
+
+  return [{
+    type: 'SpendCommandToken' as const,
+    figureId: figure.id,
+    payload: {
+      usage: context.commandTokenUsage,
+      coordinateTargetId: context.coordinateTargetId,
     },
   }];
 }

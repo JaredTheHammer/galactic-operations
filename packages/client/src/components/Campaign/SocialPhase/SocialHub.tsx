@@ -37,6 +37,7 @@ interface Props {
   onHealHero: (heroId: string) => void
   onComplete: () => void
   onSkip: () => void
+  onGoToForge?: () => void
   onAcceptBounty: (bountyId: string) => void
   onPrepBounty: (bountyId: string, heroId: string) => void
   onScoutMission: (heroId: string) => void
@@ -59,6 +60,7 @@ const dispositionLabels: Record<Disposition, string> = {
   hostile: 'Hostile',
 }
 
+export function SocialHub({ location, npcs, campaign, session, onSelectEncounter, onSelectShop, onHealHero, onComplete, onSkip, onGoToForge }: Props) {
 const clockLevelColors: Record<string, string> = {
   caught_off_guard: '#44ff44',
   normal: '#888888',
@@ -167,6 +169,16 @@ export function SocialHub({
           >
             {noSlotsLeft ? 'REVIEW & DEPLOY' : 'COMPLETE PHASE'}
           </button>
+          {onGoToForge && (
+            <button
+              style={{
+                padding: isMobile ? '8px 14px' : '10px 20px', borderRadius: '6px', border: '1px solid #cc77ff', cursor: 'pointer',
+                fontWeight: 'bold', fontSize: isMobile ? '13px' : '14px', backgroundColor: 'transparent', color: '#cc77ff',
+                flex: isMobile ? 1 : undefined,
+              }}
+              onClick={onGoToForge}
+            >
+              RELIC FORGE
           {!noSlotsLeft && (
             <button
               style={{

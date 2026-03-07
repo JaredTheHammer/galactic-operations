@@ -72,7 +72,14 @@ const campaignFiles = [
   'data/campaigns/tangrene-liberation.json',
 ];
 
-const allFiles = [...coreFiles, ...specFiles, ...npcFiles, ...missionFiles, ...socialFiles, ...campaignFiles];
+const ti4Files = [
+  'data/secret-objectives.json',
+  'data/exploration-tokens.json',
+  'data/relics.json',
+  'data/agenda-directives.json',
+];
+
+const allFiles = [...coreFiles, ...specFiles, ...npcFiles, ...missionFiles, ...socialFiles, ...campaignFiles, ...ti4Files];
 
 let allOk = true;
 function fail(msg) { console.error('FAIL: ' + msg); allOk = false; }

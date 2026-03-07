@@ -15,6 +15,8 @@ import { CombatPanel } from './components/Combat/CombatPanel'
 import { CombatLog } from './components/Combat/CombatLog'
 import { ObjectiveProgress } from './components/HUD/ObjectiveProgress'
 import { ThreatTracker } from './components/HUD/ThreatTracker'
+import { CommandTokenPanel } from './components/HUD/CommandTokenPanel'
+import { SecretObjectiveTracker } from './components/HUD/SecretObjectiveTracker'
 import { ObjectiveTooltip } from './components/HUD/ObjectiveTooltip'
 import { FigureTooltip } from './components/HUD/FigureTooltip'
 import { TileTooltip } from './components/HUD/TileTooltip'
@@ -107,6 +109,7 @@ function App() {
     showMapEditor,
     showCombatArena,
     showActTransition,
+    gameData,
     pendingBossAttack,
     confirmBossAttack,
     cancelBossAttack,
@@ -440,8 +443,10 @@ function App() {
       {/* Top Center (below turn indicator): Objective Progress */}
       <ObjectiveProgress gameState={gameState} />
 
-      {/* Top Left (below morale): Threat Pool */}
+      {/* Top Left (below morale): Threat Pool + Command Tokens + Secret Objectives */}
       <ThreatTracker gameState={gameState} />
+      <CommandTokenPanel gameState={gameState} />
+      <SecretObjectiveTracker gameState={gameState} gameData={gameData} />
 
       {/* Bottom Left: Terrain Legend + Minimap */}
       <TerrainLegend />
