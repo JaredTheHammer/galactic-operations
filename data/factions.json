@@ -1,0 +1,247 @@
+[
+  {
+    "id": "rebel-alliance",
+    "name": "Rebel Alliance",
+    "description": "The organized resistance against the Galactic Empire. Earning their trust unlocks military support, coordinated intel, and leadership bonuses.",
+    "startingReputation": 0,
+    "minReputation": -10,
+    "maxReputation": 20,
+    "thresholds": [
+      {
+        "reputation": 3,
+        "rewards": [
+          {
+            "type": "credits",
+            "credits": 100,
+            "description": "Alliance supply stipend for proven allies."
+          },
+          {
+            "type": "tag-bonus",
+            "tag": "Leadership",
+            "description": "Alliance tactical training grants [Leadership] tag bonus."
+          }
+        ]
+      },
+      {
+        "reputation": 7,
+        "rewards": [
+          {
+            "type": "discount",
+            "discountPercent": 15,
+            "description": "Alliance procurement access: 15% discount at rebel-affiliated vendors."
+          },
+          {
+            "type": "intel",
+            "missionId": "act2-m3-convoy",
+            "description": "Alliance intelligence reveals an Imperial convoy route."
+          }
+        ]
+      },
+      {
+        "reputation": 12,
+        "rewards": [
+          {
+            "type": "equipment",
+            "itemId": "a280",
+            "description": "Alliance-issue A280 blaster rifle from the armory."
+          },
+          {
+            "type": "tactic-card",
+            "cardId": "coordinated-assault",
+            "description": "Unlock the Coordinated Assault tactic card."
+          }
+        ]
+      },
+      {
+        "reputation": 18,
+        "rewards": [
+          {
+            "type": "reinforcement",
+            "npcProfileId": "rebel-commando-squad",
+            "description": "A squad of Rebel Commandos available as mission reinforcements."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "underworld-syndicate",
+    "name": "Underworld Syndicate",
+    "description": "The sprawling criminal network that controls the black market. Their favor brings credits, rare gear, and covert advantages.",
+    "startingReputation": 0,
+    "minReputation": -10,
+    "maxReputation": 20,
+    "thresholds": [
+      {
+        "reputation": 3,
+        "rewards": [
+          {
+            "type": "credits",
+            "credits": 150,
+            "description": "A cut from a recent Syndicate operation."
+          },
+          {
+            "type": "tag-bonus",
+            "tag": "Covert",
+            "description": "Syndicate tradecraft training grants [Covert] tag bonus."
+          }
+        ]
+      },
+      {
+        "reputation": 7,
+        "rewards": [
+          {
+            "type": "discount",
+            "discountPercent": 20,
+            "description": "Black market access: 20% discount on weapons and gear."
+          }
+        ]
+      },
+      {
+        "reputation": 12,
+        "rewards": [
+          {
+            "type": "equipment",
+            "itemId": "disruptor-pistol",
+            "description": "A rare disruptor pistol from the Syndicate's private arsenal."
+          },
+          {
+            "type": "tactic-card",
+            "cardId": "dirty-trick",
+            "description": "Unlock the Dirty Trick tactic card."
+          }
+        ]
+      },
+      {
+        "reputation": 18,
+        "rewards": [
+          {
+            "type": "reinforcement",
+            "npcProfileId": "syndicate-enforcer",
+            "description": "A Syndicate enforcer available as a mission companion."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "local-resistance",
+    "name": "Local Resistance",
+    "description": "The grassroots freedom fighters on Tangrene. Their support provides local knowledge, safe houses, and medical aid.",
+    "startingReputation": 0,
+    "minReputation": -10,
+    "maxReputation": 20,
+    "thresholds": [
+      {
+        "reputation": 3,
+        "rewards": [
+          {
+            "type": "credits",
+            "credits": 75,
+            "description": "Community collection for their defenders."
+          },
+          {
+            "type": "tag-bonus",
+            "tag": "Medical",
+            "description": "Local medic training grants [Medical] tag bonus."
+          }
+        ]
+      },
+      {
+        "reputation": 7,
+        "rewards": [
+          {
+            "type": "intel",
+            "missionId": "act2-m2-safehouse",
+            "description": "Resistance scouts reveal a hidden safehouse location."
+          }
+        ]
+      },
+      {
+        "reputation": 12,
+        "rewards": [
+          {
+            "type": "equipment",
+            "itemId": "bacta-injector",
+            "description": "A field bacta injector from the resistance medical cache."
+          },
+          {
+            "type": "tactic-card",
+            "cardId": "local-knowledge",
+            "description": "Unlock the Local Knowledge tactic card."
+          }
+        ]
+      },
+      {
+        "reputation": 18,
+        "rewards": [
+          {
+            "type": "reinforcement",
+            "npcProfileId": "resistance-cell",
+            "description": "A resistance cell available as mission reinforcements."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mandalorian-clans",
+    "name": "Mandalorian Clans",
+    "description": "Warrior clans with a code of honor. Earning their respect unlocks elite combat gear and the most dangerous allies in the sector.",
+    "startingReputation": 0,
+    "minReputation": -10,
+    "maxReputation": 20,
+    "thresholds": [
+      {
+        "reputation": 3,
+        "rewards": [
+          {
+            "type": "tag-bonus",
+            "tag": "Aggressive",
+            "description": "Mandalorian combat doctrine grants [Aggressive] tag bonus."
+          }
+        ]
+      },
+      {
+        "reputation": 7,
+        "rewards": [
+          {
+            "type": "equipment",
+            "itemId": "beskar-vest",
+            "description": "A beskar-reinforced vest from the clan armory."
+          },
+          {
+            "type": "discount",
+            "discountPercent": 10,
+            "description": "Clan armorer access: 10% discount on armor."
+          }
+        ]
+      },
+      {
+        "reputation": 12,
+        "rewards": [
+          {
+            "type": "equipment",
+            "itemId": "westar-35",
+            "description": "A WESTAR-35 blaster pistol, favored by Mandalorian warriors."
+          },
+          {
+            "type": "tactic-card",
+            "cardId": "mandalorian-resolve",
+            "description": "Unlock the Mandalorian Resolve tactic card."
+          }
+        ]
+      },
+      {
+        "reputation": 18,
+        "rewards": [
+          {
+            "type": "reinforcement",
+            "npcProfileId": "mandalorian-warrior",
+            "description": "A Mandalorian warrior available as a mission companion."
+          }
+        ]
+      }
+    ]
+  }
+]
