@@ -4,6 +4,84 @@
  * All exports reference v2 modules.
  */
 
+// Re-export Terraforming Mars-inspired mechanics
+export type {
+  ProjectCardCategory,
+  ProjectCardEffect,
+  ProjectCard,
+  ProjectCardState,
+  LiberationTrackId,
+  LiberationThreshold,
+  LiberationTrackDefinition,
+  LiberationTrackDelta,
+  LiberationTrackState,
+  CampaignMilestone,
+  CampaignAward,
+  MilestoneAwardState,
+  IntelCardEffectType,
+  IntelCard,
+  IntelDraftState,
+} from './types.js';
+
+// Re-export project cards engine
+export {
+  getAvailableProjects,
+  canPurchaseProject,
+  purchaseProject,
+  getActiveProjectEffects,
+  getAggregatedEffect,
+  getProjectShopDiscount,
+  getProjectThreatReduction,
+  getProjectCreditIncome,
+  getProjectXPBonus,
+  getProjectTacticCardBonus,
+  getProjectHealingDiscount,
+  getProjectReinforcementDelay,
+  hasIntelReveal,
+  getStartingSupplies,
+  getProjectsByCategory,
+} from './project-cards.js';
+
+// Re-export liberation tracks engine
+export {
+  initializeLiberationTracks,
+  advanceLiberationTracks,
+  calculateMissionTrackDeltas,
+  calculateSocialTrackDeltas,
+  getTrackValue,
+  getTrackProgress,
+  getActiveLiberationBonuses,
+  applyTrackDeltas,
+} from './liberation-tracks.js';
+
+// Re-export milestones & awards engine
+export {
+  initializeMilestoneState,
+  updateHeroStats,
+  updateSocialStats,
+  trackDamageDealt,
+  getClaimableMilestones,
+  checkMilestoneCondition,
+  claimMilestone,
+  evaluateAwards,
+  getMilestoneSummary,
+  getAwardSummary,
+} from './milestones.js';
+
+// Re-export intel draft engine
+export {
+  generateIntelDraftPool,
+  draftIntelCard,
+  canDraft,
+  getAllDraftedCardIds,
+  finalizeDraft,
+  calculateIntelEffects,
+  clearPendingIntel,
+  aiDraftIntelCard,
+} from './intel-draft.js';
+
+export type { IntelEffectResult } from './intel-draft.js';
+
 // Re-export all types
 export type {
   // Grid and Map
