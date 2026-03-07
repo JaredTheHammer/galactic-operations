@@ -419,6 +419,35 @@
         ]
       }
     ],
+    "confrontationEncounter": {
+      "id": "enc-confront-rival-act2",
+      "name": "Settling Scores with Torrin",
+      "description": "Vex Torrin has been escalating his interference. Time to confront him directly in the Syndicate's territory.",
+      "narrativeIntro": "You find Torrin in the fighting pit's observation lounge, counting credits. His hand drifts to his holster when he sees you. \"You're persistent, I'll give you that. But persistence and stupidity look the same from where I'm sitting.\"",
+      "dialogueOptions": [
+        {
+          "id": "confront-coercion-2",
+          "text": "\"I've been cleaning up your messes, Torrin. The Syndicate is watching -- and they're not happy with you.\"",
+          "skillId": "coercion",
+          "description": "Use the Syndicate's displeasure as leverage."
+        },
+        {
+          "id": "confront-streetwise-2",
+          "text": "\"Word is you double-crossed the Broker. I wonder what they'd pay for your location?\"",
+          "skillId": "streetwise",
+          "description": "Leverage underworld connections against the rival."
+        },
+        {
+          "id": "confront-leadership-2",
+          "text": "\"Your crew is watching, Torrin. Walk away now and keep their respect -- or don't.\"",
+          "skillId": "leadership",
+          "description": "Challenge the rival's authority in front of his associates."
+        }
+      ],
+      "successNarrative": "Torrin's bravado cracks. He signals his associates to stand down and retreats to a back room. You've disrupted his operations, at least for now.",
+      "failureNarrative": "Torrin calls your bluff with a cold smile. \"You don't have the pull you think you do.\" He turns his back on you dismissively, a calculated insult.",
+      "despairNarrative": "Torrin turns the tables completely, outing your identity to a Syndicate enforcer in the crowd. You've made a powerful new enemy."
+    },
     "shops": [
       {
         "id": "shop-torga-black-market",

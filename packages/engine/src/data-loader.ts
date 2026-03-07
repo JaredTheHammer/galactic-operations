@@ -18,7 +18,6 @@ import type {
   D6DieDefinition,
   BoardTemplate,
   V1_DieColor,
-  V1_UnitDefinition,
 } from './types.js';
 
 // Legacy type aliases for the v1 data loader

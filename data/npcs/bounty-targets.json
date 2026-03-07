@@ -1,0 +1,276 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Bounty target NPC stat blocks. These are injected into missions when the player has accepted the corresponding bounty. Tier scales by bounty difficulty: easy=Rival, moderate=Rival (tougher), hard=Nemesis."
+  },
+  "npcs": {
+    "imperial-deserter": {
+      "id": "imperial-deserter",
+      "name": "Lt. Korvin Harsk",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 6,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "dl-18",
+          "name": "DL-18 Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Imperial", "Deserter", "Bounty Target"],
+      "mechanicalKeywords": [],
+      "abilities": ["Slippery: When this NPC would be defeated, roll 1d6. On a 6, they escape (still counts as defeated for bounty purposes)."],
+      "threatCost": 0
+    },
+    "rogue-probe-droid": {
+      "id": "rogue-probe-droid",
+      "name": "Viper Unit X-7",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "twin-blaster",
+          "name": "Twin Blaster Cannon",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": [{ "name": "Linked", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Droid", "Probe", "Bounty Target"],
+      "mechanicalKeywords": [{"name": "Droid", "value": null}],
+      "abilities": ["Self-Destruct: When defeated, deals 3 damage to all figures within Short range."],
+      "threatCost": 0
+    },
+    "spice-runner": {
+      "id": "spice-runner",
+      "name": "Tano Kree",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 9,
+      "strainThreshold": 6,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "holdout-blaster",
+          "name": "Holdout Blaster",
+          "baseDamage": 5,
+          "range": "Short",
+          "critical": 5,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        },
+        {
+          "weaponId": "vibro-knife",
+          "name": "Vibro-knife",
+          "baseDamage": 2,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Smuggler", "Underworld", "Bounty Target"],
+      "mechanicalKeywords": [],
+      "abilities": ["Quick Draw: This NPC may attack with a holdout blaster as a free action once per round."],
+      "threatCost": 0
+    },
+    "syndicate-enforcer": {
+      "id": "syndicate-enforcer",
+      "name": "Grask",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 12,
+      "strainThreshold": 5,
+      "soak": 5,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "trandoshan-sword",
+          "name": "Trandoshan Blade",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Vicious", "value": 2 },
+            { "name": "Knockdown", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Syndicate", "Enforcer", "Trandoshan", "Bounty Target"],
+      "mechanicalKeywords": [],
+      "abilities": ["Regeneration: At the start of this NPC's activation, recover 1 wound."],
+      "threatCost": 0
+    },
+    "data-broker": {
+      "id": "data-broker",
+      "name": "Signal Ghost",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 8,
+      "strainThreshold": 12,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ion-pistol",
+          "name": "Ion Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 5,
+          "qualities": [{ "name": "Disorient", "value": 2 }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Slicer", "Underworld", "Bounty Target"],
+      "mechanicalKeywords": [{"name": "Elusive", "value": 1}],
+      "abilities": ["Smoke Screen: Once per encounter, as a maneuver, add 2 setback dice to all attacks targeting this NPC until end of next round.", "Bodyguards: When this NPC is deployed, also deploy 2 Nikto Gunners adjacent to them."],
+      "threatCost": 0
+    },
+    "turncoat-pilot": {
+      "id": "turncoat-pilot",
+      "name": "Dak Sorren",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 8,
+      "strainThreshold": 7,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "a280-rifle",
+          "name": "A280 Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Defector", "Pilot", "Bounty Target"],
+      "mechanicalKeywords": [],
+      "abilities": ["Evasive Maneuvers: Once per round, when targeted by a ranged attack, add 1 setback die to the attack pool."],
+      "threatCost": 0
+    },
+    "drayen-lieutenant": {
+      "id": "drayen-lieutenant",
+      "name": "Captain Mira Solenne",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 3 },
+      "defensePool": { "difficulty": 2, "challenge": 1 },
+      "woundThreshold": 14,
+      "strainThreshold": 10,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "dl-44-modified",
+          "name": "Modified DL-44",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "vibrorapier",
+          "name": "Vibrorapier",
+          "baseDamage": 3,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Pierce", "value": 2 },
+            { "name": "Defensive", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Warlord", "Officer", "Bounty Target"],
+      "mechanicalKeywords": [{"name": "Adversary", "value": 2}],
+      "abilities": ["Tactical Command: Allied Imperial units within Short range may perform one additional maneuver on their activation.", "Parry: When hit by a melee attack, reduce damage by 3."],
+      "threatCost": 0
+    },
+    "droid-architect": {
+      "id": "droid-architect",
+      "name": "Poggle the Elder",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": 14,
+      "soak": 2,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "sonic-pistol",
+          "name": "Geonosian Sonic Pistol",
+          "baseDamage": 5,
+          "range": "Short",
+          "critical": 5,
+          "qualities": [{ "name": "Stun setting", "value": null }, { "name": "Disorient", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Geonosian", "Engineer", "Bounty Target"],
+      "mechanicalKeywords": [],
+      "abilities": ["Droid Commander: War Droids within Medium range add 1 Proficiency die to their attacks.", "Bodyguards: When this NPC is deployed, also deploy 1 War Droid Mk1 adjacent to them."],
+      "threatCost": 0
+    },
+    "double-agent": {
+      "id": "double-agent",
+      "name": "Kessa Rynn",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 7,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "suppressed-pistol",
+          "name": "Suppressed Blaster Pistol",
+          "baseDamage": 5,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Spy", "Double Agent", "Bounty Target"],
+      "mechanicalKeywords": [{"name": "Elusive", "value": 1}],
+      "abilities": ["Misdirection: Once per encounter, force an attacker to re-roll their attack pool, keeping the second result."],
+      "threatCost": 0
+    }
+  }
+}

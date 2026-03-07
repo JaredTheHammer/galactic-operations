@@ -449,6 +449,35 @@
         ]
       }
     ],
+    "confrontationEncounter": {
+      "id": "enc-confront-rival-act1",
+      "name": "Confronting Vex Torrin",
+      "description": "Track down and confront your rival, the Devaronian hunter Vex Torrin.",
+      "narrativeIntro": "You spot Vex Torrin at a corner booth, nursing a drink and reviewing bounty postings. He notices you approaching and flashes a predatory grin. \"Come to test your luck, have you?\"",
+      "dialogueOptions": [
+        {
+          "id": "confront-coercion",
+          "text": "\"Back off our contracts, Torrin. This is your only warning.\"",
+          "skillId": "coercion",
+          "description": "Intimidate the rival into standing down."
+        },
+        {
+          "id": "confront-charm",
+          "text": "\"Let's talk this out. There's enough work for both of us -- maybe we can split the board.\"",
+          "skillId": "charm",
+          "description": "Try to negotiate a truce with the rival."
+        },
+        {
+          "id": "confront-deception",
+          "text": "\"I've got Imperial contacts who'd love to know about your little side deals, Torrin.\"",
+          "skillId": "deception",
+          "description": "Bluff about having leverage over the rival."
+        }
+      ],
+      "successNarrative": "Torrin's confident expression falters. He gathers his things and exits without another word. You've bought yourself some breathing room.",
+      "failureNarrative": "Torrin laughs in your face. \"Nice try. But I play for keeps.\" He signals to someone across the cantina -- looks like he's already working his next angle.",
+      "despairNarrative": "Not only does Torrin see through your attempt, he uses the confrontation to publicly humiliate you. Several patrons who might have been allies now eye you with suspicion."
+    },
     "shops": [
       {
         "id": "shop-greeska",
