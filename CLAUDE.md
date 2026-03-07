@@ -154,6 +154,7 @@ Setup -> Hero Creation -> MissionSelect -> Combat -> PostMission -> SocialPhase 
 - `buildCombatPools` options object has many existing params (aimBonus, cover, etc.) -- check the type before adding new ones
 - The simulator uses generated maps (36x36+), not the old 10x10 empty grid. Always pass board templates.
 - `computeGameScale(boardsWide)` derives round limits, threat income, deploy depth from map size
+- Movement bug (KNOWN): `moveFigure()` in movement.ts decrements `actionsRemaining` AND turn-machine-v2.ts `executeActionV2` decrements `maneuversRemaining` -- every Move costs both. Do not fix one without fixing the other.
 
 ### Client UI
 - Dropdowns inside `overflow: auto` containers: use `position: fixed` + `getBoundingClientRect()`, not `position: absolute`
@@ -167,6 +168,16 @@ New NPC/mission/hub JSON files must be registered in:
 2. `packages/client/src/components/Campaign/SocialPhase/SocialPhase.tsx` -- hub imports (`socialHubsByAct` map)
 3. `scripts/validate-v2-data.js` -- file lists for validation
 4. `packages/engine/src/data-loader.ts` -- auto-scans `data/npcs/` dir, but missions are hardcoded
+5. `data/ai-profiles.json` -- every NPC id must have an entry in `unitMapping` or validation fails
+
+### NPC Data Schema
+- Required: `id, name, side, tier, attackPool:{ability,proficiency}, defensePool:{difficulty,challenge}, woundThreshold, soak, speed, weapons[], aiArchetype, keywords[], mechanicalKeywords[], abilities[], threatCost`
+- `side`: "imperial" (enemy) or "operative" (player/ally) -- no "rebel"/"republic" side values
+- `tier`: Minion (`strainThreshold: null`), Rival/Nemesis (require non-null `strainThreshold`)
+- Vehicles: must be Rival/Nemesis with non-null `strainThreshold` (validator enforces)
+- Boss NPCs: `isBoss: true` + `bossHitLocations[]` (with `disabledEffects`) + `bossPhaseTransitions[]` (triggered by `disabledLocationsRequired`)
+- ID prefix convention: `ia-` (Imperial Assault), `legion-` (Legion) to avoid collisions
+- NPC files are plain JSON objects keyed by NPC id (not arrays). Game store spreads with `...fileData`.
 
 ### Adding New Specializations
 1. Create JSON in `data/specializations/<name>.json` following existing schema (30 talent cards in pyramid)
