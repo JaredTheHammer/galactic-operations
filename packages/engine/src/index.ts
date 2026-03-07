@@ -30,6 +30,8 @@ export type {
   TacticCardEffectType,
   TacticCardEffect,
   TacticCard,
+  TacticCardAltMode,
+  TacticCardAltModeType,
   // Combat
   CombatState,
   CombatResolution,
@@ -59,6 +61,14 @@ export type {
   // Species Abilities
   SpeciesAbilityEffect,
   SpeciesAbility,
+  // Supply Network
+  SupplyNodeType,
+  SupplyNode,
+  SupplyRoute,
+  SupplyNetwork,
+  SectorLocation,
+  SectorMapDefinition,
+  SupplyNodeBonus,
   // Rebellion Mechanics
   ActProgress,
   ActOutcome,
@@ -262,6 +272,43 @@ export {
   runCombatSim,
   runCombatBatch,
 } from './ai/index.js';
+
+// Re-export supply network system (Brass: Birmingham-inspired)
+export {
+  createSupplyNetwork,
+  initializeNetwork,
+  canBuildNode,
+  buildNode,
+  getActiveNodes,
+  getConnectedLocations,
+  getNetworkUnlockedMissions,
+  getNetworkAvailableGear,
+  getNetworkThreatReduction,
+  getNetworkReinforcementBonus,
+  getNetworkBonuses,
+  applyNetworkUpkeep,
+  severNodesAtLocation,
+  repairNode,
+  getNetworkFilteredMissions,
+  getNetworkSummary,
+  NODE_BUILD_COSTS,
+  NODE_UPKEEP_COSTS,
+  NODE_INCOME,
+  SAFEHOUSE_THREAT_REDUCTION,
+  MAX_REINFORCEMENT_BONUS,
+} from './supply-network.js';
+
+// Re-export dual-use tactic card functions
+export {
+  hasAltMode,
+  getAltModeCards,
+  playCardAltMode,
+  aiShouldUseAltMode,
+} from './tactic-cards.js';
+
+export type {
+  AltModeResult,
+} from './tactic-cards.js';
 
 // Re-export power ranking system
 export {

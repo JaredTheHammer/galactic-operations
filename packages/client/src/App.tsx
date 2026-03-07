@@ -29,6 +29,7 @@ import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
 import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgression'
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
+import { SectorMap } from './components/Campaign/SectorMap'
 import MissionBriefing from './components/Campaign/MissionBriefing'
 import { ActTransition } from './components/Campaign/ActTransition'
 import { CampaignOverworld } from './components/Campaign/CampaignOverworld'
@@ -97,6 +98,7 @@ function App() {
     showSocialPhase,
     showHeroProgression,
     showPortraitManager,
+    showSectorMap,
     showCampaignStats,
     showMissionBriefing,
     showCampaignJournal,
@@ -108,6 +110,7 @@ function App() {
     overworldDef,
     closeCampaignOverworld,
     travelToSector,
+    campaignState,
     showStrategicCommand,
   } = useGameStore()
 
@@ -127,6 +130,8 @@ function App() {
   const inTacticalCombat = !!gameState && isInitialized && !isAIBattle && !showSetup && !showHeroCreation
     && !showMissionSelect && !showPostMission && !showSocialPhase && !showHeroProgression
     && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition && !showCampaignOverworld && !showStrategicCommand
+    && !showPortraitManager && !showSectorMap && !showCombatArena && !showMissionBriefing && !showActTransition
+    && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition && !showStrategicCommand
   useCombatKeys(inTacticalCombat && !isMobile)
 
   // Auto-execute Imperial AI turns in campaign combat (not AI Battle mode)
@@ -197,6 +202,11 @@ function App() {
   // Campaign: portrait & faction visual manager
   if (showPortraitManager) {
     return <><AudioControls /><PortraitManagerPage /></>
+  }
+
+  // Campaign: interactive sector map
+  if (showSectorMap && campaignState) {
+    return <><AudioControls /><SectorMap campaign={campaignState} onClose={useGameStore.getState().closeSectorMap} /></>
   }
 
   // Campaign: mission journal (lazy-loaded)

@@ -65,7 +65,7 @@ import {
 import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization, equipItem, unequipItem } from '@engine/character-v2.js'
 import type { HeroCreationInput, EquipmentSlot } from '@engine/character-v2.js'
 import { getEquippedTalents, canActivateTalent } from '@engine/talent-v2.js'
-import { initializeTacticDeck, drawCardsForBothSides, playCard } from '@engine/tactic-cards.js'
+import { initializeTacticDeck, drawCardsForBothSides, playCard, playCardAltMode } from '@engine/tactic-cards.js'
 import {
   createCampaign,
   getAvailableMissions,
@@ -86,6 +86,9 @@ import type { MissionCompletionInput } from '@engine/campaign-v2.js'
 import { initializeCampaignOverworld, travelToSector as travelToSectorFn } from '@engine/campaign-overworld.js'
 import { initializeLegacyDeck, acknowledgePendingEvents } from '@engine/legacy-events.js'
 import { professionalTreatment } from '@engine/critical-injuries.js'
+import { initializeNetwork, applyNetworkUpkeep, getNetworkThreatReduction, getNetworkReinforcementBonus, severNodesAtLocation } from '@engine/supply-network.js'
+import type { SectorMapDefinition } from '@engine/types.js'
+import sectorMapData from '../../../../data/sector-map.json'
 import { combatAnimations } from '../canvas/animation-manager'
 import { saveToSlot, loadFromSlot, deleteSlot, AUTO_SAVE_SLOT, findEmptySlot, migrateLegacySave } from '../services/save-slots'
 
@@ -507,6 +510,7 @@ export interface GameStore {
   actTransitionData: { fromAct: number; toAct: number } | null
   showHeroProgression: boolean
   showPortraitManager: boolean
+  showSectorMap: boolean
   showCampaignStats: boolean
   showStrategicCommand: boolean
   showMapEditor: boolean
@@ -595,6 +599,7 @@ export interface GameStore {
   useConsumable: (itemId: string, targetId?: string) => void
   getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => void
+  playTacticCardAltMode: (cardId: string) => void
   dismissCombat: () => void
   endActivation: () => void
   advancePhase: () => void
@@ -667,6 +672,10 @@ export interface GameStore {
   // Portrait manager actions
   openPortraitManager: () => void
   closePortraitManager: () => void
+
+  // Sector map actions
+  openSectorMap: () => void
+  closeSectorMap: () => void
   purchaseHeroTalent: (heroId: string, talentId: string, tier: 1 | 2 | 3 | 4 | 5, position: number) => void
   purchaseHeroSkillRank: (heroId: string, skillId: string) => void
   unlockHeroSpecialization: (heroId: string, specializationId: string) => void
@@ -725,6 +734,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   actTransitionData: null,
   showHeroProgression: false,
   showPortraitManager: false,
+  showSectorMap: false,
   showCampaignStats: false,
   showStrategicCommand: false,
   showMapEditor: false,
@@ -1527,6 +1537,51 @@ export const useGameStore = create<GameStore>((set, get) => ({
     addCombatLog(`Played tactic card: ${cardId}`)
   },
 
+  playTacticCardAltMode: (cardId: string) => {
+    const { gameState, gameData, addCombatLog } = get()
+    if (!gameState?.tacticDeck || !gameData) return
+
+    const result = playCardAltMode(gameState.tacticDeck, gameData, 'Operative', cardId)
+    if (!result) {
+      addCombatLog(`Cannot play ${cardId} in alt mode`)
+      return
+    }
+
+    // Apply alt mode effects to the current figure
+    const figures = [...gameState.figures]
+    const currentFigureId = gameState.activationOrder?.[gameState.currentActivationIndex]
+    if (currentFigureId) {
+      const figIdx = figures.findIndex(f => f.id === currentFigureId)
+      if (figIdx >= 0) {
+        const fig = { ...figures[figIdx] }
+        if (result.result.movementBonus > 0) {
+          fig.maneuversRemaining = Math.min(2, (fig.maneuversRemaining ?? 0) + 1) as 0 | 1 | 2
+        }
+        if (result.result.actionPointBonus > 0) {
+          fig.actionsRemaining = Math.min(2, (fig.actionsRemaining ?? 0) + 1) as 0 | 1
+        }
+        if (result.result.strainRecovery > 0) {
+          fig.strainCurrent = Math.max(0, (fig.strainCurrent ?? 0) - result.result.strainRecovery)
+        }
+        if (result.result.defenseBonus > 0 && !fig.conditions.includes('DefenseStance')) {
+          fig.conditions = [...fig.conditions, 'DefenseStance']
+        }
+        figures[figIdx] = fig
+      }
+    }
+
+    set({
+      gameState: {
+        ...gameState,
+        tacticDeck: result.deck,
+        figures,
+      },
+    })
+
+    const modeLabel = result.result.altMode.type.replace(/_/g, ' ')
+    addCombatLog(`Used ${result.result.cardName} alt mode: ${modeLabel} +${result.result.altMode.value}`)
+  },
+
   dismissCombat: () => {
     const { gameState } = get()
     if (!gameState) return
@@ -2084,6 +2139,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
     // Initialize momentum at 0 (opt-in by setting the field)
     campaign = { ...campaign, momentum: 0 }
+    // Initialize supply network with starting location
+    campaign.supplyNetwork = initializeNetwork(sectorMapData as SectorMapDefinition)
 
     // Find an empty slot for the new campaign
     const newSlot = findEmptySlot() ?? 1
@@ -2136,6 +2193,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const mission = campaignMissions[missionId]
     if (!mission) return
 
+    // Apply supply network upkeep (collect income, deduct costs, sever unpaid nodes)
+    let updatedCampaignForMission = campaignState
+    if (campaignState.supplyNetwork) {
+      updatedCampaignForMission = applyNetworkUpkeep(campaignState)
+      set({ campaignState: updatedCampaignForMission })
+    }
+
     const gameData = loadGameDataV2()
     const mapConfig: MapConfig = {
       preset: mission.mapPreset as any,
@@ -2144,8 +2208,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
     const generatedMap = generateMap(mapConfig, BOARD_TEMPLATES)
 
-    // Prepare heroes from campaign roster
-    const heroes = prepareHeroesForMission(campaignState)
+    // Prepare heroes from campaign roster (use updated campaign with upkeep applied)
+    const heroes = prepareHeroesForMission(updatedCampaignForMission)
     const heroesRegistry: Record<string, HeroCharacter> = {}
     for (const hero of heroes) {
       heroesRegistry[hero.id] = hero
@@ -2157,6 +2221,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
       { id: 1, name: 'Player', role: 'Operative', isLocal: true, isAI: false },
     ]
 
+    // Apply supply network threat reduction (safehouses) and reinforcement disruption (supply routes)
+    const networkThreatReduction = updatedCampaignForMission.supplyNetwork
+      ? getNetworkThreatReduction(updatedCampaignForMission.supplyNetwork)
+      : 0
+    const networkReinforcementBonus = updatedCampaignForMission.supplyNetwork
+      ? getNetworkReinforcementBonus(updatedCampaignForMission.supplyNetwork)
+      : 0
+    const effectiveThreat = Math.max(0, mission.imperialThreat - networkThreatReduction)
+    const effectiveThreatPerRound = Math.max(0, mission.threatPerRound - Math.floor(networkThreatReduction / 2) - networkReinforcementBonus)
     // Apply exposure modifiers for act finales (missionIndex 4)
     const isActFinale = mission.missionIndex === 4
     const exposureModifiers = isActFinale && campaignState.actProgress
@@ -2190,7 +2263,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         npcProfiles: gameData.npcProfiles,
         objectivePointTemplates: mission.objectivePoints,
         lootTokens: mission.lootTokens,
-        consumableInventory: { ...(campaignState.consumableInventory ?? {}) },
+        consumableInventory: { ...(updatedCampaignForMission.consumableInventory ?? {}) },
       },
     )
 
@@ -2261,12 +2334,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       isAIBattle: false,
       activeMissionDef: effectiveMissionDef,
       triggeredWaveIds: [],
-      combatLog: isActFinale && exposureModifiers.threatBonus > 0
-        ? [
-            `Mission started: ${mission.name}`,
-            `** IMPERIAL ALERT: Exposure level has drawn additional forces! **`,
-          ]
-        : [`Mission started: ${mission.name}`],
+      combatLog: [
+        `Mission started: ${mission.name}`,
+        ...(isActFinale && exposureModifiers.threatBonus > 0 ? [`** IMPERIAL ALERT: Exposure level has drawn additional forces! **`] : []),
+        ...(networkThreatReduction > 0 ? [`Supply network reduces Imperial threat by ${networkThreatReduction}`] : []),
+        ...(networkReinforcementBonus > 0 ? [`Supply routes disrupt reinforcements: -${networkReinforcementBonus} threat/round`] : []),
+      ],
       gameStateHistory: [],
     })
   },
@@ -2283,9 +2356,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ? { ...campaignState, consumableInventory: { ...gameState.consumableInventory } }
       : campaignState
 
-    const previousAct = updatedCampaign.currentAct
+    // On defeat, sever supply nodes at the mission's sector location
+    let campaignForCompletion = updatedCampaign
+    if (input.outcome === 'defeat' && updatedCampaign.supplyNetwork) {
+      const sectorMap = sectorMapData as SectorMapDefinition
+      const missionId = gameState?.activeMissionId ?? input.missionId
+      // Reverse-lookup: find which sector location unlocks this mission
+      const missionLocation = sectorMap.locations.find(
+        loc => loc.unlocksMissions?.includes(missionId)
+      )
+      if (missionLocation) {
+        campaignForCompletion = severNodesAtLocation(campaignForCompletion, missionLocation.id)
+      }
+    }
+
+    const previousAct = campaignForCompletion.currentAct
     const { campaign: newCampaign, result } = completeMission(
-      updatedCampaign,
+      campaignForCompletion,
       input,
       campaignMissions,
     )
@@ -2493,6 +2580,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
+      showSectorMap: false,
       showCampaignStats: false,
       showStrategicCommand: false,
       showMapEditor: false,
@@ -2548,6 +2636,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
+      showSectorMap: false,
       showCampaignStats: false,
       showStrategicCommand: false,
       showMapEditor: false,
@@ -2725,6 +2814,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   closePortraitManager: () => {
     set({
       showPortraitManager: false,
+      showMissionSelect: true,
+    })
+  },
+
+  // ---- Sector Map ----
+
+  openSectorMap: () => {
+    set({
+      showMissionSelect: false,
+      showSectorMap: true,
+    })
+  },
+
+  closeSectorMap: () => {
+    set({
+      showSectorMap: false,
       showMissionSelect: true,
     })
   },
