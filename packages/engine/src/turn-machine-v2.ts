@@ -34,6 +34,7 @@ import type {
   ObjectivePoint,
   ObjectivePointTemplate,
   ConsumableItem,
+  LootToken,
 } from './types.js';
 
 import { RANGE_BAND_TILES, computeDiminishedHealing } from './types.js';
@@ -555,7 +556,7 @@ function getReinforcementPurchases(
 
   // Build purchasable lists by tier
   const allUnits = Object.values(npcProfiles)
-    .filter(npc => npc.side === 'imperial')
+    .filter(npc => (npc.side as string).toLowerCase() === 'imperial')
     .map(npc => ({
       npcId: npc.id,
       cost: npc.threatCost ?? DEFAULT_THREAT_COSTS[npc.tier] ?? 3,
@@ -1022,12 +1023,21 @@ export function buildActivationOrderV2(gameState: GameState): string[] {
   return order;
 }
 
-function getFigureSpeed(figure: Figure, gameState: GameState): number {
+export function getFigureSpeed(figure: Figure, gameState: GameState): number {
+  let speed = 4;
   if (figure.entityType === 'npc') {
     const npc = gameState.npcProfiles[figure.entityId];
-    return npc?.speed ?? 4;
+    speed = npc?.speed ?? 4;
   }
-  return 4;
+  // Boss phase transition speed bonus
+  if (figure.bossPhaseStatBonuses?.speedBonus) {
+    speed += figure.bossPhaseStatBonuses.speedBonus;
+  }
+  // Focus bonus move (+2 speed)
+  if (figure.focusBonusMove) {
+    speed += 2;
+  }
+  return speed;
 }
 
 // ============================================================================
@@ -1573,8 +1583,10 @@ export function executeActionV2(
         }
       } else {
         const heroEntity = newState.heroes[figure.entityId];
-        if (heroEntity?.equipment?.weapons?.length) {
-          standbyWpnId = heroEntity.equipment.weapons[0];
+        if (heroEntity?.equipment?.primaryWeapon) {
+          standbyWpnId = heroEntity.equipment.primaryWeapon;
+        } else if ((heroEntity?.equipment as any)?.weapons?.length) {
+          standbyWpnId = (heroEntity.equipment as any).weapons[0];
         }
       }
 

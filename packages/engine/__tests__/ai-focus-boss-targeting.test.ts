@@ -376,7 +376,7 @@ describe('chooseBossHitLocation', () => {
           woundCapacity: 5,
           woundsCurrent: 0,
           isDisabled: false,
-          disabledEffects: { soakReduction: 2 },
+          disabledEffects: { soakModifier: 2 },
         },
         {
           id: 'weapon-arm',
@@ -384,7 +384,7 @@ describe('chooseBossHitLocation', () => {
           woundCapacity: 5,
           woundsCurrent: 0,
           isDisabled: false,
-          disabledEffects: { disableWeapons: ['heavy-cannon'] },
+          disabledEffects: { disabledWeapons: ['heavy-cannon'] },
         },
       ],
     });
@@ -402,7 +402,7 @@ describe('chooseBossHitLocation', () => {
           woundCapacity: 5,
           woundsCurrent: 0,
           isDisabled: false,
-          disabledEffects: { attackPoolPenalty: { ability: -1, proficiency: 0 } },
+          disabledEffects: { attackPoolModifier: { ability: -1, proficiency: 0 } },
         },
         {
           id: 'nearly-disabled',
@@ -410,7 +410,7 @@ describe('chooseBossHitLocation', () => {
           woundCapacity: 5,
           woundsCurrent: 4,
           isDisabled: false,
-          disabledEffects: { attackPoolPenalty: { ability: -1, proficiency: 0 } },
+          disabledEffects: { attackPoolModifier: { ability: -1, proficiency: 0 } },
         },
       ],
     });
@@ -428,7 +428,7 @@ describe('chooseBossHitLocation', () => {
           woundCapacity: 3,
           woundsCurrent: 2, // 1 remaining
           isDisabled: false,
-          disabledEffects: { speedReduction: 1 }, // low value: 2 points
+          disabledEffects: { speedModifier: 1 }, // low value: 2 points
         },
         {
           id: 'strong-effect',
@@ -436,7 +436,7 @@ describe('chooseBossHitLocation', () => {
           woundCapacity: 4,
           woundsCurrent: 2, // 2 remaining
           isDisabled: false,
-          disabledEffects: { disableWeapons: ['main-gun'], attackPoolPenalty: { ability: -1, proficiency: -1 } }, // high value: 8 + 5 = 13
+          disabledEffects: { disabledWeapons: ['main-gun'], attackPoolModifier: { ability: -1, proficiency: -1 } }, // high value: 8 + 5 = 13
         },
       ],
     });
@@ -455,7 +455,7 @@ describe('chooseBossHitLocation', () => {
           woundCapacity: 3,
           woundsCurrent: 3,
           isDisabled: true,
-          disabledEffects: { disableWeapons: ['mega-weapon'] },
+          disabledEffects: { disabledWeapons: ['mega-weapon'] },
         },
         {
           id: 'active-loc',
@@ -463,7 +463,7 @@ describe('chooseBossHitLocation', () => {
           woundCapacity: 5,
           woundsCurrent: 1,
           isDisabled: false,
-          disabledEffects: { speedReduction: 2 },
+          disabledEffects: { speedModifier: 2 },
         },
       ],
     });
@@ -497,7 +497,7 @@ describe('buildAttackAction boss targeting integration', () => {
           woundCapacity: 4,
           woundsCurrent: 0,
           isDisabled: false,
-          disabledEffects: { disableWeapons: ['lightsaber'] },
+          disabledEffects: { disabledWeapons: ['lightsaber'] },
         },
         {
           id: 'force-focus',
@@ -505,7 +505,7 @@ describe('buildAttackAction boss targeting integration', () => {
           woundCapacity: 3,
           woundsCurrent: 0,
           isDisabled: false,
-          disabledEffects: { attackPoolPenalty: { ability: -1, proficiency: 0 } },
+          disabledEffects: { attackPoolModifier: { ability: -1, proficiency: 0 } },
         },
       ],
     });

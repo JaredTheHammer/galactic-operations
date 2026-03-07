@@ -10,6 +10,7 @@
 
 import type {
   AttackPool,
+  BossHitLocationState,
   DefensePool,
   CombatResolution,
   CombatScenario,
@@ -331,6 +332,14 @@ export function buildCombatPools(
     attackPool = applyBossAttackPenalties(attackPool, attacker);
   }
 
+  // Boss phase transition stat bonuses (enrage): add extra attack dice
+  if (attacker.bossPhaseStatBonuses?.attackPoolBonus) {
+    attackPool = {
+      ...attackPool,
+      ability: attackPool.ability + attacker.bossPhaseStatBonuses.attackPoolBonus,
+    };
+  }
+
   // Graduated suppression: if suppression tokens >= courage, downgrade 1 yellow to green
   if (attacker.suppressionTokens >= attacker.courage && attacker.courage > 0) {
     if (attackPool.proficiency > 0) {
@@ -434,13 +443,26 @@ export function buildCombatPools(
     defensePool = applyBossDefensePenalties(defensePool, defender);
   }
 
+  // Boss phase transition stat bonuses (enrage): add extra defense dice
+  if (defender.bossPhaseStatBonuses?.defensePoolBonus) {
+    defensePool = {
+      ...defensePool,
+      difficulty: defensePool.difficulty + defender.bossPhaseStatBonuses.defensePoolBonus,
+    };
+  }
+
   // Minimum defense: always at least 1 difficulty die
   if (defensePool.difficulty === 0 && defensePool.challenge === 0) {
     defensePool = { difficulty: 1, challenge: 0 };
   }
 
   // --- SOAK ---
-  const soak = computeSoak(defender, defenderEntity, gameData);
+  let soak = computeSoak(defender, defenderEntity, gameData);
+
+  // Boss phase transition soak bonus
+  if (defender.bossPhaseStatBonuses?.soakBonus) {
+    soak += defender.bossPhaseStatBonuses.soakBonus;
+  }
 
   return { attackPool, defensePool, soak, weapon };
 }
@@ -871,8 +893,11 @@ export function resolveCombatV2(
   // Focus bonus damage (+3 from spending Focus)
   const focusBonusDamage = (attacker.focusBonusDamage && rollResult.isHit) ? 3 : 0;
 
-  // Add advantage-based + talent bonus damage + Focus bonus to wounds
-  const totalGrossDamage = damageResult.grossDamage + spending.bonusDamage + talentBonusDamage + focusBonusDamage;
+  // Boss phase enrage damage bonus
+  const phaseDamageBonus = attacker.bossPhaseStatBonuses?.damageBonus ?? 0;
+
+  // Add advantage-based + talent bonus damage + Focus bonus + phase bonus to wounds
+  const totalGrossDamage = damageResult.grossDamage + spending.bonusDamage + talentBonusDamage + focusBonusDamage + phaseDamageBonus;
   const totalWoundsDealt = rollResult.isHit
     ? Math.max(0, totalGrossDamage - damageResult.effectiveSoak)
     : 0;
@@ -959,68 +984,83 @@ export function applyCombatResult(
     }
   }
 
-  // Track hit location feedback for resolution enrichment
-  let hitLocationFeedback: {
-    targetedLocationId?: string;
-    targetedLocationName?: string;
-    locationWoundsAbsorbed: number;
-    locationsDisabled: string[];
-    locationsDisabledNames: string[];
-    bossPhaseTransitioned: boolean;
-    newBossPhase?: number;
-  } | null = null;
+  // Pre-compute boss hit location routing for the defender (outside .map for TypeScript narrowing)
+  interface HitLocationResult {
+    actualWoundsToBody: number;
+    updatedHitLocations: BossHitLocationState[] | undefined;
+    updatedBossPhase: number | undefined;
+    updatedBossPhaseStatBonuses?: Figure['bossPhaseStatBonuses'];
+    feedback: {
+      targetedLocationId?: string;
+      targetedLocationName?: string;
+      locationWoundsAbsorbed: number;
+      locationsDisabled: string[];
+      locationsDisabledNames: string[];
+      bossPhaseTransitioned: boolean;
+      newBossPhase?: number;
+    };
+  }
+
+  let hitLocationResult: HitLocationResult | null = null;
+  const defenderFig = gameState.figures.find(f => f.id === scenario.defenderId);
+  if (defenderFig?.hitLocations && defenderFig.hitLocations.length > 0 && defenderEffectiveWounds > 0) {
+    const targetLocId = (scenario as CombatScenario & { targetLocationId?: string }).targetLocationId;
+    const routeResult = routeWoundsToHitLocations(
+      defenderFig.hitLocations,
+      defenderEffectiveWounds,
+      targetLocId,
+    );
+
+    const targetedLoc = targetLocId
+      ? defenderFig.hitLocations.find(l => l.id === targetLocId)
+      : undefined;
+    const disabledNames = routeResult.newlyDisabled.map(id => {
+      const loc = routeResult.updatedLocations.find(l => l.id === id);
+      return loc?.name ?? id;
+    });
+
+    let phaseTransitioned = false;
+    let newBossPhase = defenderFig.bossPhase;
+    let newBossPhaseStatBonuses = defenderFig.bossPhaseStatBonuses;
+    if (routeResult.newlyDisabled.length > 0) {
+      const npcProfile = gameState.npcProfiles[defenderFig.entityId];
+      if (npcProfile) {
+        const tempFig = { ...defenderFig, hitLocations: routeResult.updatedLocations, bossPhase: newBossPhase };
+        const transition = checkBossPhaseTransition(tempFig, npcProfile);
+        if (transition) {
+          const transitioned = applyBossPhaseTransition(tempFig, transition);
+          newBossPhase = transitioned.bossPhase;
+          newBossPhaseStatBonuses = transitioned.bossPhaseStatBonuses;
+          phaseTransitioned = true;
+        }
+      }
+    }
+
+    hitLocationResult = {
+      actualWoundsToBody: routeResult.overflowWounds,
+      updatedHitLocations: routeResult.updatedLocations,
+      updatedBossPhase: newBossPhase,
+      updatedBossPhaseStatBonuses: newBossPhaseStatBonuses,
+      feedback: {
+        targetedLocationId: targetLocId,
+        targetedLocationName: targetedLoc?.name,
+        locationWoundsAbsorbed: defenderEffectiveWounds - routeResult.overflowWounds,
+        locationsDisabled: routeResult.newlyDisabled,
+        locationsDisabledNames: disabledNames,
+        bossPhaseTransitioned: phaseTransitioned,
+        newBossPhase: phaseTransitioned ? newBossPhase : undefined,
+      },
+    };
+  }
 
   const newFigures = gameState.figures.map((fig) => {
     // --- DEFENDER ---
     if (fig.id === scenario.defenderId) {
-      // Boss Hit Location routing: absorb wounds into hit locations first
-      let actualWoundsToBody = defenderEffectiveWounds;
-      let updatedHitLocations = fig.hitLocations;
-      let updatedBossPhase = fig.bossPhase;
-
-      if (fig.hitLocations && fig.hitLocations.length > 0 && defenderEffectiveWounds > 0) {
-        const targetLocId = (scenario as CombatScenario & { targetLocationId?: string }).targetLocationId;
-        const routeResult = routeWoundsToHitLocations(
-          fig.hitLocations,
-          defenderEffectiveWounds,
-          targetLocId,
-        );
-        updatedHitLocations = routeResult.updatedLocations;
-        actualWoundsToBody = routeResult.overflowWounds;
-
-        // Build hit location feedback
-        const targetedLoc = targetLocId
-          ? fig.hitLocations.find(l => l.id === targetLocId)
-          : undefined;
-        const disabledNames = routeResult.newlyDisabled.map(id => {
-          const loc = routeResult.updatedLocations.find(l => l.id === id);
-          return loc?.name ?? id;
-        });
-
-        let phaseTransitioned = false;
-        // Check phase transitions on newly disabled locations
-        if (routeResult.newlyDisabled.length > 0) {
-          const npcProfile = gameState.npcProfiles[fig.entityId];
-          if (npcProfile) {
-            const tempFig = { ...fig, hitLocations: updatedHitLocations, bossPhase: updatedBossPhase };
-            const transition = checkBossPhaseTransition(tempFig, npcProfile);
-            if (transition) {
-              updatedBossPhase = (updatedBossPhase ?? 0) + 1;
-              phaseTransitioned = true;
-            }
-          }
-        }
-
-        hitLocationFeedback = {
-          targetedLocationId: targetLocId,
-          targetedLocationName: targetedLoc?.name,
-          locationWoundsAbsorbed: defenderEffectiveWounds - actualWoundsToBody,
-          locationsDisabled: routeResult.newlyDisabled,
-          locationsDisabledNames: disabledNames,
-          bossPhaseTransitioned: phaseTransitioned,
-          newBossPhase: phaseTransitioned ? updatedBossPhase : undefined,
-        };
-      }
+      // Boss Hit Location routing: use pre-computed result
+      const actualWoundsToBody = hitLocationResult?.actualWoundsToBody ?? defenderEffectiveWounds;
+      const updatedHitLocations = hitLocationResult?.updatedHitLocations ?? fig.hitLocations;
+      const updatedBossPhase = hitLocationResult?.updatedBossPhase ?? fig.bossPhase;
+      const updatedBossPhaseStatBonuses = hitLocationResult?.updatedBossPhaseStatBonuses ?? fig.bossPhaseStatBonuses;
 
       const newWounds = fig.woundsCurrent + actualWoundsToBody;
       const entity = getEntity(fig, gameState);
@@ -1045,7 +1085,7 @@ export function applyCombatResult(
       if (isRangedAttack && resolution.rollResult.isHit) {
         suppressionGain = 1; // base: +1 per ranged hit
         // Triumph adds +1 extra suppression
-        if (resolution.rollResult.triumph > 0) {
+        if (((resolution.rollResult as any).triumph ?? resolution.rollResult.totalTriumphs ?? 0) > 0) {
           suppressionGain += 1;
         }
         // Yahtzee combo bonus suppression (e.g., Quad = +2)
@@ -1078,6 +1118,7 @@ export function applyCombatResult(
           dodgeTokens: newDodgeTokens,
           hitLocations: updatedHitLocations,
           bossPhase: updatedBossPhase,
+          bossPhaseStatBonuses: updatedBossPhaseStatBonuses,
         };
       }
 
@@ -1155,18 +1196,18 @@ export function applyCombatResult(
   });
 
   // Enrich resolution with hit location feedback
-  const enrichedResolution: CombatResolution = hitLocationFeedback
+  const enrichedResolution: CombatResolution = hitLocationResult
     ? {
         ...resolution,
-        targetedLocationId: hitLocationFeedback.targetedLocationId,
-        targetedLocationName: hitLocationFeedback.targetedLocationName,
-        locationWoundsAbsorbed: hitLocationFeedback.locationWoundsAbsorbed,
-        locationsDisabled: hitLocationFeedback.locationsDisabled.length > 0
-          ? hitLocationFeedback.locationsDisabled : undefined,
-        locationsDisabledNames: hitLocationFeedback.locationsDisabledNames.length > 0
-          ? hitLocationFeedback.locationsDisabledNames : undefined,
-        bossPhaseTransitioned: hitLocationFeedback.bossPhaseTransitioned || undefined,
-        newBossPhase: hitLocationFeedback.newBossPhase,
+        targetedLocationId: hitLocationResult.feedback.targetedLocationId,
+        targetedLocationName: hitLocationResult.feedback.targetedLocationName,
+        locationWoundsAbsorbed: hitLocationResult.feedback.locationWoundsAbsorbed,
+        locationsDisabled: hitLocationResult.feedback.locationsDisabled.length > 0
+          ? hitLocationResult.feedback.locationsDisabled : undefined,
+        locationsDisabledNames: hitLocationResult.feedback.locationsDisabledNames.length > 0
+          ? hitLocationResult.feedback.locationsDisabledNames : undefined,
+        bossPhaseTransitioned: hitLocationResult.feedback.bossPhaseTransitioned || undefined,
+        newBossPhase: hitLocationResult.feedback.newBossPhase,
       }
     : resolution;
 

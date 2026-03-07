@@ -312,6 +312,70 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
             </div>
           )}
 
+          {/* Boss Hit Location Feedback */}
+          {combat.resolution.targetedLocationName && (
+            <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #333355' }}>
+              <div style={{ fontSize: '10px', color: '#ff8844', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '4px' }}>
+                Targeted Shot
+              </div>
+              <div style={{ fontSize: '11px', color: '#ffaa66' }}>
+                Target: {combat.resolution.targetedLocationName} (+1 difficulty)
+              </div>
+              {combat.resolution.locationWoundsAbsorbed != null && combat.resolution.locationWoundsAbsorbed > 0 && (
+                <div style={{ fontSize: '11px', color: '#ff8844', marginTop: '2px' }}>
+                  Location absorbed {combat.resolution.locationWoundsAbsorbed} wounds
+                </div>
+              )}
+            </div>
+          )}
+          {combat.resolution.locationsDisabledNames && combat.resolution.locationsDisabledNames.length > 0 && (
+            <div style={{ marginTop: '6px' }}>
+              {combat.resolution.locationsDisabledNames.map((name, i) => (
+                <div key={i} style={{
+                  fontSize: '12px',
+                  color: '#ff6600',
+                  fontWeight: 'bold',
+                  padding: '4px 8px',
+                  marginTop: '4px',
+                  backgroundColor: 'rgba(255, 102, 0, 0.15)',
+                  border: '1px solid rgba(255, 102, 0, 0.4)',
+                  borderRadius: '4px',
+                }}>
+                  {name} DISABLED
+                </div>
+              ))}
+            </div>
+          )}
+          {combat.resolution.bossPhaseTransitioned && (
+            <div style={{
+              marginTop: '8px',
+              padding: '8px 12px',
+              backgroundColor: 'rgba(255, 136, 68, 0.2)',
+              border: '2px solid #ff8844',
+              borderRadius: '6px',
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '13px', color: '#ff8844', fontWeight: 'bold', letterSpacing: '1px' }}>
+                BOSS PHASE {combat.resolution.newBossPhase}
+              </div>
+              <div style={{ fontSize: '10px', color: '#ffaa66', marginTop: '2px' }}>
+                The boss grows more dangerous!
+              </div>
+            </div>
+          )}
+
+          {/* Focus indicators */}
+          {attacker.focusBonusDamage && (
+            <div style={{ fontSize: '10px', color: '#ff44ff', marginTop: '6px' }}>
+              Focus: +3 bonus damage applied
+            </div>
+          )}
+          {defender.focusBonusDefense && (
+            <div style={{ fontSize: '10px', color: '#44ccff', marginTop: '2px' }}>
+              Focus: +1 Challenge defense die
+            </div>
+          )}
+
           {/* Tactic cards played */}
           {combat.resolution.tacticCardsPlayed && combat.resolution.tacticCardsPlayed.length > 0 && gameData?.tacticCards && (
             <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #333355' }}>

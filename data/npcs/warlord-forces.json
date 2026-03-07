@@ -280,12 +280,14 @@
         {
           "disabledLocationsRequired": 1,
           "newAiArchetype": "elite",
-          "narrativeText": "Drayen adapts his tactics, barking orders to his remaining forces!"
+          "narrativeText": "Drayen adapts his tactics, barking orders to his remaining forces!",
+          "statBonuses": { "defensePoolBonus": 1, "soakBonus": 1 }
         },
         {
           "disabledLocationsRequired": 2,
           "newAiArchetype": "elite",
-          "narrativeText": "Badly damaged, Drayen fights with desperate precision!"
+          "narrativeText": "Badly damaged, Drayen fights with desperate precision!",
+          "statBonuses": { "attackPoolBonus": 1, "damageBonus": 2, "speedBonus": 1 }
         }
       ]
     }

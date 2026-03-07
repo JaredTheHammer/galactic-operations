@@ -195,12 +195,12 @@ export function chooseBossHitLocation(target: Figure): string | undefined {
 
     // Bonus for high-impact disabled effects
     if (loc.disabledEffects) {
-      if (loc.disabledEffects.disableWeapons?.length) score += 8;
-      if (loc.disabledEffects.attackPoolPenalty) score += 5;
-      if (loc.disabledEffects.soakReduction) score += 4;
-      if (loc.disabledEffects.defensePoolPenalty) score += 3;
-      if (loc.disabledEffects.speedReduction) score += 2;
-      if (loc.disabledEffects.applyConditions?.length) score += 3;
+      if (loc.disabledEffects.disabledWeapons?.length) score += 8;
+      if (loc.disabledEffects.attackPoolModifier) score += 5;
+      if (loc.disabledEffects.soakModifier) score += 4;
+      if (loc.disabledEffects.defensePoolModifier) score += 3;
+      if (loc.disabledEffects.speedModifier) score += 2;
+      if (loc.disabledEffects.conditionInflicted) score += 3;
     }
 
     return { id: loc.id, score };

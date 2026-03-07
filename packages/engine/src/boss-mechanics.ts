@@ -298,16 +298,30 @@ export function checkBossPhaseTransition(
 }
 
 /**
- * Apply a boss phase transition: update AI archetype and advance phase counter.
+ * Apply a boss phase transition: advance phase counter and accumulate stat bonuses.
+ * The AI archetype swap is handled by the AI decision system reading bossPhase.
  */
 export function applyBossPhaseTransition(
   figure: Figure,
   transition: BossPhaseTransition,
 ): Figure {
   const currentPhase = figure.bossPhase ?? 0;
+  const existing = figure.bossPhaseStatBonuses ?? {};
+  const bonuses = transition.statBonuses;
+
+  // Accumulate stat bonuses from this transition
+  const newBonuses = bonuses ? {
+    attackPoolBonus: (existing.attackPoolBonus ?? 0) + (bonuses.attackPoolBonus ?? 0),
+    defensePoolBonus: (existing.defensePoolBonus ?? 0) + (bonuses.defensePoolBonus ?? 0),
+    soakBonus: (existing.soakBonus ?? 0) + (bonuses.soakBonus ?? 0),
+    speedBonus: (existing.speedBonus ?? 0) + (bonuses.speedBonus ?? 0),
+    damageBonus: (existing.damageBonus ?? 0) + (bonuses.damageBonus ?? 0),
+  } : existing;
+
   return {
     ...figure,
     bossPhase: currentPhase + 1,
+    bossPhaseStatBonuses: Object.values(newBonuses).some(v => v !== 0) ? newBonuses : undefined,
   };
 }
 

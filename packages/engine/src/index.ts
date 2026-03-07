@@ -20,18 +20,11 @@ export type {
   AttackPool,
   DefensePool,
   YahtzeeCombo,
-  RollFn,
   // Units and Figures
   Side,
-  UnitTier,
-  SurgeAbility,
-  UnitDefinition,
-  StatusEffect,
   Figure,
   // Weapons and Equipment
   WeaponType,
-  Weapon,
-  Equipment,
   // Tactic Cards
   TacticCardTiming,
   TacticCardEffectType,
@@ -44,10 +37,7 @@ export type {
   // Turn and Actions
   TurnPhase,
   ActionType,
-  MoveActionPayload,
-  AttackActionPayload,
-  RestActionPayload,
-  OverwatchActionPayload,
+  AttackPayload,
   GameAction,
   ActionLog,
   // Players

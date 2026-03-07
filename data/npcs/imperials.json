@@ -216,12 +216,14 @@
         {
           "disabledLocationsRequired": 1,
           "newAiArchetype": "melee",
-          "narrativeText": "The Inquisitor snarls in pain, drawing deeper on the Dark Side!"
+          "narrativeText": "The Inquisitor snarls in pain, drawing deeper on the Dark Side!",
+          "statBonuses": { "attackPoolBonus": 1, "damageBonus": 1, "speedBonus": 1 }
         },
         {
           "disabledLocationsRequired": 2,
           "newAiArchetype": "melee",
-          "narrativeText": "Wounded and desperate, the Inquisitor fights with reckless fury!"
+          "narrativeText": "Wounded and desperate, the Inquisitor fights with reckless fury!",
+          "statBonuses": { "attackPoolBonus": 1, "damageBonus": 2 }
         }
       ]
     }

@@ -682,6 +682,14 @@ export interface Figure {
   hitLocations?: BossHitLocationState[];
   /** Current boss AI phase (0-indexed, advances as hit locations are disabled) */
   bossPhase?: number;
+  /** Cumulative stat bonuses from boss phase transitions */
+  bossPhaseStatBonuses?: {
+    attackPoolBonus?: number;
+    defensePoolBonus?: number;
+    soakBonus?: number;
+    speedBonus?: number;
+    damageBonus?: number;
+  };
 
   // Focus resource (Oathsworn Animus-inspired, heroes only)
   /** Current Focus points available to spend */
@@ -1669,6 +1677,19 @@ export interface BossPhaseTransition {
   newAiArchetype: string;
   /** Narrative text displayed on phase transition */
   narrativeText?: string;
+  /** Stat bonuses applied when entering this phase (cumulative with previous phases) */
+  statBonuses?: {
+    /** Additional attack pool dice (positive = more dangerous) */
+    attackPoolBonus?: number;
+    /** Additional defense pool dice */
+    defensePoolBonus?: number;
+    /** Soak modifier (positive = tougher) */
+    soakBonus?: number;
+    /** Speed modifier (positive = faster) */
+    speedBonus?: number;
+    /** Bonus damage on all attacks */
+    damageBonus?: number;
+  };
 }
 
 // ============================================================================

@@ -447,9 +447,10 @@ function buildFocusActions(figure: Figure, plannedActions: GameAction[]): GameAc
     trySpend('shake_condition');
   }
 
-  // Priority 2: Recover strain if critically high (>= 75% of threshold)
-  const strainThreshold = figure.strainThreshold ?? 10;
-  if (figure.strainCurrent >= strainThreshold * 0.75) {
+  // Priority 2: Recover strain if critically high (>= 75% of estimated threshold)
+  // Heroes typically have strain threshold 10-14; use 10 as conservative estimate
+  const estimatedStrainThreshold = 10;
+  if (figure.strainCurrent >= estimatedStrainThreshold * 0.75) {
     trySpend('recover_strain');
   }
 
@@ -467,7 +468,9 @@ function buildFocusActions(figure: Figure, plannedActions: GameAction[]): GameAc
   }
 
   // Priority 5: Defensive Focus when retreating or low health
-  const healthFraction = figure.woundsCurrent / Math.max(1, figure.woundsThreshold);
+  // Estimate wound threshold from focusMax as a rough proxy (heroes ~10-15 wounds)
+  const estimatedWoundThreshold = 12;
+  const healthFraction = figure.woundsCurrent / estimatedWoundThreshold;
   if ((isRetreating || healthFraction >= 0.6) && remainingFocus > 0) {
     trySpend('bonus_defense');
   }
