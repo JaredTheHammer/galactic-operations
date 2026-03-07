@@ -9,7 +9,7 @@ A Star Wars tactical campaign game built with TypeScript, React, Zustand, and Vi
 | Stack | TypeScript, React 19, Zustand 5, Vite 7, Vitest 4 |
 | Runtime | Node 20, pnpm 9 |
 | Monorepo | pnpm workspaces (`packages/engine`, `packages/client`, `packages/server`) |
-| Tests | 882/882 passing across 28 test files (87.8% statement coverage) |
+| Tests | 2600 passing across 93 test files (87.8% statement coverage) |
 | CI | GitHub Actions: test + data validation on PR, deploy to GitHub Pages on main |
 | Design doc | `DESIGN_SPEC_V2.md` (comprehensive d6 dice system, hero/NPC design, combat rules) |
 

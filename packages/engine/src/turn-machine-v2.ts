@@ -1766,8 +1766,8 @@ export function executeActionV2(
         const heroEntity = newState.heroes[figure.entityId];
         if (heroEntity?.equipment?.primaryWeapon) {
           standbyWpnId = heroEntity.equipment.primaryWeapon;
-        } else if ((heroEntity?.equipment as any)?.weapons?.length) {
-          standbyWpnId = (heroEntity.equipment as any).weapons[0];
+        } else if (heroEntity?.equipment?.secondaryWeapon) {
+          standbyWpnId = heroEntity.equipment.secondaryWeapon;
         }
       }
 
