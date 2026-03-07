@@ -128,7 +128,7 @@
       "name": "Saska Tansen",
       "source": "Imperial Assault: Twin Shadows",
       "description": "Mon Calamari tech specialist. Enhances allies' weapons and provides energy shields through engineering expertise.",
-      "species": "duros",
+      "species": "mon_calamari",
       "career": "technician",
       "specialization": "outlaw-tech",
       "startingEquipment": {
@@ -145,7 +145,7 @@
       "name": "Loku Kanoloa",
       "source": "Imperial Assault: Return to Hoth",
       "description": "Mon Calamari reconnaissance sniper. Patient, precise, and deadly from extreme range.",
-      "species": "duros",
+      "species": "mon_calamari",
       "career": "bounty-hunter",
       "specialization": "assassin",
       "startingEquipment": {
@@ -213,7 +213,7 @@
       "name": "Murne Rin",
       "source": "Imperial Assault: The Bespin Gambit",
       "description": "Ithorian diplomat and support specialist. Controls the battlefield through commands, deception, and inspiring speeches.",
-      "species": "gran",
+      "species": "ithorian",
       "career": "commander",
       "specialization": "figurehead",
       "startingEquipment": {
@@ -281,7 +281,7 @@
       "name": "Ko-Tun Feralo",
       "source": "Imperial Assault: Heart of the Empire",
       "description": "Mirialan demolitions expert. Specializes in explosives, area denial, and structural destruction.",
-      "species": "human",
+      "species": "mirialan",
       "career": "hired-gun",
       "specialization": "demolitionist",
       "startingEquipment": {
