@@ -1,0 +1,122 @@
+[
+  {
+    "id": "intel-patrol-routes",
+    "name": "Patrol Routes",
+    "description": "Intercepted Imperial patrol schedules reveal all enemy positions at mission start.",
+    "effect": { "type": "reveal_enemies", "value": 1 },
+    "rarity": "uncommon",
+    "flavorText": "They march like clockwork. Literally."
+  },
+  {
+    "id": "intel-weapons-cache",
+    "name": "Weapons Cache Intel",
+    "description": "Intel on a nearby weapons stash provides a temporary blaster upgrade.",
+    "effect": { "type": "bonus_equipment", "value": 1, "targetId": "heavy-blaster-pistol" },
+    "rarity": "uncommon",
+    "flavorText": "Someone left this here for us. Probably."
+  },
+  {
+    "id": "intel-cover-positions",
+    "name": "Prepared Positions",
+    "description": "Pre-place 2 light cover barricades before deployment.",
+    "effect": { "type": "place_cover", "value": 2 },
+    "rarity": "common",
+    "flavorText": "A little preparation goes a long way."
+  },
+  {
+    "id": "intel-stun-grenade",
+    "name": "Stun Grenade Requisition",
+    "description": "HQ provides a free stun grenade for this mission.",
+    "effect": { "type": "bonus_consumable", "value": 1, "targetId": "stun-grenade" },
+    "rarity": "common",
+    "flavorText": "Non-lethal. Mostly."
+  },
+  {
+    "id": "intel-medpac",
+    "name": "Emergency Medpac",
+    "description": "A field medpac is included in the mission loadout.",
+    "effect": { "type": "bonus_consumable", "value": 1, "targetId": "medpac" },
+    "rarity": "common",
+    "flavorText": "Standard Alliance issue. Better than nothing."
+  },
+  {
+    "id": "intel-flanking-route",
+    "name": "Flanking Route",
+    "description": "Expand the operative deployment zone by 2 tiles.",
+    "effect": { "type": "deployment_flexibility", "value": 2 },
+    "rarity": "common",
+    "flavorText": "There's a maintenance tunnel that opens behind their line."
+  },
+  {
+    "id": "intel-comms-jam",
+    "name": "Communications Jamming",
+    "description": "Jam Imperial comms to reduce effective threat by 3.",
+    "effect": { "type": "threat_reduction", "value": 3 },
+    "rarity": "uncommon",
+    "flavorText": "They can't call for backup if they can't call at all."
+  },
+  {
+    "id": "intel-tactic-briefing",
+    "name": "Tactical Briefing",
+    "description": "Thorough pre-mission briefing grants 2 extra tactic cards at start.",
+    "effect": { "type": "bonus_tactic_cards", "value": 2 },
+    "rarity": "uncommon",
+    "flavorText": "Knowledge is the best weapon."
+  },
+  {
+    "id": "intel-objective-recon",
+    "name": "Objective Reconnaissance",
+    "description": "Forward scouts mark all objective locations on your map.",
+    "effect": { "type": "recon_objective", "value": 1 },
+    "rarity": "common",
+    "flavorText": "X marks the spot. Several spots, actually."
+  },
+  {
+    "id": "intel-ambush",
+    "name": "Ambush Setup",
+    "description": "Operatives get a free activation before the first round begins.",
+    "effect": { "type": "ambush", "value": 1 },
+    "rarity": "rare",
+    "flavorText": "We were here first."
+  },
+  {
+    "id": "intel-suppressed-sentries",
+    "name": "Suppressed Sentries",
+    "description": "One enemy group starts suppressed from a pre-mission sniper shot.",
+    "effect": { "type": "enemy_condition", "value": 1, "targetId": "Suppressed" },
+    "rarity": "rare",
+    "flavorText": "That shot came from nowhere. Keep your heads down!"
+  },
+  {
+    "id": "intel-extra-barricades",
+    "name": "Forward Barricades",
+    "description": "Pre-place 3 light cover barricades in tactical positions.",
+    "effect": { "type": "place_cover", "value": 3 },
+    "rarity": "uncommon",
+    "flavorText": "Rebel engineers work fast under pressure."
+  },
+  {
+    "id": "intel-thermal-det",
+    "name": "Thermal Detonator Requisition",
+    "description": "Special operations provides a thermal detonator for this mission.",
+    "effect": { "type": "bonus_consumable", "value": 1, "targetId": "thermal-detonator" },
+    "rarity": "rare",
+    "flavorText": "Handle with extreme care."
+  },
+  {
+    "id": "intel-threat-analysis",
+    "name": "Threat Analysis",
+    "description": "Detailed threat assessment reduces mission threat by 2.",
+    "effect": { "type": "threat_reduction", "value": 2 },
+    "rarity": "common",
+    "flavorText": "Knowing is half the battle."
+  },
+  {
+    "id": "intel-scrambled-orders",
+    "name": "Scrambled Orders",
+    "description": "Sliced enemy comms leave one group disoriented at the start.",
+    "effect": { "type": "enemy_condition", "value": 2, "targetId": "Stunned" },
+    "rarity": "rare",
+    "flavorText": "They're receiving contradictory orders. For now."
+  }
+]

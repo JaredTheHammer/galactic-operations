@@ -1,5 +1,7 @@
-import type { GameState, GridCoordinate, Figure, ObjectivePoint, BaseSize } from '@engine/types.js'
+import type { GameState, GridCoordinate, Figure, ObjectivePoint, BaseSize, Side } from '@engine/types.js'
 import { BOARD_SIZE } from '@engine/types.js'
+import { getTileVisibility, isFigureVisible } from '@engine/fog-of-war.js'
+import { getNPCKeywordValue } from '@engine/keywords.js'
 import type { SilhouetteType } from '../types/portrait'
 import { drawSilhouetteOnContext, inferSilhouetteType } from './silhouettes'
 import type { AnimationManager } from './animation-manager'
@@ -44,6 +46,7 @@ interface UIState {
   playerMovePathCost: number | null
   movePreviewTargets: string[] | null
   threateningEnemies: string[]
+  playerSide: Side
 }
 
 // ============================================================================
@@ -135,8 +138,8 @@ export class TacticalGridRenderer {
     )
     this.ctx.scale(this.zoom, this.zoom)
 
-    // Draw terrain
-    this.drawTerrain(gameState)
+    // Draw terrain (includes fog-of-war overlay)
+    this.drawTerrain(gameState, uiState)
 
     // Draw deployment zone shading
     this.drawDeploymentZones(gameState)
@@ -173,7 +176,7 @@ export class TacticalGridRenderer {
     this.ctx.restore()
   }
 
-  private drawTerrain(gameState: GameState) {
+  private drawTerrain(gameState: GameState, uiState: UIState) {
     if (!this.ctx) return
 
     const { map } = gameState
@@ -338,6 +341,26 @@ export class TacticalGridRenderer {
           }
           this.ctx.closePath()
           this.ctx.fill()
+        }
+      }
+    }
+
+    // --- Fog of war overlay ---
+    if (gameState.fogOfWar?.enabled) {
+      const side = uiState.playerSide
+      for (let y = 0; y < map.height; y++) {
+        for (let x = 0; x < map.width; x++) {
+          const vis = getTileVisibility(gameState.fogOfWar, x, y, side)
+          if (vis === 'visible') continue
+          const screenX = x * TILE_SIZE
+          const screenY = y * TILE_SIZE
+          if (vis === 'hidden') {
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.85)'
+          } else {
+            // explored: dimmed but recognizable
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'
+          }
+          this.ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE)
         }
       }
     }
@@ -826,6 +849,15 @@ export class TacticalGridRenderer {
     gameState.figures.forEach(figure => {
       if (figure.isDefeated) return
 
+      // Fog of war: hide enemy figures that aren't visible to the player
+      if (gameState.fogOfWar?.enabled) {
+        const player = gameState.players.find(p => p.id === figure.playerId)
+        const figureSide = player?.role as Side | undefined
+        if (figureSide !== uiState.playerSide) {
+          if (!isFigureVisible(gameState.fogOfWar, figure, uiState.playerSide)) return
+        }
+      }
+
       const { footprint, radiusMult } = getBaseSizeMetrics(figure.baseSize)
       const tileSpan = footprint * TILE_SIZE
 
@@ -1298,6 +1330,15 @@ export class TacticalGridRenderer {
     gameState.figures.forEach(figure => {
       if (figure.isDefeated) return
 
+      // Fog of war: skip effects for hidden enemy figures
+      if (gameState.fogOfWar?.enabled) {
+        const player = gameState.players.find(p => p.id === figure.playerId)
+        const figureSide = player?.role as Side | undefined
+        if (figureSide !== uiState.playerSide) {
+          if (!isFigureVisible(gameState.fogOfWar, figure, uiState.playerSide)) return
+        }
+      }
+
       const cx = figure.position.x * TILE_SIZE + TILE_SIZE / 2
       const cy = figure.position.y * TILE_SIZE + TILE_SIZE / 2
       const radius = TILE_SIZE / 3
@@ -1373,6 +1414,48 @@ export class TacticalGridRenderer {
         ctx.lineWidth = 0.5
         ctx.strokeRect(-3.5, -3.5, 7, 7)
         ctx.restore()
+      }
+
+      // --- Retaliate keyword: orange thorns icon below-right of figure ---
+      if (figure.entityType === 'npc') {
+        const npcProfile = gameState.npcProfiles[figure.entityId]
+        if (npcProfile) {
+          const retVal = getNPCKeywordValue(npcProfile, 'Retaliate')
+          if (retVal > 0) {
+            const ox = cx + radius + 2
+            const oy = cy + radius + 2
+            // Draw a small thorns/spikes badge
+            ctx.save()
+            ctx.fillStyle = '#ff6644'
+            ctx.beginPath()
+            // 6-point starburst
+            for (let i = 0; i < 6; i++) {
+              const angle = (i * Math.PI * 2) / 6 - Math.PI / 2
+              const outerR = 5
+              const innerR = 2.5
+              const outerX = ox + Math.cos(angle) * outerR
+              const outerY = oy + Math.sin(angle) * outerR
+              const midAngle = angle + Math.PI / 6
+              const innerX = ox + Math.cos(midAngle) * innerR
+              const innerY = oy + Math.sin(midAngle) * innerR
+              if (i === 0) ctx.moveTo(outerX, outerY)
+              else ctx.lineTo(outerX, outerY)
+              ctx.lineTo(innerX, innerY)
+            }
+            ctx.closePath()
+            ctx.fill()
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)'
+            ctx.lineWidth = 0.5
+            ctx.stroke()
+            // Value number in center
+            ctx.fillStyle = '#ffffff'
+            ctx.font = 'bold 7px monospace'
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
+            ctx.fillText(String(retVal), ox, oy)
+            ctx.restore()
+          }
+        }
       }
     })
   }

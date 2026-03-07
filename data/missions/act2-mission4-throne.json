@@ -5,22 +5,40 @@
   "narrativeIntro": "You've traced the Shadow Syndicate to its source: a fortified penthouse at the apex of Nexus Station's central spire, Level 99. The Broker controls his empire from behind walls of durasteel, bodyguards, and assassin droids. Your rebel cell breaches the lower atrium, but the turbolift is locked down. You'll have to fight through every floor of security to reach the top. The Broker is watching on holoscreen, confident his defenses will hold. Time to prove him wrong.",
   "narrativeSuccess": "The Broker staggers back, disruptor pistol clattering to the floor. His empire of extortion, bounties, and blood sport collapses in a single evening. As Nexus Station security moves in to secure the penthouse, you access his personal terminal. The data is staggering: shipping manifests, blackmail files, and a series of encrypted transmissions to someone identified only as 'Warlord Drayen.' The Broker wasn't just running a crime syndicate. He was selling intelligence to a rogue Imperial commander building an army in the Outer Rim. Act 2 is over, but a greater threat looms.",
   "narrativeFailure": "The Broker's defenses prove too formidable, and your team is forced to retreat down the spire under withering fire. The Shadow Syndicate tightens its stranglehold on Nexus Station. Without dismantling The Broker's network, the rebel cell cannot safely operate in the Tangrene Sector. The criminal empire endures.",
-
   "mapId": "penthouse-spire",
   "mapPreset": "skirmish",
   "boardsWide": 3,
   "boardsTall": 3,
-
   "difficulty": "deadly",
   "roundLimit": 12,
   "recommendedHeroCount": 2,
-
   "imperialThreat": 16,
   "threatPerRound": 3,
-
   "operativeDeployZone": [
-    {"x": 16, "y": 34}, {"x": 17, "y": 34}, {"x": 18, "y": 34},
-    {"x": 16, "y": 35}, {"x": 17, "y": 35}, {"x": 18, "y": 35}
+    {
+      "x": 16,
+      "y": 34
+    },
+    {
+      "x": 17,
+      "y": 34
+    },
+    {
+      "x": 18,
+      "y": 34
+    },
+    {
+      "x": 16,
+      "y": 35
+    },
+    {
+      "x": 17,
+      "y": 35
+    },
+    {
+      "x": 18,
+      "y": 35
+    }
   ],
   "initialEnemies": [
     {
@@ -28,7 +46,14 @@
       "count": 2,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 14, "y": 24}, {"x": 15, "y": 24}
+        {
+          "x": 14,
+          "y": 24
+        },
+        {
+          "x": 15,
+          "y": 24
+        }
       ]
     },
     {
@@ -36,26 +61,48 @@
       "count": 2,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 20, "y": 24}, {"x": 21, "y": 24}
+        {
+          "x": 20,
+          "y": 24
+        },
+        {
+          "x": 21,
+          "y": 24
+        }
       ]
     },
     {
       "npcProfileId": "ig-assassin-droid",
       "count": 1,
       "asMinGroup": false,
-      "deployZone": [{"x": 10, "y": 18}]
+      "deployZone": [
+        {
+          "x": 10,
+          "y": 18
+        }
+      ]
     },
     {
       "npcProfileId": "ig-assassin-droid",
       "count": 1,
       "asMinGroup": false,
-      "deployZone": [{"x": 26, "y": 18}]
+      "deployZone": [
+        {
+          "x": 26,
+          "y": 18
+        }
+      ]
     },
     {
       "npcProfileId": "syndicate-lieutenant",
       "count": 1,
       "asMinGroup": false,
-      "deployZone": [{"x": 18, "y": 16}]
+      "deployZone": [
+        {
+          "x": 18,
+          "y": 16
+        }
+      ]
     }
   ],
   "reinforcements": [
@@ -67,14 +114,30 @@
           "npcProfileId": "trandoshan-hunter",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 0, "y": 20}]
+          "deployZone": [
+            {
+              "x": 0,
+              "y": 20
+            }
+          ]
         },
         {
           "npcProfileId": "nikto-gunner",
           "count": 3,
           "asMinGroup": true,
           "deployZone": [
-            {"x": 35, "y": 20}, {"x": 35, "y": 21}, {"x": 35, "y": 22}
+            {
+              "x": 35,
+              "y": 20
+            },
+            {
+              "x": 35,
+              "y": 21
+            },
+            {
+              "x": 35,
+              "y": 22
+            }
           ]
         }
       ],
@@ -89,7 +152,12 @@
           "npcProfileId": "the-broker",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 18, "y": 2}]
+          "deployZone": [
+            {
+              "x": 18,
+              "y": 2
+            }
+          ]
         }
       ],
       "threatCost": 0,
@@ -104,7 +172,14 @@
           "count": 2,
           "asMinGroup": true,
           "deployZone": [
-            {"x": 16, "y": 4}, {"x": 20, "y": 4}
+            {
+              "x": 16,
+              "y": 4
+            },
+            {
+              "x": 20,
+              "y": 4
+            }
           ]
         }
       ],
@@ -112,7 +187,6 @@
       "narrativeText": "The Broker signals, and two more Gamorrean bodyguards lumber into position around him."
     }
   ],
-
   "objectives": [
     {
       "id": "obj-defeat-broker",
@@ -137,7 +211,9 @@
     {
       "side": "Operative",
       "description": "Defeat The Broker.",
-      "requiredObjectiveIds": ["obj-defeat-broker"]
+      "requiredObjectiveIds": [
+        "obj-defeat-broker"
+      ]
     },
     {
       "side": "Imperial",
@@ -145,11 +221,13 @@
       "requiredObjectiveIds": []
     }
   ],
-
   "objectivePoints": [
     {
       "id": "objpt-mainframe",
-      "position": {"x": 18, "y": 4},
+      "position": {
+        "x": 18,
+        "y": 4
+      },
       "type": "terminal",
       "skillRequired": "computers",
       "alternateSkill": "skulduggery",
@@ -157,33 +235,55 @@
       "description": "The Broker's encrypted mainframe terminal. Contains intel on his network and contacts."
     }
   ],
-
   "lootTokens": [
     {
       "id": "loot-vault-1",
-      "position": {"x": 10, "y": 10},
-      "reward": {"type": "credits", "value": 200}
+      "position": {
+        "x": 10,
+        "y": 10
+      },
+      "reward": {
+        "type": "credits",
+        "value": 200
+      }
     },
     {
       "id": "loot-vault-2",
-      "position": {"x": 26, "y": 10},
-      "reward": {"type": "credits", "value": 200}
+      "position": {
+        "x": 26,
+        "y": 10
+      },
+      "reward": {
+        "type": "credits",
+        "value": 200
+      }
     },
     {
       "id": "loot-broker-weapon",
-      "position": {"x": 18, "y": 2},
-      "reward": {"type": "equipment", "itemId": "disruptor-pistol"}
+      "position": {
+        "x": 18,
+        "y": 2
+      },
+      "reward": {
+        "type": "equipment",
+        "itemId": "disruptor-pistol"
+      }
     }
   ],
-
   "campaignAct": 2,
   "missionIndex": 4,
-  "prerequisites": ["act2-m3-warehouse", "act2-m3-hunting-grounds"],
-  "unlocksNext": ["act3-m1-defection"],
-
+  "prerequisites": [
+    "act2-m3-warehouse",
+    "act2-m3-hunting-grounds"
+  ],
+  "unlocksNext": [
+    "act3-m1-defection"
+  ],
   "baseXP": 16,
   "bonusXPPerLoot": 2,
   "bonusXPPerKill": 1,
   "maxKillXP": 8,
-  "leaderKillXP": 5
+  "leaderKillXP": 5,
+  "fogOfWar": true,
+  "fogOfWarVisionRange": 6
 }

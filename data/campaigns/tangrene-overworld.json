@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "description": "Campaign overworld definition for the Tangrene Liberation campaign. Defines sectors, their connections, and initial control levels."
+  },
+  "overworld": {
+    "id": "tangrene-overworld",
+    "name": "Tangrene System",
+    "description": "The Tangrene system, a remote cluster of settlements and Imperial installations on the Outer Rim. The liberation campaign spans three major sectors.",
+    "sectors": [
+      {
+        "id": "docking-district",
+        "name": "Docking District",
+        "description": "The main spaceport and commercial hub. Smugglers, traders, and Imperial customs all operate here.",
+        "controlLevel": 2,
+        "missionIds": ["act1-m1-arrival", "act1-m2-intel"],
+        "socialHubId": "act1-hub",
+        "adjacentSectorIds": ["market-quarter", "industrial-zone"],
+        "visited": false,
+        "mutations": []
+      },
+      {
+        "id": "market-quarter",
+        "name": "Market Quarter",
+        "description": "A bustling bazaar district where information and contraband flow freely, if you know who to ask.",
+        "controlLevel": 1,
+        "missionIds": ["act1-m3-cache", "act1-m3-ambush"],
+        "socialHubId": "act1-hub",
+        "adjacentSectorIds": ["docking-district", "old-town", "industrial-zone"],
+        "visited": false,
+        "mutations": []
+      },
+      {
+        "id": "industrial-zone",
+        "name": "Industrial Zone",
+        "description": "Factories and warehouses under heavy Imperial control. Workers toil under strict surveillance.",
+        "controlLevel": 3,
+        "missionIds": ["act1-m4-finale", "act2-m1-crossroads"],
+        "adjacentSectorIds": ["docking-district", "market-quarter", "garrison-perimeter"],
+        "visited": false,
+        "mutations": []
+      },
+      {
+        "id": "old-town",
+        "name": "Old Town",
+        "description": "The original settlement. Narrow streets and abandoned buildings provide cover for resistance operations.",
+        "controlLevel": 1,
+        "missionIds": ["act2-m2-bounty", "act2-m3-warehouse", "act2-m3-hunting-grounds"],
+        "socialHubId": "act2-hub",
+        "adjacentSectorIds": ["market-quarter", "garrison-perimeter", "upper-city"],
+        "visited": false,
+        "mutations": []
+      },
+      {
+        "id": "garrison-perimeter",
+        "name": "Garrison Perimeter",
+        "description": "The outer ring of the Imperial military compound. Heavy patrols and checkpoints.",
+        "controlLevel": 4,
+        "missionIds": ["act2-m4-throne", "act3-m1-defection"],
+        "adjacentSectorIds": ["industrial-zone", "old-town", "command-sector"],
+        "visited": false,
+        "mutations": []
+      },
+      {
+        "id": "upper-city",
+        "name": "Upper City",
+        "description": "The wealthy district where Imperial officers and collaborators reside. Social influence is key here.",
+        "controlLevel": 2,
+        "missionIds": ["act3-m2-prototype"],
+        "socialHubId": "act3-hub",
+        "adjacentSectorIds": ["old-town", "command-sector"],
+        "visited": false,
+        "mutations": []
+      },
+      {
+        "id": "command-sector",
+        "name": "Command Sector",
+        "description": "The heart of Imperial operations on Tangrene. The final objective lies here.",
+        "controlLevel": 5,
+        "missionIds": ["act3-m3-stronghold", "act3-m3-betrayal", "act3-m4-endgame"],
+        "adjacentSectorIds": ["garrison-perimeter", "upper-city"],
+        "visited": false,
+        "mutations": []
+      }
+    ],
+    "sectorPositions": {
+      "docking-district": { "x": 100, "y": 300 },
+      "market-quarter": { "x": 250, "y": 200 },
+      "industrial-zone": { "x": 250, "y": 400 },
+      "old-town": { "x": 400, "y": 150 },
+      "garrison-perimeter": { "x": 400, "y": 350 },
+      "upper-city": { "x": 550, "y": 200 },
+      "command-sector": { "x": 550, "y": 350 }
+    },
+    "connections": [
+      { "from": "docking-district", "to": "market-quarter" },
+      { "from": "docking-district", "to": "industrial-zone" },
+      { "from": "market-quarter", "to": "industrial-zone" },
+      { "from": "market-quarter", "to": "old-town" },
+      { "from": "industrial-zone", "to": "garrison-perimeter" },
+      { "from": "old-town", "to": "garrison-perimeter" },
+      { "from": "old-town", "to": "upper-city" },
+      { "from": "garrison-perimeter", "to": "command-sector" },
+      { "from": "upper-city", "to": "command-sector" }
+    ]
+  }
+}

@@ -228,19 +228,28 @@ describe('resetForActivation: condition clearing', () => {
     expect(result.conditions).not.toContain('Disoriented');
   });
 
-  it('preserves non-transient conditions', () => {
-    const fig = makeFigure({ conditions: ['Staggered' as Condition, 'Immobilized' as Condition] });
+  it('preserves non-transient conditions (Immobilized, Bleeding)', () => {
+    const fig = makeFigure({ conditions: ['Immobilized' as Condition, 'Bleeding' as Condition] });
     const result = resetForActivation(fig);
-    expect(result.conditions).toContain('Staggered');
     expect(result.conditions).toContain('Immobilized');
+    expect(result.conditions).toContain('Bleeding');
   });
 
-  it('removes Disoriented but keeps others', () => {
+  it('clears Staggered and Stunned at activation (they are now transient)', () => {
+    const fig = makeFigure({ conditions: ['Staggered' as Condition, 'Stunned' as Condition] });
+    const result = resetForActivation(fig);
+    expect(result.conditions).not.toContain('Staggered');
+    expect(result.conditions).not.toContain('Stunned');
+    // But they caused action loss
+    expect(result.actionsRemaining).toBe(0);
+  });
+
+  it('removes Disoriented but keeps non-transient', () => {
     const fig = makeFigure({
-      conditions: ['Disoriented' as Condition, 'Staggered' as Condition],
+      conditions: ['Disoriented' as Condition, 'Immobilized' as Condition],
     });
     const result = resetForActivation(fig);
-    expect(result.conditions).toEqual(['Staggered']);
+    expect(result.conditions).toEqual(['Immobilized']);
   });
 });
 

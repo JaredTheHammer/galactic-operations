@@ -6,9 +6,15 @@
 import React from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import type { MissionResult, HeroCharacter } from '../../../../engine/src/types'
+import type { MissionResult, HeroCharacter, SectorMapDefinition } from '../../../../engine/src/types'
+import { getExposureStatus } from '../../../../engine/src/types'
+import { calculateMissionExposure, calculateMissionInfluence, calculateMissionControl } from '../../../../engine/src/campaign-v2'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { t } from '../../styles/theme'
+import { CriticalInjuryPanel } from './CriticalInjuryPanel'
+import { MomentumIndicator } from './MomentumIndicator'
+import { LegacyEventReveal } from './LegacyEventReveal'
+import sectorMapData from '../../../../../data/sector-map.json'
 
 const containerStyle: React.CSSProperties = {
   width: '100vw',
@@ -127,7 +133,11 @@ function HeroStatusCard({
 // ============================================================================
 
 export default function PostMission() {
-  const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState, activeMissionDef, campaignMissions } = useGameStore()
+  const {
+    lastMissionResult, lastBountyCompletions, returnToMissionSelect, openSocialPhase,
+    campaignState, activeMissionDef, campaignMissions,
+    criticalInjuryDefs, legacyEventDefs, showLegacyEvents, acknowledgeLegacyEvents,
+  } = useGameStore()
   const { isMobile } = useIsMobile()
 
   if (!lastMissionResult) {
@@ -393,6 +403,44 @@ export default function PostMission() {
                 }}>
                   {so.objectiveId.replace(/-/g, ' ')} (+{so.xpAwarded}XP)
                 </span>
+        {/* Bounty Completions */}
+        {lastBountyCompletions.length > 0 && (
+          <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
+            <h3 style={{ ...sectionHeaderStyle, color: t.accentGold }}>
+              Bounties Completed ({lastBountyCompletions.length})
+            </h3>
+            <div style={{
+              backgroundColor: t.bgSurface2,
+              borderRadius: t.radiusMd,
+              padding: isMobile ? '8px' : '12px',
+              border: `1px solid ${t.accentGold}30`,
+            }}>
+              {lastBountyCompletions.map((bounty, i) => (
+                <div key={bounty.bountyId} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '8px 0',
+                  borderBottom: i < lastBountyCompletions.length - 1 ? `1px solid ${t.borderSubtle}` : 'none',
+                }}>
+                  <div>
+                    <div style={{ color: t.textPrimary, fontSize: '13px', fontWeight: 'bold' }}>
+                      {bounty.bountyName}
+                    </div>
+                    <div style={{ fontSize: '11px', color: t.textMuted }}>
+                      {bounty.targetName} -- {bounty.condition}
+                      {bounty.wasPrepped && ' (intel advantage)'}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ color: t.accentGold, fontWeight: 'bold', fontSize: '14px' }}>
+                      +{bounty.creditReward}
+                    </div>
+                    {bounty.reputationReward && (
+                      <div style={{ fontSize: '10px', color: t.accentPurple }}>
+                        {bounty.reputationReward.factionId} {bounty.reputationReward.delta >= 0 ? '+' : ''}{bounty.reputationReward.delta}
+                      </div>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -430,6 +478,182 @@ export default function PostMission() {
             </div>
           </div>
         )}
+        {/* Critical Injuries */}
+        {campaignState && heroes.length > 0 && Object.keys(criticalInjuryDefs).length > 0 && (
+          <CriticalInjuryPanel
+            heroes={heroes}
+            injuryDefs={criticalInjuryDefs}
+            compact
+          />
+        )}
+
+        {/* Momentum */}
+        {campaignState && (
+          <MomentumIndicator campaign={campaignState} />
+        )}
+        {/* Rebellion Mechanics Deltas */}
+        {campaignState?.actProgress && activeMissionDef && (() => {
+          const totalKillsAll = Object.values(result.heroKills).reduce((sum, k) => sum + k, 0);
+          const exposureDelta = calculateMissionExposure(
+            activeMissionDef, result.outcome, result.heroesIncapacitated,
+            result.completedObjectiveIds, totalKillsAll, result.roundsPlayed,
+          );
+          const influenceDelta = calculateMissionInfluence(result.outcome, result.completedObjectiveIds);
+          const controlDelta = calculateMissionControl(result.outcome, result.heroesIncapacitated);
+          const ap = campaignState.actProgress!;
+          const status = getExposureStatus(ap.exposure);
+          const statusColors: Record<string, string> = {
+            ghost: t.accentGreen, detected: t.accentOrange, hunted: t.accentRed,
+          };
+          const statusLabels: Record<string, string> = {
+            ghost: 'GHOST', detected: 'DETECTED', hunted: 'HUNTED',
+          };
+
+          return (
+            <div style={{
+              marginBottom: isMobile ? '12px' : '16px',
+              backgroundColor: t.bgSurface2,
+              borderRadius: t.radiusMd,
+              padding: isMobile ? '10px' : '14px',
+              border: `1px solid ${t.borderSubtle}`,
+            }}>
+              <h3 style={{ ...sectionHeaderStyle, color: t.accentBlue, marginBottom: '12px' }}>
+                Rebellion Status (Act {ap.act})
+              </h3>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                {exposureDelta !== 0 && (
+                  <span style={{
+                    ...pillStyle,
+                    color: exposureDelta > 0 ? t.accentRed : t.accentGreen,
+                    borderColor: `${exposureDelta > 0 ? t.accentRed : t.accentGreen}40`,
+                  }}>
+                    Exposure {exposureDelta > 0 ? '+' : ''}{exposureDelta}
+                  </span>
+                )}
+                {influenceDelta > 0 && (
+                  <span style={{
+                    ...pillStyle,
+                    color: t.accentBlue,
+                    borderColor: `${t.accentBlue}40`,
+                  }}>
+                    Influence +{influenceDelta}
+                  </span>
+                )}
+                {controlDelta > 0 && (
+                  <span style={{
+                    ...pillStyle,
+                    color: t.accentRed,
+                    borderColor: `${t.accentRed}40`,
+                  }}>
+                    Control +{controlDelta}
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: t.textMuted }}>
+                <span>
+                  Exposure: {ap.exposure}/10{' '}
+                  <span style={{ color: statusColors[status], fontWeight: 'bold' }}>
+                    [{statusLabels[status]}]
+                  </span>
+                </span>
+                <span>
+                  Influence {ap.influence} vs Control {ap.control}
+                </span>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Supply Network Consequences */}
+        {campaignState?.supplyNetwork && (() => {
+          const sectorMap = sectorMapData as SectorMapDefinition
+          const network = campaignState.supplyNetwork!
+          const severedNodes = network.nodes.filter(n => n.severed)
+
+          // Find the mission's location to show location-specific impact
+          const missionLocation = sectorMap.locations.find(
+            loc => loc.unlocksMissions?.includes(result.missionId)
+          )
+          const locationSevered = missionLocation
+            ? severedNodes.filter(n => n.locationId === missionLocation.id)
+            : []
+
+          // Show if mission failed and nodes were severed, or if any nodes are severed
+          if (!isVictory && locationSevered.length > 0) {
+            return (
+              <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
+                <h3 style={{ ...sectionHeaderStyle, color: t.accentRed }}>
+                  Supply Network Damaged
+                </h3>
+                <div style={{
+                  backgroundColor: 'rgba(255, 68, 68, 0.05)',
+                  border: `1px solid ${t.accentRed}30`,
+                  borderLeft: `3px solid ${t.accentRed}`,
+                  borderRadius: t.radiusMd,
+                  padding: isMobile ? '10px' : '14px',
+                  fontSize: '13px',
+                  lineHeight: '1.6',
+                }}>
+                  <div style={{ color: t.textPrimary, marginBottom: '8px' }}>
+                    Imperial forces have severed your supply connections at {missionLocation?.name ?? 'the mission location'}:
+                  </div>
+                  {locationSevered.map(node => {
+                    const typeLabel = node.type === 'contact' ? 'Contact'
+                      : node.type === 'safehouse' ? 'Safehouse'
+                      : 'Supply Route'
+                    const typeColor = node.type === 'contact' ? t.accentBlue
+                      : node.type === 'safehouse' ? t.accentGreen
+                      : t.accentOrange
+                    return (
+                      <div key={node.id} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '4px 0',
+                      }}>
+                        <span style={{ color: t.accentRed, fontSize: '14px' }}>{'\u2716'}</span>
+                        <span style={{ color: typeColor, fontWeight: 'bold', fontSize: '11px', textTransform: 'uppercase' }}>
+                          {typeLabel}
+                        </span>
+                        <span style={{ color: t.textSecondary }}>
+                          {node.name} ({node.buildCost} credits to rebuild)
+                        </span>
+                      </div>
+                    )
+                  })}
+                  {network.nodes.filter(n => !n.severed).length > 0 && (
+                    <div style={{ marginTop: '8px', color: t.textMuted, fontSize: '11px', fontStyle: 'italic' }}>
+                      Remaining active nodes: {network.nodes.filter(n => !n.severed).length} / {network.nodes.length}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          }
+
+          // On victory, show network intact status if player has nodes
+          if (isVictory && network.nodes.length > 0 && severedNodes.length === 0) {
+            return (
+              <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
+                <h3 style={{ ...sectionHeaderStyle, color: t.accentGreen }}>
+                  Supply Network Intact
+                </h3>
+                <div style={{
+                  backgroundColor: 'rgba(68, 255, 68, 0.05)',
+                  border: `1px solid ${t.accentGreen}30`,
+                  borderRadius: t.radiusMd,
+                  padding: '8px 14px',
+                  fontSize: '12px',
+                  color: t.textMuted,
+                }}>
+                  All {network.nodes.length} supply nodes operational. Network income: {network.networkIncome} credits/mission.
+                </div>
+              </div>
+            )
+          }
+
+          return null
+        })()}
 
         {/* Continue button */}
         <button
@@ -443,6 +667,15 @@ export default function PostMission() {
           {campaignState ? 'CONTINUE TO CANTINA' : 'CONTINUE TO CAMPAIGN'}
         </button>
       </div>
+
+      {/* Legacy Event Reveal overlay */}
+      {showLegacyEvents && campaignState && (
+        <LegacyEventReveal
+          campaign={campaignState}
+          eventDefs={legacyEventDefs}
+          onAcknowledge={acknowledgeLegacyEvents}
+        />
+      )}
     </div>
   )
 }
