@@ -44,10 +44,6 @@ import {
 } from '../src/keywords';
 
 import {
-  calculateDamage,
-} from '../src/combat-v2';
-
-import {
   buildCombatPools,
   resolveCombatV2,
   applyCombatResult,

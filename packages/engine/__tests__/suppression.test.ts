@@ -517,7 +517,7 @@ describe('Suppression threshold enforcement', () => {
     expect(result.conditions).not.toContain('Disoriented');
   });
 
-  it('preserves non-transient conditions (Wounded, Staggered)', () => {
+  it('preserves non-transient conditions (Wounded) and clears Staggered', () => {
     const fig = makeFigure({
       conditions: ['Wounded' as Condition, 'Staggered' as Condition],
       suppressionTokens: 0,
@@ -525,7 +525,9 @@ describe('Suppression threshold enforcement', () => {
     });
     const result = resetForActivation(fig);
     expect(result.conditions).toContain('Wounded');
-    expect(result.conditions).toContain('Staggered');
+    // Staggered is now transient: causes action loss then clears
+    expect(result.conditions).not.toContain('Staggered');
+    expect(result.actionsRemaining).toBe(0);
   });
 });
 
