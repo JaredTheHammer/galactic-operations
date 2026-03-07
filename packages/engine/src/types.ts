@@ -2103,6 +2103,8 @@ export interface ExpandedSocialPhaseResult extends SocialPhaseResult {
   bountiesAccepted: string[];
   bountiesPrepped: BountyPrepResult[];
   bountiesClaimedByRival: string[];
+}
+
 // SPIRIT ISLAND SUBSYSTEMS (all toggleable via OptionalSubsystems)
 // ============================================================================
 

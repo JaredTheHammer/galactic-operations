@@ -1236,6 +1236,7 @@ export function resetForActivation(
       const burnIdx = newConditions.indexOf('Burning');
       if (burnIdx >= 0) newConditions.splice(burnIdx, 1);
     }
+  }
   // Focus recovery (heroes only): recover Focus points at activation start
   let focusCurrent = figure.focusCurrent;
   if (figure.entityType === 'hero' && figure.focusMax !== undefined && focusCurrent !== undefined) {

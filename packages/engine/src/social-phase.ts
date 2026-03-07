@@ -37,6 +37,7 @@ import type {
   ThreatClockLevel,
   ThreatClockEffects,
   ExpandedSocialPhaseResult,
+  ActProgress,
 } from './types';
 
 import {
@@ -46,11 +47,8 @@ import {
   RIVAL_SLOTS_BY_ACT,
   ACTIVITY_CLOCK_TICKS,
   SLOTS_PER_ACT,
+  createActProgress,
 } from './types';
-  ActProgress,
-} from './types';
-
-import { DISPOSITION_DIFFICULTY, SOCIAL_SKILLS, createActProgress } from './types';
 
 import {
   resolveSkillCheck,

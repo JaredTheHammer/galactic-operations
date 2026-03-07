@@ -584,9 +584,6 @@ export function completeMission(
     bountyPrepResults: (campaign.bountyPrepResults ?? []).filter(
       p => !completedBountyIds.includes(p.bountyId),
     ),
-  };
-
-  return { campaign: newCampaign, result, bountyCompletions };
     actProgress,
     actOutcomes,
   };
@@ -642,7 +639,7 @@ export function completeMission(
     newCampaign.actProgress = createActProgress(currentAct);
   }
 
-  return { campaign: newCampaign, result };
+  return { campaign: newCampaign, result, bountyCompletions };
 }
 
 // ============================================================================
