@@ -39,8 +39,10 @@ import { SocialEncounter as SocialEncounterView } from './SocialEncounter'
 import { SocialCheckResult as SocialCheckResultView } from './SocialCheckResult'
 import { SocialShop } from './SocialShop'
 import { SocialSummary } from './SocialSummary'
+import { AgendaVoting } from './AgendaVoting'
+import { RelicForge } from './RelicForge'
 
-export type SocialView = 'hub' | 'encounter' | 'check-result' | 'shop' | 'summary'
+export type SocialView = 'agenda' | 'hub' | 'encounter' | 'check-result' | 'shop' | 'forge' | 'summary'
 
 export interface SocialSessionState {
   completedEncounterIds: Set<string>
@@ -69,8 +71,10 @@ const getContainerStyle = (isMobile: boolean): React.CSSProperties => ({
 
 export function SocialPhase() {
   const { isMobile } = useIsMobile()
-  const { campaignState, closeSocialPhase, updateCampaignState } = useGameStore()
-  const [view, setView] = useState<SocialView>('hub')
+  const { campaignState, closeSocialPhase, updateCampaignState, gameData } = useGameStore()
+  // Start with agenda phase if directives are available, otherwise go straight to hub
+  const hasAgendaDirectives = gameData?.agendaDirectives && Object.keys(gameData.agendaDirectives).length >= 2
+  const [view, setView] = useState<SocialView>(hasAgendaDirectives ? 'agenda' : 'hub')
   const [session, setSession] = useState<SocialSessionState>(() => ({
     completedEncounterIds: new Set(),
     encounterResults: [],
@@ -197,12 +201,39 @@ export function SocialPhase() {
     closeSocialPhase()
   }, [closeSocialPhase])
 
+  // Agenda phase completed (or skipped)
+  const onAgendaComplete = useCallback((updatedCampaign: CampaignState) => {
+    updateCampaignState(updatedCampaign)
+    setView('hub')
+  }, [updateCampaignState])
+
+  const onAgendaSkip = useCallback(() => {
+    setView('hub')
+  }, [])
+
+  // Forge navigation
+  const goToForge = useCallback(() => {
+    setView('forge')
+  }, [])
+
+  const onForgeUpdate = useCallback((updatedCampaign: CampaignState) => {
+    updateCampaignState(updatedCampaign)
+  }, [updateCampaignState])
+
   const activeShop = session.activeShopId
     ? location.shops.find(s => s.id === session.activeShopId) ?? null
     : null
 
   return (
     <div style={getContainerStyle(isMobile)}>
+      {view === 'agenda' && gameData && (
+        <AgendaVoting
+          campaign={campaignState}
+          gameData={gameData}
+          onComplete={onAgendaComplete}
+          onSkip={onAgendaSkip}
+        />
+      )}
       {view === 'hub' && (
         <SocialHub
           location={location}
@@ -214,6 +245,7 @@ export function SocialPhase() {
           onHealHero={onHealHero}
           onComplete={goToSummary}
           onSkip={onSkip}
+          onGoToForge={gameData ? goToForge : undefined}
         />
       )}
       {view === 'encounter' && session.currentEncounter && (
@@ -239,6 +271,14 @@ export function SocialPhase() {
           campaign={campaignState}
           onPurchase={onPurchase}
           onSell={onSell}
+          onBack={goToHub}
+        />
+      )}
+      {view === 'forge' && gameData && (
+        <RelicForge
+          campaign={campaignState}
+          gameData={gameData}
+          onUpdate={onForgeUpdate}
           onBack={goToHub}
         />
       )}

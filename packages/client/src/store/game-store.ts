@@ -33,6 +33,7 @@ import type {
   ObjectivePointTemplate,
   ConsumableItem,
   TacticCard,
+  CommandTokenUsage,
 } from '@engine/types.js'
 import { MAP_PRESETS, computeGameScale } from '@engine/types.js'
 import {
@@ -549,6 +550,8 @@ export interface GameStore {
   useTalent: (talentId: string) => void
   useConsumable: (itemId: string, targetId?: string) => void
   getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
+  revealExploration: (tokenId: string) => void
+  spendCommandToken: (usage: CommandTokenUsage, coordinateTargetId?: string) => void
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => void
   dismissCombat: () => void
   endActivation: () => void
@@ -1440,6 +1443,41 @@ export const useGameStore = create<GameStore>((set, get) => ({
       results.push({ item: item as ConsumableItem, count })
     }
     return results
+  },
+
+  revealExploration: (tokenId: string) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const action = {
+      type: 'RevealExploration' as const,
+      figureId: selectedFigureId,
+      payload: { tokenId },
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+
+    const token = newGameState.explorationTokens?.find(t => t.id === tokenId)
+    if (token?.isRevealed && token.revealResult) {
+      const rewardText = token.revealResult.rewards.map(r => r.type).join(', ')
+      addCombatLog(`${selectedFigureId} explored: ${token.revealResult.tokenType} (${rewardText})`)
+    } else {
+      addCombatLog(`${selectedFigureId} revealed exploration token`)
+    }
+  },
+
+  spendCommandToken: (usage: CommandTokenUsage, coordinateTargetId?: string) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const action = {
+      type: 'SpendCommandToken' as const,
+      figureId: selectedFigureId,
+      payload: { usage, coordinateTargetId },
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+    addCombatLog(`${selectedFigureId} spent command token: ${usage.replace(/_/g, ' ')}`)
   },
 
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => {

@@ -27,6 +27,7 @@ interface Props {
   onHealHero: (heroId: string) => void
   onComplete: () => void
   onSkip: () => void
+  onGoToForge?: () => void
 }
 
 const dispositionColors: Record<Disposition, string> = {
@@ -43,7 +44,7 @@ const dispositionLabels: Record<Disposition, string> = {
   hostile: 'Hostile',
 }
 
-export function SocialHub({ location, npcs, campaign, session, onSelectEncounter, onSelectShop, onHealHero, onComplete, onSkip }: Props) {
+export function SocialHub({ location, npcs, campaign, session, onSelectEncounter, onSelectShop, onHealHero, onComplete, onSkip, onGoToForge }: Props) {
   const { isMobile } = useIsMobile()
   const availableEncounters = getAvailableEncounters(location, campaign, session.completedEncounterIds)
   const allEncounters = location.encounters
@@ -78,6 +79,18 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
           >
             COMPLETE PHASE
           </button>
+          {onGoToForge && (
+            <button
+              style={{
+                padding: isMobile ? '8px 14px' : '10px 20px', borderRadius: '6px', border: '1px solid #cc77ff', cursor: 'pointer',
+                fontWeight: 'bold', fontSize: isMobile ? '13px' : '14px', backgroundColor: 'transparent', color: '#cc77ff',
+                flex: isMobile ? 1 : undefined,
+              }}
+              onClick={onGoToForge}
+            >
+              RELIC FORGE
+            </button>
+          )}
           <button
             style={{
               padding: isMobile ? '8px 14px' : '10px 20px', borderRadius: '6px', border: '1px solid #555', cursor: 'pointer',

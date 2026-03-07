@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useGameStore } from '../../store/game-store'
 import type { Figure } from '@engine/types.js'
 import { getWoundThresholdV2 } from '@engine/turn-machine-v2.js'
+import { getRevealableTokens } from '@engine/exploration-tokens.js'
 
 interface ActionButtonsProps {
   selectedFigure: Figure | null
@@ -15,6 +16,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
     aimFigure, dodgeFigure, takeCover, standUp, strainForManeuver, drawHolster,
     undoLastAction, gameStateHistory,
     useConsumable, getAvailableConsumables, gameData,
+    revealExploration, spendCommandToken,
   } = useGameStore()
 
   const [showConsumableMenu, setShowConsumableMenu] = useState(false)
@@ -64,6 +66,17 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
     ? getAvailableConsumables(selectedFigure)
     : []
   const hasConsumables = availableConsumables.length > 0
+
+  // Get revealable exploration tokens (only for operative heroes)
+  const revealableTokens = gameState && selectedFigure.entityType === 'hero'
+    ? getRevealableTokens(gameState, selectedFigure.id)
+    : []
+  const hasRevealable = revealableTokens.length > 0
+
+  // Check command token availability
+  const commandTokens = gameState?.commandTokens
+  const operativeTokens = commandTokens?.operativeTokens ?? 0
+  const hasCommandTokens = operativeTokens > 0
 
   const containerStyle: React.CSSProperties = compact ? {
     display: 'flex',
@@ -349,6 +362,46 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ selectedFigure, co
             </div>
           )}
         </div>
+      )}
+
+      {/* Exploration token reveal button */}
+      {hasRevealable && (
+        <button
+          style={buttonStyle('#00ccaa')}
+          onClick={() => revealExploration(revealableTokens[0].id)}
+          title={`Reveal exploration token (${revealableTokens.length} nearby)`}
+        >
+          <span style={actionTypeLabel}>Free</span>
+          <span>Explore</span>
+          {revealableTokens.length > 1 && (
+            <span style={{ fontSize: '9px', marginTop: '1px', opacity: 0.7 }}>
+              {revealableTokens.length}
+            </span>
+          )}
+        </button>
+      )}
+
+      {/* Command token buttons */}
+      {hasCommandTokens && (
+        <>
+          <button
+            style={buttonStyle('#0088cc', !canAttack)}
+            onClick={() => spendCommandToken('focus_fire')}
+            disabled={!canAttack}
+            title="Focus Fire: +1 attack die on next attack (costs 1 command token)"
+          >
+            <span style={actionTypeLabel}>Token</span>
+            <span>Focus</span>
+          </button>
+          <button
+            style={buttonStyle('#006699')}
+            onClick={() => spendCommandToken('defensive_stance')}
+            title="Defensive Stance: +1 defense die for nearby allies (costs 1 command token)"
+          >
+            <span style={actionTypeLabel}>Token</span>
+            <span>Defend</span>
+          </button>
+        </>
       )}
 
       {/* Active Talent buttons (heroes only) */}
