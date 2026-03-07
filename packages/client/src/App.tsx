@@ -29,6 +29,7 @@ import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
 import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgression'
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
+import { SectorMap } from './components/Campaign/SectorMap'
 import MissionBriefing from './components/Campaign/MissionBriefing'
 import { ActTransition } from './components/Campaign/ActTransition'
 import { FloatingCombatTextOverlay } from './components/HUD/FloatingCombatText'
@@ -95,12 +96,14 @@ function App() {
     showSocialPhase,
     showHeroProgression,
     showPortraitManager,
+    showSectorMap,
     showCampaignStats,
     showMissionBriefing,
     showCampaignJournal,
     showMapEditor,
     showCombatArena,
     showActTransition,
+    campaignState,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -118,7 +121,7 @@ function App() {
   // Keyboard shortcuts for tactical combat (disabled on non-combat screens and mobile)
   const inTacticalCombat = !!gameState && isInitialized && !isAIBattle && !showSetup && !showHeroCreation
     && !showMissionSelect && !showPostMission && !showSocialPhase && !showHeroProgression
-    && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition
+    && !showPortraitManager && !showSectorMap && !showCombatArena && !showMissionBriefing && !showActTransition
   useCombatKeys(inTacticalCombat && !isMobile)
 
   // Auto-execute Imperial AI turns in campaign combat (not AI Battle mode)
@@ -177,6 +180,11 @@ function App() {
   // Campaign: portrait & faction visual manager
   if (showPortraitManager) {
     return <><AudioControls /><PortraitManagerPage /></>
+  }
+
+  // Campaign: interactive sector map
+  if (showSectorMap && campaignState) {
+    return <><AudioControls /><SectorMap campaign={campaignState} onClose={useGameStore.getState().closeSectorMap} /></>
   }
 
   // Campaign: mission journal (lazy-loaded)

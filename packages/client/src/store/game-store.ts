@@ -459,6 +459,7 @@ export interface GameStore {
   actTransitionData: { fromAct: number; toAct: number } | null
   showHeroProgression: boolean
   showPortraitManager: boolean
+  showSectorMap: boolean
   showCampaignStats: boolean
   showMapEditor: boolean
   campaignHeroCreation: boolean // true when creating heroes for a new campaign
@@ -601,6 +602,10 @@ export interface GameStore {
   // Portrait manager actions
   openPortraitManager: () => void
   closePortraitManager: () => void
+
+  // Sector map actions
+  openSectorMap: () => void
+  closeSectorMap: () => void
   purchaseHeroTalent: (heroId: string, talentId: string, tier: 1 | 2 | 3 | 4 | 5, position: number) => void
   purchaseHeroSkillRank: (heroId: string, skillId: string) => void
   unlockHeroSpecialization: (heroId: string, specializationId: string) => void
@@ -659,6 +664,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   actTransitionData: null,
   showHeroProgression: false,
   showPortraitManager: false,
+  showSectorMap: false,
   showCampaignStats: false,
   showMapEditor: false,
   campaignHeroCreation: false,
@@ -2465,6 +2471,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
+      showSectorMap: false,
       showCampaignStats: false,
       showMapEditor: false,
       // Clear stale combat state from previous campaign
@@ -2517,6 +2524,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
+      showSectorMap: false,
       showCampaignStats: false,
       showMapEditor: false,
       campaignHeroCreation: false,
@@ -2634,6 +2642,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   closePortraitManager: () => {
     set({
       showPortraitManager: false,
+      showMissionSelect: true,
+    })
+  },
+
+  // ---- Sector Map ----
+
+  openSectorMap: () => {
+    set({
+      showMissionSelect: false,
+      showSectorMap: true,
+    })
+  },
+
+  closeSectorMap: () => {
+    set({
+      showSectorMap: false,
       showMissionSelect: true,
     })
   },

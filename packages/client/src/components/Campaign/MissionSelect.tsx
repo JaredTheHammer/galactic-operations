@@ -655,6 +655,7 @@ export default function MissionSelect() {
     openSocialPhase,
     openHeroProgression,
     openPortraitManager,
+    openSectorMap,
     openCampaignStats,
     openCampaignJournal,
   } = useGameStore()
@@ -829,6 +830,12 @@ export default function MissionSelect() {
             onClick={openPortraitManager}
           >
             PORTRAITS
+          </button>
+          <button
+            style={{ ...buttonStyle, backgroundColor: '#1a2a2a', color: '#44ddaa', flex: isMobile ? '1 1 auto' : undefined }}
+            onClick={openSectorMap}
+          >
+            SECTOR MAP
           </button>
           <button
             style={{ ...buttonStyle, backgroundColor: '#1a2a3a', color: '#cc8800', flex: isMobile ? '1 1 auto' : undefined }}
