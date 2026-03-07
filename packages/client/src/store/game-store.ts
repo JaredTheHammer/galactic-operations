@@ -153,6 +153,14 @@ import survivalistSpecData from '@data/specializations/survivalist.json'
 import contractsData from '@data/contracts.json'
 import researchTrackData from '@data/research-track.json'
 import mercenariesNpcData from '@data/npcs/mercenaries.json'
+import iaImperialNpcData from '@data/npcs/imperial-assault-imperial.json'
+import iaMercenaryNpcData from '@data/npcs/imperial-assault-mercenary.json'
+import iaRebelNpcData from '@data/npcs/imperial-assault-rebel.json'
+import legionImperialNpcData from '@data/npcs/legion-imperial.json'
+import legionRebelNpcData from '@data/npcs/legion-rebel.json'
+import legionRepublicNpcData from '@data/npcs/legion-republic.json'
+import legionSeparatistNpcData from '@data/npcs/legion-separatist.json'
+import legionShadowCollectiveNpcData from '@data/npcs/legion-shadow-collective.json'
 
 // Campaign mission data - Act 1
 import mission1Data from '@data/missions/act1-mission1-arrival.json'
@@ -205,7 +213,7 @@ const BOARD_TEMPLATES: BoardTemplate[] = [
 function loadGameDataV2(): GameData {
   // NPC profiles (merge all faction files)
   const npcProfiles: Record<string, NPCProfile> = {}
-  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData, bountyTargetsNpcData, mercenariesNpcData]
+  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData, bountyTargetsNpcData, mercenariesNpcData, iaImperialNpcData, iaMercenaryNpcData, iaRebelNpcData, legionImperialNpcData, legionRebelNpcData, legionRepublicNpcData, legionSeparatistNpcData, legionShadowCollectiveNpcData]
   for (const npcFile of npcDataFiles) {
     const npcsRaw = (npcFile as any).npcs ?? npcFile
     for (const [id, npc] of Object.entries(npcsRaw)) {
@@ -499,7 +507,7 @@ function heroArmyV2(heroes: HeroCharacter[]): ArmyCompositionV2 {
 /** Notification for UI display (reinforcement popups, narrative events) */
 export interface GameNotification {
   id: string
-  type: 'reinforcement' | 'narrative' | 'objective' | 'info'
+  type: 'reinforcement' | 'narrative' | 'objective' | 'info' | 'error'
   title: string
   message: string
   duration: number  // ms, 0 = manual dismiss only
@@ -2371,6 +2379,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       saveToSlot(AUTO_SAVE_SLOT, campaign)
     } catch (e) {
       console.error('Failed to auto-save new campaign:', e)
+      get().addNotification({ type: 'error', title: 'Save Failed', message: 'Campaign could not be saved. Check storage quota.', duration: 0 })
     }
     get().saveCampaignToStorage()
   },
@@ -2472,7 +2481,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
         npcProfiles: gameData.npcProfiles,
         objectivePointTemplates: mission.objectivePoints,
         lootTokens: mission.lootTokens,
-        consumableInventory: { ...(campaignState.consumableInventory ?? {}) },
         fogOfWar: mission.fogOfWar,
         fogOfWarVisionRange: mission.fogOfWarVisionRange,
         consumableInventory: { ...(updatedCampaignForMission.consumableInventory ?? {}) },
@@ -2757,6 +2765,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
     } catch (e) {
       console.error('Autosave after mission failed:', e)
+      get().addNotification({ type: 'error', title: 'Save Failed', message: 'Post-mission save failed. Use manual save before closing.', duration: 0 })
     }
     // Auto-save after mission completion
     try {
@@ -2766,6 +2775,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     } catch (e) {
       console.error('Auto-save after mission failed:', e)
+      get().addNotification({ type: 'error', title: 'Save Failed', message: 'Post-mission slot save failed. Check storage quota.', duration: 0 })
     }
     get().saveCampaignToStorage()
   },
@@ -2828,6 +2838,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ lastAutosaveTime: Date.now() })
     } catch (e) {
       console.error('Failed to save campaign:', e)
+      get().addNotification({ type: 'error', title: 'Save Failed', message: 'Campaign autosave failed. Try manual save.', duration: 0 })
     }
   },
 
@@ -2846,6 +2857,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
     } catch (e) {
       console.error('Failed to save campaign to slot:', e)
+      get().addNotification({ type: 'error', title: 'Save Failed', message: 'Failed to save to slot. Check storage quota.', duration: 0 })
     }
   },
 
@@ -2978,6 +2990,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
       } catch (e) {
         console.error('Failed to auto-save on exit:', e)
+        get().addNotification({ type: 'error', title: 'Save Failed', message: 'Auto-save on exit failed. Progress may be lost.', duration: 0 })
       }
     }
 
@@ -3054,6 +3067,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
       } catch (e) {
         console.error('Autosave after social phase failed:', e)
+        get().addNotification({ type: 'error', title: 'Save Failed', message: 'Post-social-phase save failed. Try manual save.', duration: 0 })
       }
     }
     // Auto-save after social phase
@@ -3065,6 +3079,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       } catch (e) {
         console.error('Auto-save after social phase failed:', e)
+        get().addNotification({ type: 'error', title: 'Save Failed', message: 'Social phase slot save failed. Check storage quota.', duration: 0 })
       }
     }
     get().saveCampaignToStorage()
@@ -3160,6 +3175,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       } catch (e) {
         console.error('Auto-save after hero progression failed:', e)
+        get().addNotification({ type: 'error', title: 'Save Failed', message: 'Hero progression save failed. Try manual save.', duration: 0 })
       }
     }
     get().saveCampaignToStorage()

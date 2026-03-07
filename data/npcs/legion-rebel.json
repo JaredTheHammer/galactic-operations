@@ -1,0 +1,1369 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Rebel Alliance units from Star Wars: Legion. Adapted to d6 dice pool system. Miniature-compatible -- players can field their Legion Rebel minis. Units that overlap with Imperial Assault have 'legion-' prefix IDs. Rebels can be fielded as operative-side allies or as player-controlled forces.",
+    "source": "Star Wars: Legion (AMG/FFG)",
+    "faction": "Rebel Alliance"
+  },
+  "npcs": {
+    "legion-luke-skywalker": {
+      "id": "legion-luke-skywalker",
+      "name": "Luke Skywalker (Legion)",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 14,
+      "strainThreshold": 12,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-luke-saber",
+          "name": "Anakin's Lightsaber",
+          "baseDamage": 9,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Impact",
+              "value": 2
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-luke-blaster",
+          "name": "DL-44 Heavy Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Rebel",
+        "Force-sensitive",
+        "Light Side",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Commander",
+        "Jedi"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Retaliate",
+          "value": 2
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "abilities": [
+        "Deflect: When targeted by a ranged attack, add 1 Challenge die to defense pool. On 3+ net defense successes, reflect 2 damage back.",
+        "Son of Skywalker: Once per game, after performing an attack, immediately perform a second attack for free.",
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Jump: Ignore terrain height 1 when moving. May move over gaps.",
+        "Inspire: At start of activation, remove 1 suppression from a friendly unit within Short range."
+      ],
+      "threatCost": 14,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "force-connection",
+          "name": "Force Connection",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Force Disrupted"
+          }
+        },
+        {
+          "id": "saber-arm",
+          "name": "Sword Arm",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weakened"
+          }
+        },
+        {
+          "id": "legs",
+          "name": "Mobility",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "conditionInflicted": "Hobbled"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Luke reaches out to the Force, feeling its power surge through him!",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 2,
+            "speedBonus": 1
+          }
+        }
+      ]
+    },
+    "legion-leia-organa": {
+      "id": "legion-leia-organa",
+      "name": "Leia Organa (Legion)",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 12,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-leia-defender",
+          "name": "Defender Sporting Blaster",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Rebel",
+        "Leader",
+        "Unique",
+        "Legion",
+        "Commander"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "courage": 4,
+      "abilities": [
+        "Take Cover: As an action, each friendly trooper within Short range gains a dodge token.",
+        "No Time for Sorrows: After being wounded, gain +1 to all attack pools until end of round.",
+        "Inspire: At start of activation, remove 2 suppression from a friendly unit within Short range.",
+        "Sharpshooter: Reduce target's cover bonus by 1.",
+        "Nimble: After defending with a dodge token, gain 1 dodge token."
+      ],
+      "threatCost": 8
+    },
+    "legion-han-solo": {
+      "id": "legion-han-solo",
+      "name": "Han Solo (Legion)",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-han-dl44",
+          "name": "DL-44 Modified Blaster",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-han-shoulder",
+          "name": "Shoulder Charge",
+          "baseDamage": 3,
+          "range": "Engaged",
+          "critical": 4,
+          "qualities": [
+            {
+              "name": "Knockdown",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Rebel",
+        "Smuggler",
+        "Unique",
+        "Legion",
+        "Commander"
+      ],
+      "mechanicalKeywords": [],
+      "courage": 3,
+      "abilities": [
+        "Sorry About the Mess: Han always attacks first in the first round (acts at Initiative 0).",
+        "Gunslinger: After performing a ranged attack, may perform a second ranged attack against a different target at -1 Proficiency.",
+        "Uncanny Luck: May reroll up to 3 defense dice per attack.",
+        "Low Profile: While in cover, improve cover by 1 rank.",
+        "Reckless Diversion: As an action, hostile figures within Medium range must target Han if able."
+      ],
+      "threatCost": 9
+    },
+    "legion-chewbacca": {
+      "id": "legion-chewbacca",
+      "name": "Chewbacca (Legion)",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 14,
+      "strainThreshold": 8,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-chewie-bowcaster",
+          "name": "Bowcaster",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-chewie-fists",
+          "name": "Wookiee Fists",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Knockdown",
+              "value": null
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Rebel",
+        "Wookiee",
+        "Unique",
+        "Legion",
+        "Operative"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Retaliate",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Guardian: When a friendly Commander within Short range would suffer wounds, Chewie may suffer up to 3 of those wounds instead.",
+        "Enrage: When wounded below half health, gain +1 to all attack pools and +1 speed.",
+        "Teamwork: Han Solo -- When Han is within Short range, both gain 1 aim token at start of activation.",
+        "Scale: May climb terrain freely without spending extra movement."
+      ],
+      "threatCost": 9
+    },
+    "legion-jyn-erso": {
+      "id": "legion-jyn-erso",
+      "name": "Jyn Erso",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-jyn-a180",
+          "name": "A-180 Blaster (Pistol)",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-jyn-a180-rifle",
+          "name": "A-180 Blaster (Rifle)",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-jyn-truncheon",
+          "name": "Collapsible Tonfa",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Rebel",
+        "Trooper",
+        "Unique",
+        "Legion",
+        "Commander",
+        "Rogue One"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Quick Thinking: Gain 1 aim and 1 dodge token when issued an order.",
+        "Nimble: After defending with a dodge token, regain that dodge token.",
+        "Sharpshooter: Reduce target's cover bonus by 1.",
+        "Rebellious: Friendly troopers within Short range gain +1 courage.",
+        "Infiltrate: May deploy anywhere on the battlefield outside Short range of enemy figures."
+      ],
+      "threatCost": 9
+    },
+    "legion-cassian-andor": {
+      "id": "legion-cassian-andor",
+      "name": "Cassian Andor",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-cassian-a280",
+          "name": "A-280-CFE Sniper Config",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-cassian-pistol",
+          "name": "A-280-CFE Pistol Config",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Rebel",
+        "Trooper",
+        "Spy",
+        "Unique",
+        "Legion",
+        "Commander",
+        "Rogue One"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Danger Sense: When defending, roll 1 additional defense die per suppression token (max 3).",
+        "Covert Ops: If deployed as a non-commander, gains Infiltrate. May deploy disguised.",
+        "Marksman: May convert 1 aim token to Pierce 1.",
+        "Tactical: Gain 1 aim token when issued an order.",
+        "Teamwork: K-2SO -- When K-2SO is within Short range, both gain 1 dodge token at start of activation."
+      ],
+      "threatCost": 8
+    },
+    "legion-k2so": {
+      "id": "legion-k2so",
+      "name": "K-2SO",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": null,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-k2so-fists",
+          "name": "Crushing Strike",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Knockdown",
+              "value": null
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-k2so-blaster",
+          "name": "Commandeered E-11",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Rebel",
+        "Droid",
+        "Unique",
+        "Legion",
+        "Operative",
+        "Rogue One"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Calculate Odds: Once per round, may choose to gain or remove 1 suppression from self.",
+        "Jyn, I'll Be There For You: When Jyn Erso is within Short range and would suffer wounds, K-2SO may suffer up to 2 of those wounds instead.",
+        "Programmed: Immune to suppression effects. Cannot benefit from rally abilities.",
+        "Infiltrate: May deploy disguised as an Imperial unit."
+      ],
+      "threatCost": 5
+    },
+    "legion-sabine-wren": {
+      "id": "legion-sabine-wren",
+      "name": "Sabine Wren",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 8,
+      "soak": 4,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-sabine-dual-pistols",
+          "name": "Dual WESTAR-35 Blaster Pistols",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Linked",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-sabine-darksaber",
+          "name": "The Darksaber",
+          "baseDamage": 7,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-sabine-explosives",
+          "name": "Explosives",
+          "baseDamage": 8,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 3
+            },
+            {
+              "name": "Limited Ammo",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Rebel",
+        "Mandalorian",
+        "Unique",
+        "Legion",
+        "Operative",
+        "Spectre"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Guerrilla Fighter: After attacking, may perform a free Move maneuver.",
+        "Jetpack: Ignore terrain and elevation. May move through hostile figures.",
+        "Nimble: After defending with a dodge token, regain that dodge token.",
+        "Mandalorian Armor: Reduce damage from Blast and Burn effects by 2.",
+        "Explosives Expert: Blast attacks ignore cover."
+      ],
+      "threatCost": 9
+    },
+    "legion-ezra-bridger": {
+      "id": "legion-ezra-bridger",
+      "name": "Ezra Bridger",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-ezra-saber",
+          "name": "Lightsaber-Blaster Hybrid",
+          "baseDamage": 7,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-ezra-blaster",
+          "name": "Lightsaber-Blaster Hybrid (Ranged)",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Rebel",
+        "Force-sensitive",
+        "Light Side",
+        "Unique",
+        "Legion",
+        "Operative",
+        "Spectre",
+        "Jedi"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        }
+      ],
+      "abilities": [
+        "Deflect: When targeted by a ranged attack, add 1 Difficulty die to defense pool.",
+        "Jump: Ignore terrain height 1 when moving.",
+        "Danger Sense: Roll 1 additional defense die per suppression token (max 3).",
+        "Street Smarts: In urban terrain, gain +1 dodge token at start of activation.",
+        "Latent Power: Once per game, perform 2 Force actions in a single activation."
+      ],
+      "threatCost": 8
+    },
+    "legion-rebel-troopers": {
+      "id": "legion-rebel-troopers",
+      "name": "Rebel Trooper (Legion)",
+      "side": "operative",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 0
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-rebel-a280",
+          "name": "A-280 Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Rebel",
+        "Trooper",
+        "Legion",
+        "Corps"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Nimble: After defending with a dodge token, regain 1 dodge token.",
+        "Inspire: Allies within Short range remove 1 suppression when this unit activates."
+      ],
+      "threatCost": 2
+    },
+    "legion-fleet-troopers": {
+      "id": "legion-fleet-troopers",
+      "name": "Fleet Trooper",
+      "side": "operative",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 0
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-fleet-dh17",
+          "name": "DH-17 Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Short",
+          "critical": 3,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Rebel",
+        "Trooper",
+        "Legion",
+        "Corps"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Ready: After performing a standby, gain 1 aim token.",
+        "Point Blank: +2 damage when attacking at Engaged or Short range."
+      ],
+      "threatCost": 2
+    },
+    "legion-rebel-veterans": {
+      "id": "legion-rebel-veterans",
+      "name": "Rebel Veteran",
+      "side": "operative",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-veteran-a300",
+          "name": "A-300 Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Rebel",
+        "Trooper",
+        "Veteran",
+        "Legion",
+        "Corps"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Coordinate: After being issued an order, a friendly Corps unit at Short range gains a surge token.",
+        "Defend: Gain +1 defense die when not moving this activation.",
+        "Veteran Instincts: May reroll 1 defense die per attack."
+      ],
+      "threatCost": 3
+    },
+    "legion-mark-ii-medium-blaster": {
+      "id": "legion-mark-ii-medium-blaster",
+      "name": "Mark II Medium Blaster Trooper",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": 4,
+      "soak": 2,
+      "speed": 2,
+      "weapons": [
+        {
+          "weaponId": "legion-mark-ii-blaster",
+          "name": "Mark II Medium Blaster",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Auto-fire",
+              "value": null
+            },
+            {
+              "name": "Cumbersome",
+              "value": 3
+            },
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Rebel",
+        "Heavy Weapons",
+        "Emplacement",
+        "Legion",
+        "Support"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Shield",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Emplaced: Cannot take Move maneuvers. Must be set up at deployment.",
+        "Sentinel: Standby range increased to Long.",
+        "Suppressive: Targets hit gain +1 suppression token."
+      ],
+      "threatCost": 4
+    },
+    "legion-rebel-commandos": {
+      "id": "legion-rebel-commandos",
+      "name": "Rebel Commando",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": 5,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-commando-dh17",
+          "name": "DH-17 Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Rebel",
+        "Trooper",
+        "Scout",
+        "Legion",
+        "Special Forces"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Scout: Deploy up to 2 tiles ahead of normal deployment zone.",
+        "Low Profile: While in cover, improve cover by 1 rank.",
+        "Sharpshooter: Reduce target's cover bonus by 1.",
+        "Danger Sense: Roll 1 extra defense die per suppression token (max 2)."
+      ],
+      "threatCost": 4
+    },
+    "legion-rebel-commando-sniper": {
+      "id": "legion-rebel-commando-sniper",
+      "name": "Rebel Commando Sniper",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 0,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 3,
+      "strainThreshold": 4,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-commando-sniper-rifle",
+          "name": "Sniper Rifle",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Rebel",
+        "Trooper",
+        "Sniper",
+        "Legion",
+        "Special Forces"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Scout: Deploy up to 2 tiles ahead of normal deployment zone.",
+        "Low Profile: While in cover, improve cover by 1 rank.",
+        "Sharpshooter: Reduce target's cover bonus by 1.",
+        "Marksman: May convert 1 aim token to Pierce 1."
+      ],
+      "threatCost": 4
+    },
+    "legion-wookiee-warriors": {
+      "id": "legion-wookiee-warriors",
+      "name": "Wookiee Warrior",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 8,
+      "strainThreshold": 5,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-wookiee-ryyk",
+          "name": "Ryyk Blade",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-wookiee-bowcaster",
+          "name": "Bowcaster",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Rebel",
+        "Wookiee",
+        "Legion",
+        "Special Forces"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Retaliate",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Duelist: While engaged, gain +1 to defense pool.",
+        "Scale: May climb terrain freely without spending extra movement.",
+        "Indomitable: May reroll all suppression rally dice."
+      ],
+      "threatCost": 5
+    },
+    "legion-rebel-pathfinders": {
+      "id": "legion-rebel-pathfinders",
+      "name": "Rebel Pathfinder",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": 5,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-pathfinder-a300",
+          "name": "A-300 Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Rebel",
+        "Trooper",
+        "Scout",
+        "Legion",
+        "Special Forces",
+        "Rogue One"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Infiltrate: May deploy anywhere on the battlefield outside Short range of enemy figures.",
+        "Danger Sense: Roll 1 extra defense die per suppression token (max 3).",
+        "Dauntless: May gain 1 suppression to perform a free Move after rallying.",
+        "Recon: At deployment, may make a free Short-range move."
+      ],
+      "threatCost": 4
+    },
+    "legion-tauntaun-riders": {
+      "id": "legion-tauntaun-riders",
+      "name": "Tauntaun Rider",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 8,
+      "strainThreshold": 4,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-tauntaun-horns",
+          "name": "Tauntaun Horns",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Vicious",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-tauntaun-dx9",
+          "name": "DX-9 Disruptor Pistol",
+          "baseDamage": 7,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Rebel",
+        "Trooper",
+        "Creature",
+        "Mounted",
+        "Legion",
+        "Support"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Relentless: After performing a Move, may perform a free attack.",
+        "Agile: Gain 1 dodge token after performing a Move.",
+        "Unhindered: Ignore difficult terrain.",
+        "Ram: When performing a Move into engagement, deal 2 damage to the engaged enemy."
+      ],
+      "threatCost": 5
+    },
+    "legion-at-rt-rebel": {
+      "id": "legion-at-rt-rebel",
+      "name": "AT-RT (Rebel)",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 8,
+      "strainThreshold": 4,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-atrt-rotary",
+          "name": "AT-RT Rotary Blaster",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Auto-fire",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Rebel",
+        "Vehicle",
+        "Walker",
+        "Legion",
+        "Support",
+        "Ground Vehicle"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Climbing Vehicle: May move up terrain of height 1.",
+        "Weak Point: Rear -- attacks from behind ignore Armor.",
+        "Grit: +1 courage per wound suffered."
+      ],
+      "threatCost": 5
+    },
+    "legion-t47-airspeeder": {
+      "id": "legion-t47-airspeeder",
+      "name": "T-47 Airspeeder",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 0,
+        "challenge": 2
+      },
+      "woundThreshold": 12,
+      "strainThreshold": 6,
+      "soak": 3,
+      "speed": 6,
+      "weapons": [
+        {
+          "weaponId": "legion-t47-laser",
+          "name": "Ap/11 Double Laser Cannon",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 2
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-t47-harpoon",
+          "name": "Power Harpoon",
+          "baseDamage": 5,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 2
+            },
+            {
+              "name": "Ensnare",
+              "value": 3
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Rebel",
+        "Vehicle",
+        "Speeder",
+        "Repulsor",
+        "Legion",
+        "Heavy"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Arsenal 2: May use up to 2 weapons per attack action.",
+        "Cover: 1 -- Immune to Pierce while in cover.",
+        "Compulsory Move: Must move at least 2 tiles per activation.",
+        "Speeder: Ignore terrain. Cannot be engaged.",
+        "Immune: Melee."
+      ],
+      "threatCost": 10
+    }
+  }
+}

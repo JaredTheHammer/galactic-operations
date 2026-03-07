@@ -60,7 +60,6 @@ const dispositionLabels: Record<Disposition, string> = {
   hostile: 'Hostile',
 }
 
-export function SocialHub({ location, npcs, campaign, session, onSelectEncounter, onSelectShop, onHealHero, onComplete, onSkip, onGoToForge }: Props) {
 const clockLevelColors: Record<string, string> = {
   caught_off_guard: '#44ff44',
   normal: '#888888',
@@ -179,6 +178,8 @@ export function SocialHub({
               onClick={onGoToForge}
             >
               RELIC FORGE
+            </button>
+          )}
           {!noSlotsLeft && (
             <button
               style={{

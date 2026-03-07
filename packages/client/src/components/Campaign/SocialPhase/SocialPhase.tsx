@@ -444,7 +444,6 @@ export function SocialPhase() {
     updateCampaignState(updatedCampaign)
   }, [updateCampaignState])
 
-  const activeShop = session.activeShopId
   // Network-unlocked gear: add items to any shop the player visits
   const networkGearItems = useMemo(() => {
     if (!campaignState.supplyNetwork) return []

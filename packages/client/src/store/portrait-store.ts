@@ -113,7 +113,7 @@ export const usePortraitStore = create<PortraitStoreState>((set, get) => ({
       set({ portraits, hydrated: true });
     } catch (err) {
       console.error('[portrait-store] Hydration failed:', err);
-      set({ hydrated: true }); // Mark as hydrated to prevent retry loops
+      set({ hydrated: true, portraits: {} }); // Mark hydrated with empty state to prevent retry loops
     }
   },
 

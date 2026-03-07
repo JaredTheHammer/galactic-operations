@@ -312,6 +312,7 @@ export {
   advancePhaseV2,
   getCurrentFigureV2,
   executeActionV2,
+  validateGameAction,
   checkVictoryV2,
   resetForActivation,
   resolveStandbyTriggers,

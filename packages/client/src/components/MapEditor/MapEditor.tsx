@@ -409,7 +409,11 @@ export default function MapEditor({ onClose }: MapEditorProps) {
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result as string) as BoardTemplate
-        if (!data.tiles || !Array.isArray(data.tiles)) throw new Error('Invalid board format')
+        if (!data.tiles || !Array.isArray(data.tiles)) throw new Error('Invalid board: missing tiles array')
+        if (!Array.isArray(data.tiles[0])) throw new Error('Invalid board: tiles must be a 2D array')
+        if (typeof data.width !== 'number' || typeof data.height !== 'number') throw new Error('Invalid board: missing width/height')
+        if (data.width < 1 || data.width > 100 || data.height < 1 || data.height > 100) throw new Error('Invalid board: dimensions out of range')
+        if (data.tiles.length !== data.height) throw new Error('Invalid board: tiles row count does not match height')
         pushUndo(board)
         setBoard(data)
         setBoardName(data.name ?? 'Imported Board')

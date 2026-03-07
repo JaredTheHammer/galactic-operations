@@ -1,0 +1,1064 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Shadow Collective and mercenary units from Star Wars: Legion. Adapted to d6 dice pool system. Miniature-compatible. The Shadow Collective can ally with multiple factions. Includes Maul, Gar Saxon, Mandalorian warriors, Black Sun, Pyke Syndicate, and independent bounty hunters like Din Djarin. These units can be fielded by either side depending on scenario.",
+    "source": "Star Wars: Legion (AMG/FFG)",
+    "faction": "Shadow Collective / Mercenary"
+  },
+  "npcs": {
+    "legion-maul": {
+      "id": "legion-maul",
+      "name": "Maul",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 14,
+      "strainThreshold": 12,
+      "soak": 3,
+      "speed": 6,
+      "weapons": [
+        {
+          "weaponId": "legion-maul-saber",
+          "name": "Maul's Double-Bladed Lightsaber",
+          "baseDamage": 9,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 3
+            },
+            {
+              "name": "Vicious",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-maul-throw",
+          "name": "Force Throw",
+          "baseDamage": 6,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 2
+            },
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Shadow Collective",
+        "Force-sensitive",
+        "Dark Side",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Commander",
+        "Zabrak",
+        "Nightbrother"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Retaliate",
+          "value": 3
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "abilities": [
+        "Master of the Force: May use 2 Force powers per activation.",
+        "Deflect: When targeted by a ranged attack, add 1 Challenge die to defense pool.",
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Jump: Ignore terrain height 1 when moving.",
+        "Juyo Mastery: Perform 2 melee attacks as a single action.",
+        "Fueled by Rage: When wounded below half health, gain +2 to all attack pools and +1 speed.",
+        "At Last We Will Reveal Ourselves: Once per game, at start of activation, perform 3 melee attacks instead of 2."
+      ],
+      "threatCost": 15,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "saber",
+          "name": "Double-Bladed Saber",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weapon Damaged"
+          }
+        },
+        {
+          "id": "dark-connection",
+          "name": "Dark Side Fury",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "soakModifier": -1,
+            "conditionInflicted": "Force Disrupted"
+          }
+        },
+        {
+          "id": "cybernetic-legs",
+          "name": "Cybernetic Legs",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -3,
+            "conditionInflicted": "Hobbled"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 1,
+          "newAiArchetype": "melee",
+          "narrativeText": "Maul howls in rage. 'I am the one with the power!'",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 2,
+            "speedBonus": 1
+          }
+        },
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Maul fights with nothing left to lose, channeling every ounce of hatred into each strike!",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 4,
+            "speedBonus": 0
+          }
+        }
+      ]
+    },
+    "legion-gar-saxon": {
+      "id": "legion-gar-saxon",
+      "name": "Gar Saxon",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 12,
+      "strainThreshold": 10,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-saxon-dual-pistols",
+          "name": "Dual WESTAR-35 Blaster Pistols",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Linked",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-saxon-jetpack-rockets",
+          "name": "Jetpack Rockets",
+          "baseDamage": 9,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 2
+            },
+            {
+              "name": "Impact",
+              "value": 1
+            },
+            {
+              "name": "Limited Ammo",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Shadow Collective",
+        "Mandalorian",
+        "Unique",
+        "Legion",
+        "Commander",
+        "Super Commando"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Jetpack: Ignore terrain and elevation. May move through hostile figures.",
+        "Mandalorian Armor: Reduce damage from Blast and Burn effects by 2.",
+        "Entourage: Mandalorian Super Commandos -- reduce their deployment cost by 2.",
+        "Tactical: Gain 1 aim token when issued an order.",
+        "Pride of Mandalore: Friendly Mandalorian units within Short range gain +1 damage."
+      ],
+      "threatCost": 9
+    },
+    "legion-mandalorian-super-commandos": {
+      "id": "legion-mandalorian-super-commandos",
+      "name": "Mandalorian Super Commando",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 6,
+      "strainThreshold": 6,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-msc-westar",
+          "name": "WESTAR-35 Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-msc-beskad",
+          "name": "Beskad",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Shadow Collective",
+        "Mandalorian",
+        "Legion",
+        "Special Forces",
+        "Super Commando"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Jetpack: Ignore terrain and elevation.",
+        "Mandalorian Armor: Reduce damage from Blast and Burn effects by 2.",
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Disciplined: Remove 1 suppression at start of activation."
+      ],
+      "threatCost": 5
+    },
+    "legion-black-sun-enforcers": {
+      "id": "legion-black-sun-enforcers",
+      "name": "Black Sun Enforcer",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 0
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-bs-blaster",
+          "name": "Scatter Blaster",
+          "baseDamage": 7,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-bs-knuckles",
+          "name": "Shock Knuckles",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Shadow Collective",
+        "Black Sun",
+        "Enforcer",
+        "Legion",
+        "Corps"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Criminal Connections: +1 damage when attacking at Short range or Engaged.",
+        "Intimidating: Hostile figures within Engaged range suffer +1 suppression."
+      ],
+      "threatCost": 2
+    },
+    "legion-pyke-syndicate-foot-soldiers": {
+      "id": "legion-pyke-syndicate-foot-soldiers",
+      "name": "Pyke Syndicate Foot Soldier",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 0
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-pyke-blaster",
+          "name": "P-13 Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Shadow Collective",
+        "Pyke Syndicate",
+        "Legion",
+        "Corps"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Independent: This unit does not need to be issued an order to activate normally.",
+        "Spice Runner: +1 speed when moving toward an objective.",
+        "Danger Sense: Roll 1 extra defense die per suppression token (max 2)."
+      ],
+      "threatCost": 2
+    },
+    "legion-pyke-syndicate-capo": {
+      "id": "legion-pyke-syndicate-capo",
+      "name": "Pyke Syndicate Capo",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 6,
+      "strainThreshold": 8,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-pyke-capo-blaster",
+          "name": "Capo's Heavy Blaster",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Shadow Collective",
+        "Pyke Syndicate",
+        "Leader",
+        "Legion",
+        "Commander"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Spice Incentive: Friendly Pyke units within Short range gain +1 to attack pools.",
+        "Independent: Does not need orders to activate.",
+        "Underhanded Tactics: Once per round, force a hostile figure within Short range to upgrade their check difficulty by 1."
+      ],
+      "threatCost": 3
+    },
+    "legion-din-djarin": {
+      "id": "legion-din-djarin",
+      "name": "Din Djarin (The Mandalorian)",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 12,
+      "strainThreshold": 10,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-mando-amban",
+          "name": "Amban Phase-Pulse Rifle",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            },
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-mando-pistol",
+          "name": "IB-94 Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-mando-whistling-birds",
+          "name": "Whistling Birds",
+          "baseDamage": 6,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 3
+            },
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Limited Ammo",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-mando-flamethrower",
+          "name": "Wrist Flamethrower",
+          "baseDamage": 5,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 2
+            },
+            {
+              "name": "Burn",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-mando-beskar-spear",
+          "name": "Beskar Spear",
+          "baseDamage": 6,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 3
+            },
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Mercenary",
+        "Mandalorian",
+        "Bounty Hunter",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Operative"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Beskar Armor: Immune to Pierce. Reduce lightsaber damage by 2.",
+        "Jetpack: Ignore terrain and elevation.",
+        "Mandalorian Armor: Reduce damage from Blast and Burn effects by 2.",
+        "Arsenal 2: May use up to 2 weapons per attack action.",
+        "Bounty: At deployment, choose 1 enemy figure. +2 damage against that target.",
+        "Lone Wolf: +1 to all defense pools when no friendly figures within Short range.",
+        "This Is the Way: Once per game, recover all wounds and gain +2 to all pools for 1 round."
+      ],
+      "threatCost": 12,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "beskar-plate",
+          "name": "Beskar Chest Plate",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "soakModifier": -2,
+            "conditionInflicted": "Armor Cracked"
+          }
+        },
+        {
+          "id": "weapons-array",
+          "name": "Weapons Array",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "disabledWeapons": [
+              "legion-mando-whistling-birds",
+              "legion-mando-flamethrower"
+            ],
+            "conditionInflicted": "Weapons Damaged"
+          }
+        },
+        {
+          "id": "jetpack",
+          "name": "Jetpack",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "conditionInflicted": "Grounded"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "elite",
+          "narrativeText": "Din adapts, fighting more carefully. His resolve only hardens.",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 2,
+            "speedBonus": 0
+          }
+        }
+      ]
+    },
+    "legion-boba-fett": {
+      "id": "legion-boba-fett",
+      "name": "Boba Fett (Legion)",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 12,
+      "strainThreshold": 10,
+      "soak": 4,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-fett-ee3",
+          "name": "EE-3 Carbine Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-fett-flamer",
+          "name": "Wrist Flamethrower",
+          "baseDamage": 5,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 2
+            },
+            {
+              "name": "Burn",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-fett-whipcord",
+          "name": "Whipcord Launcher",
+          "baseDamage": 1,
+          "range": "Short",
+          "critical": 5,
+          "qualities": [
+            {
+              "name": "Ensnare",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-fett-rocket",
+          "name": "Wrist Rocket",
+          "baseDamage": 9,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 2
+            },
+            {
+              "name": "Impact",
+              "value": 1
+            },
+            {
+              "name": "Limited Ammo",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Mercenary",
+        "Mandalorian",
+        "Bounty Hunter",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Operative"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Pierce",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Jetpack: Ignore terrain and elevation. May move through hostile figures.",
+        "Arsenal 2: May use up to 2 weapons per attack action.",
+        "Sharpshooter: Reduce target's cover bonus by 1.",
+        "Bounty: Choose 1 enemy figure at deployment. +2 damage against that target.",
+        "No Disintegrations: +3 damage against Wounded targets.",
+        "Mandalorian Armor: Reduce damage from Blast and Burn effects by 2."
+      ],
+      "threatCost": 11
+    },
+    "legion-bossk": {
+      "id": "legion-bossk",
+      "name": "Bossk (Legion)",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 14,
+      "strainThreshold": 8,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-bossk-relby",
+          "name": "Relby-v10 Mortar Gun",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Blast",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-bossk-claws",
+          "name": "Trandoshan Claws",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Mercenary",
+        "Bounty Hunter",
+        "Trandoshan",
+        "Unique",
+        "Legion",
+        "Operative"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Retaliate",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Regeneration: Recover 2 wounds at the start of each activation.",
+        "Bounty: Choose 1 enemy figure at deployment. +2 damage against that target.",
+        "Hunter: +1 Proficiency die when attacking wounded targets.",
+        "Unhindered: Ignore difficult terrain.",
+        "Enrage: When wounded below half health, +1 to all attack pools."
+      ],
+      "threatCost": 9
+    },
+    "legion-nite-owls": {
+      "id": "legion-nite-owls",
+      "name": "Nite Owl Warrior",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 6,
+      "strainThreshold": 6,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-niteowl-westar",
+          "name": "WESTAR-35 Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-niteowl-gauntlet",
+          "name": "Gauntlet Blades",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Mandalorian",
+        "Nite Owls",
+        "Legion",
+        "Special Forces"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Jetpack: Ignore terrain and elevation.",
+        "Mandalorian Armor: Reduce Blast and Burn damage by 2.",
+        "Charge: After Move, may perform a free melee attack.",
+        "This Is the Way: +1 courage. Cannot be broken by morale."
+      ],
+      "threatCost": 5
+    },
+    "legion-clan-kryze-warriors": {
+      "id": "legion-clan-kryze-warriors",
+      "name": "Clan Kryze Warrior",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": 5,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-kryze-westar",
+          "name": "WESTAR-35 Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Mandalorian",
+        "Clan Kryze",
+        "Legion",
+        "Corps"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Jetpack: Ignore terrain and elevation.",
+        "Mandalorian Armor: Reduce Blast and Burn damage by 2.",
+        "Nimble: After defending with a dodge token, regain that token."
+      ],
+      "threatCost": 3
+    },
+    "legion-a-a5-speeder-truck": {
+      "id": "legion-a-a5-speeder-truck",
+      "name": "A-A5 Speeder Truck",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 4,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-a5-gun",
+          "name": "Mounted Gun",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Shadow Collective",
+        "Vehicle",
+        "Speeder",
+        "Repulsor",
+        "Legion",
+        "Support",
+        "Transport"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Transport: Carry up to 1 friendly trooper unit. Deploy when stopping.",
+        "Speeder: Ignore terrain height 1 or lower.",
+        "Weak Point: Rear."
+      ],
+      "threatCost": 4
+    },
+    "legion-swoop-bike-riders": {
+      "id": "legion-swoop-bike-riders",
+      "name": "Swoop Bike Rider",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 0
+      },
+      "defensePool": {
+        "difficulty": 0,
+        "challenge": 1
+      },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 6,
+      "weapons": [
+        {
+          "weaponId": "legion-swoop-blaster",
+          "name": "Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Shadow Collective",
+        "Vehicle",
+        "Speeder",
+        "Repulsor",
+        "Legion",
+        "Support"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Compulsory Move: Must move at least 1 tile per activation.",
+        "Speeder: Ignore terrain height 1 or lower.",
+        "Cover: 1.",
+        "Hit and Run: After attacking, may perform a free 2-tile move."
+      ],
+      "threatCost": 3
+    }
+  }
+}

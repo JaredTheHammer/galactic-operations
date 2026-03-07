@@ -1,0 +1,1232 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Galactic Republic (Clone Wars era) units from Star Wars: Legion. Adapted to d6 dice pool system. Miniature-compatible -- players can field their Legion Republic minis. Clone troopers emphasize fire support tokens and coordinated tactics. Jedi commanders are boss-tier with Force abilities.",
+    "source": "Star Wars: Legion (AMG/FFG)",
+    "faction": "Galactic Republic"
+  },
+  "npcs": {
+    "legion-obi-wan-kenobi": {
+      "id": "legion-obi-wan-kenobi",
+      "name": "Obi-Wan Kenobi",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 14,
+      "strainThreshold": 14,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-kenobi-saber",
+          "name": "Kenobi's Lightsaber",
+          "baseDamage": 9,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Impact",
+              "value": 2
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Republic",
+        "Force-sensitive",
+        "Light Side",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Commander",
+        "Jedi",
+        "Jedi Master"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Retaliate",
+          "value": 2
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "abilities": [
+        "Master of the Force: May use 2 Force powers per activation.",
+        "Deflect: When targeted by a ranged attack, add 1 Challenge die to defense pool. On 3+ net defense successes, reflect 2 damage back.",
+        "Soresu Mastery: When defending in melee, add 1 additional Challenge die. After defending, may perform a free melee attack.",
+        "Guardian: When a friendly figure within Short range would suffer wounds, Obi-Wan may suffer up to 2 of those wounds instead.",
+        "Hello There: Once per game, after deploying or moving into engagement, perform 2 free melee attacks.",
+        "Jump: Ignore terrain height 1 when moving."
+      ],
+      "threatCost": 14,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "saber-arm",
+          "name": "Saber Arm",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weakened"
+          }
+        },
+        {
+          "id": "force-focus",
+          "name": "Force Attunement",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "soakModifier": -1,
+            "conditionInflicted": "Force Disrupted"
+          }
+        },
+        {
+          "id": "legs",
+          "name": "Mobility",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "conditionInflicted": "Hobbled"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Obi-Wan centers himself in the Force, becoming an unbreakable wall of defense.",
+          "statBonuses": {
+            "attackPoolBonus": 0,
+            "damageBonus": 1,
+            "speedBonus": 0
+          }
+        }
+      ]
+    },
+    "legion-anakin-skywalker": {
+      "id": "legion-anakin-skywalker",
+      "name": "Anakin Skywalker",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 14,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-anakin-saber",
+          "name": "Anakin's Lightsaber",
+          "baseDamage": 10,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 3
+            },
+            {
+              "name": "Impact",
+              "value": 3
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Republic",
+        "Force-sensitive",
+        "Light Side",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Commander",
+        "Jedi",
+        "Chosen One"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Retaliate",
+          "value": 3
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "abilities": [
+        "Master of the Force: May use 2 Force powers per activation.",
+        "Deflect: When targeted by a ranged attack, add 1 Challenge die to defense pool. On 3+ net defense successes, reflect 3 damage back.",
+        "Djem So Mastery: After defending in melee, perform a free melee attack with +1 damage.",
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "I'm Going to End This: When wounded below half health, gain +2 to all attack pools. Gain Crit 1 on all attacks.",
+        "Jump: Ignore terrain height 1 when moving."
+      ],
+      "threatCost": 15,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "saber-arm",
+          "name": "Saber Arm",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -2,
+            "conditionInflicted": "Weakened"
+          }
+        },
+        {
+          "id": "emotional-control",
+          "name": "Emotional Stability",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Enraged"
+          }
+        },
+        {
+          "id": "legs",
+          "name": "Mobility",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "conditionInflicted": "Hobbled"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 1,
+          "newAiArchetype": "melee",
+          "narrativeText": "Anakin's fury erupts. The Dark Side whispers at the edges of his power.",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 2,
+            "speedBonus": 1
+          }
+        },
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "'You underestimate my power!' Anakin fights with reckless, devastating aggression!",
+          "statBonuses": {
+            "attackPoolBonus": 2,
+            "damageBonus": 3,
+            "speedBonus": 0
+          }
+        }
+      ]
+    },
+    "legion-ahsoka-tano": {
+      "id": "legion-ahsoka-tano",
+      "name": "Ahsoka Tano (Republic)",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 12,
+      "strainThreshold": 12,
+      "soak": 3,
+      "speed": 6,
+      "weapons": [
+        {
+          "weaponId": "legion-ahsoka-dual-sabers",
+          "name": "Dual Lightsabers",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            },
+            {
+              "name": "Linked",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Republic",
+        "Force-sensitive",
+        "Light Side",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Operative",
+        "Jedi",
+        "Togruta"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Retaliate",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Master of the Force: May use 1 Force power per activation.",
+        "Deflect: When targeted by a ranged attack, add 1 Challenge die to defense pool.",
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Jump: Ignore terrain height 1 when moving.",
+        "Nimble: After defending with a dodge token, regain that dodge token.",
+        "Force Leap: May move up to 3 additional tiles when performing a Move. Ignore terrain."
+      ],
+      "threatCost": 12,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "sabers",
+          "name": "Dual Sabers",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weakened"
+          }
+        },
+        {
+          "id": "force-bond",
+          "name": "Force Bond",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Force Disrupted"
+          }
+        },
+        {
+          "id": "agility",
+          "name": "Agility",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -3,
+            "conditionInflicted": "Hobbled"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Ahsoka grounds herself. 'I am no Jedi.' She fights with renewed determination.",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 2,
+            "speedBonus": 1
+          }
+        }
+      ]
+    },
+    "legion-yoda": {
+      "id": "legion-yoda",
+      "name": "Yoda",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 0,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 3
+      },
+      "woundThreshold": 12,
+      "strainThreshold": 16,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-yoda-saber",
+          "name": "Yoda's Lightsaber",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Impact",
+              "value": 2
+            },
+            {
+              "name": "Vicious",
+              "value": 3
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Republic",
+        "Force-sensitive",
+        "Light Side",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Commander",
+        "Jedi",
+        "Jedi Grand Master",
+        "Small"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Retaliate",
+          "value": 3
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "abilities": [
+        "Grand Master of the Force: May use 3 Force powers per activation.",
+        "Deflect: When targeted by a ranged attack, add 2 Challenge dice to defense pool. On 3+ net defense successes, reflect 3 damage back.",
+        "Ataru Mastery: Perform 2 melee attacks as a single action. After defending in melee, perform a free melee attack.",
+        "Size Matters Not: May spend 1 strain to add 1 Proficiency die to any check.",
+        "Guidance: Friendly Force-sensitive figures within Medium range may reroll 1 die on any check.",
+        "Jump: Ignore terrain height 2 when moving.",
+        "Diminutive: +1 defense die against ranged attacks."
+      ],
+      "threatCost": 16,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "saber",
+          "name": "Lightsaber",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Disarmed"
+          }
+        },
+        {
+          "id": "force-mastery",
+          "name": "Force Mastery",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "defensePoolModifier": -2,
+            "conditionInflicted": "Force Disrupted"
+          }
+        },
+        {
+          "id": "vitality",
+          "name": "Ancient Vitality",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "soakModifier": -1,
+            "conditionInflicted": "Exhausted"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 1,
+          "newAiArchetype": "melee",
+          "narrativeText": "Yoda closes his eyes. 'Strong in the Force, I still am.' Power radiates from the diminutive Jedi.",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 1,
+            "speedBonus": 1
+          }
+        },
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Yoda's movements become a blur. 'Judge me by my size, do you?'",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 2,
+            "speedBonus": 2
+          }
+        }
+      ]
+    },
+    "legion-clone-commander-rex": {
+      "id": "legion-clone-commander-rex",
+      "name": "Clone Commander Rex",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 12,
+      "strainThreshold": 10,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-rex-dual-dc17",
+          "name": "Dual DC-17 Hand Blasters",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Linked",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Republic",
+        "Clone",
+        "Trooper",
+        "Unique",
+        "Legion",
+        "Commander",
+        "501st"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 2
+        },
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "courage": 4,
+      "abilities": [
+        "Scouting Party: At deployment, Rex and up to 2 friendly Clone units may deploy up to 2 tiles ahead.",
+        "I'm No Jedi, But I Know the Force: Friendly Clone units within Short range gain +1 courage.",
+        "Tactical: Gain 1 aim token when issued an order.",
+        "Fire Support: When a friendly Clone within Short range attacks, Rex may add his dice to the attack pool.",
+        "Reliable: At start of activation, gain 1 aim token."
+      ],
+      "threatCost": 9
+    },
+    "legion-padme-amidala": {
+      "id": "legion-padme-amidala",
+      "name": "Padme Amidala",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 12,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-padme-el16hfe",
+          "name": "ELG-3A Royal Blaster",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Republic",
+        "Leader",
+        "Unique",
+        "Legion",
+        "Operative",
+        "Naboo",
+        "Senator"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "courage": 4,
+      "abilities": [
+        "Authoritative: When issuing orders, may issue 1 additional order to a non-clone unit.",
+        "Quick Thinking: Gain 1 aim and 1 dodge token when issued an order.",
+        "Nimble: After defending with a dodge token, regain that dodge token.",
+        "Sharpshooter: Reduce target's cover bonus by 1.",
+        "Secret Mission: May score secret objectives at +1 bonus progress."
+      ],
+      "threatCost": 8
+    },
+    "legion-clone-troopers": {
+      "id": "legion-clone-troopers",
+      "name": "Clone Trooper (Phase I)",
+      "side": "operative",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 0
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-clone-dc15a",
+          "name": "DC-15A Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Long",
+          "critical": 3,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Republic",
+        "Clone",
+        "Trooper",
+        "Legion",
+        "Corps",
+        "Phase I"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Fire Support: When a friendly unit at Short range attacks, this unit may contribute its dice to the attack pool (once per round).",
+        "Reliable: At start of activation, gain 1 aim token."
+      ],
+      "threatCost": 3
+    },
+    "legion-clone-troopers-phase2": {
+      "id": "legion-clone-troopers-phase2",
+      "name": "Clone Trooper (Phase II)",
+      "side": "operative",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-clone-dc15a-p2",
+          "name": "DC-15A Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Republic",
+        "Clone",
+        "Trooper",
+        "Legion",
+        "Corps",
+        "Phase II"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Fire Support: When a friendly unit at Short range attacks, this unit may contribute its dice to the attack pool (once per round).",
+        "Reliable: At start of activation, gain 1 aim token.",
+        "Improved Armor: Phase II armor grants reroll of 1 defense die."
+      ],
+      "threatCost": 3
+    },
+    "legion-arc-troopers": {
+      "id": "legion-arc-troopers",
+      "name": "ARC Trooper",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 6,
+      "strainThreshold": 6,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-arc-dual-dc17",
+          "name": "Dual DC-17 Hand Blasters",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Linked",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-arc-dc15x",
+          "name": "DC-15x Sniper Rifle",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Republic",
+        "Clone",
+        "Trooper",
+        "Elite",
+        "Legion",
+        "Special Forces",
+        "ARC"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        },
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Tactical: Gain 1 aim token when issued an order.",
+        "Marksman: May convert 1 aim token to Pierce 1.",
+        "Scout: Deploy up to 2 tiles ahead of normal deployment zone.",
+        "Fire Support: May contribute dice to a friendly clone's attack pool."
+      ],
+      "threatCost": 5
+    },
+    "legion-clone-commandos": {
+      "id": "legion-clone-commandos",
+      "name": "Clone Commando",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 7,
+      "strainThreshold": 6,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-commando-dc17m",
+          "name": "DC-17m Blaster",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-commando-dc17m-sniper",
+          "name": "DC-17m Sniper Config",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-commando-vibroblade",
+          "name": "Vibroblade",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Republic",
+        "Clone",
+        "Trooper",
+        "Elite",
+        "Legion",
+        "Special Forces",
+        "Republic Commando"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        },
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Scout: Deploy up to 2 tiles ahead of normal deployment zone.",
+        "Tactical: Gain 1 aim token when issued an order.",
+        "Scale: May climb terrain freely.",
+        "Katarn Armor: Reroll up to 2 defense dice per attack."
+      ],
+      "threatCost": 6
+    },
+    "legion-501st-clone-troopers": {
+      "id": "legion-501st-clone-troopers",
+      "name": "501st Clone Trooper",
+      "side": "operative",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-501st-dc15a",
+          "name": "DC-15A Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Republic",
+        "Clone",
+        "Trooper",
+        "Legion",
+        "Corps",
+        "501st"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Fire Support: May contribute dice to a friendly clone's attack pool.",
+        "Reliable: At start of activation, gain 1 aim token.",
+        "Aggressive Tactics: +1 damage when attacking at Short range or closer."
+      ],
+      "threatCost": 3
+    },
+    "legion-barc-speeder": {
+      "id": "legion-barc-speeder",
+      "name": "BARC Speeder",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 0,
+        "challenge": 1
+      },
+      "woundThreshold": 7,
+      "strainThreshold": 4,
+      "soak": 3,
+      "speed": 6,
+      "weapons": [
+        {
+          "weaponId": "legion-barc-laser",
+          "name": "Twin Laser Cannons",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 1
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Republic",
+        "Clone",
+        "Vehicle",
+        "Speeder",
+        "Legion",
+        "Support",
+        "Repulsor"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Cover: 1 -- Immune to Pierce while in cover.",
+        "Compulsory Move: Must move at least 1 tile per activation.",
+        "Speeder: Ignore terrain height 1 or lower.",
+        "Fire Support: May contribute dice to a friendly clone's attack pool."
+      ],
+      "threatCost": 5
+    },
+    "legion-at-te": {
+      "id": "legion-at-te",
+      "name": "AT-TE",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 2,
+        "challenge": 1
+      },
+      "woundThreshold": 18,
+      "strainThreshold": 8,
+      "soak": 7,
+      "speed": 2,
+      "weapons": [
+        {
+          "weaponId": "legion-atte-mass-driver",
+          "name": "Mass-Driver Cannon",
+          "baseDamage": 12,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 3
+            },
+            {
+              "name": "Pierce",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-atte-laser-cannons",
+          "name": "Lateral Laser Cannons",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Republic",
+        "Vehicle",
+        "Walker",
+        "Massive",
+        "Legion",
+        "Heavy",
+        "Ground Vehicle"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Arsenal 2: May use up to 2 weapons per attack action.",
+        "Weak Point: Rear -- attacks from behind ignore Armor.",
+        "Immune: Pierce.",
+        "Transport: Carry up to 2 Clone trooper units. Deploy when stopping.",
+        "Fire Support: Friendly clones within Short range may add dice to AT-TE attacks."
+      ],
+      "threatCost": 14
+    },
+    "legion-republic-at-rt": {
+      "id": "legion-republic-at-rt",
+      "name": "AT-RT (Republic)",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 8,
+      "strainThreshold": 4,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-rep-atrt-laser",
+          "name": "AT-RT Laser Cannon",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 2
+            },
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Republic",
+        "Clone",
+        "Vehicle",
+        "Walker",
+        "Legion",
+        "Support",
+        "Ground Vehicle"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Climbing Vehicle: May move up terrain of height 1.",
+        "Weak Point: Rear -- attacks from behind ignore Armor.",
+        "Fire Support: May contribute dice to a friendly clone's attack pool."
+      ],
+      "threatCost": 6
+    },
+    "legion-wookiee-chieftain": {
+      "id": "legion-wookiee-chieftain",
+      "name": "Wookiee Chieftain",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 14,
+      "strainThreshold": 8,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-chieftain-blade",
+          "name": "Chieftain's Ryyk Blade",
+          "baseDamage": 6,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Vicious",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-chieftain-bowcaster",
+          "name": "Heavy Bowcaster",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Republic",
+        "Wookiee",
+        "Unique",
+        "Legion",
+        "Commander"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Retaliate",
+          "value": 2
+        }
+      ],
+      "courage": 4,
+      "abilities": [
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Enrage: When wounded below half health, +2 to all attack pools and +1 speed.",
+        "Scale: May climb terrain freely without spending extra movement.",
+        "Wookiee Rage: Friendly Wookiee units within Short range gain +1 damage.",
+        "Indomitable: May reroll all suppression rally dice."
+      ],
+      "threatCost": 9
+    }
+  }
+}

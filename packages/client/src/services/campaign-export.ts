@@ -197,10 +197,21 @@ export async function downloadCampaignBundle(
  * (content-addressable IDs guarantee identity).
  */
 export async function importCampaignBundle(json: string): Promise<ImportResult> {
-  const bundle: CampaignExportBundle = JSON.parse(json);
+  let bundle: CampaignExportBundle;
+  try {
+    bundle = JSON.parse(json);
+  } catch (e) {
+    throw new Error(`Invalid campaign file: ${e instanceof Error ? e.message : 'JSON parse error'}`);
+  }
+  if (!bundle || typeof bundle !== 'object') {
+    throw new Error('Invalid campaign file: expected an object');
+  }
+  if (bundle.portraits && typeof bundle.portraits !== 'object') {
+    throw new Error('Invalid campaign file: portraits must be an object');
+  }
   const warnings: string[] = [];
 
-  // Validate and restore campaign state
+  // Validate and restore campaign state (loadCampaign does structural checks)
   const campaign = loadCampaign(bundle);
 
   // Import portraits

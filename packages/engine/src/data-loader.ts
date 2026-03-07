@@ -40,7 +40,7 @@ type DieDefinition = Record<string, unknown>;
  * Note: This function is designed for Node.js file system access
  */
 /** @deprecated Use loadGameDataV2 instead */
-export async function loadGameData(basePath: string): Promise<Record<string, unknown>> {
+export async function loadGameData(basePath: string): Promise<GameData> {
   // Dynamic import of fs to support both Node.js and browser environments
   const { readFile } = await import('fs/promises');
   const { join } = await import('path');
@@ -90,7 +90,7 @@ export function loadGameDataFromObjects(data: {
   };
 
   // Build dice definitions map
-  const dice: Record<string, any> = {};
+  const dice: Record<string, D6DieDefinition> = {};
   if (Array.isArray(data.dice)) {
     for (const die of data.dice) {
       dice[die.color] = die;
@@ -111,7 +111,7 @@ export function loadGameDataFromObjects(data: {
   }
 
   // Build equipment map
-  const equipment: Record<string, any> = {};
+  const equipment: Record<string, Record<string, unknown>> = {};
   if (Array.isArray(data.equipment)) {
     for (const item of data.equipment) {
       equipment[item.id] = item;
@@ -124,8 +124,8 @@ export function loadGameDataFromObjects(data: {
   const factions: Record<string, FactionDefinition> = {};
   if (data.factions) {
     const factionList = Array.isArray(data.factions) ? data.factions : Object.values(data.factions);
-    for (const faction of factionList as any[]) {
-      if (faction.id) factions[faction.id] = faction as FactionDefinition;
+    for (const faction of factionList as FactionDefinition[]) {
+      if (faction.id) factions[faction.id] = faction;
     }
   }
 
@@ -136,7 +136,7 @@ export function loadGameDataFromObjects(data: {
     tacticCards,
     equipment,
     factions: Object.keys(factions).length > 0 ? factions : undefined,
-  } as any;
+  } as unknown as GameData; // Deprecated v1 loader populates partial GameData
 }
 
 /**

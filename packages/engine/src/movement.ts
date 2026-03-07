@@ -276,6 +276,17 @@ export function moveFigure(
   // Update figure position to the end of the path
   const newPosition = path[path.length - 1];
 
+  // Bounds check: reject moves to coordinates outside the map
+  const { width, height } = gameState.map;
+  if (
+    newPosition.x < 0 || newPosition.x >= width ||
+    newPosition.y < 0 || newPosition.y >= height ||
+    figure.position.x < 0 || figure.position.x >= width ||
+    figure.position.y < 0 || figure.position.y >= height
+  ) {
+    return gameState;
+  }
+
   // Create updated figures array
   const updatedFigures = gameState.figures.map((f) =>
     f.id === figure.id

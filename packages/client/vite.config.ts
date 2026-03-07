@@ -34,6 +34,9 @@ export default defineConfig(({ command }) => {
       host: true,
       port: 5173,
     },
+    build: {
+      sourcemap: false,
+    },
     resolve: {
       alias: {
         '@engine': path.resolve(__dirname, '../engine/src'),
