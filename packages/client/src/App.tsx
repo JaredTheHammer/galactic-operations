@@ -32,6 +32,7 @@ import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
 import { SectorMap } from './components/Campaign/SectorMap'
 import MissionBriefing from './components/Campaign/MissionBriefing'
 import { ActTransition } from './components/Campaign/ActTransition'
+import { CampaignOverworld } from './components/Campaign/CampaignOverworld'
 import { FloatingCombatTextOverlay } from './components/HUD/FloatingCombatText'
 const CampaignJournal = React.lazy(() => import('./components/Campaign/CampaignJournal'))
 const CampaignStats = React.lazy(() => import('./components/Campaign/CampaignStats'))
@@ -104,7 +105,11 @@ function App() {
     showMapEditor,
     showCombatArena,
     showActTransition,
+    showCampaignOverworld,
     campaignState,
+    overworldDef,
+    closeCampaignOverworld,
+    travelToSector,
     showStrategicCommand,
   } = useGameStore()
 
@@ -123,6 +128,7 @@ function App() {
   // Keyboard shortcuts for tactical combat (disabled on non-combat screens and mobile)
   const inTacticalCombat = !!gameState && isInitialized && !isAIBattle && !showSetup && !showHeroCreation
     && !showMissionSelect && !showPostMission && !showSocialPhase && !showHeroProgression
+    && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition && !showCampaignOverworld && !showStrategicCommand
     && !showPortraitManager && !showSectorMap && !showCombatArena && !showMissionBriefing && !showActTransition
     && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition && !showStrategicCommand
   useCombatKeys(inTacticalCombat && !isMobile)
@@ -163,6 +169,18 @@ function App() {
   // Campaign: mission briefing (shown before combat begins)
   if (showMissionBriefing) {
     return <><AudioControls /><MissionBriefing /></>
+  }
+
+  // Campaign: overworld map screen
+  if (showCampaignOverworld && campaignState && overworldDef) {
+    return (
+      <><AudioControls /><CampaignOverworld
+        campaign={campaignState}
+        overworldDef={overworldDef}
+        onTravelToSector={(sectorId) => { travelToSector(sectorId); closeCampaignOverworld() }}
+        onClose={closeCampaignOverworld}
+      /></>
+    )
   }
 
   // Campaign: mission select screen

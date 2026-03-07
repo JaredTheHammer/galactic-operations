@@ -141,7 +141,7 @@ function makeHeroCharacter(overrides: Partial<HeroCharacter> = {}): HeroCharacte
     wounds: { current: 0, threshold: 12 },
     strain: { current: 0, threshold: 12 },
     soak: 3,
-    equipment: { weapons: ['blaster-rifle'], armor: null, gear: [] },
+    equipment: { primaryWeapon: 'blaster-rifle', secondaryWeapon: null, armor: null, gear: [] },
     xp: { total: 0, available: 0 },
     ...overrides,
   } as any;

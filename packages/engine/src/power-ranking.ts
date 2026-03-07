@@ -414,7 +414,7 @@ function runDuel(
 
         const actionDescs: string[] = [];
         for (const action of decision.actions) {
-          actionDescs.push(`${action.type}${action.payload?.targetId ? ' -> ' + action.payload.targetId : ''}`);
+          actionDescs.push(`${action.type}${(action.payload as Record<string, unknown>)?.targetId ? ' -> ' + (action.payload as Record<string, unknown>).targetId : ''}`);
           gs = executeActionV2(gs, action, gameData);
         }
 

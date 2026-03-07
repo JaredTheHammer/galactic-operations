@@ -20,18 +20,11 @@ export type {
   AttackPool,
   DefensePool,
   YahtzeeCombo,
-  RollFn,
   // Units and Figures
   Side,
-  UnitTier,
-  SurgeAbility,
-  UnitDefinition,
-  StatusEffect,
   Figure,
   // Weapons and Equipment
   WeaponType,
-  Weapon,
-  Equipment,
   // Tactic Cards
   TacticCardTiming,
   TacticCardEffectType,
@@ -46,10 +39,6 @@ export type {
   // Turn and Actions
   TurnPhase,
   ActionType,
-  MoveActionPayload,
-  AttackActionPayload,
-  RestActionPayload,
-  OverwatchActionPayload,
   GameAction,
   ActionLog,
   // Players
@@ -87,6 +76,8 @@ export type {
   ExposureStatus,
   CampaignEpilogue,
   CampaignEpilogueTier,
+  // v1 Legacy types
+  V1_UnitDefinition,
 } from './types.js';
 
 // Re-export rebellion mechanics helpers from types
@@ -94,7 +85,10 @@ export {
   getExposureStatus,
   getActOutcomeTier,
   createActProgress,
-  // Dune-inspired mechanics types
+} from './types.js';
+
+// Dune-inspired mechanics types
+export type {
   ContractTier,
   ContractConditionType,
   ContractCondition,
@@ -436,3 +430,96 @@ export type {
   EnemyDistance,
   DamageEntry,
 } from './ai/index.js';
+
+// Re-export critical injury system
+export {
+  MAX_CRITICAL_INJURIES,
+  FORCED_REST_THRESHOLD,
+  SEVERITY_ROLL_RANGES,
+  rollCriticalInjuryD66,
+  getCriticalInjuryForRoll,
+  applyCriticalInjury,
+  removeCriticalInjury,
+  removeCriticalInjuryById,
+  getCriticalInjuryCharacteristicPenalties,
+  getCriticalInjuryWoundPenalty,
+  getCriticalInjuryStrainPenalty,
+  getCriticalInjurySpeedPenalty,
+  getCriticalInjurySoakPenalty,
+  getCriticalInjurySkillPenalties,
+  isHeroForcedToRest,
+  getHeroCriticalInjuryStatus,
+  attemptTreatment,
+  professionalTreatment,
+  processNaturalRecovery,
+} from './critical-injuries.js';
+
+// Re-export sector control system
+export {
+  initializeOverworld,
+  modifySectorControl,
+  computePostMissionControlChanges,
+  applyControlEscalation,
+  addSectorMutation,
+  getSectorMissionEffects,
+  getSectorThreatBonus,
+  getSectorShopMultiplier,
+  getSectorSocialDifficultyMod,
+  findSectorForMission,
+  moveToSector,
+  getOverworldSummary,
+} from './sector-control.js';
+
+// Re-export legacy event system
+export {
+  initializeLegacyDeck,
+  evaluateTrigger,
+  evaluateAllTriggers,
+  checkForTriggeredEvents,
+  applyLegacyEffect,
+  resolveEvent,
+  processLegacyEvents,
+  acknowledgePendingEvents,
+  isRuleChangeActive,
+} from './legacy-events.js';
+export type { LegacyEventContext } from './legacy-events.js';
+
+// Re-export momentum system
+export {
+  updateMomentum,
+  getMomentumEffects,
+  applyMomentumCredits,
+  getMomentumThreatAdjustment,
+  getMomentumTacticCardBonus,
+  getMomentumNarrative,
+  resetMomentum,
+} from './momentum.js';
+
+// Re-export campaign overworld system
+export {
+  initializeCampaignOverworld,
+  processOverworldPostMission,
+  getAvailableMissionsInSector,
+  computeEffectiveThreatWithSector,
+  getAccessibleSectors,
+  travelToSector,
+  getCampaignOverworldSummary,
+} from './campaign-overworld.js';
+
+// Re-export new types from types.ts
+export type {
+  CriticalInjurySeverity,
+  CriticalInjuryEffectType,
+  CriticalInjuryEffect,
+  CriticalInjuryDefinition,
+  ActiveCriticalInjury,
+  SectorControlLevel,
+  CampaignSector,
+  SectorMutation,
+  LegacyEventTrigger,
+  LegacyEventEffect,
+  LegacyEventDefinition,
+  LegacyDeckState,
+  CampaignOverworldDefinition,
+  CampaignOverworldState,
+} from './types.js';
