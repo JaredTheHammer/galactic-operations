@@ -290,7 +290,10 @@ export type SpeciesAbilityEffect =
   | { type: 'first_attack_bonus'; value: number }
   | { type: 'regeneration'; value: number }
   | { type: 'skill_bonus'; skills: string[]; value: number }
-  | { type: 'soak_bonus'; value: number };
+  | { type: 'soak_bonus'; value: number }
+  | { type: 'natural_weapon_damage'; value: number }
+  | { type: 'dark_vision'; value: number }
+  | { type: 'silhouette_small'; value: number };
 
 /** A single species ability (passive mechanical effect) */
 export interface SpeciesAbility {
