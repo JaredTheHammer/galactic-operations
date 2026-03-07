@@ -1203,6 +1203,18 @@ export interface CampaignState {
 
   /** Active shop discounts (percentage, from social outcomes) */
   activeDiscounts?: Record<string, number>;
+
+  /** Rival NPC state (persists across social phases) */
+  rivalState?: RivalState;
+
+  /** Active bounties carried into the next mission */
+  activeBounties?: BountyContract[];
+
+  /** Completed bounty IDs across the campaign */
+  completedBounties?: string[];
+
+  /** Bounty prep results for active bounties */
+  bountyPrepResults?: BountyPrepResult[];
 }
 
 /** Campaign save file format (serializable to JSON) */
@@ -1538,6 +1550,201 @@ export interface SocialPhaseResult {
   itemsSold: Array<{ itemId: string; revenue: number }>;
   creditsSpentOnHealing: number;
   completedAt: string;
+}
+
+// ============================================================================
+// SOCIAL PHASE EXPANSION: Time Slots, Rival, Threat Clock, Bounties
+// ============================================================================
+
+/** Rival NPC archetype determines action priority ordering */
+export type RivalArchetype = 'hunter' | 'saboteur' | 'operative';
+
+/** Rival action types (what the rival does each slot) */
+export type RivalActionType =
+  | 'claim_bounty'      // Takes a bounty before the player
+  | 'poison_contact'    // Shifts NPC disposition negative by 1 step
+  | 'buy_stock'         // Buys out a limited shop item
+  | 'gather_intel'      // Advances threat clock +1 extra
+  | 'lay_low';          // No effect (no valid targets)
+
+/** A single rival action taken during the social phase */
+export interface RivalAction {
+  type: RivalActionType;
+  targetId?: string;        // bounty ID, NPC ID, or shop item ID
+  description: string;      // Narrative text shown to player
+}
+
+/** Persistent rival NPC that competes during social phases */
+export interface RivalNPC {
+  id: string;
+  name: string;
+  description: string;
+  portraitId?: string;
+  archetype: RivalArchetype;
+  characteristics: { willpower: number; presence: number; cunning: number };
+  skills: Partial<Record<SocialSkillId | 'discipline' | 'cool', number>>;
+}
+
+/** Campaign-level rival state (persists between missions) */
+export interface RivalState {
+  rivalId: string;
+  /** Bounties the rival has claimed across the campaign */
+  claimedBounties: string[];
+  /** NPCs the rival has poisoned (tracks disposition shifts) */
+  poisonedContacts: string[];
+  /** Intel gathered (mission IDs the rival has scouted) */
+  intelGathered: string[];
+  /** Whether the rival has been defeated (Act 3 milestone) */
+  defeated: boolean;
+}
+
+/** Rival action priority lists by archetype */
+export const RIVAL_PRIORITIES: Record<RivalArchetype, RivalActionType[]> = {
+  hunter:    ['claim_bounty', 'poison_contact', 'buy_stock', 'gather_intel'],
+  saboteur:  ['poison_contact', 'gather_intel', 'buy_stock', 'claim_bounty'],
+  operative: ['gather_intel', 'claim_bounty', 'poison_contact', 'buy_stock'],
+};
+
+/** Slots available to the rival, scaling by act */
+export const RIVAL_SLOTS_BY_ACT: Record<number, number> = { 1: 2, 2: 3, 3: 4 };
+
+/** Bounty completion condition */
+export type BountyCondition = 'eliminate' | 'capture' | 'interrogate';
+
+/** Bounty difficulty tier */
+export type BountyDifficulty = 'easy' | 'moderate' | 'hard';
+
+/** A bounty contract available during the social phase */
+export interface BountyContract {
+  id: string;
+  name: string;
+  description: string;
+  targetNpcId: string;
+  targetName: string;
+  difficulty: BountyDifficulty;
+  condition: BountyCondition;
+  creditReward: number;
+  reputationReward?: { factionId: string; delta: number };
+  bonusReward?: SocialOutcome;
+  /** How much the rival wants this bounty (1-5, higher = more likely to claim) */
+  rivalPriority: number;
+}
+
+/** Bounty prep result from spending a slot to gather intel */
+export interface BountyPrepResult {
+  bountyId: string;
+  success: boolean;
+  /** If success: tactical intel about target */
+  intelRevealed?: string;
+  /** If triumph: target spawns weakened */
+  targetWeakened?: boolean;
+}
+
+/** Social phase activity types (what a slot can be spent on) */
+export type SocialActivityType =
+  | 'encounter'           // Talk to NPC
+  | 'shop'                // Browse/buy from shop
+  | 'bounty_prep'         // Gather intel on bounty target
+  | 'scout_mission'       // Recon next mission (reduce/increase clock)
+  | 'confront_rival'      // Opposed check against rival
+  | 'rest_recover';       // Heal a wounded hero
+
+/** A recorded social phase activity (slot spent) */
+export interface SocialActivity {
+  type: SocialActivityType;
+  targetId?: string;       // encounter ID, shop ID, bounty ID, etc.
+  heroId?: string;         // which hero performed the activity
+  clockTicks: number;      // how much the threat clock advanced
+  result?: string;         // narrative description of outcome
+}
+
+/** Threat clock thresholds and their effects on the next mission */
+export type ThreatClockLevel =
+  | 'caught_off_guard'   // 0-2: operatives get surprise round
+  | 'normal'             // 3-4: standard initiative
+  | 'prepared'           // 5-6: +1 enemy reinforcement group
+  | 'fortified'          // 7-8: +1 reinforcement + enemies in cover
+  | 'ambush';            // 9-10: +2 reinforcements + enemy surprise round
+
+/** Mission modifiers produced by the threat clock */
+export interface ThreatClockEffects {
+  level: ThreatClockLevel;
+  clockValue: number;
+  bonusReinforcements: number;
+  enemySurpriseRound: boolean;
+  operativeSurpriseRound: boolean;
+  enemiesStartInCover: boolean;
+}
+
+/** Threat clock tick costs per activity */
+export const ACTIVITY_CLOCK_TICKS: Record<SocialActivityType, number> = {
+  encounter: 1,
+  shop: 1,
+  bounty_prep: 1,
+  scout_mission: 1,
+  confront_rival: 2,
+  rest_recover: 2,
+};
+
+/** Time slots available per act */
+export const SLOTS_PER_ACT: Record<number, number> = { 1: 4, 2: 4, 3: 5 };
+
+/** Unified state for the expanded social phase (transient, not saved in campaign) */
+export interface SocialPhaseState {
+  /** Slots remaining */
+  slotsRemaining: number;
+  slotsTotal: number;
+
+  /** Threat clock value (0-10) */
+  threatClock: number;
+
+  /** Rival state for this phase */
+  rivalSlotsRemaining: number;
+  rivalActionsThisPhase: RivalAction[];
+
+  /** Available bounties (not yet claimed by player or rival) */
+  availableBounties: BountyContract[];
+  /** Bounties the player has accepted this phase */
+  acceptedBounties: string[];
+  /** Bounties the player has prepped (with results) */
+  preppedBounties: BountyPrepResult[];
+  /** Bounties claimed by rival this phase */
+  rivalClaimedBounties: string[];
+
+  /** Activities performed this phase (log) */
+  activities: SocialActivity[];
+
+  /** NPC disposition overrides from rival poisoning */
+  dispositionOverrides: Record<string, Disposition>;
+
+  /** Shop items bought out by rival */
+  rivalBoughtItems: string[];
+
+  /** Whether the player deployed early (forfeited remaining slots) */
+  deployedEarly: boolean;
+
+  /** Current act (for scaling) */
+  act: number;
+}
+
+/** Extended social phase result with expansion data */
+export interface ExpandedSocialPhaseResult extends SocialPhaseResult {
+  /** Slot usage summary */
+  slotsUsed: number;
+  slotsTotal: number;
+  deployedEarly: boolean;
+
+  /** Rival actions taken */
+  rivalActions: RivalAction[];
+
+  /** Threat clock final value and effects */
+  threatClockFinal: number;
+  threatClockEffects: ThreatClockEffects;
+
+  /** Bounty outcomes */
+  bountiesAccepted: string[];
+  bountiesPrepped: BountyPrepResult[];
+  bountiesClaimedByRival: string[];
 }
 
 // ============================================================================
