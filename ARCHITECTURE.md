@@ -64,13 +64,46 @@ Returns `{ winner, reason }` or null if game continues.
 4. Poison: deal strain damage
 5. Clear per-activation flags (hasActed, aimTokens decay)
 
+### Reinforcement System
+
+Two independent systems fire during the Reinforcement phase:
+
+**Threat-based purchasing** (`applyReinforcementPhase`):
+- Threat income added each round from `gameState.reinforcementPoints`
+- AI purchasing strategy has three phases based on round progress:
+  - Early (rounds 1-30%): Buy cheapest minions to establish presence
+  - Mid (30-55%): Buy mobile elites (speed >= 3), bank threat for boss
+  - Late (55%+): Deploy boss if affordable, fill with elites then minions
+- Forward deployment: spawns 1/3 of the way between deploy zone and front line (not at map edge)
+- Hard cap: max 8 active Imperial units at once
+
+**Mission-scripted waves** (`applyMissionReinforcements`):
+- Triggered by `triggerRound === gameState.roundNumber`
+- Cost 0 threat (separate from economy)
+- Can specify custom deploy zones or use forward deployment fallback
+- Tracked by wave ID to prevent re-triggering
+
+### Suppression Processing (at activation start)
+
+1. Roll 1d6 per suppression token; 4+ removes that token
+2. Disciplined X keyword: remove X additional tokens automatically
+3. Dauntless (optional): spend 1 strain to remove 1 more token
+4. Determine state: Normal (tokens < courage), Suppressed (tokens >= courage, lose Action), Panicked (tokens >= 2x courage, flee only)
+
+Hero courage = `willpower + 2` (floor 3) to prevent suppression death spiral.
+
 ### Non-obvious Behaviors
 
 - `resetForActivation()` resets `actionsRemaining=1, maneuversRemaining=1` per figure
-- Reinforcements use TWO systems: threat-based purchasing AND mission-scripted waves
+- Bleeding/Burning deal 1 wound at activation start, AFTER species regeneration is applied
+- Standby triggers AFTER movement is committed (cannot prevent the move). Only the first eligible standby fires per move.
+- Suppression >= courage cancels standby retroactively (checked at trigger time, not setup time)
+- Relentless keyword grants a free maneuver AFTER attack, only if the figure hasn't moved yet
+- Cumbersome keyword: if figure moved this activation, Attack action is consumed with no combat
 - `computeGameScale(boardsWide)` derives round limits, threat income, and deploy depth from map size
 - Creature type detection uses `entityId.includes('droid')` heuristic (fragile)
 - No mid-activation victory check: victory is only detected between activations
+- InteractTerminal has dual cost: Action (skill check path) vs Maneuver (legacy/auto-succeed path)
 
 ---
 
