@@ -2119,6 +2119,9 @@ export interface SpiritIslandState {
   threatCadence?: ThreatCadenceState;
   elementSynergy?: ElementTracker;
   collateralDamage?: CollateralDamageState;
+}
+
+// ============================================================================
 // BOSS HIT LOCATION TYPES (Oathsworn-inspired targetable boss locations)
 // ============================================================================
 
