@@ -65,7 +65,7 @@ const COVER_OPTIONS: { value: CoverDensity; label: string }[] = [
   { value: 'heavy',    label: 'Heavy' },
 ]
 
-const SPECIES_LIST = [
+const SPECIES_LIST_FALLBACK = [
   'human', 'wookiee', 'twilek', 'rodian', 'trandoshan', 'bothan', 'duros',
 ]
 
@@ -122,6 +122,12 @@ export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatFo
 
   // Seed
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 10000))
+
+  // Species list from gameData (falls back to hardcoded list if empty)
+  const speciesList = useMemo(() => {
+    const ids = Object.keys(gameData.species ?? {})
+    return ids.length > 0 ? ids.sort() : SPECIES_LIST_FALLBACK
+  }, [gameData])
 
   // NPC profiles
   const npcList = useMemo(() => {
@@ -254,7 +260,7 @@ export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatFo
   const handleRandomize = () => {
     const randomCount = () => Math.floor(Math.random() * 3) + 1
     const randomNpc = () => npcList[Math.floor(Math.random() * npcList.length)]
-    const randomSpecies = () => SPECIES_LIST[Math.floor(Math.random() * SPECIES_LIST.length)]
+    const randomSpecies = () => speciesList[Math.floor(Math.random() * speciesList.length)]
     const randomCareer = () => Object.keys(CAREER_SPECS)[Math.floor(Math.random() * Object.keys(CAREER_SPECS).length)]
     const randomWeapon = () => weaponList[Math.floor(Math.random() * weaponList.length)]
     const randomArmor = () => armorList[Math.floor(Math.random() * armorList.length)]
@@ -343,7 +349,7 @@ export function CombatForceBuilder({ gameData, onStartCombat, onBack }: CombatFo
         <div style={styles.heroFields}>
           <select style={styles.heroSelect} value={hero.species}
             onChange={e => updateHero(which, hero.id, 'species', e.target.value)}>
-            {SPECIES_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+            {speciesList.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
           <select style={styles.heroSelect} value={hero.career}
             onChange={e => updateHero(which, hero.id, 'career', e.target.value)}>
