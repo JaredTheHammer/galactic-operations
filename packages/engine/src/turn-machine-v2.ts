@@ -1399,6 +1399,78 @@ function getStandbyWeaponRange(
  * - Maneuvers (Move, TakeCover, StandUp, DrawHolster, Interact, AimManeuver) consume maneuversRemaining
  * - StrainForManeuver: special, consumes 2 strain to grant +1 maneuver
  */
+/**
+ * Validate a game action before execution.
+ * Returns true if the action is structurally valid and the acting figure
+ * has the required resources (actions/maneuvers) to perform it.
+ */
+export function validateGameAction(
+  action: GameAction,
+  gameState: GameState,
+  gameData: GameData,
+): { valid: boolean; reason?: string } {
+  if (!action || typeof action !== 'object' || !action.type || !action.figureId) {
+    return { valid: false, reason: 'Malformed action: missing type or figureId' };
+  }
+
+  const figure = gameState.figures.find(f => f.id === action.figureId);
+  if (!figure) {
+    return { valid: false, reason: `Figure '${action.figureId}' not found` };
+  }
+  if (figure.isDefeated) {
+    return { valid: false, reason: `Figure '${action.figureId}' is defeated` };
+  }
+
+  // Actions that consume actionsRemaining
+  const actionTypes = ['Attack', 'Aim', 'Dodge', 'Rally', 'GuardedStance', 'UseSkill', 'UseTalent', 'UseConsumable'];
+  // Maneuvers that consume maneuversRemaining
+  const maneuverTypes = ['Move', 'TakeCover', 'StandUp', 'DrawHolster', 'Interact', 'CollectLoot', 'InteractTerminal', 'AimManeuver'];
+  // Free actions (no cost)
+  const freeTypes = ['StrainForManeuver', 'SpendFocusToken', 'SpendFocus', 'RevealExploration', 'SpendCommandToken'];
+
+  if (actionTypes.includes(action.type) && figure.actionsRemaining < 1) {
+    return { valid: false, reason: `Figure '${action.figureId}' has no actions remaining for ${action.type}` };
+  }
+  if (maneuverTypes.includes(action.type) && figure.maneuversRemaining < 1) {
+    return { valid: false, reason: `Figure '${action.figureId}' has no maneuvers remaining for ${action.type}` };
+  }
+
+  // Validate references in payload
+  if (action.type === 'Attack') {
+    const { targetId, weaponId } = action.payload;
+    if (!gameState.figures.find(f => f.id === targetId)) {
+      return { valid: false, reason: `Attack target '${targetId}' not found` };
+    }
+    if (weaponId && gameData.weapons && !gameData.weapons[weaponId]) {
+      // Also check NPC inline weapons
+      const npc = figure.entityType === 'npc' ? gameState.npcProfiles[figure.entityId] : null;
+      const hasNpcWeapon = npc?.weapons?.some(w => w.weaponId === weaponId);
+      if (!hasNpcWeapon) {
+        return { valid: false, reason: `Weapon '${weaponId}' not found in game data` };
+      }
+    }
+  }
+
+  if (action.type === 'Move') {
+    const { path } = action.payload;
+    if (!Array.isArray(path) || path.length === 0) {
+      return { valid: false, reason: 'Move action requires a non-empty path' };
+    }
+    const { width, height } = gameState.map;
+    for (const coord of path) {
+      if (coord.x < 0 || coord.x >= width || coord.y < 0 || coord.y >= height) {
+        return { valid: false, reason: `Move path contains out-of-bounds coordinate (${coord.x}, ${coord.y})` };
+      }
+    }
+  }
+
+  if (!actionTypes.includes(action.type) && !maneuverTypes.includes(action.type) && !freeTypes.includes(action.type)) {
+    return { valid: false, reason: `Unknown action type: ${action.type}` };
+  }
+
+  return { valid: true };
+}
+
 export function executeActionV2(
   gameState: GameState,
   action: GameAction,

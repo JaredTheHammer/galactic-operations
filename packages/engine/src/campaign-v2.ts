@@ -1180,10 +1180,47 @@ export function campaignToJSON(campaign: CampaignState): string {
 
 /**
  * Deserialize a JSON string to campaign state.
+ * Wraps JSON.parse in try-catch and validates numeric bounds.
  */
 export function campaignFromJSON(json: string): CampaignState {
-  const saveFile: CampaignSaveFile = JSON.parse(json);
-  return loadCampaign(saveFile);
+  let saveFile: CampaignSaveFile;
+  try {
+    saveFile = JSON.parse(json);
+  } catch (e) {
+    throw new Error(`Invalid campaign JSON: ${e instanceof Error ? e.message : 'parse error'}`);
+  }
+  if (!saveFile || typeof saveFile !== 'object') {
+    throw new Error('Invalid campaign JSON: expected an object');
+  }
+  const campaign = loadCampaign(saveFile);
+  validateCampaignBounds(campaign);
+  return campaign;
+}
+
+/**
+ * Validate that numeric fields in a deserialized campaign are within sane bounds.
+ */
+function validateCampaignBounds(c: CampaignState): void {
+  if (typeof c.credits === 'number' && (c.credits < 0 || c.credits > 1_000_000)) {
+    throw new Error('Invalid campaign data: credits out of range');
+  }
+  if (typeof c.currentAct === 'number' && (c.currentAct < 1 || c.currentAct > 10)) {
+    throw new Error('Invalid campaign data: currentAct out of range');
+  }
+  if (c.heroes && typeof c.heroes === 'object') {
+    for (const [heroId, hero] of Object.entries(c.heroes)) {
+      if (!hero || typeof hero !== 'object') {
+        throw new Error(`Invalid campaign data: hero '${heroId}' is not an object`);
+      }
+      const h = hero as Record<string, unknown>;
+      if (typeof h.woundsCurrent === 'number' && h.woundsCurrent < 0) {
+        throw new Error(`Invalid campaign data: hero '${heroId}' has negative wounds`);
+      }
+      if (typeof h.strainCurrent === 'number' && h.strainCurrent < 0) {
+        throw new Error(`Invalid campaign data: hero '${heroId}' has negative strain`);
+      }
+    }
+  }
 }
 
 // ============================================================================
