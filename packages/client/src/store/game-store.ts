@@ -515,6 +515,11 @@ export interface GameStore {
   // Camera control: set to pan the tactical grid camera to a grid position
   cameraTarget: GridCoordinate | null
 
+  // Boss hit location targeting: pending attack awaiting location selection
+  pendingBossAttack: { targetId: string } | null
+  confirmBossAttack: (targetLocationId?: string) => void
+  cancelBossAttack: () => void
+
   // Actions
   initGame: (players: Player[], mapConfig?: MapConfig) => void
   startHeroCreation: (players: Player[], mapConfig?: MapConfig) => void
@@ -524,6 +529,7 @@ export interface GameStore {
   selectFigure: (figureId: string | null) => void
   moveFigure: (destination: GridCoordinate) => void
   startAttack: (targetId: string) => void
+  _executeAttack: (targetId: string, targetLocationId?: string) => void
   rallyFigure: () => void
   aimFigure: () => void
   dodgeFigure: () => void
@@ -675,6 +681,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // Imperial AI state (campaign combat)
   imperialAIPhase: null,
+
+  // Boss hit location targeting
+  pendingBossAttack: null,
 
   // Camera control
   cameraTarget: null,
@@ -1082,7 +1091,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
+  confirmBossAttack: (targetLocationId?: string) => {
+    const { pendingBossAttack } = get()
+    if (!pendingBossAttack) return
+
+    const targetId = pendingBossAttack.targetId
+    set({ pendingBossAttack: null })
+
+    // Re-enter startAttack with the location selected (bypass boss check via internal helper)
+    const store = get()
+    store._executeAttack(targetId, targetLocationId)
+  },
+
+  cancelBossAttack: () => {
+    set({ pendingBossAttack: null })
+  },
+
   startAttack: (targetId: string) => {
+    const { gameState } = get()
+    if (!gameState) return
+
+    // Check if target is a boss with active hit locations
+    const defender = gameState.figures.find(f => f.id === targetId)
+    if (defender?.hitLocations?.some(loc => !loc.isDisabled)) {
+      // Show location picker instead of attacking immediately
+      set({ pendingBossAttack: { targetId } })
+      return
+    }
+
+    get()._executeAttack(targetId)
+  },
+
+  _executeAttack: (targetId: string, targetLocationId?: string) => {
     const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
 
@@ -1097,7 +1137,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const attackAction = {
         type: 'Attack' as const,
         figureId: selectedFigureId,
-        payload: { targetId, weaponId },
+        payload: { targetId, weaponId, ...(targetLocationId ? { targetLocationId } : {}) },
       }
       const newGameState = executeActionV2(gameState, attackAction, gameData)
       set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
@@ -2464,6 +2504,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       activeMission: null,
       triggeredWaveIds: [],
       imperialAIPhase: null,
+      pendingBossAttack: null,
       cameraTarget: null,
       showSetup: true,
       gameState: null,

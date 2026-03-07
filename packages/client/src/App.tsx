@@ -103,6 +103,9 @@ function App() {
     showMapEditor,
     showCombatArena,
     showActTransition,
+    pendingBossAttack,
+    confirmBossAttack,
+    cancelBossAttack,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -395,10 +398,20 @@ function App() {
         <InfoPanel selectedFigure={selectedFigure} gameState={gameState} />
       )}
 
-      {/* Top Right (below InfoPanel): Boss Hit Locations (shown when selecting a boss) */}
-      {selectedFigure && (
-        <BossHitLocations figure={selectedFigure} />
-      )}
+      {/* Top Right (below InfoPanel): Boss Hit Locations (shown when selecting a boss or targeting) */}
+      {(selectedFigure || pendingBossAttack) && (() => {
+        const bossFigure = pendingBossAttack
+          ? gameState.figures.find(f => f.id === pendingBossAttack.targetId) ?? null
+          : selectedFigure
+        return bossFigure?.hitLocations?.length ? (
+          <BossHitLocations
+            figure={bossFigure}
+            targeting={!!pendingBossAttack}
+            onSelectLocation={confirmBossAttack}
+            onCancelTargeting={cancelBossAttack}
+          />
+        ) : null
+      })()}
 
       {/* Bottom Center (above Action Buttons): Focus Bar (shown for activating hero) */}
       {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
