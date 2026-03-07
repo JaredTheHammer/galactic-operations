@@ -25,6 +25,7 @@ The codebase has a **strong overall security posture** for a client-side game ap
 - `action.figureId` is checked for existence (line 1407-1408, returns early if not found), but action payloads (`path`, `targetIds`, `weaponId`) are used without verifying they reference valid game entities
 - Move action `path` coordinates are not bounds-checked against map dimensions
 - `targetIds` and `weaponId` are not verified to exist in `gameData` before use
+- No validation that the acting figure has sufficient `actionsRemaining` or `maneuversRemaining` before consuming them
 
 **Risk:** If the multiplayer server is implemented, a malicious client could send crafted actions with invalid IDs or out-of-bounds coordinates. Currently mitigated by the single-player/AI-only architecture.
 
@@ -35,6 +36,36 @@ function validateGameAction(action: GameAction, state: GameState, data: GameData
   // Verify targetIds reference existing figures
   // Verify weaponId exists in gameData
   // Verify move path coordinates are within map bounds
+  // Verify figure has sufficient actions/maneuvers remaining
+}
+```
+
+---
+
+### MEDIUM-1a: Unchecked Array Access on Move Coordinates
+
+**Severity:** Medium
+**Location:** `packages/engine/src/movement.ts:297-310`
+**Category:** Input Validation / DoS
+
+The `moveFigure()` function accesses map tiles directly using path coordinates without bounds checking:
+
+```typescript
+// Line 297 -- no bounds check
+const oldTile = updatedMap.tiles[figure.position.y][figure.position.x];
+// Line 306 -- no bounds check
+const newTile = updatedMap.tiles[newPosition.y][newPosition.x];
+```
+
+If coordinates are negative or exceed map dimensions, this produces `TypeError: Cannot read properties of undefined`. Notably, `hasLineOfSight()` in `los.ts:83` does perform bounds checking, but `moveFigure()` does not.
+
+**Risk:** Crafted move actions with out-of-bounds coordinates crash the game engine. In a multiplayer context, a malicious client could use this for denial of service.
+
+**Remediation:**
+```typescript
+if (newPosition.x < 0 || newPosition.x >= updatedMap.width ||
+    newPosition.y < 0 || newPosition.y >= updatedMap.height) {
+  return gameState; // reject invalid move
 }
 ```
 
@@ -166,6 +197,7 @@ The MapEditor import and campaign import both parse JSON and perform basic struc
 | ID | Severity | Category | Status |
 |----|----------|----------|--------|
 | MEDIUM-1 | Medium | Input Validation | Open -- mitigated by single-player architecture |
+| MEDIUM-1a | Medium | Input Validation / DoS | Open -- unchecked array access in moveFigure() |
 | MEDIUM-2 | Medium | Input Validation | Open -- affects campaign import |
 | MEDIUM-3 | Medium | Auth Boundaries | Open -- future risk when multiplayer is implemented |
 | LOW-1 | Low | Info Disclosure | Open |
