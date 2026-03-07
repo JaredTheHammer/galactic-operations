@@ -37,7 +37,7 @@ function useTutorialWatcher() {
     // Figure selected
     if (selectedFigureId && selectedFigureId !== prevSelectedRef.current) {
       const fig = gameState.figures.find(f => f.id === selectedFigureId)
-      if (fig && fig.player === 1) { // Operative figure selected
+      if (fig && fig.playerId === 1) { // Operative figure selected
         notifyEvent('figure-selected')
       }
     }
@@ -45,7 +45,7 @@ function useTutorialWatcher() {
 
     // Figure moved (detect position changes for operative figures)
     const opPositions = gameState.figures
-      .filter(f => f.player === 1)
+      .filter(f => f.playerId === 1)
       .map(f => `${f.id}:${f.position.x},${f.position.y}`)
       .join('|')
     if (prevFigurePositionsRef.current && opPositions !== prevFigurePositionsRef.current) {

@@ -20,23 +20,18 @@ export type {
   AttackPool,
   DefensePool,
   YahtzeeCombo,
-  RollFn,
   // Units and Figures
   Side,
-  UnitTier,
-  SurgeAbility,
-  UnitDefinition,
-  StatusEffect,
   Figure,
   // Weapons and Equipment
   WeaponType,
-  Weapon,
-  Equipment,
   // Tactic Cards
   TacticCardTiming,
   TacticCardEffectType,
   TacticCardEffect,
   TacticCard,
+  TacticCardAltMode,
+  TacticCardAltModeType,
   // Combat
   CombatState,
   CombatResolution,
@@ -44,10 +39,7 @@ export type {
   // Turn and Actions
   TurnPhase,
   ActionType,
-  MoveActionPayload,
-  AttackActionPayload,
-  RestActionPayload,
-  OverwatchActionPayload,
+  AttackPayload,
   GameAction,
   ActionLog,
   // Players
@@ -70,6 +62,25 @@ export type {
   // Species Abilities
   SpeciesAbilityEffect,
   SpeciesAbility,
+  // Fog of War
+  TileVisibility,
+  FogOfWarState,
+  // Boss Hit Location Types
+  BossHitLocationDef,
+  BossHitLocationState,
+  BossPhaseTransition,
+  // Focus Resource Types
+  FocusConfig,
+  FocusEffect,
+  SpendFocusPayload,
+  // Supply Network
+  SupplyNodeType,
+  SupplyNode,
+  SupplyRoute,
+  SupplyNetwork,
+  SectorLocation,
+  SectorMapDefinition,
+  SupplyNodeBonus,
   // Rebellion Mechanics
   ActProgress,
   ActOutcome,
@@ -77,6 +88,8 @@ export type {
   ExposureStatus,
   CampaignEpilogue,
   CampaignEpilogueTier,
+  // v1 Legacy types
+  V1_UnitDefinition,
 } from './types.js';
 
 // Re-export rebellion mechanics helpers from types
@@ -84,7 +97,10 @@ export {
   getExposureStatus,
   getActOutcomeTier,
   createActProgress,
-  // Dune-inspired mechanics types
+} from './types.js';
+
+// Dune-inspired mechanics types
+export type {
   ContractTier,
   ContractConditionType,
   ContractCondition,
@@ -195,6 +211,7 @@ export {
   getSuppressionState,
   getNPCCourage,
   getHeroCourage,
+  getFigureSpeed,
 } from './turn-machine-v2.js';
 export type { ArmyCompositionV2, SuppressionState } from './turn-machine-v2.js';
 
@@ -221,10 +238,24 @@ export {
   npcHasKeyword,
   getNPCKeywordValue,
   applyArmorKeyword,
+  applyRetaliateKeyword,
   applyDisciplinedBonus,
   findGuardians,
   applyGuardianTransfer,
 } from './keywords.js';
+
+// Re-export fog of war system
+export {
+  createFogOfWarState,
+  getTileVisibility,
+  isFigureVisible,
+  computeVisibleTiles,
+  computeVisibleTilesWithRoomReveal,
+  updateFogOfWar,
+  updateFogAfterMove,
+  serializeFogOfWar,
+  deserializeFogOfWar,
+} from './fog-of-war.js';
 
 // Re-export AI system
 export {
@@ -239,6 +270,7 @@ export {
   calculateThreatLevel,
   evaluateCondition,
   getEnemies,
+  getVisibleEnemies,
   getAllies,
   getFigureSide,
   getValidTargetsV2,
@@ -269,6 +301,43 @@ export {
   runCombatBatch,
 } from './ai/index.js';
 
+// Re-export supply network system (Brass: Birmingham-inspired)
+export {
+  createSupplyNetwork,
+  initializeNetwork,
+  canBuildNode,
+  buildNode,
+  getActiveNodes,
+  getConnectedLocations,
+  getNetworkUnlockedMissions,
+  getNetworkAvailableGear,
+  getNetworkThreatReduction,
+  getNetworkReinforcementBonus,
+  getNetworkBonuses,
+  applyNetworkUpkeep,
+  severNodesAtLocation,
+  repairNode,
+  getNetworkFilteredMissions,
+  getNetworkSummary,
+  NODE_BUILD_COSTS,
+  NODE_UPKEEP_COSTS,
+  NODE_INCOME,
+  SAFEHOUSE_THREAT_REDUCTION,
+  MAX_REINFORCEMENT_BONUS,
+} from './supply-network.js';
+
+// Re-export dual-use tactic card functions
+export {
+  hasAltMode,
+  getAltModeCards,
+  playCardAltMode,
+  aiShouldUseAltMode,
+} from './tactic-cards.js';
+
+export type {
+  AltModeResult,
+} from './tactic-cards.js';
+
 // Re-export power ranking system
 export {
   computeAnalyticalRating,
@@ -288,6 +357,131 @@ export type {
   BalanceFlag,
 } from './power-ranking.js';
 
+// Re-export Spirit Island subsystems
+export {
+  initializeSpiritIsland,
+  hasAnySubsystem,
+  getEnabledSubsystems,
+} from './spirit-island.js';
+
+export {
+  initializeDisruptionTrack,
+  computeTerrorLevel,
+  addDisruption,
+  getActiveVictoryConditions,
+  didTerrorLevelIncrease,
+  applyDisruptionEvent,
+} from './disruption-track.js';
+
+export {
+  initializeDualTiming,
+  getSlowBonus,
+  queueSlowAction,
+  cancelSlowActionsForFigure,
+  getPendingSlowActions,
+  clearSlowQueue,
+  canBeSlowed,
+  applySlowAction,
+  resolveSlowPhase,
+} from './dual-timing.js';
+
+export {
+  initializeThreatCadence,
+  getPhaseForRound,
+  getCycleCount,
+  advanceThreatCadence,
+  disruptCurrentPhase,
+  getActiveEffects as getThreatCadenceEffects,
+  addScoutedZones,
+  addFortification,
+  getNextPhase,
+  getThreatIncomeMultiplier,
+  applyThreatCadenceRound,
+  getFortificationBonus,
+} from './threat-cadence.js';
+
+export {
+  initializeElementTracker,
+  addElementForAction,
+  addElement,
+  meetsThresholds,
+  checkInnatePowers,
+  getActiveEffects as getElementSynergyEffects,
+  mergeEffects,
+  getHeroElementCounts,
+  applyElementGeneration,
+  ALL_ELEMENTS,
+  DEFAULT_INNATE_POWERS,
+} from './element-synergy.js';
+
+export {
+  initializeCollateralDamage,
+  getTileCollateral,
+  applyCollateralToTile,
+  getCollateralForQuality,
+  applyWeaponCollateral,
+  getTilesAtLevel,
+  getTerrainModification,
+  applyCollateralToGameState,
+  getXPMultiplier,
+  getCollateralSummary,
+} from './collateral-damage.js';
+
+export type {
+  OptionalSubsystems,
+  SpiritIslandState,
+  TerrorLevel,
+  TieredVictoryCondition,
+  DisruptionTrackState,
+  DisruptionEvent,
+  ActionTiming,
+  QueuedSlowAction,
+  SlowBonus,
+  DualTimingState,
+  ThreatCadencePhase,
+  ThreatCadenceState,
+  ThreatCadenceEffect,
+  SynergyElement,
+  ElementThreshold,
+  InnatePower,
+  InnatePowerEffect,
+  ElementTracker,
+  CollateralLevel,
+  DamagedTile,
+  CollateralDamageState,
+  CollateralSource,
+} from './types.js';
+// Re-export boss mechanics (Oathsworn-inspired hit location system)
+export {
+  initBossHitLocations,
+  routeWoundsToHitLocations,
+  getBossAttackPoolPenalty,
+  getBossDefensePoolPenalty,
+  getBossSoakPenalty,
+  getBossSpeedPenalty,
+  getDisabledBossWeapons,
+  getDisabledLocationConditions,
+  applyTargetedShotPenalty,
+  applyBossAttackPenalties,
+  applyBossDefensePenalties,
+  checkBossPhaseTransition,
+  applyBossPhaseTransition,
+  isBossWeaponAvailable,
+  getBossLocationSummary,
+} from './boss-mechanics.js';
+
+// Re-export Focus resource system (Oathsworn Animus-inspired)
+export {
+  getFocusConfigForHero,
+  initFocusResource,
+  recoverFocus,
+  canSpendFocus,
+  getAvailableFocusEffects,
+  spendFocus,
+  hasFocusResource,
+  getFocusPercent,
+  getFocusEffectLabel,
+} from './focus-resource.js';
 // Re-export Dune-inspired mechanics
 
 // Contracts system
@@ -389,3 +583,96 @@ export type {
   EnemyDistance,
   DamageEntry,
 } from './ai/index.js';
+
+// Re-export critical injury system
+export {
+  MAX_CRITICAL_INJURIES,
+  FORCED_REST_THRESHOLD,
+  SEVERITY_ROLL_RANGES,
+  rollCriticalInjuryD66,
+  getCriticalInjuryForRoll,
+  applyCriticalInjury,
+  removeCriticalInjury,
+  removeCriticalInjuryById,
+  getCriticalInjuryCharacteristicPenalties,
+  getCriticalInjuryWoundPenalty,
+  getCriticalInjuryStrainPenalty,
+  getCriticalInjurySpeedPenalty,
+  getCriticalInjurySoakPenalty,
+  getCriticalInjurySkillPenalties,
+  isHeroForcedToRest,
+  getHeroCriticalInjuryStatus,
+  attemptTreatment,
+  professionalTreatment,
+  processNaturalRecovery,
+} from './critical-injuries.js';
+
+// Re-export sector control system
+export {
+  initializeOverworld,
+  modifySectorControl,
+  computePostMissionControlChanges,
+  applyControlEscalation,
+  addSectorMutation,
+  getSectorMissionEffects,
+  getSectorThreatBonus,
+  getSectorShopMultiplier,
+  getSectorSocialDifficultyMod,
+  findSectorForMission,
+  moveToSector,
+  getOverworldSummary,
+} from './sector-control.js';
+
+// Re-export legacy event system
+export {
+  initializeLegacyDeck,
+  evaluateTrigger,
+  evaluateAllTriggers,
+  checkForTriggeredEvents,
+  applyLegacyEffect,
+  resolveEvent,
+  processLegacyEvents,
+  acknowledgePendingEvents,
+  isRuleChangeActive,
+} from './legacy-events.js';
+export type { LegacyEventContext } from './legacy-events.js';
+
+// Re-export momentum system
+export {
+  updateMomentum,
+  getMomentumEffects,
+  applyMomentumCredits,
+  getMomentumThreatAdjustment,
+  getMomentumTacticCardBonus,
+  getMomentumNarrative,
+  resetMomentum,
+} from './momentum.js';
+
+// Re-export campaign overworld system
+export {
+  initializeCampaignOverworld,
+  processOverworldPostMission,
+  getAvailableMissionsInSector,
+  computeEffectiveThreatWithSector,
+  getAccessibleSectors,
+  travelToSector,
+  getCampaignOverworldSummary,
+} from './campaign-overworld.js';
+
+// Re-export new types from types.ts
+export type {
+  CriticalInjurySeverity,
+  CriticalInjuryEffectType,
+  CriticalInjuryEffect,
+  CriticalInjuryDefinition,
+  ActiveCriticalInjury,
+  SectorControlLevel,
+  CampaignSector,
+  SectorMutation,
+  LegacyEventTrigger,
+  LegacyEventEffect,
+  LegacyEventDefinition,
+  LegacyDeckState,
+  CampaignOverworldDefinition,
+  CampaignOverworldState,
+} from './types.js';

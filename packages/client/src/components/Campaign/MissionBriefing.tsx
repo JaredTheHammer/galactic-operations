@@ -271,6 +271,25 @@ export default function MissionBriefing() {
               <div style={{ fontSize: '14px', color: '#ff6644', fontWeight: 'bold' }}>{mission.imperialThreat}</div>
             </div>
           </div>
+          <div style={infoCardStyle}>
+            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Round Limit</div>
+            <div style={{ fontSize: '14px', color: '#ffd966', fontWeight: 'bold' }}>{mission.roundLimit}</div>
+          </div>
+          <div style={infoCardStyle}>
+            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Squad</div>
+            <div style={{ fontSize: '14px', color: '#ffd966', fontWeight: 'bold' }}>{heroes.length} heroes</div>
+          </div>
+          <div style={infoCardStyle}>
+            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Threat</div>
+            <div style={{ fontSize: '14px', color: '#ff6644', fontWeight: 'bold' }}>{mission.imperialThreat}</div>
+          </div>
+          {mission.fogOfWar && (
+            <div style={infoCardStyle}>
+              <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Visibility</div>
+              <div style={{ fontSize: '14px', color: '#6699cc', fontWeight: 'bold' }}>Fog of War</div>
+            </div>
+          )}
+        </div>
 
         {/* Threat Clock Effects */}
         {clockEffects && clockEffects.level !== 'normal' && (

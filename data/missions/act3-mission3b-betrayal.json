@@ -5,36 +5,78 @@
   "narrativeIntro": "The shipping manifests included personnel files that turned your stomach. Three former rebel operatives -- people who fought alongside you -- have defected to Warlord Drayen. They're training his conscript forces at a hidden jungle camp, sharing rebel tactics, codes, and safe house locations. Every day they operate, more rebel intelligence is compromised. Commander Vane wants them brought back alive for questioning if possible. But if they resist, lethal force is authorized. This one is personal.",
   "narrativeSuccess": "The camp is secured. The turncoat leader fought to the last, screaming that Drayen was 'the future' and the rebellion was 'a dying cause.' Among the captured intelligence, you find encrypted communication logs between the turncoats and Drayen's inner circle. The final piece of the puzzle: the location of Fortress Drayen and its garrison strength. It's time to finish this.",
   "narrativeFailure": "The turncoats were ready for you. Using rebel counter-intelligence tactics, they slip through your perimeter and vanish into the jungle. Their training data -- rebel codes, safe house locations, tactical doctrine -- is already in Drayen's hands. Your approach to the final confrontation just got significantly harder.",
-
   "mapId": "jungle-camp",
   "mapPreset": "skirmish",
   "boardsWide": 3,
   "boardsTall": 3,
-
   "difficulty": "hard",
   "roundLimit": 8,
   "recommendedHeroCount": 2,
-
   "imperialThreat": 10,
   "threatPerRound": 3,
-
   "operativeDeployZone": [
-    {"x": 0, "y": 16}, {"x": 1, "y": 16}, {"x": 2, "y": 16},
-    {"x": 0, "y": 17}, {"x": 1, "y": 17}, {"x": 2, "y": 17}
+    {
+      "x": 0,
+      "y": 16
+    },
+    {
+      "x": 1,
+      "y": 16
+    },
+    {
+      "x": 2,
+      "y": 16
+    },
+    {
+      "x": 0,
+      "y": 17
+    },
+    {
+      "x": 1,
+      "y": 17
+    },
+    {
+      "x": 2,
+      "y": 17
+    }
   ],
   "initialEnemies": [
     {
       "npcProfileId": "rebel-turncoat",
       "count": 2,
       "asMinGroup": false,
-      "deployZone": [{"x": 18, "y": 10}, {"x": 22, "y": 12}]
+      "deployZone": [
+        {
+          "x": 18,
+          "y": 10
+        },
+        {
+          "x": 22,
+          "y": 12
+        }
+      ]
     },
     {
       "npcProfileId": "conscript-militia",
       "count": 4,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 16, "y": 14}, {"x": 17, "y": 14}, {"x": 18, "y": 14}, {"x": 19, "y": 14}
+        {
+          "x": 16,
+          "y": 14
+        },
+        {
+          "x": 17,
+          "y": 14
+        },
+        {
+          "x": 18,
+          "y": 14
+        },
+        {
+          "x": 19,
+          "y": 14
+        }
       ]
     },
     {
@@ -42,7 +84,18 @@
       "count": 3,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 24, "y": 8}, {"x": 25, "y": 8}, {"x": 26, "y": 8}
+        {
+          "x": 24,
+          "y": 8
+        },
+        {
+          "x": 25,
+          "y": 8
+        },
+        {
+          "x": 26,
+          "y": 8
+        }
       ]
     },
     {
@@ -50,7 +103,18 @@
       "count": 3,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 20, "y": 6}, {"x": 21, "y": 6}, {"x": 22, "y": 6}
+        {
+          "x": 20,
+          "y": 6
+        },
+        {
+          "x": 21,
+          "y": 6
+        },
+        {
+          "x": 22,
+          "y": 6
+        }
       ]
     }
   ],
@@ -63,14 +127,34 @@
           "npcProfileId": "rebel-turncoat",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 34, "y": 10}]
+          "deployZone": [
+            {
+              "x": 34,
+              "y": 10
+            }
+          ]
         },
         {
           "npcProfileId": "conscript-militia",
           "count": 4,
           "asMinGroup": true,
           "deployZone": [
-            {"x": 32, "y": 10}, {"x": 33, "y": 10}, {"x": 32, "y": 11}, {"x": 33, "y": 11}
+            {
+              "x": 32,
+              "y": 10
+            },
+            {
+              "x": 33,
+              "y": 10
+            },
+            {
+              "x": 32,
+              "y": 11
+            },
+            {
+              "x": 33,
+              "y": 11
+            }
           ]
         }
       ],
@@ -85,14 +169,18 @@
           "npcProfileId": "shock-commando",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 35, "y": 16}]
+          "deployZone": [
+            {
+              "x": 35,
+              "y": 16
+            }
+          ]
         }
       ],
       "threatCost": 4,
       "narrativeText": "A Shock Commando arrives -- Drayen's personal enforcer, sent to protect the turncoats!"
     }
   ],
-
   "objectives": [
     {
       "id": "obj-eliminate",
@@ -116,7 +204,9 @@
     {
       "side": "Operative",
       "description": "Neutralize all warlord forces.",
-      "requiredObjectiveIds": ["obj-eliminate"]
+      "requiredObjectiveIds": [
+        "obj-eliminate"
+      ]
     },
     {
       "side": "Imperial",
@@ -124,11 +214,13 @@
       "requiredObjectiveIds": []
     }
   ],
-
   "objectivePoints": [
     {
       "id": "objpt-cache-1",
-      "position": {"x": 18, "y": 8},
+      "position": {
+        "x": 18,
+        "y": 8
+      },
       "type": "crate",
       "skillRequired": "computers",
       "alternateSkill": "skulduggery",
@@ -137,7 +229,10 @@
     },
     {
       "id": "objpt-cache-2",
-      "position": {"x": 26, "y": 14},
+      "position": {
+        "x": 26,
+        "y": 14
+      },
       "type": "crate",
       "skillRequired": "computers",
       "alternateSkill": "skulduggery",
@@ -145,33 +240,53 @@
       "description": "Training facility terminal -- purge the tactical data."
     }
   ],
-
   "lootTokens": [
     {
       "id": "loot-rebel-gear",
-      "position": {"x": 20, "y": 10},
-      "reward": {"type": "credits", "value": 150}
+      "position": {
+        "x": 20,
+        "y": 10
+      },
+      "reward": {
+        "type": "credits",
+        "value": 150
+      }
     },
     {
       "id": "loot-comms-log",
-      "position": {"x": 24, "y": 6},
-      "reward": {"type": "xp", "value": 5}
+      "position": {
+        "x": 24,
+        "y": 6
+      },
+      "reward": {
+        "type": "xp",
+        "value": 5
+      }
     },
     {
       "id": "loot-turncoat-weapon",
-      "position": {"x": 22, "y": 12},
-      "reward": {"type": "equipment", "itemId": "scattergun"}
+      "position": {
+        "x": 22,
+        "y": 12
+      },
+      "reward": {
+        "type": "equipment",
+        "itemId": "scattergun"
+      }
     }
   ],
-
   "campaignAct": 3,
   "missionIndex": 3,
-  "prerequisites": ["act3-m2-prototype"],
-  "unlocksNext": ["act3-m4-endgame"],
-
+  "prerequisites": [
+    "act3-m2-prototype"
+  ],
+  "unlocksNext": [
+    "act3-m4-endgame"
+  ],
   "baseXP": 16,
   "bonusXPPerLoot": 2,
   "bonusXPPerKill": 1,
   "maxKillXP": 7,
-  "leaderKillXP": 0
+  "leaderKillXP": 0,
+  "fogOfWar": false
 }

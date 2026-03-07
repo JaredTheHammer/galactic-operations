@@ -61,6 +61,8 @@ import type { CombatTalentContext } from '../talent-v2.js';
 import { RANGE_BAND_TILES } from '../types.js';
 
 import { findGuardians, hasKeyword, npcHasKeyword, getNPCKeywordValue } from '../keywords.js';
+import { isFigureVisible } from '../fog-of-war.js';
+import { isBossWeaponAvailable } from '../boss-mechanics.js';
 
 import type {
   ConditionResult,
@@ -264,7 +266,9 @@ function getPrimaryWeapon(
 
   if (isNPC(entity)) {
     if (entity.weapons.length === 0) return null;
-    const npcW = entity.weapons[0];
+    // Skip weapons disabled by boss hit locations
+    const available = entity.weapons.filter(w => isBossWeaponAvailable(figure, w.weaponId));
+    const npcW = available.length > 0 ? available[0] : entity.weapons[0];
     // Synthesize a WeaponDefinition from NPC weapon
     return {
       id: npcW.weaponId,
@@ -471,6 +475,21 @@ export function getEnemies(figure: Figure, gameState: GameState): Figure[] {
 }
 
 /**
+ * Get all living enemy figures that are currently visible to this figure's side.
+ * When fog of war is disabled, returns all enemies (same as getEnemies).
+ * AI should use this instead of getEnemies when making tactical decisions.
+ */
+export function getVisibleEnemies(figure: Figure, gameState: GameState): Figure[] {
+  const enemies = getEnemies(figure, gameState);
+  if (!gameState.fogOfWar?.enabled) return enemies;
+
+  const side = getFigureSide(figure, gameState);
+  if (!side) return [];
+
+  return enemies.filter(e => isFigureVisible(gameState.fogOfWar!, e, side));
+}
+
+/**
  * Get all living allied figures (excluding self).
  */
 export function getAllies(figure: Figure, gameState: GameState): Figure[] {
@@ -527,7 +546,7 @@ export function scoreTargets(
     ? entity.characteristics.brawn
     : 0;
 
-  const enemies = getEnemies(attacker, gameState);
+  const enemies = getVisibleEnemies(attacker, gameState);
   const scored: ScoredTarget[] = [];
 
   for (const enemy of enemies) {
@@ -586,13 +605,33 @@ export function scoreTargets(
       guardianModifier += 4;
     }
 
+    // Shield keyword: defender with Shield X is harder to damage (reduce expected value)
+    const shieldValue = hasKeyword(enemy, 'Shield', gameState) ? getNPCKeywordValue(
+      gameState.npcProfiles[enemy.entityId] as any, 'Shield') : 0;
+    const shieldPenalty = shieldValue > 0 ? -shieldValue * 1.5 : 0;
+
+    // Steadfast keyword: target immune to Stunned/Immobilized (reduces combo value)
+    const steadfastPenalty = hasKeyword(enemy, 'Steadfast', gameState) ? -2 : 0;
+
+    // Condition-based scoring: prioritize targets already debuffed
+    let conditionBonus = 0;
+    if (enemy.conditions.includes('Bleeding') || enemy.conditions.includes('Burning')) {
+      conditionBonus += 1; // DOT targets are closer to defeat
+    }
+    if (enemy.conditions.includes('Immobilized')) {
+      conditionBonus += 1.5; // easier to hit (can't reposition)
+    }
+
     // Composite score (same heuristic structure as v1)
     const score =
       killProb * weights.killPotential * 10 +
       threat * weights.threatLevel +
       (1 / Math.max(1, remaining)) * weights.killPotential * 5 +
       suppressionBonus +
-      guardianModifier -
+      guardianModifier +
+      shieldPenalty +
+      steadfastPenalty +
+      conditionBonus -
       dist * 0.5;
 
     scored.push({
@@ -710,7 +749,7 @@ export function scoreMoveDestinations(
   weights: AIWeights,
   preferCloseToTarget?: GridCoordinate,
 ): ScoredPosition[] {
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   if (enemies.length === 0) return [];
 
   const scored: ScoredPosition[] = [];
@@ -832,7 +871,7 @@ export function getValidTargetsV2(
 ): string[] {
   const weapon = getPrimaryWeapon(figure, gameState, gameData);
   const maxRange = getMaxRangeInTiles(weapon);
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
 
   return enemies
     .filter(enemy => {
@@ -936,7 +975,7 @@ function evalCanKillTarget(
     figure.actionsRemaining >= 1 && figure.maneuversRemaining >= 1;
 
   if (canMoveAndAttack) {
-    const enemies = getEnemies(figure, gameState);
+    const enemies = getVisibleEnemies(figure, gameState);
     for (const enemy of enemies) {
       const positions = findAttackPositions(figure, enemy.position, gameState, gameData);
       for (const pos of positions) {
@@ -987,7 +1026,7 @@ function evalCanAttackFromCover(
   const weapon = getPrimaryWeapon(figure, gameState, gameData);
   const maxRange = getMaxRangeInTiles(weapon);
   const validMoves = getValidMoves(figure, gameState);
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
 
   const coverPositions: Array<{ coord: GridCoordinate; targetId: string; score: number }> = [];
 
@@ -1148,7 +1187,7 @@ function evalLowHealthRetreat(
   }
 
   // Pick cover position farthest from enemies
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   const scored = coverMoves.map(coord => {
     let minEnemyDist = Infinity;
     for (const e of enemies) {
@@ -1189,7 +1228,7 @@ function evalOverwatchOpportunity(
     if (figure.aimTokens >= 1) {
       const scored = scoreTargets(figure, figure.position, gameState, gameData, weights);
       const bestExpected = scored.length > 0 ? scored[0].expectedDamage : 0;
-      const enemies = getEnemies(figure, gameState);
+      const enemies = getVisibleEnemies(figure, gameState);
       const weapon = getPrimaryWeapon(figure, gameState, gameData);
       const maxRng = weapon ? getMaxRangeInTiles(weapon) : 4;
       const nearbyEnemyCount = enemies.filter(e => getDistance(figure.position, e.position) <= maxRng + 4).length;
@@ -1217,7 +1256,7 @@ function evalOverwatchOpportunity(
   }
 
   // Check if there are enemies that could move into range (lane coverage)
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   const weapon = getPrimaryWeapon(figure, gameState, gameData);
   const maxRange = weapon ? getMaxRangeInTiles(weapon) : 4;
   const nearbyEnemies = enemies.filter(e => getDistance(figure.position, e.position) <= maxRange + 4);
@@ -1242,7 +1281,7 @@ function evalAdjacentToEnemy(
   gameData: GameData,
   weights: AIWeights,
 ): ConditionResult {
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   const adjacent = enemies.filter(e => getDistance(figure.position, e.position) <= 1);
 
   if (adjacent.length === 0) {
@@ -1479,7 +1518,7 @@ function evalCanInteractObjective(
   // already biases movement toward objectives when in "advance" mode, but
   // this condition is the primary driver for dedicated objective pursuit.
   if (best.needsMove) {
-    const enemies = getEnemies(figure, gameState);
+    const enemies = getVisibleEnemies(figure, gameState);
     const adjacentEnemies = enemies.filter(
       e => getDistance(figure.position, e.position) <= 1
     );
@@ -1540,7 +1579,7 @@ function evalShouldUseBoughtTime(
 
   // Only worthwhile if we've already used our maneuver (or will use it)
   // and need extra movement to reach enemies
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   if (enemies.length === 0) {
     return { satisfied: false, context: { reasoning: 'No enemies' } };
   }
@@ -1606,7 +1645,7 @@ function evalShouldAimBeforeAttack(
     return { satisfied: false, context: { reasoning: 'Already at max aim tokens (2)' } };
   }
 
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   if (enemies.length === 0) {
     return { satisfied: false, context: { reasoning: 'No enemies on the board' } };
   }
@@ -1722,7 +1761,7 @@ function evalShouldDodgeForDefense(
     return { satisfied: false, context: { reasoning: 'Already at max dodge tokens (1)' } };
   }
 
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   if (enemies.length === 0) {
     return { satisfied: false, context: { reasoning: 'No enemies on the board' } };
   }
@@ -1914,7 +1953,7 @@ export function getThreateningEnemies(
   gameState: GameState,
   gameData: GameData,
 ): string[] {
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   return enemies
     .filter(enemy => {
       const weapon = getPrimaryWeapon(enemy, gameState, gameData);

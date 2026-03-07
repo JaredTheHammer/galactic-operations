@@ -6,11 +6,15 @@
 import React from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import type { MissionResult, HeroCharacter } from '../../../../engine/src/types'
+import type { MissionResult, HeroCharacter, SectorMapDefinition } from '../../../../engine/src/types'
 import { getExposureStatus } from '../../../../engine/src/types'
 import { calculateMissionExposure, calculateMissionInfluence, calculateMissionControl } from '../../../../engine/src/campaign-v2'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { t } from '../../styles/theme'
+import { CriticalInjuryPanel } from './CriticalInjuryPanel'
+import { MomentumIndicator } from './MomentumIndicator'
+import { LegacyEventReveal } from './LegacyEventReveal'
+import sectorMapData from '../../../../../data/sector-map.json'
 
 const containerStyle: React.CSSProperties = {
   width: '100vw',
@@ -130,6 +134,11 @@ function HeroStatusCard({
 
 export default function PostMission() {
   const { lastMissionResult, lastBountyCompletions, returnToMissionSelect, openSocialPhase, campaignState, activeMissionDef, campaignMissions } = useGameStore()
+  const {
+    lastMissionResult, returnToMissionSelect, openSocialPhase,
+    campaignState, activeMissionDef, campaignMissions,
+    criticalInjuryDefs, legacyEventDefs, showLegacyEvents, acknowledgeLegacyEvents,
+  } = useGameStore()
   const { isMobile } = useIsMobile()
 
   if (!lastMissionResult) {
@@ -423,6 +432,18 @@ export default function PostMission() {
               ))}
             </div>
           </div>
+        {/* Critical Injuries */}
+        {campaignState && heroes.length > 0 && Object.keys(criticalInjuryDefs).length > 0 && (
+          <CriticalInjuryPanel
+            heroes={heroes}
+            injuryDefs={criticalInjuryDefs}
+            compact
+          />
+        )}
+
+        {/* Momentum */}
+        {campaignState && (
+          <MomentumIndicator campaign={campaignState} />
         )}
         {/* Rebellion Mechanics Deltas */}
         {campaignState?.actProgress && activeMissionDef && (() => {
@@ -497,6 +518,97 @@ export default function PostMission() {
           );
         })()}
 
+        {/* Supply Network Consequences */}
+        {campaignState?.supplyNetwork && (() => {
+          const sectorMap = sectorMapData as SectorMapDefinition
+          const network = campaignState.supplyNetwork!
+          const severedNodes = network.nodes.filter(n => n.severed)
+
+          // Find the mission's location to show location-specific impact
+          const missionLocation = sectorMap.locations.find(
+            loc => loc.unlocksMissions?.includes(result.missionId)
+          )
+          const locationSevered = missionLocation
+            ? severedNodes.filter(n => n.locationId === missionLocation.id)
+            : []
+
+          // Show if mission failed and nodes were severed, or if any nodes are severed
+          if (!isVictory && locationSevered.length > 0) {
+            return (
+              <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
+                <h3 style={{ ...sectionHeaderStyle, color: t.accentRed }}>
+                  Supply Network Damaged
+                </h3>
+                <div style={{
+                  backgroundColor: 'rgba(255, 68, 68, 0.05)',
+                  border: `1px solid ${t.accentRed}30`,
+                  borderLeft: `3px solid ${t.accentRed}`,
+                  borderRadius: t.radiusMd,
+                  padding: isMobile ? '10px' : '14px',
+                  fontSize: '13px',
+                  lineHeight: '1.6',
+                }}>
+                  <div style={{ color: t.textPrimary, marginBottom: '8px' }}>
+                    Imperial forces have severed your supply connections at {missionLocation?.name ?? 'the mission location'}:
+                  </div>
+                  {locationSevered.map(node => {
+                    const typeLabel = node.type === 'contact' ? 'Contact'
+                      : node.type === 'safehouse' ? 'Safehouse'
+                      : 'Supply Route'
+                    const typeColor = node.type === 'contact' ? t.accentBlue
+                      : node.type === 'safehouse' ? t.accentGreen
+                      : t.accentOrange
+                    return (
+                      <div key={node.id} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '4px 0',
+                      }}>
+                        <span style={{ color: t.accentRed, fontSize: '14px' }}>{'\u2716'}</span>
+                        <span style={{ color: typeColor, fontWeight: 'bold', fontSize: '11px', textTransform: 'uppercase' }}>
+                          {typeLabel}
+                        </span>
+                        <span style={{ color: t.textSecondary }}>
+                          {node.name} ({node.buildCost} credits to rebuild)
+                        </span>
+                      </div>
+                    )
+                  })}
+                  {network.nodes.filter(n => !n.severed).length > 0 && (
+                    <div style={{ marginTop: '8px', color: t.textMuted, fontSize: '11px', fontStyle: 'italic' }}>
+                      Remaining active nodes: {network.nodes.filter(n => !n.severed).length} / {network.nodes.length}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          }
+
+          // On victory, show network intact status if player has nodes
+          if (isVictory && network.nodes.length > 0 && severedNodes.length === 0) {
+            return (
+              <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
+                <h3 style={{ ...sectionHeaderStyle, color: t.accentGreen }}>
+                  Supply Network Intact
+                </h3>
+                <div style={{
+                  backgroundColor: 'rgba(68, 255, 68, 0.05)',
+                  border: `1px solid ${t.accentGreen}30`,
+                  borderRadius: t.radiusMd,
+                  padding: '8px 14px',
+                  fontSize: '12px',
+                  color: t.textMuted,
+                }}>
+                  All {network.nodes.length} supply nodes operational. Network income: {network.networkIncome} credits/mission.
+                </div>
+              </div>
+            )
+          }
+
+          return null
+        })()}
+
         {/* Continue button */}
         <button
           style={{
@@ -509,6 +621,15 @@ export default function PostMission() {
           {campaignState ? 'CONTINUE TO CANTINA' : 'CONTINUE TO CAMPAIGN'}
         </button>
       </div>
+
+      {/* Legacy Event Reveal overlay */}
+      {showLegacyEvents && campaignState && (
+        <LegacyEventReveal
+          campaign={campaignState}
+          eventDefs={legacyEventDefs}
+          onAcknowledge={acknowledgeLegacyEvents}
+        />
+      )}
     </div>
   )
 }
