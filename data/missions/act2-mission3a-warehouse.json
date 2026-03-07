@@ -5,22 +5,40 @@
   "narrativeIntro": "The bounty board data led you here: a sprawling warehouse complex in Nexus Station's lower levels where the Syndicate stockpiles contraband. Weapons, spice, and stolen military tech fill the corridors floor to ceiling. If you destroy the caches, you cripple The Broker's operation and cut off his supply line. The warehouse is a maze of tight corridors and stacked crates -- perfect terrain for Gamorrean ambushes. Move fast, plant charges, and get out.",
   "narrativeSuccess": "The last contraband cache detonates in a shower of sparks and shrapnel. Crates of illegal weapons and barrels of refined spice go up in a chain reaction that rattles the entire lower level. The Syndicate's supply line is severed. Among the wreckage, you recover a manifest listing shipments to 'The Broker's penthouse, Spire Level 99.' Now you know exactly where to find him.",
   "narrativeFailure": "The Syndicate reinforcements prove overwhelming, and you're forced to withdraw before the charges are set. The contraband remains intact, and The Broker's supply chain keeps flowing. The Syndicate will be better armed than ever for the confrontation ahead.",
-
   "mapId": "warehouse-interior",
   "mapPreset": "skirmish",
   "boardsWide": 3,
   "boardsTall": 3,
-
   "difficulty": "hard",
   "roundLimit": 10,
   "recommendedHeroCount": 2,
-
   "imperialThreat": 14,
   "threatPerRound": 2,
-
   "operativeDeployZone": [
-    {"x": 0, "y": 16}, {"x": 1, "y": 16}, {"x": 2, "y": 16},
-    {"x": 0, "y": 17}, {"x": 1, "y": 17}, {"x": 2, "y": 17}
+    {
+      "x": 0,
+      "y": 16
+    },
+    {
+      "x": 1,
+      "y": 16
+    },
+    {
+      "x": 2,
+      "y": 16
+    },
+    {
+      "x": 0,
+      "y": 17
+    },
+    {
+      "x": 1,
+      "y": 17
+    },
+    {
+      "x": 2,
+      "y": 17
+    }
   ],
   "initialEnemies": [
     {
@@ -28,7 +46,22 @@
       "count": 4,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 14, "y": 8}, {"x": 15, "y": 8}, {"x": 16, "y": 8}, {"x": 17, "y": 8}
+        {
+          "x": 14,
+          "y": 8
+        },
+        {
+          "x": 15,
+          "y": 8
+        },
+        {
+          "x": 16,
+          "y": 8
+        },
+        {
+          "x": 17,
+          "y": 8
+        }
       ]
     },
     {
@@ -36,20 +69,41 @@
       "count": 3,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 24, "y": 16}, {"x": 25, "y": 16}, {"x": 26, "y": 16}
+        {
+          "x": 24,
+          "y": 16
+        },
+        {
+          "x": 25,
+          "y": 16
+        },
+        {
+          "x": 26,
+          "y": 16
+        }
       ]
     },
     {
       "npcProfileId": "ig-assassin-droid",
       "count": 1,
       "asMinGroup": false,
-      "deployZone": [{"x": 30, "y": 4}]
+      "deployZone": [
+        {
+          "x": 30,
+          "y": 4
+        }
+      ]
     },
     {
       "npcProfileId": "syndicate-lieutenant",
       "count": 1,
       "asMinGroup": false,
-      "deployZone": [{"x": 18, "y": 12}]
+      "deployZone": [
+        {
+          "x": 18,
+          "y": 12
+        }
+      ]
     }
   ],
   "reinforcements": [
@@ -61,7 +115,12 @@
           "npcProfileId": "trandoshan-hunter",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 35, "y": 17}]
+          "deployZone": [
+            {
+              "x": 35,
+              "y": 17
+            }
+          ]
         }
       ],
       "threatCost": 4,
@@ -76,21 +135,32 @@
           "count": 2,
           "asMinGroup": true,
           "deployZone": [
-            {"x": 0, "y": 0}, {"x": 1, "y": 0}
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0
+            }
           ]
         },
         {
           "npcProfileId": "ig-assassin-droid",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 34, "y": 0}]
+          "deployZone": [
+            {
+              "x": 34,
+              "y": 0
+            }
+          ]
         }
       ],
       "threatCost": 5,
       "narrativeText": "Warehouse security activates a backup IG droid, and Gamorrean guards charge in from the loading bay!"
     }
   ],
-
   "objectives": [
     {
       "id": "obj-destroy-caches",
@@ -115,7 +185,9 @@
     {
       "side": "Operative",
       "description": "Destroy all 3 contraband caches.",
-      "requiredObjectiveIds": ["obj-destroy-caches"]
+      "requiredObjectiveIds": [
+        "obj-destroy-caches"
+      ]
     },
     {
       "side": "Imperial",
@@ -123,11 +195,13 @@
       "requiredObjectiveIds": []
     }
   ],
-
   "objectivePoints": [
     {
       "id": "objpt-cache-1",
-      "position": {"x": 8, "y": 8},
+      "position": {
+        "x": 8,
+        "y": 8
+      },
       "type": "crate",
       "skillRequired": "mechanics",
       "alternateSkill": "skulduggery",
@@ -136,7 +210,10 @@
     },
     {
       "id": "objpt-cache-2",
-      "position": {"x": 20, "y": 14},
+      "position": {
+        "x": 20,
+        "y": 14
+      },
       "type": "crate",
       "skillRequired": "mechanics",
       "alternateSkill": "athletics",
@@ -145,7 +222,10 @@
     },
     {
       "id": "objpt-cache-3",
-      "position": {"x": 32, "y": 8},
+      "position": {
+        "x": 32,
+        "y": 8
+      },
       "type": "crate",
       "skillRequired": "mechanics",
       "alternateSkill": "skulduggery",
@@ -153,33 +233,54 @@
       "description": "Military-grade hardware in locked containers. Requires careful charge placement."
     }
   ],
-
   "lootTokens": [
     {
       "id": "loot-weapon-crate-1",
-      "position": {"x": 14, "y": 16},
-      "reward": {"type": "equipment", "itemId": "frag-grenade"}
+      "position": {
+        "x": 14,
+        "y": 16
+      },
+      "reward": {
+        "type": "equipment",
+        "itemId": "frag-grenade"
+      }
     },
     {
       "id": "loot-weapon-crate-2",
-      "position": {"x": 28, "y": 4},
-      "reward": {"type": "equipment", "itemId": "heavy-blaster-pistol"}
+      "position": {
+        "x": 28,
+        "y": 4
+      },
+      "reward": {
+        "type": "equipment",
+        "itemId": "heavy-blaster-pistol"
+      }
     },
     {
       "id": "loot-credits",
-      "position": {"x": 18, "y": 12},
-      "reward": {"type": "credits", "value": 150}
+      "position": {
+        "x": 18,
+        "y": 12
+      },
+      "reward": {
+        "type": "credits",
+        "value": 150
+      }
     }
   ],
-
   "campaignAct": 2,
   "missionIndex": 3,
-  "prerequisites": ["act2-m2-bounty"],
-  "unlocksNext": ["act2-m4-throne"],
-
+  "prerequisites": [
+    "act2-m2-bounty"
+  ],
+  "unlocksNext": [
+    "act2-m4-throne"
+  ],
   "baseXP": 14,
   "bonusXPPerLoot": 2,
   "bonusXPPerKill": 1,
   "maxKillXP": 6,
-  "leaderKillXP": 0
+  "leaderKillXP": 0,
+  "fogOfWar": true,
+  "fogOfWarVisionRange": 8
 }

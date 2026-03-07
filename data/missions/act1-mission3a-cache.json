@@ -5,22 +5,36 @@
   "narrativeIntro": "The coordinates from the listening post data lead to a canyon depot on the desolate world of Vandor-3. Imperial supply containers are stacked in the open, guarded only by a skeleton crew. But long-range sensors show a patrol scheduled to return within the hour. Move fast, grab what you can, and get out.",
   "narrativeSuccess": "Your team loads the last crate of thermal detonators and blaster packs into the speeder. The depot is cleaned out. These weapons will arm a dozen rebel cells. As you pull away, you spot the returning patrol's dust cloud on the horizon. Perfect timing.",
   "narrativeFailure": "The patrol returns sooner than expected, cutting off your escape route. Under withering fire, you're forced to abandon the cache. The Empire now knows someone is targeting their supply lines in this sector.",
-
   "mapId": "canyon-depot",
   "mapPreset": "skirmish",
   "boardsWide": 3,
   "boardsTall": 3,
-
   "difficulty": "moderate",
   "roundLimit": 6,
   "recommendedHeroCount": 2,
-
   "imperialThreat": 12,
   "threatPerRound": 2,
-
   "operativeDeployZone": [
-    {"x": 0, "y": 8}, {"x": 0, "y": 9}, {"x": 0, "y": 10},
-    {"x": 1, "y": 8}, {"x": 1, "y": 9}
+    {
+      "x": 0,
+      "y": 8
+    },
+    {
+      "x": 0,
+      "y": 9
+    },
+    {
+      "x": 0,
+      "y": 10
+    },
+    {
+      "x": 1,
+      "y": 8
+    },
+    {
+      "x": 1,
+      "y": 9
+    }
   ],
   "initialEnemies": [
     {
@@ -28,7 +42,18 @@
       "count": 3,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 18, "y": 18}, {"x": 19, "y": 18}, {"x": 20, "y": 18}
+        {
+          "x": 18,
+          "y": 18
+        },
+        {
+          "x": 19,
+          "y": 18
+        },
+        {
+          "x": 20,
+          "y": 18
+        }
       ]
     },
     {
@@ -36,7 +61,18 @@
       "count": 3,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 18, "y": 6}, {"x": 19, "y": 6}, {"x": 20, "y": 6}
+        {
+          "x": 18,
+          "y": 6
+        },
+        {
+          "x": 19,
+          "y": 6
+        },
+        {
+          "x": 20,
+          "y": 6
+        }
       ]
     }
   ],
@@ -50,21 +86,40 @@
           "count": 4,
           "asMinGroup": true,
           "deployZone": [
-            {"x": 35, "y": 0}, {"x": 35, "y": 1}, {"x": 34, "y": 0}, {"x": 34, "y": 1}
+            {
+              "x": 35,
+              "y": 0
+            },
+            {
+              "x": 35,
+              "y": 1
+            },
+            {
+              "x": 34,
+              "y": 0
+            },
+            {
+              "x": 34,
+              "y": 1
+            }
           ]
         },
         {
           "npcProfileId": "stormtrooper-elite",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 35, "y": 2}]
+          "deployZone": [
+            {
+              "x": 35,
+              "y": 2
+            }
+          ]
         }
       ],
       "threatCost": 8,
       "narrativeText": "The Imperial patrol returns early! A full squad with an elite sergeant storms in from the east!"
     }
   ],
-
   "objectives": [
     {
       "id": "obj-collect",
@@ -89,7 +144,9 @@
     {
       "side": "Operative",
       "description": "Secure at least 3 weapons crates and have at least 1 hero standing.",
-      "requiredObjectiveIds": ["obj-collect"]
+      "requiredObjectiveIds": [
+        "obj-collect"
+      ]
     },
     {
       "side": "Imperial",
@@ -97,11 +154,13 @@
       "requiredObjectiveIds": []
     }
   ],
-
   "objectivePoints": [
     {
       "id": "objpt-cache-lock",
-      "position": {"x": 20, "y": 10},
+      "position": {
+        "x": 20,
+        "y": 10
+      },
       "type": "lock",
       "skillRequired": "skulduggery",
       "alternateSkill": "mechanics",
@@ -111,7 +170,10 @@
     },
     {
       "id": "objpt-security-grid",
-      "position": {"x": 16, "y": 16},
+      "position": {
+        "x": 16,
+        "y": 16
+      },
       "type": "console",
       "skillRequired": "computers",
       "difficulty": 2,
@@ -119,23 +181,75 @@
       "objectiveId": "obj-collect"
     }
   ],
-
   "lootTokens": [
-    {"id": "crate-1", "position": {"x": 16, "y": 12}, "reward": {"type": "xp", "value": 2}},
-    {"id": "crate-2", "position": {"x": 20, "y": 8}, "reward": {"type": "credits", "value": 75}},
-    {"id": "crate-3", "position": {"x": 24, "y": 14}, "reward": {"type": "xp", "value": 2}},
-    {"id": "crate-4", "position": {"x": 18, "y": 20}, "reward": {"type": "equipment", "itemId": "thermal-detonator"}},
-    {"id": "crate-5", "position": {"x": 28, "y": 10}, "reward": {"type": "credits", "value": 100}}
+    {
+      "id": "crate-1",
+      "position": {
+        "x": 16,
+        "y": 12
+      },
+      "reward": {
+        "type": "xp",
+        "value": 2
+      }
+    },
+    {
+      "id": "crate-2",
+      "position": {
+        "x": 20,
+        "y": 8
+      },
+      "reward": {
+        "type": "credits",
+        "value": 75
+      }
+    },
+    {
+      "id": "crate-3",
+      "position": {
+        "x": 24,
+        "y": 14
+      },
+      "reward": {
+        "type": "xp",
+        "value": 2
+      }
+    },
+    {
+      "id": "crate-4",
+      "position": {
+        "x": 18,
+        "y": 20
+      },
+      "reward": {
+        "type": "equipment",
+        "itemId": "thermal-detonator"
+      }
+    },
+    {
+      "id": "crate-5",
+      "position": {
+        "x": 28,
+        "y": 10
+      },
+      "reward": {
+        "type": "credits",
+        "value": 100
+      }
+    }
   ],
-
   "campaignAct": 1,
   "missionIndex": 3,
-  "prerequisites": ["act1-m2-intel"],
-  "unlocksNext": ["act1-m4-finale"],
-
+  "prerequisites": [
+    "act1-m2-intel"
+  ],
+  "unlocksNext": [
+    "act1-m4-finale"
+  ],
   "baseXP": 10,
   "bonusXPPerLoot": 2,
   "bonusXPPerKill": 1,
   "maxKillXP": 5,
-  "leaderKillXP": 0
+  "leaderKillXP": 0,
+  "fogOfWar": false
 }

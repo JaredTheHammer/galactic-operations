@@ -11,7 +11,12 @@
       }
     ],
     "text": "Add 1 Hit to your attack roll.",
-    "cost": 0
+    "cost": 0,
+    "altMode": {
+      "type": "movement",
+      "value": 1,
+      "text": "Steady advance: gain +1 movement this activation."
+    }
   },
   {
     "id": "brace-for-impact",
@@ -25,7 +30,12 @@
       }
     ],
     "text": "Add 1 Block to your defense roll.",
-    "cost": 0
+    "cost": 0,
+    "altMode": {
+      "type": "defense_stance",
+      "value": 1,
+      "text": "Hunker down: gain +1 Block on the next attack against this figure."
+    }
   },
   {
     "id": "lucky-break",
@@ -53,7 +63,12 @@
       }
     ],
     "text": "Reroll 1 of your defense dice.",
-    "cost": 1
+    "cost": 1,
+    "altMode": {
+      "type": "movement",
+      "value": 2,
+      "text": "Evasive sprint: gain +2 movement this activation."
+    }
   },
   {
     "id": "adrenaline-rush",
@@ -67,7 +82,12 @@
       }
     ],
     "text": "The active figure recovers 2 health.",
-    "cost": 2
+    "cost": 2,
+    "altMode": {
+      "type": "action_point",
+      "value": 1,
+      "text": "Burst of energy: gain +1 action this activation."
+    }
   },
   {
     "id": "suppressive-fire",
@@ -138,7 +158,12 @@
       }
     ],
     "text": "The active figure gains 1 bonus action point this round.",
-    "cost": 3
+    "cost": 3,
+    "altMode": {
+      "type": "strain_recovery",
+      "value": 3,
+      "text": "Catch your breath: recover 3 strain."
+    }
   },
   {
     "id": "for-the-alliance",
@@ -166,7 +191,12 @@
       }
     ],
     "text": "Recover 1 Morale point for the Operative side.",
-    "cost": 1
+    "cost": 1,
+    "altMode": {
+      "type": "strain_recovery",
+      "value": 2,
+      "text": "Rally the troops: recover 2 strain."
+    }
   },
   {
     "id": "guerrilla-tactics",
@@ -180,7 +210,12 @@
       }
     ],
     "text": "Ignore the target's cover bonus for this attack.",
-    "cost": 2
+    "cost": 2,
+    "altMode": {
+      "type": "movement",
+      "value": 3,
+      "text": "Hit and run: gain +3 movement this activation."
+    }
   },
   {
     "id": "last-stand",
@@ -209,7 +244,12 @@
       }
     ],
     "text": "Draw 2 additional Tactic Cards from the deck.",
-    "cost": 1
+    "cost": 1,
+    "altMode": {
+      "type": "draw_card",
+      "value": 2,
+      "text": "Resourceful: draw 2 tactic cards."
+    }
   },
   {
     "id": "imperial-discipline",
@@ -266,7 +306,12 @@
       }
     ],
     "text": "Move 1 friendly figure up to 2 spaces.",
-    "cost": 1
+    "cost": 1,
+    "altMode": {
+      "type": "movement",
+      "value": 2,
+      "text": "Orderly retreat: gain +2 movement this activation."
+    }
   },
   {
     "id": "reinforcement-order",
@@ -351,7 +396,12 @@
       }
     ],
     "text": "Heal an adjacent friendly figure 3 health.",
-    "cost": 2
+    "cost": 2,
+    "altMode": {
+      "type": "strain_recovery",
+      "value": 4,
+      "text": "Field triage: recover 4 strain."
+    }
   },
   {
     "id": "frag-grenade",
@@ -407,7 +457,12 @@
       }
     ],
     "text": "Move the defender 1 space after combat resolves.",
-    "cost": 0
+    "cost": 0,
+    "altMode": {
+      "type": "defense_stance",
+      "value": 2,
+      "text": "Defensive posture: gain +2 Block on the next attack against this figure."
+    }
   },
   {
     "id": "point-blank",

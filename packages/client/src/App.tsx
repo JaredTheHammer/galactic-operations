@@ -29,11 +29,14 @@ import PostMission from './components/Campaign/PostMission'
 import { SocialPhase } from './components/Campaign/SocialPhase/SocialPhase'
 import { HeroProgression } from './components/Campaign/HeroProgression/HeroProgression'
 import PortraitManagerPage from './components/Campaign/PortraitManagerPage'
+import { SectorMap } from './components/Campaign/SectorMap'
 import MissionBriefing from './components/Campaign/MissionBriefing'
 import { ActTransition } from './components/Campaign/ActTransition'
+import { CampaignOverworld } from './components/Campaign/CampaignOverworld'
 import { FloatingCombatTextOverlay } from './components/HUD/FloatingCombatText'
 const CampaignJournal = React.lazy(() => import('./components/Campaign/CampaignJournal'))
 const CampaignStats = React.lazy(() => import('./components/Campaign/CampaignStats'))
+const StrategicCommand = React.lazy(() => import('./components/Campaign/StrategicCommand/StrategicCommand'))
 import { CombatArena } from './components/CombatArena/CombatArena'
 import { useCampaignAI } from './hooks/useCampaignAI'
 import { useIsMobile } from './hooks/useIsMobile'
@@ -43,6 +46,8 @@ import { useAutoPhase } from './hooks/useAutoPhase'
 import { useAutosave } from './hooks/useAutosave'
 import { AutosaveToast } from './components/HUD/AutosaveToast'
 import { ShortcutHelp } from './components/HUD/ShortcutHelp'
+import { BossHitLocations } from './components/HUD/BossHitLocations'
+import { FocusBar } from './components/HUD/FocusBar'
 
 /** Brief victory/defeat overlay shown on the tactical grid before PostMission transition */
 const MissionOutcomeOverlay: React.FC<{ winner: string; victoryCondition?: string }> = ({ winner, victoryCondition }) => {
@@ -95,12 +100,22 @@ function App() {
     showSocialPhase,
     showHeroProgression,
     showPortraitManager,
+    showSectorMap,
     showCampaignStats,
     showMissionBriefing,
     showCampaignJournal,
     showMapEditor,
     showCombatArena,
     showActTransition,
+    pendingBossAttack,
+    confirmBossAttack,
+    cancelBossAttack,
+    showCampaignOverworld,
+    campaignState,
+    overworldDef,
+    closeCampaignOverworld,
+    travelToSector,
+    showStrategicCommand,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -118,7 +133,9 @@ function App() {
   // Keyboard shortcuts for tactical combat (disabled on non-combat screens and mobile)
   const inTacticalCombat = !!gameState && isInitialized && !isAIBattle && !showSetup && !showHeroCreation
     && !showMissionSelect && !showPostMission && !showSocialPhase && !showHeroProgression
-    && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition
+    && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition && !showCampaignOverworld && !showStrategicCommand
+    && !showPortraitManager && !showSectorMap && !showCombatArena && !showMissionBriefing && !showActTransition
+    && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition && !showStrategicCommand
   useCombatKeys(inTacticalCombat && !isMobile)
 
   // Auto-execute Imperial AI turns in campaign combat (not AI Battle mode)
@@ -159,6 +176,18 @@ function App() {
     return <><AudioControls /><MissionBriefing /></>
   }
 
+  // Campaign: overworld map screen
+  if (showCampaignOverworld && campaignState && overworldDef) {
+    return (
+      <><AudioControls /><CampaignOverworld
+        campaign={campaignState}
+        overworldDef={overworldDef}
+        onTravelToSector={(sectorId) => { travelToSector(sectorId); closeCampaignOverworld() }}
+        onClose={closeCampaignOverworld}
+      /></>
+    )
+  }
+
   // Campaign: mission select screen
   if (showMissionSelect) {
     return <><AudioControls /><MissionSelect /></>
@@ -177,6 +206,11 @@ function App() {
   // Campaign: portrait & faction visual manager
   if (showPortraitManager) {
     return <><AudioControls /><PortraitManagerPage /></>
+  }
+
+  // Campaign: interactive sector map
+  if (showSectorMap && campaignState) {
+    return <><AudioControls /><SectorMap campaign={campaignState} onClose={useGameStore.getState().closeSectorMap} /></>
   }
 
   // Campaign: mission journal (lazy-loaded)
@@ -203,6 +237,20 @@ function App() {
       }>
         <AudioControls />
         <CampaignStats />
+      </React.Suspense>
+    )
+  }
+
+  // Campaign: strategic command (contracts, intel, deck-building, research, mercenaries)
+  if (showStrategicCommand) {
+    return (
+      <React.Suspense fallback={
+        <div style={{ width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a0f' }}>
+          <div style={{ color: '#cc8800', fontSize: '16px' }}>Loading strategic command...</div>
+        </div>
+      }>
+        <AudioControls />
+        <StrategicCommand />
       </React.Suspense>
     )
   }
@@ -279,6 +327,11 @@ function App() {
           <FloatingCombatTextOverlay />
         </div>
 
+        {/* Focus Bar (shown for activating hero during player turn) */}
+        {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
+          <FocusBar figure={selectedFigure} compact />
+        )}
+
         {/* Action buttons strip (hidden during Imperial AI turns) */}
         {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
           <ActionButtons selectedFigure={selectedFigure} compact />
@@ -288,6 +341,22 @@ function App() {
         {selectedFigure && (
           <InfoPanel selectedFigure={selectedFigure} gameState={gameState} compact />
         )}
+
+        {/* Boss Hit Locations (shown when selecting a boss or targeting) */}
+        {(selectedFigure || pendingBossAttack) && (() => {
+          const bossFigure = pendingBossAttack
+            ? gameState.figures.find(f => f.id === pendingBossAttack.targetId) ?? null
+            : selectedFigure
+          return bossFigure?.hitLocations?.length ? (
+            <BossHitLocations
+              figure={bossFigure}
+              targeting={!!pendingBossAttack}
+              onSelectLocation={confirmBossAttack}
+              onCancelTargeting={cancelBossAttack}
+              compact={!pendingBossAttack}
+            />
+          ) : null
+        })()}
 
         {/* Combat log overlay */}
         <CombatLog messages={combatLog} compact visible={showCombatLog} onClose={() => setShowCombatLog(false)} />
@@ -391,6 +460,26 @@ function App() {
       {/* Top Right: Selected Figure Info */}
       {selectedFigure && (
         <InfoPanel selectedFigure={selectedFigure} gameState={gameState} />
+      )}
+
+      {/* Top Right (below InfoPanel): Boss Hit Locations (shown when selecting a boss or targeting) */}
+      {(selectedFigure || pendingBossAttack) && (() => {
+        const bossFigure = pendingBossAttack
+          ? gameState.figures.find(f => f.id === pendingBossAttack.targetId) ?? null
+          : selectedFigure
+        return bossFigure?.hitLocations?.length ? (
+          <BossHitLocations
+            figure={bossFigure}
+            targeting={!!pendingBossAttack}
+            onSelectLocation={confirmBossAttack}
+            onCancelTargeting={cancelBossAttack}
+          />
+        ) : null
+      })()}
+
+      {/* Bottom Center (above Action Buttons): Focus Bar (shown for activating hero) */}
+      {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
+        <FocusBar figure={selectedFigure} />
       )}
 
       {/* Bottom Center: Action Buttons (hidden during Imperial AI turns) */}

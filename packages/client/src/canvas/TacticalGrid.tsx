@@ -191,6 +191,7 @@ export const TacticalGrid: React.FC<TacticalGridProps> = ({ gameState }) => {
         playerMovePathCost,
         movePreviewTargets,
         threateningEnemies,
+        playerSide: 'Operative' as const,
       })
 
       animationId = requestAnimationFrame(animate)

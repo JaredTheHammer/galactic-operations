@@ -19,10 +19,12 @@ import type {
   GameData,
   GameAction,
   GridCoordinate,
+  BossHitLocationState,
 } from '../types.js';
 
 import { getPath, getValidMoves, getDistance } from '../movement.js';
 import { hasLineOfSight } from '../los.js';
+import { isBossWeaponAvailable } from '../boss-mechanics.js';
 
 import type {
   ConditionContext,
@@ -35,7 +37,7 @@ import {
   scoreMoveDestinations,
   findAttackPositions,
   findMeleePositions,
-  getEnemies,
+  getVisibleEnemies,
   getValidTargetsV2,
   getAttackPoolForFigure,
 } from './evaluate-v2.js';
@@ -57,6 +59,10 @@ function getPrimaryWeaponId(
   if (figure.entityType === 'npc') {
     const npc = gameState.npcProfiles[figure.entityId];
     if (npc && npc.weapons.length > 0) {
+      // Skip weapons disabled by boss hit locations
+      const available = npc.weapons.filter(w => isBossWeaponAvailable(figure, w.weaponId));
+      if (available.length > 0) return available[0].weaponId;
+      // All weapons disabled: fall back to first weapon (combat-v2 will handle the miss)
       return npc.weapons[0].weaponId;
     }
   } else {
@@ -66,6 +72,21 @@ function getPrimaryWeaponId(
     }
   }
   return 'unarmed'; // fallback
+}
+
+/**
+ * Build an AttackPayload with automatic boss hit location targeting.
+ */
+function buildAttackPayload(
+  figure: Figure,
+  targetId: string,
+  gameState: GameState,
+  gameData: GameData,
+): { targetId: string; weaponId: string; targetLocationId?: string } {
+  const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
+  const target = gameState.figures.find(f => f.id === targetId);
+  const targetLocationId = target ? chooseBossHitLocation(target) : undefined;
+  return { targetId, weaponId, ...(targetLocationId ? { targetLocationId } : {}) };
 }
 
 // ============================================================================
@@ -141,11 +162,57 @@ export function buildAttackAction(
 
   const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
 
+  // Boss hit location targeting: pick the best location to target
+  const target = gameState.figures.find(f => f.id === targetId);
+  const targetLocationId = target ? chooseBossHitLocation(target) : undefined;
+
   return {
     type: 'Attack',
     figureId: figure.id,
-    payload: { targetId, weaponId },
+    payload: { targetId, weaponId, ...(targetLocationId ? { targetLocationId } : {}) },
   };
+}
+
+/**
+ * Choose the best boss hit location to target.
+ *
+ * Priority:
+ * 1. Locations with weapon-disabling effects (highest impact)
+ * 2. Locations with attack reduction effects
+ * 3. Locations closest to being disabled (fewest remaining wounds)
+ * 4. Skip if all locations are already disabled
+ *
+ * Returns undefined for non-boss targets or if no locations are available.
+ */
+export function chooseBossHitLocation(target: Figure): string | undefined {
+  if (!target.hitLocations || target.hitLocations.length === 0) return undefined;
+
+  const active = target.hitLocations.filter(loc => !loc.isDisabled);
+  if (active.length === 0) return undefined;
+
+  // Score each active location
+  const scored = active.map(loc => {
+    let score = 0;
+    const remaining = loc.woundCapacity - loc.woundsCurrent;
+
+    // Bonus for locations close to being disabled (fewer remaining wounds = higher value)
+    score += 10 / Math.max(1, remaining);
+
+    // Bonus for high-impact disabled effects
+    if (loc.disabledEffects) {
+      if (loc.disabledEffects.disabledWeapons?.length) score += 8;
+      if (loc.disabledEffects.attackPoolModifier) score += 5;
+      if (loc.disabledEffects.soakModifier) score += 4;
+      if (loc.disabledEffects.defensePoolModifier) score += 3;
+      if (loc.disabledEffects.speedModifier) score += 2;
+      if (loc.disabledEffects.conditionInflicted) score += 3;
+    }
+
+    return { id: loc.id, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0].id;
 }
 
 /**
@@ -369,11 +436,10 @@ function buildAttackKillTarget(
   if (context.attackPosition) {
     const move = buildMoveAction(figure, context.attackPosition, gameState);
     if (move) {
-      const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
       const atk: GameAction = {
         type: 'Attack',
         figureId: figure.id,
-        payload: { targetId, weaponId },
+        payload: buildAttackPayload(figure, targetId, gameState, gameData),
       };
       return [move, atk];
     }
@@ -399,11 +465,10 @@ function buildMoveToCoverThenAttack(
   const move = buildMoveAction(figure, context.attackPosition, gameState);
   if (!move) return [];
 
-  const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
   const atk: GameAction = {
     type: 'Attack',
     figureId: figure.id,
-    payload: { targetId: context.targetId, weaponId },
+    payload: buildAttackPayload(figure, context.targetId, gameState, gameData),
   };
 
   return [move, atk];
@@ -447,7 +512,7 @@ function buildAdvanceWithCover(
   gameData: GameData,
   weights: AIWeights,
 ): GameAction[] {
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   if (enemies.length === 0) return [];
 
   // For heroes: check if there are uncompleted objectives to bias toward
@@ -545,11 +610,10 @@ function buildAdvanceWithCover(
 
     if (validTargetsAfterMove.length > 0) {
       // Score targets and attack the best one
-      const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
       actions.push({
         type: 'Attack',
         figureId: figure.id,
-        payload: { targetId: validTargetsAfterMove[0], weaponId },
+        payload: buildAttackPayload(figure, validTargetsAfterMove[0], gameState, gameData),
       });
     } else {
       // No enemy in range after move. Use action for something useful.
@@ -687,13 +751,12 @@ function buildMeleeCharge(
   const move = buildMoveAction(figure, meleePositions[0], gameState);
   if (!move) return [];
 
-  const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
   return [
     move,
     {
       type: 'Attack',
       figureId: figure.id,
-      payload: { targetId, weaponId },
+      payload: buildAttackPayload(figure, targetId, gameState, gameData),
     },
   ];
 }
@@ -710,7 +773,7 @@ function buildMoveTowardEnemy(
   gameData: GameData,
   _weights: AIWeights,
 ): GameAction[] {
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   if (enemies.length === 0) return [];
   if (figure.maneuversRemaining < 1) return [];
 
@@ -747,11 +810,10 @@ function buildMoveTowardEnemy(
   // After first move, check if enemy is now in attack range
   const targetsAfterMove = getValidTargetsV2(figure, bestMove, gameState, gameData);
   if (targetsAfterMove.length > 0 && figure.actionsRemaining >= 1) {
-    const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
     actions.push({
       type: 'Attack',
       figureId: figure.id,
-      payload: { targetId: targetsAfterMove[0], weaponId },
+      payload: buildAttackPayload(figure, targetsAfterMove[0], gameState, gameData),
     });
   } else if (!figure.hasUsedStrainForManeuver) {
     // No attack available: strain-for-maneuver for second move
@@ -823,7 +885,7 @@ function buildUseSecondWind(
     }
   } else if (figure.maneuversRemaining >= 1) {
     // No targets in range: move toward enemies
-    const enemies = getEnemies(figure, gameState);
+    const enemies = getVisibleEnemies(figure, gameState);
     if (enemies.length > 0) {
       let nearest = enemies[0];
       let nearestDist = Infinity;
@@ -868,7 +930,7 @@ function buildUseBoughtTimeAdvance(
 
   // After Bought Time, figure has an extra maneuver.
   // Strategy: Move (maneuver 1) + Move (maneuver 2 from Bought Time) + Attack if in range.
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   if (enemies.length === 0) return actions;
 
   let nearest = enemies[0];
@@ -913,11 +975,10 @@ function buildUseBoughtTimeAdvance(
                 figure, sorted2[0].coord, movedState, gameData,
               );
               if (targetsAfterMove2.length > 0) {
-                const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
                 actions.push({
                   type: 'Attack',
                   figureId: figure.id,
-                  payload: { targetId: targetsAfterMove2[0], weaponId },
+                  payload: buildAttackPayload(figure, targetsAfterMove2[0], gameState, gameData),
                 });
               }
             }
@@ -1010,7 +1071,7 @@ function buildAimThenAttack(
 
     if (validTargets.length === 0) {
       // No targets in range: move toward nearest enemy
-      const enemies = getEnemies(figure, gameState);
+      const enemies = getVisibleEnemies(figure, gameState);
       if (enemies.length > 0) {
         let nearest = enemies[0];
         let nearestDist = Infinity;
@@ -1084,7 +1145,7 @@ function buildDodgeAndHold(
       const validMoves = getValidMoves(figure, gameState);
       if (validMoves.length > 0) {
         // Find nearby enemies to retreat from
-        const enemies = getEnemies(figure, gameState);
+        const enemies = getVisibleEnemies(figure, gameState);
         if (enemies.length > 0) {
           let nearest = enemies[0];
           let nearestDist = Infinity;

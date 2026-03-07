@@ -296,6 +296,11 @@
                 "type": "xp",
                 "xpAmount": 2,
                 "description": "Tactical terrain knowledge gained."
+              },
+              {
+                "type": "cover_tracks",
+                "exposureDelta": -1,
+                "description": "Fenwick laid false trails during his recon, leading Drayen's scouts away from your position."
               }
             ],
             "failureOutcomes": [
@@ -337,6 +342,35 @@
         ]
       }
     ],
+    "confrontationEncounter": {
+      "id": "enc-confront-rival-act3",
+      "name": "Final Reckoning with Torrin",
+      "description": "With the final assault approaching, this is your last chance to neutralize Vex Torrin before he undermines the entire operation.",
+      "narrativeIntro": "Torrin sits alone at the edge of the resistance camp, sharpening a vibroblade. He doesn't look up as you approach. \"So. The endgame. I figured one of us would come looking for the other before this is over.\" He stands slowly, the blade catching the light. \"Let's finish this.\"",
+      "dialogueOptions": [
+        {
+          "id": "confront-coercion-3",
+          "text": "\"Drayen is going to crush you along with everyone else. I'm offering you a chance to walk away -- take it.\"",
+          "skillId": "coercion",
+          "description": "Force the rival to acknowledge the hopelessness of his position."
+        },
+        {
+          "id": "confront-charm-3",
+          "text": "\"We've been at each other's throats long enough. Fight with us against Drayen and there's a place for you after.\"",
+          "skillId": "charm",
+          "description": "Appeal to the rival's survival instinct and offer an alliance."
+        },
+        {
+          "id": "confront-deception-3",
+          "text": "\"Drayen already knows you've been playing both sides. I intercepted the kill order. You need me more than you know.\"",
+          "skillId": "deception",
+          "description": "Fabricate a threat to make the rival dependent on you."
+        }
+      ],
+      "successNarrative": "For the first time, Torrin drops his guard entirely. He sheathes the blade and nods once. \"You win. I'm done hunting your shadow.\" He disappears into the night, his rivalry finally broken.",
+      "failureNarrative": "Torrin shakes his head with something almost like pity. \"You never had what it takes.\" He disappears into the camp, no doubt already planning his next move against you.",
+      "despairNarrative": "Torrin not only rejects your approach but reveals he's been feeding information to Drayen's scouts. Your position may be compromised."
+    },
     "shops": [
       {
         "id": "shop-rook-salvage",
