@@ -29,6 +29,8 @@ import type {
 } from './types';
 
 import { applyTacticCards, aiSelectTacticCards, playCard } from './tactic-cards.js';
+import { calculateCombatFocusTokens, awardFocusTokens } from './focus-tokens.js';
+import { getEffectiveCardEffects } from './card-tags.js';
 
 import {
   buildAttackPool,
@@ -269,6 +271,8 @@ export function buildCombatPools(
     cover?: CoverType;
     elevationDiff?: number; // positive = attacker higher
     aimBonus?: number;      // number of stacked aim actions (0-2)
+    focusAttackBoost?: number;   // extra ability dice from focus token spending
+    focusDefenseBoost?: number;  // extra difficulty dice from focus token spending
     attackerConditions?: Condition[];
     defenderConditions?: Condition[];
     rangeBand?: import('./types').RangeBand;  // for talent range-conditional effects
@@ -279,6 +283,8 @@ export function buildCombatPools(
     cover = 'None',
     elevationDiff = 0,
     aimBonus = 0,
+    focusAttackBoost = 0,
+    focusDefenseBoost = 0,
     attackerConditions = attacker.conditions,
     defenderConditions = defender.conditions,
     rangeBand = 'Medium',
@@ -312,6 +318,14 @@ export function buildCombatPools(
     ...attackPool,
     ability: attackPool.ability + effectiveAim,
   };
+
+  // Apply focus token attack boost: +1 Ability die per focus spent
+  if (focusAttackBoost > 0) {
+    attackPool = {
+      ...attackPool,
+      ability: attackPool.ability + focusAttackBoost,
+    };
+  }
 
   // Graduated suppression: if suppression tokens >= courage, downgrade 1 yellow to green
   if (attacker.suppressionTokens >= attacker.courage && attacker.courage > 0) {
@@ -395,6 +409,14 @@ export function buildCombatPools(
         };
       }
     }
+  }
+
+  // Apply focus token defense boost: +1 Difficulty die per focus spent
+  if (focusDefenseBoost > 0) {
+    defensePool = {
+      ...defensePool,
+      difficulty: defensePool.difficulty + focusDefenseBoost,
+    };
   }
 
   // Passive talent defense pool modifiers (hero defenders only)
@@ -786,11 +808,27 @@ export function resolveCombatV2(
     const defenderCardIds = scenario.defenderTacticCards
       ?? aiSelectTacticCards(gameState.tacticDeck, gameData, defenderSide, 'defender', rollResult);
 
+    // Resolve cards with tag synergy effects (Ark Nova-inspired)
+    const attackerHero = attacker.entityType === 'hero' ? (gameState.heroes[attacker.entityId] ?? null) : null;
+    const defenderHero = defender.entityType === 'hero' ? (gameState.heroes[defender.entityId] ?? null) : null;
+    const attackerHand = attackerSide === 'Operative' ? gameState.tacticDeck.operativeHand : gameState.tacticDeck.imperialHand;
+    const defenderHand = defenderSide === 'Operative' ? gameState.tacticDeck.operativeHand : gameState.tacticDeck.imperialHand;
+
     const attackerCards = attackerCardIds
-      .map(id => gameData.tacticCards![id])
+      .map(id => {
+        const card = gameData.tacticCards![id];
+        if (!card) return null;
+        const effectiveEffects = getEffectiveCardEffects(card, attackerHero, attackerHand, gameData);
+        return { ...card, effects: effectiveEffects };
+      })
       .filter((c): c is TacticCard => !!c);
     const defenderCards = defenderCardIds
-      .map(id => gameData.tacticCards![id])
+      .map(id => {
+        const card = gameData.tacticCards![id];
+        if (!card) return null;
+        const effectiveEffects = getEffectiveCardEffects(card, defenderHero, defenderHand, gameData);
+        return { ...card, effects: effectiveEffects };
+      })
       .filter((c): c is TacticCard => !!c);
 
     if (attackerCards.length > 0 || defenderCards.length > 0) {
@@ -866,6 +904,12 @@ export function resolveCombatV2(
   const isNewlyWounded = reachedThreshold && defenderIsHero && !alreadyWounded;
   const isDefeated = reachedThreshold && (!defenderIsHero || alreadyWounded);
 
+  // 9. Calculate focus tokens earned from combos and crits
+  const focusTokensAwarded = calculateCombatFocusTokens({
+    rollResult,
+    criticalTriggered: spending.criticalTriggered,
+  } as CombatResolution);
+
   return {
     rollResult,
     weaponBaseDamage: poolCtx.weapon.baseDamage,
@@ -880,6 +924,7 @@ export function resolveCombatV2(
     tacticCardsPlayed: tacticCardsPlayedAll.length > 0 ? tacticCardsPlayedAll : undefined,
     tacticSuppression: tacticSuppression > 0 ? tacticSuppression : undefined,
     tacticRecover: tacticRecover > 0 ? tacticRecover : undefined,
+    focusTokensAwarded: focusTokensAwarded > 0 ? focusTokensAwarded : undefined,
     isHit: rollResult.isHit,
     isDefeated,
     isNewlyWounded,
@@ -1011,12 +1056,17 @@ export function applyCombatResult(
       };
     }
 
-    // --- ATTACKER (threat-based strain + consume aim tokens) ---
+    // --- ATTACKER (threat-based strain + consume aim tokens + award focus tokens) ---
     if (fig.id === scenario.attackerId) {
       // Consume aim tokens (effect already applied in buildCombatPools)
       let updatedFig = (fig.aimTokens ?? 0) > 0
         ? { ...fig, aimTokens: 0 }
         : fig;
+
+      // Award focus tokens from combos and crits (hero attackers only)
+      if (resolution.focusTokensAwarded && resolution.focusTokensAwarded > 0 && updatedFig.entityType === 'hero') {
+        updatedFig = awardFocusTokens(updatedFig, resolution.focusTokensAwarded);
+      }
 
       // Apply strain from net threats
       const netThreats = resolution.rollResult.netAdvantages < 0

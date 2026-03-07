@@ -31,6 +31,11 @@ import {
 } from './character-v2';
 
 import { type RollFn, defaultRollFn } from './dice-v2';
+import type { FactionDefinition } from './types';
+import {
+  modifyFactionReputation,
+  processAllFactionRewards,
+} from './faction-reputation';
 
 // ============================================================================
 // SOCIAL ENCOUNTER AVAILABILITY
@@ -256,6 +261,7 @@ export function applySocialOutcomes(
   campaign: CampaignState,
   outcomes: SocialOutcome[],
   heroId?: string,
+  factions?: Record<string, FactionDefinition>,
 ): CampaignState {
   let state = { ...campaign };
 
@@ -328,9 +334,8 @@ export function applySocialOutcomes(
 
       case 'reputation': {
         if (outcome.factionId && outcome.reputationDelta !== undefined) {
-          const reputation = { ...(state.factionReputation ?? {}) };
-          reputation[outcome.factionId] = (reputation[outcome.factionId] ?? 0) + outcome.reputationDelta;
-          state = { ...state, factionReputation: reputation };
+          const faction = factions?.[outcome.factionId];
+          state = modifyFactionReputation(state, outcome.factionId, outcome.reputationDelta, faction);
         }
         break;
       }
@@ -382,6 +387,12 @@ export function applySocialOutcomes(
         break;
       }
     }
+  }
+
+  // After all outcomes applied, check for newly crossed faction thresholds
+  if (factions) {
+    const { campaign: withRewards } = processAllFactionRewards(state, factions);
+    state = withRewards;
   }
 
   return state;

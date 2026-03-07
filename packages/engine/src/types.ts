@@ -782,6 +782,10 @@ export interface CombatResolution {
   tacticSuppression?: number;
   tacticRecover?: number;
 
+  // Focus tokens (Ark Nova X-token inspired)
+  /** Focus tokens earned by attacker from combos and crits */
+  focusTokensAwarded?: number;
+
   // Outcome
   isHit: boolean;
   isDefeated: boolean;

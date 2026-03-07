@@ -52,6 +52,12 @@ export function createCampaign(input: CampaignCreationInput): CampaignState {
     };
   }
 
+  // Initialize focus tokens for all heroes at 0
+  const focusTokens: Record<string, number> = {};
+  for (const hero of input.heroes) {
+    focusTokens[hero.id] = 0;
+  }
+
   return {
     id: `campaign-${Date.now()}`,
     name: input.name,
@@ -68,6 +74,8 @@ export function createCampaign(input: CampaignCreationInput): CampaignState {
     threatLevel: 0,
     threatMultiplier: scaling.baseMultiplier,
     missionsPlayed: 0,
+    factionReputation: {},
+    focusTokens,
   };
 }
 
@@ -233,6 +241,8 @@ export interface MissionCompletionInput {
   heroesWounded?: string[];
   leaderKilled: boolean;
   narrativeBonus?: number;
+  /** Focus tokens per hero at mission end (from Figure.focusTokens). Persisted to campaign. */
+  heroFocusTokens?: Record<string, number>;
 }
 
 /**
@@ -409,6 +419,14 @@ export function completeMission(
     }
   }
 
+  // Persist focus tokens from mission figures to campaign
+  const focusTokens = { ...(campaign.focusTokens ?? {}) };
+  if (input.heroFocusTokens) {
+    for (const [heroId, tokens] of Object.entries(input.heroFocusTokens)) {
+      focusTokens[heroId] = tokens;
+    }
+  }
+
   const newCampaign: CampaignState = {
     ...campaign,
     lastPlayedAt: new Date().toISOString(),
@@ -421,6 +439,7 @@ export function completeMission(
     currentAct,
     threatLevel: campaign.threatLevel + scaling.perMission,
     missionsPlayed: campaign.missionsPlayed + 1,
+    focusTokens,
   };
 
   return { campaign: newCampaign, result };
