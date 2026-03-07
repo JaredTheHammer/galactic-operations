@@ -9,7 +9,7 @@ import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult, ActProgress } from '../../../../engine/src/types'
 import { getExposureStatus } from '../../../../engine/src/types'
-import { getCampaignStats } from '../../../../engine/src/campaign-v2'
+import { getCampaignStats, getFinaleExposureModifiers } from '../../../../engine/src/campaign-v2'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
 import { usePortraitStore } from '../../store/portrait-store'
@@ -1254,6 +1254,40 @@ export default function MissionSelect() {
                         </div>
                       </div>
                     )}
+
+                    {/* Exposure warning for act finales */}
+                    {selectedMission.missionIndex === 4 && campaignState.actProgress && (() => {
+                      const status = getExposureStatus(campaignState.actProgress.exposure);
+                      if (status === 'ghost') return null;
+                      const mods = getFinaleExposureModifiers(campaignState.actProgress.exposure);
+                      const color = status === 'hunted' ? '#ff4444' : '#ffaa00';
+                      const icon = status === 'hunted' ? '\u26A0' : '\u26A0';
+                      const label = status === 'hunted' ? 'HUNTED' : 'DETECTED';
+                      return (
+                        <div style={{
+                          marginTop: '12px',
+                          padding: '10px 12px',
+                          backgroundColor: `${color}10`,
+                          border: `1px solid ${color}40`,
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                        }}>
+                          <div style={{ color, fontWeight: 'bold', marginBottom: '6px' }}>
+                            {icon} Imperial Alert: {label}
+                          </div>
+                          <div style={{ color: '#aaa', lineHeight: '1.5' }}>
+                            {status === 'hunted'
+                              ? 'The Empire has prepared an ambush. Expect heavy resistance.'
+                              : 'Imperial garrison is on alert. Increased patrols expected.'}
+                          </div>
+                          <div style={{ marginTop: '6px', display: 'flex', gap: '12px', color: '#999', fontSize: '11px' }}>
+                            {mods.threatBonus > 0 && <span style={{ color }}>+{mods.threatBonus} Threat</span>}
+                            {mods.roundLimitModifier < 0 && <span style={{ color }}>{mods.roundLimitModifier} Round Limit</span>}
+                            {mods.extraReinforcements > 0 && <span style={{ color }}>+{mods.extraReinforcements} Extra Wave{mods.extraReinforcements > 1 ? 's' : ''}</span>}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     <button
                       style={{
