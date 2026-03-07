@@ -17,6 +17,7 @@ import type {
   HeroCharacter,
   Figure,
   Side,
+  Player,
 } from './types.js';
 
 import { COMMAND_TOKEN_CONFIG } from './types.js';
@@ -149,7 +150,8 @@ export function validateTokenUsage(
   const figure = gameState.figures.find(f => f.id === figureId);
   if (!figure) return { valid: false, reason: 'Figure not found' };
 
-  const side = figure.side;
+  const side = getSideForFigure(figure, gameState);
+  if (!side) return { valid: false, reason: 'Cannot determine figure side' };
   if (!canSpendToken(tokens, side)) {
     return { valid: false, reason: 'No command tokens available' };
   }
@@ -161,7 +163,8 @@ export function validateTokenUsage(
       }
       const target = gameState.figures.find(f => f.id === payload.coordinateTargetId);
       if (!target) return { valid: false, reason: 'Coordinate target not found' };
-      if (target.side !== side) return { valid: false, reason: 'Cannot coordinate with enemy' };
+      const targetSide = getSideForFigure(target, gameState);
+      if (targetSide !== side) return { valid: false, reason: 'Cannot coordinate with enemy' };
       return { valid: true };
     }
     case 'bonus_maneuver':
@@ -244,4 +247,12 @@ export function applyDirectiveBonus(
       imperialTokens: state.imperialTokens + bonusTokens,
     };
   }
+}
+
+/**
+ * Derive the Side for a figure by looking up its player.
+ */
+function getSideForFigure(figure: Figure, gameState: GameState): Side | null {
+  const player = gameState.players.find((p: Player) => p.id === figure.playerId);
+  return player ? (player.role as Side) : null;
 }

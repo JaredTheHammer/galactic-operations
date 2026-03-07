@@ -54,7 +54,10 @@ function makeMinimalGameState(overrides: Partial<GameState> = {}): GameState {
     turnPhase: 'Activation' as any,
     playMode: 'grid',
     map: { id: 'test', name: 'Test', width: 12, height: 12, tiles: [], deploymentZones: { imperial: [], operative: [] } },
-    players: [],
+    players: [
+      { id: 1, name: 'Operative', role: 'Operative', isAI: false },
+      { id: 2, name: 'Imperial', role: 'Imperial', isAI: true },
+    ],
     currentPlayerIndex: 0,
     figures: [],
     activationOrder: [],
@@ -196,8 +199,8 @@ describe('Command Tokens - Validation', () => {
   it('validates coordinate usage requires target', () => {
     const gs = makeMinimalGameState({
       figures: [
-        { id: 'hero-1', side: 'Operative', position: { x: 0, y: 0 }, isActive: true } as any,
-        { id: 'hero-2', side: 'Operative', position: { x: 1, y: 0 }, isActive: true } as any,
+        { id: 'hero-1', playerId: 1, entityType: 'hero', position: { x: 0, y: 0 }, isDefeated: false } as any,
+        { id: 'hero-2', playerId: 1, entityType: 'hero', position: { x: 1, y: 0 }, isDefeated: false } as any,
       ],
     });
 
@@ -216,8 +219,8 @@ describe('Command Tokens - Validation', () => {
   it('rejects coordinate with enemy target', () => {
     const gs = makeMinimalGameState({
       figures: [
-        { id: 'hero-1', side: 'Operative', position: { x: 0, y: 0 }, isActive: true } as any,
-        { id: 'npc-1', side: 'Imperial', position: { x: 1, y: 0 }, isActive: true } as any,
+        { id: 'hero-1', playerId: 1, entityType: 'hero', position: { x: 0, y: 0 }, isDefeated: false } as any,
+        { id: 'npc-1', playerId: 2, entityType: 'npc', position: { x: 1, y: 0 }, isDefeated: false } as any,
       ],
     });
 
@@ -233,7 +236,7 @@ describe('Command Tokens - Validation', () => {
   it('validates simple usage types', () => {
     const gs = makeMinimalGameState({
       figures: [
-        { id: 'hero-1', side: 'Operative', position: { x: 0, y: 0 }, isActive: true } as any,
+        { id: 'hero-1', playerId: 1, entityType: 'hero', position: { x: 0, y: 0 }, isDefeated: false } as any,
       ],
     });
 
@@ -244,7 +247,7 @@ describe('Command Tokens - Validation', () => {
 
   it('rejects when no tokens initialized', () => {
     const gs = makeMinimalGameState({ commandTokens: undefined });
-    gs.figures = [{ id: 'hero-1', side: 'Operative', position: { x: 0, y: 0 }, isActive: true } as any];
+    gs.figures = [{ id: 'hero-1', playerId: 1, entityType: 'hero', position: { x: 0, y: 0 }, isDefeated: false } as any];
 
     const result = validateTokenUsage('bonus_maneuver', { usage: 'bonus_maneuver' }, gs, 'hero-1');
     expect(result.valid).toBe(false);

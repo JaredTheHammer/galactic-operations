@@ -123,7 +123,10 @@ function makeMinimalGameState(overrides: Partial<GameState> = {}): GameState {
     turnPhase: 'Activation' as any,
     playMode: 'grid',
     map: makeTestMap(),
-    players: [],
+    players: [
+      { id: 1, name: 'Operative', role: 'Operative', isAI: false },
+      { id: 2, name: 'Imperial', role: 'Imperial', isAI: true },
+    ],
     currentPlayerIndex: 0,
     figures: [],
     activationOrder: [],
@@ -211,7 +214,7 @@ describe('Exploration Tokens - Discovery', () => {
   it('finds revealable tokens adjacent to figure', () => {
     const gs = makeMinimalGameState({
       figures: [
-        { id: 'hero-1', side: 'Operative', position: { x: 5, y: 5 }, isActive: true } as any,
+        { id: 'hero-1', playerId: 1, entityType: 'hero', position: { x: 5, y: 5 }, isDefeated: false } as any,
       ],
       explorationTokens: [
         { id: 'tok-1', position: { x: 6, y: 5 }, tokenTypeId: 'supply-stim', isRevealed: false },
@@ -227,7 +230,7 @@ describe('Exploration Tokens - Discovery', () => {
   it('excludes already revealed tokens', () => {
     const gs = makeMinimalGameState({
       figures: [
-        { id: 'hero-1', side: 'Operative', position: { x: 5, y: 5 }, isActive: true } as any,
+        { id: 'hero-1', playerId: 1, entityType: 'hero', position: { x: 5, y: 5 }, isDefeated: false } as any,
       ],
       explorationTokens: [
         { id: 'tok-1', position: { x: 6, y: 5 }, tokenTypeId: 'supply-stim', isRevealed: true },
@@ -243,7 +246,7 @@ describe('Exploration Tokens - Discovery', () => {
   it('only operatives can explore', () => {
     const gs = makeMinimalGameState({
       figures: [
-        { id: 'npc-1', side: 'Imperial', position: { x: 5, y: 5 }, isActive: true } as any,
+        { id: 'npc-1', playerId: 2, entityType: 'npc', position: { x: 5, y: 5 }, isDefeated: false } as any,
       ],
       explorationTokens: [
         { id: 'tok-1', position: { x: 6, y: 5 }, tokenTypeId: 'supply-stim', isRevealed: false },
@@ -257,7 +260,7 @@ describe('Exploration Tokens - Discovery', () => {
   it('includes diagonally adjacent tokens', () => {
     const gs = makeMinimalGameState({
       figures: [
-        { id: 'hero-1', side: 'Operative', position: { x: 5, y: 5 }, isActive: true } as any,
+        { id: 'hero-1', playerId: 1, entityType: 'hero', position: { x: 5, y: 5 }, isDefeated: false } as any,
       ],
       explorationTokens: [
         { id: 'tok-1', position: { x: 6, y: 6 }, tokenTypeId: 'supply-stim', isRevealed: false }, // diagonal

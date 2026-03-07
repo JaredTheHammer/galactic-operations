@@ -22,6 +22,8 @@ import type {
   Figure,
   GameMap,
   Tile,
+  Side,
+  Player,
 } from './types.js';
 
 import type { RollFn } from './dice-v2.js';
@@ -146,7 +148,8 @@ export function getRevealableTokens(
 ): ExplorationToken[] {
   const figure = gameState.figures.find(f => f.id === figureId);
   if (!figure) return [];
-  if (figure.side !== 'Operative') return []; // Only Operatives explore
+  const figureSide = getSideForFigure(figure, gameState);
+  if (figureSide !== 'Operative') return []; // Only Operatives explore
 
   const tokens = gameState.explorationTokens ?? [];
   return tokens.filter(token => {
@@ -298,7 +301,7 @@ export function applyExplorationReveal(
       : t
   );
 
-  let state = { ...gameState, explorationTokens: tokens };
+  let state: GameState = { ...gameState, explorationTokens: tokens };
 
   // Apply immediate rewards
   for (const reward of result.rewards) {
@@ -340,7 +343,7 @@ export function applyExplorationReveal(
  */
 function applyHealingReward(gameState: GameState, token: ExplorationToken, healValue: number): GameState {
   // Find the closest operative figure to the token
-  const operatives = gameState.figures.filter(f => f.side === 'Operative' && f.isActive);
+  const operatives = gameState.figures.filter(f => getSideForFigure(f, gameState) === 'Operative' && !f.isDefeated);
   if (operatives.length === 0) return gameState;
 
   let closest = operatives[0];
@@ -368,7 +371,7 @@ function applyHealingReward(gameState: GameState, token: ExplorationToken, healV
  * Apply damage from a booby trap to the nearest operative figure.
  */
 function applyDamageReward(gameState: GameState, token: ExplorationToken, damage: number): GameState {
-  const operatives = gameState.figures.filter(f => f.side === 'Operative' && f.isActive);
+  const operatives = gameState.figures.filter(f => getSideForFigure(f, gameState) === 'Operative' && !f.isDefeated);
   if (operatives.length === 0) return gameState;
 
   let closest = operatives[0];
@@ -406,4 +409,12 @@ export function getCollectedRewards(gameState: GameState): ExplorationReward[] {
   return tokens
     .filter(t => t.isRevealed && t.revealResult)
     .flatMap(t => t.revealResult!.rewards);
+}
+
+/**
+ * Derive the Side for a figure by looking up its player.
+ */
+function getSideForFigure(figure: Figure, gameState: GameState): Side | null {
+  const player = gameState.players.find((p: Player) => p.id === figure.playerId);
+  return player ? (player.role as Side) : null;
 }
