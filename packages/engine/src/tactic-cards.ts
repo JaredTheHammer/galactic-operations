@@ -375,6 +375,33 @@ export function aiSelectTacticCards(
 }
 
 // ============================================================================
+// STRATEGIC CARD PLAY (War of the Ring Event Card Dual-Use)
+// ============================================================================
+
+/**
+ * Result of playing a tactic card for its strategic effect.
+ */
+export interface StrategicCardResult {
+  cardId: string;
+  effect: import('./types.js').StrategicEffect;
+  /** Updated game state delta */
+  reinforcementPointsAdded: number;
+  moraleRecovered: number;
+  cardsDrawn: number;
+  repositionFigureId: string | null;
+}
+
+/**
+ * Check if a tactic card has a strategic (non-combat) effect.
+ */
+export function hasStrategicEffect(card: TacticCard): boolean {
+  return !!card.strategicEffect;
+}
+
+/**
+ * Get cards from a side's hand that have strategic effects.
+ */
+export function getStrategicCards(
 // DUAL-USE CARD SYSTEM (Brass: Birmingham-inspired)
 // ============================================================================
 
@@ -421,6 +448,17 @@ export function getAltModeCards(
 
   return hand
     .map(id => gameData.tacticCards![id])
+    .filter((card): card is TacticCard => !!card && hasStrategicEffect(card));
+}
+
+/**
+ * Play a tactic card for its strategic effect (instead of its combat effect).
+ * The card is discarded after use. This is the dual-use mechanic from WotR:
+ * each Event card can be played for its text effect OR as a combat card, never both.
+ *
+ * Returns the strategic result and updated deck state.
+ */
+export function playStrategicCard(
     .filter((card): card is TacticCard => !!card && hasAltMode(card));
 }
 
@@ -434,6 +472,87 @@ export function playCardAltMode(
   gameData: GameData,
   side: Side,
   cardId: string,
+): { result: StrategicCardResult; deck: TacticDeckState } | null {
+  if (!gameData.tacticCards) return null;
+
+  const card = gameData.tacticCards[cardId];
+  if (!card || !card.strategicEffect) return null;
+
+  // Remove from hand
+  const updatedDeck = playCard(deck, side, cardId);
+  if (!updatedDeck) return null;
+
+  const effect = card.strategicEffect;
+  const result: StrategicCardResult = {
+    cardId,
+    effect,
+    reinforcementPointsAdded: 0,
+    moraleRecovered: 0,
+    cardsDrawn: 0,
+    repositionFigureId: null,
+  };
+
+  switch (effect.type) {
+    case 'Reinforce':
+      result.reinforcementPointsAdded = effect.value;
+      break;
+    case 'Rally':
+      result.moraleRecovered = effect.value;
+      break;
+    case 'Resupply':
+      result.cardsDrawn = effect.value;
+      break;
+    case 'Reposition':
+    case 'Intel':
+      // These require additional context (figure selection, objective info)
+      // which is handled by the caller
+      break;
+  }
+
+  return { result, deck: updatedDeck };
+}
+
+/**
+ * AI decides whether to play a card for strategic vs. tactical effect.
+ * Simple heuristic: play for strategic effect if no combat is imminent
+ * and the strategic value exceeds a threshold.
+ *
+ * WotR parallel: AI must decide if an Event card is worth more as a
+ * combat modifier or as a strategic play.
+ */
+export function aiShouldPlayStrategic(
+  card: TacticCard,
+  side: Side,
+  hasActiveCombat: boolean,
+  currentMorale: number,
+  maxMorale: number,
+): boolean {
+  if (!card.strategicEffect) return false;
+
+  // Never use strategically if in active combat and card has good combat effects
+  if (hasActiveCombat) {
+    const hasCombatValue = card.effects.some(
+      e => e.type === 'AddHit' || e.type === 'AddBlock' || e.type === 'Pierce',
+    );
+    if (hasCombatValue) return false;
+  }
+
+  // Play Rally cards strategically when morale is low
+  if (card.strategicEffect.type === 'Rally') {
+    return currentMorale < maxMorale * 0.5;
+  }
+
+  // Play Reinforce cards strategically when not in combat
+  if (card.strategicEffect.type === 'Reinforce') {
+    return !hasActiveCombat;
+  }
+
+  // Play Resupply when hand is small (< 3 cards)
+  if (card.strategicEffect.type === 'Resupply') {
+    return !hasActiveCombat;
+  }
+
+  return false;
 ): { deck: TacticDeckState; result: AltModeResult } | null {
   if (!gameData.tacticCards) return null;
 

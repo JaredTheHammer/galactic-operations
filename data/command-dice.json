@@ -1,0 +1,23 @@
+{
+  "description": "Command dice face distributions for the Action Dice Allocation system. Inspired by War of the Ring action dice.",
+  "imperial": {
+    "faces": ["Assault", "Assault", "Maneuver", "Muster", "Scheme", "Command"],
+    "baseDice": 5,
+    "maxDice": 8,
+    "notes": "Heavy military bias. No Wild face (rigid command structure). Gains dice from deploying leader NPCs."
+  },
+  "operative": {
+    "faces": ["Assault", "Maneuver", "Maneuver", "Scheme", "Command", "Wild"],
+    "baseDice": 3,
+    "maxDice": 6,
+    "notes": "Balanced with Wild face for flexibility. Fewer dice but more adaptable. Gains dice from recruiting companions."
+  },
+  "faceDescriptions": {
+    "Assault": "Activate a figure to perform an Attack action",
+    "Maneuver": "Activate a figure to Move, Take Cover, or reposition",
+    "Muster": "Spend reinforcement points to deploy NPC units",
+    "Scheme": "Play a tactic card for its strategic (non-combat) effect",
+    "Command": "Activate a leader figure for any action type",
+    "Wild": "Can be used as any face (Operative advantage)"
+  }
+}
