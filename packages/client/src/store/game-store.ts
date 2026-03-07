@@ -79,7 +79,7 @@ import {
   removeFromInventory,
 } from '@engine/campaign-v2.js'
 import type { MissionCompletionInput } from '@engine/campaign-v2.js'
-import { initializeNetwork } from '@engine/supply-network.js'
+import { initializeNetwork, applyNetworkUpkeep, getNetworkThreatReduction, severNodesAtLocation } from '@engine/supply-network.js'
 import type { SectorMapDefinition } from '@engine/types.js'
 import sectorMapData from '../../../../data/sector-map.json'
 import { combatAnimations } from '../canvas/animation-manager'
@@ -2096,6 +2096,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const mission = campaignMissions[missionId]
     if (!mission) return
 
+    // Apply supply network upkeep (collect income, deduct costs, sever unpaid nodes)
+    let updatedCampaignForMission = campaignState
+    if (campaignState.supplyNetwork) {
+      updatedCampaignForMission = applyNetworkUpkeep(campaignState)
+      set({ campaignState: updatedCampaignForMission })
+    }
+
     const gameData = loadGameDataV2()
     const mapConfig: MapConfig = {
       preset: mission.mapPreset as any,
@@ -2104,8 +2111,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
     const generatedMap = generateMap(mapConfig, BOARD_TEMPLATES)
 
-    // Prepare heroes from campaign roster
-    const heroes = prepareHeroesForMission(campaignState)
+    // Prepare heroes from campaign roster (use updated campaign with upkeep applied)
+    const heroes = prepareHeroesForMission(updatedCampaignForMission)
     const heroesRegistry: Record<string, HeroCharacter> = {}
     for (const hero of heroes) {
       heroesRegistry[hero.id] = hero
@@ -2117,6 +2124,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       { id: 1, name: 'Player', role: 'Operative', isLocal: true, isAI: false },
     ]
 
+    // Apply supply network threat reduction
+    const networkThreatReduction = updatedCampaignForMission.supplyNetwork
+      ? getNetworkThreatReduction(updatedCampaignForMission.supplyNetwork)
+      : 0
+    const effectiveThreat = Math.max(0, mission.imperialThreat - networkThreatReduction)
+    const effectiveThreatPerRound = Math.max(0, mission.threatPerRound - Math.floor(networkThreatReduction / 2))
+
     // Build a mission object compatible with createInitialGameStateV2
     const gameMission = {
       id: mission.id,
@@ -2124,8 +2138,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       description: mission.description,
       mapId: mission.mapId,
       roundLimit: mission.roundLimit,
-      imperialThreat: mission.imperialThreat,
-      imperialReinforcementPoints: mission.threatPerRound,
+      imperialThreat: effectiveThreat,
+      imperialReinforcementPoints: effectiveThreatPerRound,
       victoryConditions: mission.victoryConditions.map(vc => ({
         side: vc.side,
         description: vc.description,
@@ -2144,7 +2158,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         npcProfiles: gameData.npcProfiles,
         objectivePointTemplates: mission.objectivePoints,
         lootTokens: mission.lootTokens,
-        consumableInventory: { ...(campaignState.consumableInventory ?? {}) },
+        consumableInventory: { ...(updatedCampaignForMission.consumableInventory ?? {}) },
       },
     )
 
@@ -2204,7 +2218,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       isAIBattle: false,
       activeMissionDef: mission,
       triggeredWaveIds: [],
-      combatLog: [`Mission started: ${mission.name}`],
+      combatLog: [
+        `Mission started: ${mission.name}`,
+        ...(networkThreatReduction > 0 ? [`Supply network reduces Imperial threat by ${networkThreatReduction}`] : []),
+      ],
       gameStateHistory: [],
     })
   },
@@ -2221,9 +2238,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ? { ...campaignState, consumableInventory: { ...gameState.consumableInventory } }
       : campaignState
 
-    const previousAct = updatedCampaign.currentAct
+    // On defeat, sever supply nodes at the mission's sector location
+    let campaignForCompletion = updatedCampaign
+    if (input.outcome === 'defeat' && updatedCampaign.supplyNetwork) {
+      const sectorMap = sectorMapData as SectorMapDefinition
+      const missionId = gameState?.activeMissionId ?? input.missionId
+      // Reverse-lookup: find which sector location unlocks this mission
+      const missionLocation = sectorMap.locations.find(
+        loc => loc.unlocksMissions?.includes(missionId)
+      )
+      if (missionLocation) {
+        campaignForCompletion = severNodesAtLocation(campaignForCompletion, missionLocation.id)
+      }
+    }
+
+    const previousAct = campaignForCompletion.currentAct
     const { campaign: newCampaign, result } = completeMission(
-      updatedCampaign,
+      campaignForCompletion,
       input,
       campaignMissions,
     )

@@ -37,6 +37,7 @@ import {
   applyReinforcementPhase,
 } from '@engine/turn-machine-v2.js'
 import { getMoraleChangeForEvent, applyMoraleChange } from '@engine/morale.js'
+import { getAltModeCards, playCardAltMode, aiShouldUseAltMode } from '@engine/tactic-cards.js'
 import { BattleLogger } from '@engine/ai/battle-logger.js'
 import type { BattleLog } from '@engine/ai/battle-logger.js'
 import aiProfilesRaw from '@data/ai-profiles.json'
@@ -283,6 +284,60 @@ export function useAITurn(): UseAITurnReturn {
           }))
 
           addCombatLog(`AI [${figureName}]: ${decision.reasoning}`)
+
+          // --- ALT-MODE CARD CHECK ---
+          if (gs.tacticDeck && gameData) {
+            const figSide = gs.players.find(p => p.id === activeFig.playerId)?.role
+            const side = figSide === 'Imperial' ? 'Imperial' : 'Operative'
+            const altCards = getAltModeCards(gs.tacticDeck, gameData, side)
+            if (altCards.length > 0) {
+              const woundThreshold = getWoundThresholdV2(activeFig, gs)
+              const healthPct = woundThreshold > 0 ? 1 - (activeFig.woundsCurrent / woundThreshold) : 1
+              const strainThreshold = (activeFig as any).strainThreshold ?? 10
+              const strainPct = strainThreshold > 0 ? ((activeFig.strainCurrent ?? 0) / strainThreshold) : 0
+              const enemies = gs.figures.filter(f => !f.isDefeated && f.playerId !== activeFig.playerId)
+              let minDist = Infinity
+              for (const enemy of enemies) {
+                const d = Math.abs(enemy.position.x - activeFig.position.x) + Math.abs(enemy.position.y - activeFig.position.y)
+                if (d < minDist) minDist = d
+              }
+              const hand = side === 'Imperial' ? gs.tacticDeck.imperialHand : gs.tacticDeck.operativeHand
+              const context = {
+                figureHealthPercent: healthPct,
+                figureStrainPercent: strainPct,
+                distanceToNearestEnemy: minDist === Infinity ? 20 : minDist,
+                handSize: hand.length,
+                hasAttackedThisActivation: false,
+              }
+              for (const card of altCards) {
+                if (aiShouldUseAltMode(card, context)) {
+                  const altResult = playCardAltMode(gs.tacticDeck, gameData, side, card.id)
+                  if (altResult) {
+                    const figures = [...gs.figures]
+                    const figIdx = figures.findIndex(f => f.id === activeFig.id)
+                    if (figIdx >= 0) {
+                      const updFig = { ...figures[figIdx] }
+                      if (altResult.result.movementBonus > 0) {
+                        updFig.maneuversRemaining = Math.min(2, (updFig.maneuversRemaining ?? 0) + 1) as 0 | 1 | 2
+                      }
+                      if (altResult.result.actionPointBonus > 0) {
+                        updFig.actionsRemaining = Math.min(2, (updFig.actionsRemaining ?? 0) + 1) as 0 | 1
+                      }
+                      if (altResult.result.strainRecovery > 0) {
+                        updFig.strainCurrent = Math.max(0, (updFig.strainCurrent ?? 0) - altResult.result.strainRecovery)
+                      }
+                      figures[figIdx] = updFig
+                    }
+                    gs = { ...gs, tacticDeck: altResult.deck, figures }
+                    useGameStore.setState({ gameState: gs })
+                    const modeLabel = altResult.result.altMode.type.replace(/_/g, ' ')
+                    addCombatLog(`  AI plays ${altResult.result.cardName} alt mode: ${modeLabel} +${altResult.result.altMode.value}`)
+                    break
+                  }
+                }
+              }
+            }
+          }
 
           // --- EXECUTING ---
           const woundsBefore = new Map(gs.figures.map(f => [f.id, f.woundsCurrent]))
