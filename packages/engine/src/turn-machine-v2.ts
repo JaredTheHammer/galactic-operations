@@ -103,6 +103,8 @@ export function createInitialGameStateV2(
     lootTokens?: LootToken[];
     /** Consumable inventory from campaign state. Maps item ID to quantity. */
     consumableInventory?: Record<string, number>;
+    /** Spirit Island optional subsystem configuration */
+    spiritIsland?: import('./types.js').SpiritIslandState;
   },
 ): GameState {
   let map: GameMap;
@@ -183,6 +185,9 @@ export function createInitialGameStateV2(
 
     // Consumable inventory (initialized from campaign state or empty for standalone)
     consumableInventory: options?.consumableInventory ?? {},
+
+    // Spirit Island optional subsystems (all toggleable, disabled by default)
+    spiritIsland: options?.spiritIsland,
   };
 }
 

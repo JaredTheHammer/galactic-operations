@@ -339,6 +339,100 @@ export type {
   BalanceFlag,
 } from './power-ranking.js';
 
+// Re-export Spirit Island subsystems
+export {
+  initializeSpiritIsland,
+  hasAnySubsystem,
+  getEnabledSubsystems,
+} from './spirit-island.js';
+
+export {
+  initializeDisruptionTrack,
+  computeTerrorLevel,
+  addDisruption,
+  getActiveVictoryConditions,
+  didTerrorLevelIncrease,
+  applyDisruptionEvent,
+} from './disruption-track.js';
+
+export {
+  initializeDualTiming,
+  getSlowBonus,
+  queueSlowAction,
+  cancelSlowActionsForFigure,
+  getPendingSlowActions,
+  clearSlowQueue,
+  canBeSlowed,
+  applySlowAction,
+  resolveSlowPhase,
+} from './dual-timing.js';
+
+export {
+  initializeThreatCadence,
+  getPhaseForRound,
+  getCycleCount,
+  advanceThreatCadence,
+  disruptCurrentPhase,
+  getActiveEffects as getThreatCadenceEffects,
+  addScoutedZones,
+  addFortification,
+  getNextPhase,
+  getThreatIncomeMultiplier,
+  applyThreatCadenceRound,
+  getFortificationBonus,
+} from './threat-cadence.js';
+
+export {
+  initializeElementTracker,
+  addElementForAction,
+  addElement,
+  meetsThresholds,
+  checkInnatePowers,
+  getActiveEffects as getElementSynergyEffects,
+  mergeEffects,
+  getHeroElementCounts,
+  applyElementGeneration,
+  ALL_ELEMENTS,
+  DEFAULT_INNATE_POWERS,
+} from './element-synergy.js';
+
+export {
+  initializeCollateralDamage,
+  getTileCollateral,
+  applyCollateralToTile,
+  getCollateralForQuality,
+  applyWeaponCollateral,
+  getTilesAtLevel,
+  getTerrainModification,
+  applyCollateralToGameState,
+  getXPMultiplier,
+  getCollateralSummary,
+} from './collateral-damage.js';
+
+export type {
+  OptionalSubsystems,
+  SpiritIslandState,
+  TerrorLevel,
+  TieredVictoryCondition,
+  DisruptionTrackState,
+  DisruptionEvent,
+  ActionTiming,
+  QueuedSlowAction,
+  SlowBonus,
+  DualTimingState,
+  ThreatCadencePhase,
+  ThreatCadenceState,
+  ThreatCadenceEffect,
+  SynergyElement,
+  ElementThreshold,
+  InnatePower,
+  InnatePowerEffect,
+  ElementTracker,
+  CollateralLevel,
+  DamagedTile,
+  CollateralDamageState,
+  CollateralSource,
+} from './types.js';
 // Re-export boss mechanics (Oathsworn-inspired hit location system)
 export {
   initBossHitLocations,
