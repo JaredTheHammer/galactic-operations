@@ -9,8 +9,14 @@
       "name": "Stormtrooper",
       "side": "imperial",
       "tier": "Minion",
-      "attackPool": { "ability": 2, "proficiency": 1 },
-      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
       "woundThreshold": 4,
       "strainThreshold": null,
       "soak": 3,
@@ -22,11 +28,19 @@
           "baseDamage": 8,
           "range": "Long",
           "critical": 3,
-          "qualities": [{ "name": "Stun setting", "value": null }]
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
         }
       ],
       "aiArchetype": "trooper",
-      "keywords": ["Imperial", "Trooper"],
+      "keywords": [
+        "Imperial",
+        "Trooper"
+      ],
       "mechanicalKeywords": [],
       "abilities": [],
       "threatCost": 2
@@ -36,8 +50,14 @@
       "name": "Stormtrooper Elite",
       "side": "imperial",
       "tier": "Rival",
-      "attackPool": { "ability": 1, "proficiency": 2 },
-      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
       "woundThreshold": 8,
       "strainThreshold": 6,
       "soak": 4,
@@ -49,13 +69,29 @@
           "baseDamage": 8,
           "range": "Long",
           "critical": 3,
-          "qualities": [{ "name": "Stun setting", "value": null }]
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
         }
       ],
       "aiArchetype": "elite",
-      "keywords": ["Imperial", "Trooper", "Elite"],
-      "mechanicalKeywords": [{"name": "Disciplined", "value": 1}],
-      "abilities": ["Tactical Direction: Other Imperial Minions within Short range add 1 Ability die to attacks."],
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Elite"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Tactical Direction: Other Imperial Minions within Short range add 1 Ability die to attacks."
+      ],
       "threatCost": 4
     },
     "imperial-officer": {
@@ -63,8 +99,14 @@
       "name": "Imperial Officer",
       "side": "imperial",
       "tier": "Rival",
-      "attackPool": { "ability": 1, "proficiency": 1 },
-      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
       "woundThreshold": 5,
       "strainThreshold": 8,
       "soak": 2,
@@ -76,12 +118,29 @@
           "baseDamage": 7,
           "range": "Medium",
           "critical": 3,
-          "qualities": [{ "name": "Stun setting", "value": null }]
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
         }
       ],
       "aiArchetype": "elite",
-      "keywords": ["Imperial", "Officer", "Leader"],
-      "mechanicalKeywords": [{"name": "Disciplined", "value": 1}],
+      "keywords": [
+        "Imperial",
+        "Officer",
+        "Leader"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
       "courage": 3,
       "abilities": [
         "Rally the Troops: As an Action, all Imperial allies within Short range recover 2 strain.",
@@ -94,8 +153,14 @@
       "name": "Probe Droid",
       "side": "imperial",
       "tier": "Minion",
-      "attackPool": { "ability": 1, "proficiency": 1 },
-      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
       "woundThreshold": 4,
       "strainThreshold": null,
       "soak": 3,
@@ -111,9 +176,14 @@
         }
       ],
       "aiArchetype": "sniper",
-      "keywords": ["Imperial", "Droid"],
+      "keywords": [
+        "Imperial",
+        "Droid"
+      ],
       "mechanicalKeywords": [],
-      "abilities": ["Self-Destruct: When defeated, deal 5 damage to all figures within Engaged range (Blast 5)."],
+      "abilities": [
+        "Self-Destruct: When defeated, deal 5 damage to all figures within Engaged range (Blast 5)."
+      ],
       "threatCost": 3
     },
     "e-web-engineer": {
@@ -121,8 +191,14 @@
       "name": "E-Web Engineer",
       "side": "imperial",
       "tier": "Rival",
-      "attackPool": { "ability": 1, "proficiency": 2 },
-      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
       "woundThreshold": 6,
       "strainThreshold": 4,
       "soak": 3,
@@ -135,15 +211,36 @@
           "range": "Long",
           "critical": 3,
           "qualities": [
-            { "name": "Auto-fire", "value": null },
-            { "name": "Cumbersome", "value": 4 }
+            {
+              "name": "Auto-fire",
+              "value": null
+            },
+            {
+              "name": "Cumbersome",
+              "value": 4
+            }
           ]
         }
       ],
       "aiArchetype": "sniper",
-      "keywords": ["Imperial", "Heavy Weapons", "Emplacement"],
-      "mechanicalKeywords": [{"name": "Armor", "value": 1}],
-      "abilities": ["Emplaced: Cannot take Move maneuvers. Must be set up at deployment."],
+      "keywords": [
+        "Imperial",
+        "Heavy Weapons",
+        "Emplacement"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Shield",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Emplaced: Cannot take Move maneuvers. Must be set up at deployment."
+      ],
       "threatCost": 5
     },
     "inquisitor": {
@@ -151,8 +248,14 @@
       "name": "Inquisitor",
       "side": "imperial",
       "tier": "Nemesis",
-      "attackPool": { "ability": 1, "proficiency": 3 },
-      "defensePool": { "difficulty": 1, "challenge": 2 },
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
       "woundThreshold": 16,
       "strainThreshold": 14,
       "soak": 4,
@@ -165,21 +268,96 @@
           "range": "Engaged",
           "critical": 1,
           "qualities": [
-            { "name": "Breach", "value": 1 },
-            { "name": "Sunder", "value": null },
-            { "name": "Vicious", "value": 2 }
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Sunder",
+              "value": null
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
           ]
         }
       ],
       "aiArchetype": "melee",
-      "keywords": ["Imperial", "Force-sensitive", "Dark Side", "Boss"],
-      "mechanicalKeywords": [{"name": "Dauntless"}],
+      "keywords": [
+        "Imperial",
+        "Force-sensitive",
+        "Dark Side",
+        "Boss"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Retaliate",
+          "value": 2
+        },
+        {
+          "name": "Pierce",
+          "value": 2
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
       "abilities": [
         "Force Push: As an Action, make a Discipline check vs target's Discipline. On success, push target 2 tiles and deal 4 strain.",
         "Parry: When hit by melee, suffer 3 strain to reduce damage by 5.",
         "Adversary 2: Upgrade difficulty of all combat checks against this target by 2."
       ],
-      "threatCost": 9
+      "threatCost": 9,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "saber-arm",
+          "name": "Saber Arm",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -2,
+            "disabledWeapons": ["lightsaber"],
+            "conditionInflicted": "Staggered"
+          }
+        },
+        {
+          "id": "force-focus",
+          "name": "Force Focus",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "soakModifier": -2,
+            "conditionInflicted": "Disoriented"
+          }
+        },
+        {
+          "id": "leg-servos",
+          "name": "Leg Servos",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "conditionInflicted": "Immobilized"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 1,
+          "newAiArchetype": "melee",
+          "narrativeText": "The Inquisitor snarls in pain, drawing deeper on the Dark Side!",
+          "statBonuses": { "attackPoolBonus": 1, "damageBonus": 1, "speedBonus": 1 }
+        },
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Wounded and desperate, the Inquisitor fights with reckless fury!",
+          "statBonuses": { "attackPoolBonus": 1, "damageBonus": 2 }
+        }
+      ]
     }
   }
 }

@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Agenda directive definitions for the Imperial Senate voting phase (TI4-inspired)"
+  },
+  "agendaDirectives": {
+    "martial-law": {
+      "id": "martial-law",
+      "name": "Martial Law",
+      "description": "Imperial reinforcements arrive 1 round earlier.",
+      "target": "imperial",
+      "effects": [
+        { "type": "reinforcement_timing", "roundDelta": -1 }
+      ],
+      "influenceCost": 4,
+      "flavorText": "The Imperial governor declares martial law. Garrison troops are on high alert."
+    },
+    "open-trade-routes": {
+      "id": "open-trade-routes",
+      "name": "Open Trade Routes",
+      "description": "Heroes start the next mission with an extra stim pack.",
+      "target": "operative",
+      "effects": [
+        { "type": "starting_consumables", "itemId": "stim-pack", "quantity": 1 }
+      ],
+      "influenceCost": 3,
+      "flavorText": "Trade lanes are opened, allowing supplies to flow to resistance cells."
+    },
+    "imperial-requisition": {
+      "id": "imperial-requisition",
+      "name": "Imperial Requisition",
+      "description": "Imperial threat per round increases by 1.",
+      "target": "imperial",
+      "effects": [
+        { "type": "threat_modifier", "value": 1 }
+      ],
+      "influenceCost": 5,
+      "flavorText": "The Empire redirects resources to this sector, increasing military presence."
+    },
+    "black-market-access": {
+      "id": "black-market-access",
+      "name": "Black Market Access",
+      "description": "All shop prices reduced by 20%.",
+      "target": "operative",
+      "effects": [
+        { "type": "shop_discount", "percent": 20 }
+      ],
+      "influenceCost": 3,
+      "flavorText": "Smugglers open their channels, offering discounted goods to the resistance."
+    },
+    "intelligence-windfall": {
+      "id": "intelligence-windfall",
+      "name": "Intelligence Windfall",
+      "description": "Gain +3 bonus XP from the next mission.",
+      "target": "operative",
+      "effects": [
+        { "type": "xp_bonus", "value": 3 }
+      ],
+      "influenceCost": 4,
+      "flavorText": "A sympathetic Imperial officer leaks training data, accelerating skill development."
+    },
+    "propaganda-broadcast": {
+      "id": "propaganda-broadcast",
+      "name": "Propaganda Broadcast",
+      "description": "Operatives start with +1 morale. Imperials start with +1 morale.",
+      "target": "both",
+      "effects": [
+        { "type": "morale_modifier", "side": "Operative", "value": 1 },
+        { "type": "morale_modifier", "side": "Imperial", "value": 1 }
+      ],
+      "influenceCost": 2,
+      "flavorText": "Both sides broadcast rallying messages, boosting the resolve of their troops."
+    },
+    "sector-lockdown": {
+      "id": "sector-lockdown",
+      "name": "Sector Lockdown",
+      "description": "Fewer exploration tokens appear on the next map.",
+      "target": "imperial",
+      "effects": [
+        { "type": "exploration_bonus", "extraTokens": -2 }
+      ],
+      "influenceCost": 3,
+      "flavorText": "Imperial security patrols sweep the area, clearing hidden caches."
+    },
+    "resistance-network": {
+      "id": "resistance-network",
+      "name": "Resistance Network",
+      "description": "More exploration tokens appear on the next map.",
+      "target": "operative",
+      "effects": [
+        { "type": "exploration_bonus", "extraTokens": 3 }
+      ],
+      "influenceCost": 4,
+      "flavorText": "Resistance operatives seed the area with supply drops and intel packages."
+    },
+    "tactical-briefing": {
+      "id": "tactical-briefing",
+      "name": "Tactical Briefing",
+      "description": "Gain +1 command token per round in the next mission.",
+      "target": "operative",
+      "effects": [
+        { "type": "command_token_bonus", "value": 1 }
+      ],
+      "influenceCost": 4,
+      "flavorText": "A veteran commander provides tactical briefings, improving battlefield coordination."
+    },
+    "garrison-reinforcement": {
+      "id": "garrison-reinforcement",
+      "name": "Garrison Reinforcement",
+      "description": "Imperial reinforcements arrive 1 round later, but threat per round +1.",
+      "target": "imperial",
+      "effects": [
+        { "type": "reinforcement_timing", "roundDelta": 1 },
+        { "type": "threat_modifier", "value": 1 }
+      ],
+      "influenceCost": 5,
+      "flavorText": "The garrison consolidates forces, delaying deployment but increasing overall strength."
+    },
+    "humanitarian-aid": {
+      "id": "humanitarian-aid",
+      "name": "Humanitarian Aid",
+      "description": "Heroes start with 2 extra stim packs and +2 morale.",
+      "target": "operative",
+      "effects": [
+        { "type": "starting_consumables", "itemId": "stim-pack", "quantity": 2 },
+        { "type": "morale_modifier", "side": "Operative", "value": 2 }
+      ],
+      "influenceCost": 6,
+      "flavorText": "Medical supplies and relief workers arrive, bolstering resistance morale and readiness."
+    },
+    "imperial-crackdown": {
+      "id": "imperial-crackdown",
+      "name": "Imperial Crackdown",
+      "description": "Imperial threat per round +2. Operatives lose 1 starting morale.",
+      "target": "imperial",
+      "effects": [
+        { "type": "threat_modifier", "value": 2 },
+        { "type": "morale_modifier", "side": "Operative", "value": -1 }
+      ],
+      "influenceCost": 6,
+      "flavorText": "The Empire tightens its grip, flooding the sector with troops and spreading fear."
+    }
+  }
+}

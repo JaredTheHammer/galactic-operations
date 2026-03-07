@@ -21,6 +21,8 @@
 import type {
   TacticCard,
   TacticCardEffect,
+  TacticCardAltMode,
+  TacticCardAltModeType,
   TacticDeckState,
   GameState,
   GameData,
@@ -400,6 +402,40 @@ export function hasStrategicEffect(card: TacticCard): boolean {
  * Get cards from a side's hand that have strategic effects.
  */
 export function getStrategicCards(
+// DUAL-USE CARD SYSTEM (Brass: Birmingham-inspired)
+// ============================================================================
+
+/**
+ * Result of playing a card in its alternative (non-combat) mode.
+ * Applied during the activation phase instead of combat.
+ */
+export interface AltModeResult {
+  cardId: string;
+  cardName: string;
+  altMode: TacticCardAltMode;
+  /** Movement bonus applied to the figure */
+  movementBonus: number;
+  /** Extra actions granted this activation */
+  actionPointBonus: number;
+  /** Temporary defense boost (additional Block on next incoming attack) */
+  defenseBonus: number;
+  /** Strain recovered */
+  strainRecovery: number;
+  /** Number of additional cards drawn */
+  cardsDrawn: number;
+}
+
+/**
+ * Check if a tactic card has an alternative (non-combat) mode.
+ */
+export function hasAltMode(card: TacticCard): boolean {
+  return !!card.altMode;
+}
+
+/**
+ * Get cards from a side's hand that have an alt mode available.
+ */
+export function getAltModeCards(
   deck: TacticDeckState,
   gameData: GameData,
   side: Side,
@@ -423,6 +459,15 @@ export function getStrategicCards(
  * Returns the strategic result and updated deck state.
  */
 export function playStrategicCard(
+    .filter((card): card is TacticCard => !!card && hasAltMode(card));
+}
+
+/**
+ * Play a tactic card in its alternative mode (outside of combat).
+ * Discards the card and returns the alt mode result.
+ * Returns null if the card doesn't have an alt mode or isn't in hand.
+ */
+export function playCardAltMode(
   deck: TacticDeckState,
   gameData: GameData,
   side: Side,
@@ -508,6 +553,112 @@ export function aiShouldPlayStrategic(
   }
 
   return false;
+): { deck: TacticDeckState; result: AltModeResult } | null {
+  if (!gameData.tacticCards) return null;
+
+  const card = gameData.tacticCards[cardId];
+  if (!card || !card.altMode) return null;
+
+  // Check card is in hand
+  const hand = side === 'Operative'
+    ? deck.operativeHand
+    : deck.imperialHand;
+
+  if (!hand.includes(cardId)) return null;
+
+  // Discard the card
+  const updatedDeck = playCard(deck, side, cardId);
+  if (!updatedDeck) return null;
+
+  // Resolve the alt mode effect
+  const result = resolveAltMode(card);
+
+  // If the alt mode draws cards, do that now
+  let finalDeck = updatedDeck;
+  if (result.cardsDrawn > 0) {
+    finalDeck = drawCards(updatedDeck, side, result.cardsDrawn);
+  }
+
+  return { deck: finalDeck, result };
+}
+
+/**
+ * Resolve an alt mode into concrete bonuses.
+ */
+function resolveAltMode(card: TacticCard): AltModeResult {
+  const altMode = card.altMode!;
+  const result: AltModeResult = {
+    cardId: card.id,
+    cardName: card.name,
+    altMode,
+    movementBonus: 0,
+    actionPointBonus: 0,
+    defenseBonus: 0,
+    strainRecovery: 0,
+    cardsDrawn: 0,
+  };
+
+  switch (altMode.type) {
+    case 'movement':
+      result.movementBonus = altMode.value;
+      break;
+    case 'action_point':
+      result.actionPointBonus = altMode.value;
+      break;
+    case 'defense_stance':
+      result.defenseBonus = altMode.value;
+      break;
+    case 'strain_recovery':
+      result.strainRecovery = altMode.value;
+      break;
+    case 'draw_card':
+      result.cardsDrawn = altMode.value;
+      break;
+  }
+
+  return result;
+}
+
+/**
+ * AI decides whether to play a card in alt mode vs saving for combat.
+ * Heuristic: use alt mode when the non-combat benefit is more immediately useful.
+ */
+export function aiShouldUseAltMode(
+  card: TacticCard,
+  context: {
+    figureHealthPercent: number;
+    figureStrainPercent: number;
+    distanceToNearestEnemy: number;
+    handSize: number;
+    hasAttackedThisActivation: boolean;
+  },
+): boolean {
+  if (!card.altMode) return false;
+
+  switch (card.altMode.type) {
+    case 'movement':
+      // Use movement bonus if far from enemies and haven't attacked yet
+      return context.distanceToNearestEnemy > 4 && !context.hasAttackedThisActivation;
+
+    case 'action_point':
+      // Use extra action if healthy and in good position
+      return context.figureHealthPercent > 0.5 && context.distanceToNearestEnemy <= 6;
+
+    case 'defense_stance':
+      // Use defense if wounded
+      return context.figureHealthPercent < 0.4;
+
+    case 'strain_recovery':
+      // Use strain recovery if high strain
+      return context.figureStrainPercent > 0.6;
+
+    case 'draw_card':
+      // Draw more cards if hand is low
+      return context.handSize <= 2;
+
+    default:
+      return false;
+  }
 }
 
 // ============================================================================

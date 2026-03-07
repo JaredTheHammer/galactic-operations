@@ -79,6 +79,8 @@ export type AIConditionId =
   | 'should-aim-before-attack'
   | 'should-dodge-for-defense'
   | 'should-use-consumable'
+  | 'can-reveal-exploration'
+  | 'should-spend-command-token'
   | 'default';
 
 /**
@@ -101,7 +103,9 @@ export type AIActionId =
   | 'move-to-objective-interact'
   | 'aim-then-attack'
   | 'dodge-and-hold'
-  | 'use-consumable';
+  | 'use-consumable'
+  | 'reveal-exploration-token'
+  | 'spend-command-token';
 
 // ============================================================================
 // SCORING AND EVALUATION
@@ -169,6 +173,12 @@ export interface ConditionContext {
   consumableId?: string;
   /** Target figure ID for consumable use */
   consumableTargetId?: string;
+  /** Exploration token ID to reveal */
+  explorationTokenId?: string;
+  /** Command token usage type */
+  commandTokenUsage?: import('../types.js').CommandTokenUsage;
+  /** For coordinate: second hero to activate */
+  coordinateTargetId?: string;
   /** Human-readable reasoning */
   reasoning: string;
 }

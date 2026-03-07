@@ -9,24 +9,24 @@
 --------------------------------------------------------
   WIN RATES
 --------------------------------------------------------
-  Imperial Patrol      35.0%  (35 wins)
-  Korrga Solo          65.0%  (65 wins)
+  Imperial Patrol      20.0%  (20 wins)
+  Korrga Solo          80.0%  (80 wins)
   Draw                 0.0%  (0 draws)
 
 --------------------------------------------------------
   AVERAGES PER GAME
 --------------------------------------------------------
-  Rounds played:       10.4
-  Side A damage taken: 8.2
-  Side B damage taken: 11.0
-  Side A defeated:     2.1
-  Side B defeated:     0.1
+  Rounds played:       7.9
+  Side A damage taken: 9.6
+  Side B damage taken: 2.0
+  Side A defeated:     2.4
+  Side B defeated:     0.0
 
 --------------------------------------------------------
   FIGURE PERFORMANCE
 --------------------------------------------------------
   Figure                 Side  Survival  AvgDmgTkn  AvgRounds
-  Stormtrooper           A         31%        2.7        8.3
-  Korrga                 B         85%        7.0       10.4
+  Stormtrooper           A         20%        3.2        6.7
+  Korrga                 B        100%        2.9        7.9
 
 ========================================================

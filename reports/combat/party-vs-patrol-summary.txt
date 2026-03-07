@@ -16,22 +16,22 @@
 --------------------------------------------------------
   AVERAGES PER GAME
 --------------------------------------------------------
-  Rounds played:       10.4
+  Rounds played:       10.7
   Side A damage taken: 18.6
-  Side B damage taken: 16.4
+  Side B damage taken: 14.7
   Side A defeated:     3.7
-  Side B defeated:     0.3
+  Side B defeated:     0.2
 
 --------------------------------------------------------
   FIGURE PERFORMANCE
 --------------------------------------------------------
   Figure                 Side  Survival  AvgDmgTkn  AvgRounds
-  Stormtrooper           A         28%        2.9        8.4
-  Stormtrooper Elite     A         28%        5.8       10.2
+  Stormtrooper           A         28%        2.9        9.2
+  Stormtrooper Elite     A         28%        5.8        9.4
   Imperial Officer       A         16%        4.2        5.8
-  Korrga                 B        100%        2.3       10.4
-  Vex Dorin              B         88%        4.0       10.0
-  Ashara Nev             B         84%        3.1        9.8
-  Ssorku                 B        100%        1.5       10.4
+  Korrga                 B        100%        0.9       10.7
+  Vex Dorin              B         94%        5.1       10.5
+  Ashara Nev             B         84%        4.0       10.2
+  Ssorku                 B        100%        1.8       10.7
 
 ========================================================
