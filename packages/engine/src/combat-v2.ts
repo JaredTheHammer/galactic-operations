@@ -399,6 +399,14 @@ export function buildCombatPools(
     }
   }
 
+  // DefenseStance (tactic card alt mode): add difficulty dice
+  if (defenderConditions.includes('DefenseStance')) {
+    defensePool = {
+      ...defensePool,
+      difficulty: defensePool.difficulty + 1,
+    };
+  }
+
   // Passive talent defense pool modifiers (hero defenders only)
   if (isHero(defenderEntity)) {
     const defMods = getPassiveDefensePoolModifiers(defenderEntity, gameData);
@@ -996,6 +1004,10 @@ export function applyCombatResult(
 
       // Consume dodge token if defender had one (effect already applied in resolveCombatV2)
       const newDodgeTokens = (fig.dodgeTokens ?? 0) > 0 ? fig.dodgeTokens - 1 : fig.dodgeTokens ?? 0;
+
+      // Consume DefenseStance (tactic card alt mode, one-shot)
+      const dsIdx = newConditions.indexOf('DefenseStance');
+      if (dsIdx >= 0) newConditions.splice(dsIdx, 1);
 
       // Imperial Assault wounded hero mechanic:
       const figIsHero = fig.entityType === 'hero';
