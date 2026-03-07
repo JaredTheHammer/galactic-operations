@@ -173,7 +173,7 @@
       ],
       "aiArchetype": "melee",
       "keywords": ["Imperial", "Force-sensitive", "Dark Side", "Boss"],
-      "mechanicalKeywords": [{"name": "Dauntless"}],
+      "mechanicalKeywords": [{"name": "Dauntless"}, {"name": "Retaliate", "value": 2}],
       "abilities": [
         "Force Push: As an Action, make a Discipline check vs target's Discipline. On success, push target 2 tiles and deal 4 strain.",
         "Parry: When hit by melee, suffer 3 strain to reduce damage by 5.",

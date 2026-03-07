@@ -30,7 +30,7 @@
       ],
       "aiArchetype": "melee",
       "keywords": ["Syndicate", "Brute", "Melee"],
-      "mechanicalKeywords": [],
+      "mechanicalKeywords": [{"name": "Retaliate", "value": 1}],
       "abilities": [],
       "threatCost": 3
     },

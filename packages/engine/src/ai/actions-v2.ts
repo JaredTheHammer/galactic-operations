@@ -35,7 +35,7 @@ import {
   scoreMoveDestinations,
   findAttackPositions,
   findMeleePositions,
-  getEnemies,
+  getVisibleEnemies,
   getValidTargetsV2,
   getAttackPoolForFigure,
 } from './evaluate-v2.js';
@@ -447,7 +447,7 @@ function buildAdvanceWithCover(
   gameData: GameData,
   weights: AIWeights,
 ): GameAction[] {
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   if (enemies.length === 0) return [];
 
   // For heroes: check if there are uncompleted objectives to bias toward
@@ -710,7 +710,7 @@ function buildMoveTowardEnemy(
   gameData: GameData,
   _weights: AIWeights,
 ): GameAction[] {
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   if (enemies.length === 0) return [];
   if (figure.maneuversRemaining < 1) return [];
 
@@ -823,7 +823,7 @@ function buildUseSecondWind(
     }
   } else if (figure.maneuversRemaining >= 1) {
     // No targets in range: move toward enemies
-    const enemies = getEnemies(figure, gameState);
+    const enemies = getVisibleEnemies(figure, gameState);
     if (enemies.length > 0) {
       let nearest = enemies[0];
       let nearestDist = Infinity;
@@ -868,7 +868,7 @@ function buildUseBoughtTimeAdvance(
 
   // After Bought Time, figure has an extra maneuver.
   // Strategy: Move (maneuver 1) + Move (maneuver 2 from Bought Time) + Attack if in range.
-  const enemies = getEnemies(figure, gameState);
+  const enemies = getVisibleEnemies(figure, gameState);
   if (enemies.length === 0) return actions;
 
   let nearest = enemies[0];
@@ -1010,7 +1010,7 @@ function buildAimThenAttack(
 
     if (validTargets.length === 0) {
       // No targets in range: move toward nearest enemy
-      const enemies = getEnemies(figure, gameState);
+      const enemies = getVisibleEnemies(figure, gameState);
       if (enemies.length > 0) {
         let nearest = enemies[0];
         let nearestDist = Infinity;
@@ -1084,7 +1084,7 @@ function buildDodgeAndHold(
       const validMoves = getValidMoves(figure, gameState);
       if (validMoves.length > 0) {
         // Find nearby enemies to retreat from
-        const enemies = getEnemies(figure, gameState);
+        const enemies = getVisibleEnemies(figure, gameState);
         if (enemies.length > 0) {
           let nearest = enemies[0];
           let nearestDist = Infinity;

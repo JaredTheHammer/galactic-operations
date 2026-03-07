@@ -217,6 +217,7 @@ export {
   calculateThreatLevel,
   evaluateCondition,
   getEnemies,
+  getVisibleEnemies,
   getAllies,
   getFigureSide,
   getValidTargetsV2,
