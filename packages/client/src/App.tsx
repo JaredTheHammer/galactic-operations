@@ -43,6 +43,8 @@ import { useAutoPhase } from './hooks/useAutoPhase'
 import { useAutosave } from './hooks/useAutosave'
 import { AutosaveToast } from './components/HUD/AutosaveToast'
 import { ShortcutHelp } from './components/HUD/ShortcutHelp'
+import { BossHitLocations } from './components/HUD/BossHitLocations'
+import { FocusBar } from './components/HUD/FocusBar'
 
 /** Brief victory/defeat overlay shown on the tactical grid before PostMission transition */
 const MissionOutcomeOverlay: React.FC<{ winner: string; victoryCondition?: string }> = ({ winner, victoryCondition }) => {
@@ -391,6 +393,16 @@ function App() {
       {/* Top Right: Selected Figure Info */}
       {selectedFigure && (
         <InfoPanel selectedFigure={selectedFigure} gameState={gameState} />
+      )}
+
+      {/* Top Right (below InfoPanel): Boss Hit Locations (shown when selecting a boss) */}
+      {selectedFigure && (
+        <BossHitLocations figure={selectedFigure} />
+      )}
+
+      {/* Bottom Center (above Action Buttons): Focus Bar (shown for activating hero) */}
+      {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
+        <FocusBar figure={selectedFigure} />
       )}
 
       {/* Bottom Center: Action Buttons (hidden during Imperial AI turns) */}

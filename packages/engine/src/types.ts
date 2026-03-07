@@ -640,6 +640,14 @@ export interface Figure {
   aimTokens: number;    // 0-2, each adds +1 Ability die to next attack. Persist across activations.
   dodgeTokens: number;  // 0-1, cancel 1 net success when hit. Cleared at next activation.
 
+  // Focus effect flags (set by SpendFocus action, consumed by resolution systems)
+  /** +2 speed this activation (consumed after Move maneuver, cleared at activation end) */
+  focusBonusMove?: boolean;
+  /** +3 damage on next attack (consumed after Attack action) */
+  focusBonusDamage?: boolean;
+  /** +1 Challenge die to defense (persists until next activation) */
+  focusBonusDefense?: boolean;
+
   isActivated: boolean;
   isDefeated: boolean;
   isWounded: boolean;          // Imperial Assault style: hero wounded but still in play

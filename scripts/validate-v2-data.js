@@ -170,8 +170,46 @@ for (const [id, npc] of Object.entries(allNpcs)) {
       }
     }
   }
+  // Boss hit locations (optional, validate structure when present)
+  if (npc.isBoss) {
+    if (npc.bossHitLocations) {
+      if (!Array.isArray(npc.bossHitLocations)) fail('Boss NPC ' + id + ' bossHitLocations must be an array');
+      const locIds = new Set();
+      for (const loc of npc.bossHitLocations) {
+        if (!loc.id || typeof loc.id !== 'string') fail('Boss NPC ' + id + ' hit location missing id');
+        if (!loc.name || typeof loc.name !== 'string') fail('Boss NPC ' + id + ' hit location missing name');
+        if (typeof loc.woundCapacity !== 'number' || loc.woundCapacity < 1) {
+          fail('Boss NPC ' + id + ' hit location ' + loc.id + ' woundCapacity must be a positive number');
+        }
+        if (!loc.disabledEffects || typeof loc.disabledEffects !== 'object') {
+          fail('Boss NPC ' + id + ' hit location ' + loc.id + ' missing disabledEffects');
+        }
+        if (locIds.has(loc.id)) fail('Boss NPC ' + id + ' has duplicate hit location id: ' + loc.id);
+        locIds.add(loc.id);
+        // Validate disabled weapon references
+        if (loc.disabledEffects.disabledWeapons) {
+          for (const wepId of loc.disabledEffects.disabledWeapons) {
+            if (!npc.weapons.some(w => w.weaponId === wepId)) {
+              fail('Boss NPC ' + id + ' hit location ' + loc.id + ' references unknown weapon: ' + wepId);
+            }
+          }
+        }
+      }
+    }
+    if (npc.bossPhaseTransitions) {
+      if (!Array.isArray(npc.bossPhaseTransitions)) fail('Boss NPC ' + id + ' bossPhaseTransitions must be an array');
+      for (const pt of npc.bossPhaseTransitions) {
+        if (typeof pt.disabledLocationsRequired !== 'number' || pt.disabledLocationsRequired < 1) {
+          fail('Boss NPC ' + id + ' phase transition has invalid disabledLocationsRequired');
+        }
+        if (!pt.newAiArchetype || typeof pt.newAiArchetype !== 'string') {
+          fail('Boss NPC ' + id + ' phase transition missing newAiArchetype');
+        }
+      }
+    }
+  }
 }
-console.log('OK: All ' + Object.keys(allNpcs).length + ' NPC stat blocks valid (pools, strain, weapons, courage, keywords)');
+console.log('OK: All ' + Object.keys(allNpcs).length + ' NPC stat blocks valid (pools, strain, weapons, courage, keywords, boss)');
 
 // 8. AI profile mappings: every NPC has an archetype
 const unitMapping = aiProfiles.unitMapping;

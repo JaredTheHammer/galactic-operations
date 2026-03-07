@@ -421,6 +421,14 @@ export function buildCombatPools(
     defensePool = applyTalentDefensePoolModifiers(defensePool, defMods);
   }
 
+  // Focus bonus defense: +1 Challenge die (from spending Focus)
+  if (defender.focusBonusDefense) {
+    defensePool = {
+      ...defensePool,
+      challenge: defensePool.challenge + 1,
+    };
+  }
+
   // Boss hit location penalties: reduce defense pool if locations are disabled
   if (defender.hitLocations) {
     defensePool = applyBossDefensePenalties(defensePool, defender);
@@ -860,8 +868,11 @@ export function resolveCombatV2(
   // 6. Auto-spend advantages/threats
   const spending = autoSpendAdvantagesThreats(rollResult, poolCtx.weapon);
 
-  // Add advantage-based + talent bonus damage to wounds
-  const totalGrossDamage = damageResult.grossDamage + spending.bonusDamage + talentBonusDamage;
+  // Focus bonus damage (+3 from spending Focus)
+  const focusBonusDamage = (attacker.focusBonusDamage && rollResult.isHit) ? 3 : 0;
+
+  // Add advantage-based + talent bonus damage + Focus bonus to wounds
+  const totalGrossDamage = damageResult.grossDamage + spending.bonusDamage + talentBonusDamage + focusBonusDamage;
   const totalWoundsDealt = rollResult.isHit
     ? Math.max(0, totalGrossDamage - damageResult.effectiveSoak)
     : 0;
@@ -1066,12 +1077,17 @@ export function applyCombatResult(
       };
     }
 
-    // --- ATTACKER (threat-based strain + consume aim tokens) ---
+    // --- ATTACKER (threat-based strain + consume aim tokens + consume Focus bonus) ---
     if (fig.id === scenario.attackerId) {
       // Consume aim tokens (effect already applied in buildCombatPools)
       let updatedFig = (fig.aimTokens ?? 0) > 0
         ? { ...fig, aimTokens: 0 }
         : fig;
+
+      // Consume Focus bonus damage flag (effect already applied in resolveCombatV2)
+      if (updatedFig.focusBonusDamage) {
+        updatedFig = { ...updatedFig, focusBonusDamage: false };
+      }
 
       // Apply strain from net threats
       const netThreats = resolution.rollResult.netAdvantages < 0

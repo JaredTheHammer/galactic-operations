@@ -136,7 +136,7 @@ export function spendFocus(
 
   switch (effect) {
     case 'bonus_move':
-      // +2 speed is tracked as a transient flag; consumed by movement resolution
+      updated = { ...updated, focusBonusMove: true };
       description = `Spent ${cost} Focus for +2 speed this activation`;
       break;
 
@@ -150,12 +150,12 @@ export function spendFocus(
       break;
 
     case 'bonus_damage':
-      // Tracked via a flag; consumed in calculateDamage
+      updated = { ...updated, focusBonusDamage: true };
       description = `Spent ${cost} Focus for +3 damage on next attack`;
       break;
 
     case 'bonus_defense':
-      // Tracked as a temporary condition-like flag; cleared at next activation
+      updated = { ...updated, focusBonusDefense: true };
       description = `Spent ${cost} Focus for +1 Challenge die to defense`;
       break;
 

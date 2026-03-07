@@ -273,13 +273,14 @@ describe('Focus Spending', () => {
     expect(effects.length).toBe(0);
   });
 
-  it('spends Focus on bonus_move', () => {
+  it('spends Focus on bonus_move (sets flag)', () => {
     const fig = makeFigure({ focusCurrent: 3 });
     const gs = makeGameState([fig]);
     const result = spendFocus(fig, 'bonus_move', gs);
 
     expect(result).not.toBeNull();
     expect(result!.figure.focusCurrent).toBe(2);
+    expect(result!.figure.focusBonusMove).toBe(true);
     expect(result!.description).toContain('+2 speed');
   });
 
@@ -302,23 +303,25 @@ describe('Focus Spending', () => {
     expect(result!.figure.aimTokens).toBe(3);
   });
 
-  it('spends Focus on bonus_damage', () => {
+  it('spends Focus on bonus_damage (sets flag)', () => {
     const fig = makeFigure({ focusCurrent: 3 });
     const gs = makeGameState([fig]);
     const result = spendFocus(fig, 'bonus_damage', gs);
 
     expect(result).not.toBeNull();
     expect(result!.figure.focusCurrent).toBe(1);
+    expect(result!.figure.focusBonusDamage).toBe(true);
     expect(result!.description).toContain('+3 damage');
   });
 
-  it('spends Focus on bonus_defense', () => {
+  it('spends Focus on bonus_defense (sets flag)', () => {
     const fig = makeFigure({ focusCurrent: 3 });
     const gs = makeGameState([fig]);
     const result = spendFocus(fig, 'bonus_defense', gs);
 
     expect(result).not.toBeNull();
     expect(result!.figure.focusCurrent).toBe(1);
+    expect(result!.figure.focusBonusDefense).toBe(true);
     expect(result!.description).toContain('defense');
   });
 
@@ -437,6 +440,20 @@ describe('Focus Integration with resetForActivation', () => {
     const result = resetForActivation(fig);
     expect(result.focusCurrent).toBeUndefined();
   });
+
+  it('clears all Focus effect flags on activation reset', () => {
+    const fig = makeFigure({
+      focusBonusMove: true,
+      focusBonusDamage: true,
+      focusBonusDefense: true,
+      isActivated: true,
+    });
+
+    const result = resetForActivation(fig);
+    expect(result.focusBonusMove).toBe(false);
+    expect(result.focusBonusDamage).toBe(false);
+    expect(result.focusBonusDefense).toBe(false);
+  });
 });
 
 // ============================================================================
@@ -451,5 +468,132 @@ describe('Focus Cost Table', () => {
     expect(FOCUS_COSTS.bonus_defense).toBe(2);
     expect(FOCUS_COSTS.recover_strain).toBe(1);
     expect(FOCUS_COSTS.shake_condition).toBe(3);
+  });
+});
+
+// ============================================================================
+// FOCUS BONUS MOVE - MOVEMENT INTEGRATION
+// ============================================================================
+
+import { getValidMoves } from '../src/movement';
+
+describe('Focus Bonus Move - Movement Integration', () => {
+  it('increases movement range by 2 with focusBonusMove', () => {
+    const gs = makeGameState([]);
+    const baseFig = makeFigure({
+      position: { x: 5, y: 5 },
+      actionsRemaining: 1,
+      focusBonusMove: false,
+    });
+
+    const baseRange = getValidMoves(baseFig, gs);
+
+    const boostedFig = makeFigure({
+      position: { x: 5, y: 5 },
+      actionsRemaining: 1,
+      focusBonusMove: true,
+    });
+
+    const boostedRange = getValidMoves(boostedFig, gs);
+
+    // Boosted figure should be able to reach more tiles
+    expect(boostedRange.length).toBeGreaterThan(baseRange.length);
+  });
+
+  it('does not grant movement when actionsRemaining is 0 even with bonus', () => {
+    const gs = makeGameState([]);
+    const fig = makeFigure({
+      position: { x: 5, y: 5 },
+      actionsRemaining: 0,
+      focusBonusMove: true,
+    });
+
+    const moves = getValidMoves(fig, gs);
+    expect(moves.length).toBe(0);
+  });
+});
+
+// ============================================================================
+// FOCUS BONUS DEFENSE - COMBAT POOL INTEGRATION
+// ============================================================================
+
+import { buildCombatPools } from '../src/combat-v2';
+
+describe('Focus Bonus Defense - Combat Pool Integration', () => {
+  function makeGameDataMinimal() {
+    return {
+      dice: {},
+      species: {},
+      careers: {},
+      specializations: {},
+      weapons: {
+        'blaster': {
+          id: 'blaster',
+          name: 'Blaster',
+          type: 'Ranged (Light)' as const,
+          skill: 'ranged (light)',
+          baseDamage: 6,
+          damageAddBrawn: false,
+          range: 'Medium' as const,
+          critical: 3,
+          qualities: [],
+          encumbrance: 1,
+          cost: 100,
+        },
+      },
+      armor: {},
+      npcProfiles: {
+        'stormtrooper': {
+          id: 'stormtrooper',
+          name: 'Stormtrooper',
+          side: 'imperial' as const,
+          tier: 'Minion' as const,
+          attackPool: { ability: 2, proficiency: 0 },
+          defensePool: { difficulty: 1, challenge: 0 },
+          woundThreshold: 4,
+          strainThreshold: null,
+          soak: 3,
+          speed: 4,
+          weapons: [{ weaponId: 'blaster', name: 'Blaster', baseDamage: 6, range: 'Medium' as const, critical: 3, qualities: [] }],
+          aiArchetype: 'trooper',
+          keywords: [],
+          abilities: [],
+        },
+      },
+    } as any;
+  }
+
+  it('adds +1 Challenge die when defender has focusBonusDefense', () => {
+    const attacker = makeFigure({
+      id: 'attacker',
+      entityType: 'npc',
+      entityId: 'stormtrooper',
+      playerId: 0,
+    });
+
+    const defenderBase = makeFigure({
+      id: 'defender',
+      entityType: 'hero',
+      entityId: 'hero-1',
+      playerId: 1,
+      focusBonusDefense: false,
+    });
+
+    const defenderBoosted = makeFigure({
+      id: 'defender-boost',
+      entityType: 'hero',
+      entityId: 'hero-1',
+      playerId: 1,
+      focusBonusDefense: true,
+    });
+
+    const gs = makeGameState([attacker, defenderBase]);
+    gs.npcProfiles = makeGameDataMinimal().npcProfiles;
+    const gd = makeGameDataMinimal();
+
+    const baseResult = buildCombatPools(attacker, defenderBase, 'blaster', gs, gd);
+    const boostedResult = buildCombatPools(attacker, defenderBoosted, 'blaster', gs, gd);
+
+    expect(boostedResult.defensePool.challenge).toBe(baseResult.defensePool.challenge + 1);
   });
 });

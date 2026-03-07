@@ -534,6 +534,7 @@ export interface GameStore {
   guardedStance: () => void
   useTalent: (talentId: string) => void
   useConsumable: (itemId: string, targetId?: string) => void
+  spendFocus: (effect: import('@engine/types.js').FocusEffect) => void
   getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => void
   dismissCombat: () => void
@@ -1408,6 +1409,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ validMoves: moves, validTargets: targets })
     } else {
       set({ validMoves: [], validTargets: [] })
+    }
+  },
+
+  spendFocus: (effect) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure) return
+
+    const focusAction = {
+      type: 'SpendFocus' as const,
+      figureId: selectedFigureId,
+      payload: { effect },
+    }
+    const newGameState = executeActionV2(gameState, focusAction, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+
+    addCombatLog(`${selectedFigureId} spent Focus: ${effect}`)
+
+    // Re-select to update valid moves (bonus_move changes movement range)
+    const updatedFigure = newGameState.figures.find(f => f.id === selectedFigureId)
+    if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
+      const moves = getValidMoves(updatedFigure, newGameState)
+      const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
+      set({ validMoves: moves, validTargets: targets })
     }
   },
 

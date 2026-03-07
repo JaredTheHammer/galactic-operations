@@ -1165,6 +1165,9 @@ export function resetForActivation(
     hasStandby: false,       // standby consumed/cleared at new activation
     standbyWeaponId: null,
     dodgeTokens: 0,          // dodge tokens cleared at new activation (aim persists)
+    focusBonusMove: false,   // Focus movement bonus cleared at new activation
+    focusBonusDamage: false, // Focus damage bonus cleared (should already be consumed by attack)
+    focusBonusDefense: false, // Focus defense bonus cleared at new activation
     isActivated: false,
     conditions: newConditions,
     suppressionTokens,
