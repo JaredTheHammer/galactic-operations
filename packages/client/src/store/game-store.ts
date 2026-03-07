@@ -68,6 +68,15 @@ import { generateExplorationTokens } from '@engine/exploration-tokens.js'
 import { initializeCommandTokens } from '@engine/command-tokens.js'
 import { initializeSecretObjectives } from '@engine/secret-objectives.js'
 import {
+  getDirectiveThreatModifier,
+  getDirectiveReinforcementModifier,
+  getDirectiveStartingConsumables,
+  getDirectiveShopDiscount,
+  getDirectiveMoraleModifier,
+  getDirectiveExplorationBonus,
+  getDirectiveCommandTokenBonus,
+} from '@engine/agenda-phase.js'
+import {
   createCampaign,
   getAvailableMissions,
   completeMission,
@@ -2199,18 +2208,64 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameState.tacticDeck = initializeTacticDeck(gameData)
     }
 
+    // Apply agenda directive effects to mission parameters
+    const threatMod = getDirectiveThreatModifier(campaignState)
+    if (threatMod !== 0) {
+      gameState.reinforcementPoints = Math.max(0, (gameState.reinforcementPoints ?? 0) + threatMod)
+    }
+
+    const moraleMod_imp = getDirectiveMoraleModifier(campaignState, 'Imperial')
+    const moraleMod_op = getDirectiveMoraleModifier(campaignState, 'Operative')
+    if (moraleMod_imp !== 0 && gameState.imperialMorale) {
+      gameState.imperialMorale = {
+        ...gameState.imperialMorale,
+        value: Math.max(0, gameState.imperialMorale.value + moraleMod_imp),
+      }
+    }
+    if (moraleMod_op !== 0 && gameState.operativeMorale) {
+      gameState.operativeMorale = {
+        ...gameState.operativeMorale,
+        value: Math.max(0, gameState.operativeMorale.value + moraleMod_op),
+      }
+    }
+
+    // Add directive starting consumables to inventory
+    const directiveConsumables = getDirectiveStartingConsumables(campaignState)
+    if (directiveConsumables.length > 0 && gameState.consumableInventory) {
+      for (const { itemId, quantity } of directiveConsumables) {
+        gameState.consumableInventory[itemId] = (gameState.consumableInventory[itemId] ?? 0) + quantity
+      }
+    }
+
+    // Apply shop discount from directives to campaign (for social phase)
+    const shopDiscount = getDirectiveShopDiscount(campaignState)
+    if (shopDiscount > 0) {
+      const discounts = { ...(campaignState.activeDiscounts ?? {}), agenda_directive: shopDiscount }
+      set({ campaignState: { ...campaignState, activeDiscounts: discounts } })
+    }
+
     // Initialize TI4-inspired systems
-    // Exploration tokens: place on valid map tiles for heroes to discover
-    const explorationTokens = generateExplorationTokens(gameState.map, gameData)
+    // Exploration tokens: place on valid map tiles with directive bonus
+    const explorationBonus = getDirectiveExplorationBonus(campaignState)
+    const defaultTokenCount = Math.max(3, Math.floor((gameState.map.width * gameState.map.height) / 50))
+    const explorationTokens = generateExplorationTokens(
+      gameState.map, gameData,
+      explorationBonus !== 0 ? defaultTokenCount + explorationBonus : undefined,
+    )
     if (explorationTokens.length > 0) {
       gameState.explorationTokens = explorationTokens
     }
 
-    // Command tokens: per-mission resource for tactical abilities
+    // Command tokens: per-mission resource with directive bonus
     const commandTokens = initializeCommandTokens(
       heroesRegistry,
       campaignState.threatLevel,
     )
+    const tokenBonus = getDirectiveCommandTokenBonus(campaignState)
+    if (tokenBonus > 0) {
+      commandTokens.operativeTokens += tokenBonus
+      commandTokens.operativeMaxPerRound += tokenBonus
+    }
     gameState.commandTokens = commandTokens
 
     // Secret objectives: draw one per hero from the available deck
