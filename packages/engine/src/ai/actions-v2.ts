@@ -24,6 +24,7 @@ import type {
 
 import { getPath, getValidMoves, getDistance } from '../movement.js';
 import { hasLineOfSight } from '../los.js';
+import { isBossWeaponAvailable } from '../boss-mechanics.js';
 
 import type {
   ConditionContext,
@@ -58,6 +59,10 @@ function getPrimaryWeaponId(
   if (figure.entityType === 'npc') {
     const npc = gameState.npcProfiles[figure.entityId];
     if (npc && npc.weapons.length > 0) {
+      // Skip weapons disabled by boss hit locations
+      const available = npc.weapons.filter(w => isBossWeaponAvailable(figure, w.weaponId));
+      if (available.length > 0) return available[0].weaponId;
+      // All weapons disabled: fall back to first weapon (combat-v2 will handle the miss)
       return npc.weapons[0].weaponId;
     }
   } else {

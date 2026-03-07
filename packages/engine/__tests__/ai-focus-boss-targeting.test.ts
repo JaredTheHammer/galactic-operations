@@ -832,3 +832,136 @@ describe('getProfileForFigure - boss phase archetype swap', () => {
     expect(result.id).toBe('trooper');
   });
 });
+
+// ============================================================================
+// AI DISABLED WEAPON FILTERING TESTS
+// ============================================================================
+
+describe('AI weapon selection with disabled boss weapons', () => {
+  beforeEach(() => {
+    vi.mocked(hasLineOfSight).mockReturnValue(true);
+    vi.mocked(getCover).mockReturnValue('None');
+    vi.mocked(getDistance).mockImplementation((a: any, b: any) =>
+      Math.abs(a.x - b.x) + Math.abs(a.y - b.y),
+    );
+  });
+
+  it('skips disabled weapon and uses next available weapon for attack action', () => {
+    const bossProfile = makeNPC({
+      id: 'boss-droid',
+      name: 'Boss Droid',
+      tier: 'Nemesis',
+      isBoss: true,
+      weapons: [
+        { weaponId: 'main-cannon', name: 'Main Cannon', baseDamage: 12, range: 'Long' as const, critical: 2, qualities: [] },
+        { weaponId: 'backup-blaster', name: 'Backup Blaster', baseDamage: 7, range: 'Medium' as const, critical: 3, qualities: [] },
+      ],
+    });
+
+    const bossFig = makeNPCFigure({
+      id: 'fig-boss-droid',
+      entityId: 'boss-droid',
+      position: { x: 10, y: 5 },
+      hitLocations: [
+        {
+          id: 'cannon-mount',
+          name: 'Cannon Mount',
+          woundCapacity: 5,
+          woundsCurrent: 5,
+          isDisabled: true,
+          disabledEffects: { disabledWeapons: ['main-cannon'] },
+        },
+      ],
+    });
+
+    const heroFig = makeFigure({ position: { x: 5, y: 5 } });
+    const gs = makeGameState([bossFig, heroFig], { 'hero-1': makeHero() }, {
+      'boss-droid': bossProfile,
+    });
+    const gd = makeGameData();
+    gd.weapons['main-cannon'] = makeWeapon({ id: 'main-cannon', baseDamage: 12, range: 'Long' });
+    gd.weapons['backup-blaster'] = makeWeapon({ id: 'backup-blaster', baseDamage: 7, range: 'Medium' });
+
+    const action = buildAttackAction(bossFig, heroFig.id, gs, gd);
+    expect(action).not.toBeNull();
+    expect((action!.payload as any).weaponId).toBe('backup-blaster');
+  });
+
+  it('falls back to first weapon when all weapons are disabled', () => {
+    const bossProfile = makeNPC({
+      id: 'boss-droid',
+      name: 'Boss Droid',
+      tier: 'Nemesis',
+      isBoss: true,
+      weapons: [
+        { weaponId: 'main-cannon', name: 'Main Cannon', baseDamage: 12, range: 'Long' as const, critical: 2, qualities: [] },
+      ],
+    });
+
+    const bossFig = makeNPCFigure({
+      id: 'fig-boss-droid',
+      entityId: 'boss-droid',
+      position: { x: 10, y: 5 },
+      hitLocations: [
+        {
+          id: 'cannon-mount',
+          name: 'Cannon Mount',
+          woundCapacity: 5,
+          woundsCurrent: 5,
+          isDisabled: true,
+          disabledEffects: { disabledWeapons: ['main-cannon'] },
+        },
+      ],
+    });
+
+    const heroFig = makeFigure({ position: { x: 5, y: 5 } });
+    const gs = makeGameState([bossFig, heroFig], { 'hero-1': makeHero() }, {
+      'boss-droid': bossProfile,
+    });
+    const gd = makeGameData();
+
+    const action = buildAttackAction(bossFig, heroFig.id, gs, gd);
+    expect(action).not.toBeNull();
+    // Falls back to first weapon since all are disabled
+    expect((action!.payload as any).weaponId).toBe('main-cannon');
+  });
+
+  it('uses primary weapon when no hit locations are disabled', () => {
+    const bossProfile = makeNPC({
+      id: 'boss-droid',
+      name: 'Boss Droid',
+      tier: 'Nemesis',
+      isBoss: true,
+      weapons: [
+        { weaponId: 'main-cannon', name: 'Main Cannon', baseDamage: 12, range: 'Long' as const, critical: 2, qualities: [] },
+        { weaponId: 'backup-blaster', name: 'Backup Blaster', baseDamage: 7, range: 'Medium' as const, critical: 3, qualities: [] },
+      ],
+    });
+
+    const bossFig = makeNPCFigure({
+      id: 'fig-boss-droid',
+      entityId: 'boss-droid',
+      position: { x: 10, y: 5 },
+      hitLocations: [
+        {
+          id: 'cannon-mount',
+          name: 'Cannon Mount',
+          woundCapacity: 5,
+          woundsCurrent: 2,
+          isDisabled: false,
+          disabledEffects: { disabledWeapons: ['main-cannon'] },
+        },
+      ],
+    });
+
+    const heroFig = makeFigure({ position: { x: 5, y: 5 } });
+    const gs = makeGameState([bossFig, heroFig], { 'hero-1': makeHero() }, {
+      'boss-droid': bossProfile,
+    });
+    const gd = makeGameData();
+
+    const action = buildAttackAction(bossFig, heroFig.id, gs, gd);
+    expect(action).not.toBeNull();
+    expect((action!.payload as any).weaponId).toBe('main-cannon');
+  });
+});

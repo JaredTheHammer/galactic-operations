@@ -1084,6 +1084,19 @@ export function applyCombatResult(
         }
       }
 
+      // Apply conditions from newly-disabled boss hit locations (e.g. Disoriented, Immobilized)
+      if (hitLocationResult?.feedback.locationsDisabled.length) {
+        for (const disabledId of hitLocationResult.feedback.locationsDisabled) {
+          const loc = updatedHitLocations?.find(l => l.id === disabledId);
+          if (loc?.disabledEffects.conditionInflicted) {
+            const cond = loc.disabledEffects.conditionInflicted as Condition;
+            if (!newConditions.includes(cond)) {
+              newConditions.push(cond);
+            }
+          }
+        }
+      }
+
       // Graduated suppression: ranged hits add suppression tokens
       let suppressionGain = 0;
       if (isRangedAttack && resolution.rollResult.isHit) {
@@ -1136,6 +1149,7 @@ export function applyCombatResult(
         dodgeTokens: newDodgeTokens,
         hitLocations: updatedHitLocations,
         bossPhase: updatedBossPhase,
+        bossPhaseStatBonuses: updatedBossPhaseStatBonuses,
       };
     }
 

@@ -594,3 +594,100 @@ describe('Boss Location Summary', () => {
     expect(getBossLocationSummary(fig)).toEqual([]);
   });
 });
+
+// ============================================================================
+// DISABLED WEAPON AVAILABILITY TESTS
+// ============================================================================
+
+describe('Boss Weapon Availability', () => {
+  it('reports all weapons available when no locations disabled', () => {
+    const fig = makeBossFigure();
+    expect(isBossWeaponAvailable(fig, 'boss-gun')).toBe(true);
+    expect(isBossWeaponAvailable(fig, 'boss-sword')).toBe(true);
+  });
+
+  it('reports weapon unavailable when its location is disabled', () => {
+    const fig = makeBossFigure();
+    fig.hitLocations![1].isDisabled = true; // gun-arm disables boss-gun
+
+    expect(isBossWeaponAvailable(fig, 'boss-gun')).toBe(false);
+    expect(isBossWeaponAvailable(fig, 'boss-sword')).toBe(true);
+  });
+
+  it('reports all weapons available for non-boss figures', () => {
+    const fig = makeBossFigure({ hitLocations: undefined });
+    expect(isBossWeaponAvailable(fig, 'boss-gun')).toBe(true);
+    expect(isBossWeaponAvailable(fig, 'any-weapon')).toBe(true);
+  });
+
+  it('reports multiple weapons unavailable from multiple disabled locations', () => {
+    const fig = makeBossFigure({
+      hitLocations: [
+        {
+          id: 'arm-1', name: 'Arm 1', woundCapacity: 3, woundsCurrent: 3, isDisabled: true,
+          disabledEffects: { disabledWeapons: ['weapon-a'] },
+        },
+        {
+          id: 'arm-2', name: 'Arm 2', woundCapacity: 3, woundsCurrent: 3, isDisabled: true,
+          disabledEffects: { disabledWeapons: ['weapon-b'] },
+        },
+        {
+          id: 'legs', name: 'Legs', woundCapacity: 3, woundsCurrent: 0, isDisabled: false,
+          disabledEffects: { disabledWeapons: ['weapon-c'] },
+        },
+      ],
+    });
+
+    expect(isBossWeaponAvailable(fig, 'weapon-a')).toBe(false);
+    expect(isBossWeaponAvailable(fig, 'weapon-b')).toBe(false);
+    expect(isBossWeaponAvailable(fig, 'weapon-c')).toBe(true); // location not disabled
+  });
+});
+
+// ============================================================================
+// DISABLED LOCATION CONDITION COLLECTION TESTS
+// ============================================================================
+
+describe('Disabled Location Condition Collection', () => {
+  it('collects unique conditions from disabled locations', () => {
+    const fig = makeBossFigure();
+    fig.hitLocations![0].isDisabled = true; // Disoriented
+    fig.hitLocations![3].isDisabled = true; // Immobilized
+
+    const conditions = getDisabledLocationConditions(fig);
+    expect(conditions).toContain('Disoriented');
+    expect(conditions).toContain('Immobilized');
+    expect(conditions.length).toBe(2);
+  });
+
+  it('deduplicates identical conditions from multiple locations', () => {
+    const fig = makeBossFigure({
+      hitLocations: [
+        {
+          id: 'a', name: 'A', woundCapacity: 3, woundsCurrent: 3, isDisabled: true,
+          disabledEffects: { conditionInflicted: 'Disoriented' },
+        },
+        {
+          id: 'b', name: 'B', woundCapacity: 3, woundsCurrent: 3, isDisabled: true,
+          disabledEffects: { conditionInflicted: 'Disoriented' },
+        },
+      ],
+    });
+
+    const conditions = getDisabledLocationConditions(fig);
+    expect(conditions.length).toBe(1);
+    expect(conditions[0]).toBe('Disoriented');
+  });
+
+  it('returns empty array when no locations are disabled', () => {
+    const fig = makeBossFigure();
+    const conditions = getDisabledLocationConditions(fig);
+    expect(conditions.length).toBe(0);
+  });
+
+  it('returns empty array for non-boss figures', () => {
+    const fig = makeBossFigure({ hitLocations: undefined });
+    const conditions = getDisabledLocationConditions(fig);
+    expect(conditions.length).toBe(0);
+  });
+});
