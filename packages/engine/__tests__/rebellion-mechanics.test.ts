@@ -626,6 +626,53 @@ describe('completeMission rebellion mechanics integration', () => {
     expect(updated.actProgress).toBeDefined();
     expect(updated.actProgress!.act).toBe(1);
   });
+
+  it('applies intel exposure reduction only once per act', () => {
+    const missionWithIntel = makeTestMission({
+      lootTokens: [
+        { id: 'intel-1', position: { x: 5, y: 5 }, reward: { type: 'narrative' as any, description: 'Secret plans', value: 0 } },
+      ],
+    });
+    const missionLookup: Record<string, MissionDefinition> = {
+      [missionWithIntel.id]: missionWithIntel,
+    };
+
+    // First mission: collects intel, should get -1 exposure reduction
+    const campaign = makeCampaignWithProgress({
+      actProgress: { act: 1, exposure: 5, influence: 0, control: 0, exposureThresholdsTriggered: [] },
+    });
+    const { campaign: after1 } = completeMission(campaign, {
+      mission: missionWithIntel,
+      outcome: 'victory',
+      roundsPlayed: 3,
+      completedObjectiveIds: ['obj-eliminate', 'obj-loot'],
+      heroKills: { 'hero-1': 2 },
+      lootCollected: ['intel-1'],
+      heroesIncapacitated: [],
+      leaderKilled: false,
+    }, missionLookup);
+
+    expect(after1.actProgress!.intelReductionUsed).toBe(true);
+    const exposureAfterFirst = after1.actProgress!.exposure;
+
+    // Second mission: also collects intel, should NOT get another reduction
+    const { campaign: after2 } = completeMission(after1, {
+      mission: missionWithIntel,
+      outcome: 'victory',
+      roundsPlayed: 3,
+      completedObjectiveIds: ['obj-eliminate', 'obj-loot'],
+      heroKills: { 'hero-1': 2 },
+      lootCollected: ['intel-1'],
+      heroesIncapacitated: [],
+      leaderKilled: false,
+    }, missionLookup);
+
+    // Both missions are victories with all objectives complete = perfect = -1 exposure each
+    // First mission: exposureDelta(-1 perfect) + intelReduction(-1) = -2 from base 5 = 3
+    // Second mission: exposureDelta(-1 perfect) + intelReduction(0, already used) = -1 from 3 = 2
+    expect(after2.actProgress!.exposure).toBe(exposureAfterFirst - 1);
+    expect(after2.actProgress!.intelReductionUsed).toBe(true);
+  });
 });
 
 // ============================================================================

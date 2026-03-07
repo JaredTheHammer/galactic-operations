@@ -1227,6 +1227,8 @@ export interface ActProgress {
   control: number;
   /** One-time exposure threshold bonuses already applied to Control */
   exposureThresholdsTriggered: number[];
+  /** Whether intel exposure reduction has been used this act (max once per act) */
+  intelReductionUsed?: boolean;
 }
 
 /** Act outcome tier based on influence - control delta */

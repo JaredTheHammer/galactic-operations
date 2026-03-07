@@ -443,7 +443,8 @@ export function completeMission(
     const token = mission.lootTokens.find(l => l.id === id);
     return token?.reward.type === 'narrative';
   });
-  const intelReduction = newIntelItems.length > 0 ? -1 : 0;
+  // Intel reduction: -1 exposure, max once per act
+  const intelReduction = (newIntelItems.length > 0 && !actProgress.intelReductionUsed) ? -1 : 0;
 
   actProgress = updateActProgress(
     actProgress,
@@ -451,6 +452,10 @@ export function completeMission(
     influenceDelta,
     controlDelta,
   );
+
+  if (intelReduction < 0) {
+    actProgress = { ...actProgress, intelReductionUsed: true };
+  }
 
   // Handle act finale: freeze outcome and apply consequences
   let actOutcomes = [...(campaign.actOutcomes ?? [])];
@@ -608,7 +613,7 @@ export function updateActProgress(
   }
 
   return {
-    act: progress.act,
+    ...progress,
     exposure: newExposure,
     influence: progress.influence + influenceDelta,
     control: progress.control + controlDelta + extraControl,
