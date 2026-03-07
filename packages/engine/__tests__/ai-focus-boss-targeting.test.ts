@@ -47,7 +47,7 @@ import {
   buildAttackAction,
 } from '../src/ai/actions-v2.js';
 
-import { determineActions, loadAIProfiles } from '../src/ai/decide-v2.js';
+import { determineActions, loadAIProfiles, getProfileForFigure } from '../src/ai/decide-v2.js';
 
 import { getValidMoves, getDistance } from '../src/movement.js';
 import { hasLineOfSight, getCover } from '../src/los.js';
@@ -339,6 +339,34 @@ function makeAIProfiles(): AIProfilesData {
         weights: {
           killPotential: 5, coverValue: 3, proximity: 2,
           threatLevel: 2, elevation: 1, selfPreservation: 3,
+        },
+      },
+      melee: {
+        id: 'melee',
+        name: 'Melee Berserker',
+        cardTitle: 'MELEE TACTICS',
+        description: 'Aggressive melee behavior.',
+        priorityRules: [
+          { rank: 1, condition: 'enemy-in-range', action: 'attack-best-target', cardText: 'Charge!' },
+          { rank: 2, condition: 'default', action: 'advance-with-cover', cardText: 'Close in.' },
+        ],
+        weights: {
+          killPotential: 8, coverValue: 1, proximity: 5,
+          threatLevel: 1, elevation: 0, selfPreservation: 1,
+        },
+      },
+      elite: {
+        id: 'elite',
+        name: 'Elite Commander',
+        cardTitle: 'ELITE TACTICS',
+        description: 'Tactical elite behavior.',
+        priorityRules: [
+          { rank: 1, condition: 'enemy-in-range', action: 'attack-best-target', cardText: 'Engage.' },
+          { rank: 2, condition: 'default', action: 'advance-with-cover', cardText: 'Advance.' },
+        ],
+        weights: {
+          killPotential: 6, coverValue: 2, proximity: 3,
+          threatLevel: 3, elevation: 1, selfPreservation: 2,
         },
       },
     },
@@ -725,5 +753,82 @@ describe('AI Focus spending in determineActions', () => {
     const decision = determineActions(heroFig, gs, gd, profiles);
     const focusActions = decision.actions.filter(a => a.type === 'SpendFocus');
     expect(focusActions.length).toBe(0);
+  });
+});
+
+// ============================================================================
+// AI ARCHETYPE SWAP ON PHASE TRANSITION TESTS
+// ============================================================================
+
+describe('getProfileForFigure - boss phase archetype swap', () => {
+  it('uses default archetype at phase 0', () => {
+    const npcProfile = makeNPC({
+      aiArchetype: 'trooper',
+      bossPhaseTransitions: [
+        { disabledLocationsRequired: 1, newAiArchetype: 'melee' },
+      ],
+    });
+    const fig = makeNPCFigure({ bossPhase: 0 });
+    const gs = makeGameState([fig], {}, { stormtrooper: npcProfile });
+    const profiles = makeAIProfiles();
+
+    const result = getProfileForFigure(fig, gs, profiles);
+    expect(result.id).toBe('trooper');
+  });
+
+  it('swaps to newAiArchetype at phase 1', () => {
+    const npcProfile = makeNPC({
+      aiArchetype: 'trooper',
+      bossPhaseTransitions: [
+        { disabledLocationsRequired: 1, newAiArchetype: 'melee' },
+      ],
+    });
+    const fig = makeNPCFigure({ bossPhase: 1 });
+    const gs = makeGameState([fig], {}, { stormtrooper: npcProfile });
+    const profiles = makeAIProfiles();
+
+    const result = getProfileForFigure(fig, gs, profiles);
+    expect(result.id).toBe('melee');
+  });
+
+  it('uses second transition archetype at phase 2', () => {
+    const npcProfile = makeNPC({
+      aiArchetype: 'trooper',
+      bossPhaseTransitions: [
+        { disabledLocationsRequired: 1, newAiArchetype: 'melee' },
+        { disabledLocationsRequired: 2, newAiArchetype: 'elite' },
+      ],
+    });
+    const fig = makeNPCFigure({ bossPhase: 2 });
+    const gs = makeGameState([fig], {}, { stormtrooper: npcProfile });
+    const profiles = makeAIProfiles();
+
+    const result = getProfileForFigure(fig, gs, profiles);
+    expect(result.id).toBe('elite');
+  });
+
+  it('falls back to default when newAiArchetype not found in profiles', () => {
+    const npcProfile = makeNPC({
+      aiArchetype: 'trooper',
+      bossPhaseTransitions: [
+        { disabledLocationsRequired: 1, newAiArchetype: 'nonexistent' },
+      ],
+    });
+    const fig = makeNPCFigure({ bossPhase: 1 });
+    const gs = makeGameState([fig], {}, { stormtrooper: npcProfile });
+    const profiles = makeAIProfiles();
+
+    const result = getProfileForFigure(fig, gs, profiles);
+    expect(result.id).toBe('trooper'); // falls back to original
+  });
+
+  it('uses default archetype for non-boss NPC (no bossPhaseTransitions)', () => {
+    const npcProfile = makeNPC({ aiArchetype: 'trooper' });
+    const fig = makeNPCFigure({ bossPhase: undefined });
+    const gs = makeGameState([fig], {}, { stormtrooper: npcProfile });
+    const profiles = makeAIProfiles();
+
+    const result = getProfileForFigure(fig, gs, profiles);
+    expect(result.id).toBe('trooper');
   });
 });

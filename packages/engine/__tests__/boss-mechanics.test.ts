@@ -498,6 +498,76 @@ describe('Boss Phase Transitions', () => {
 });
 
 // ============================================================================
+// PHASE STAT BONUS TESTS
+// ============================================================================
+
+describe('Boss Phase Transition Stat Bonuses', () => {
+  it('accumulates stat bonuses from transition', () => {
+    const fig = makeBossFigure({ bossPhase: 0 });
+    const transition: BossPhaseTransition = {
+      disabledLocationsRequired: 1,
+      newAiArchetype: 'melee',
+      statBonuses: { attackPoolBonus: 1, damageBonus: 2, speedBonus: 1 },
+    };
+
+    const result = applyBossPhaseTransition(fig, transition);
+    expect(result.bossPhase).toBe(1);
+    expect(result.bossPhaseStatBonuses).toBeDefined();
+    expect(result.bossPhaseStatBonuses!.attackPoolBonus).toBe(1);
+    expect(result.bossPhaseStatBonuses!.damageBonus).toBe(2);
+    expect(result.bossPhaseStatBonuses!.speedBonus).toBe(1);
+  });
+
+  it('stacks bonuses across multiple transitions', () => {
+    // First transition
+    const fig1 = makeBossFigure({ bossPhase: 0 });
+    const transition1: BossPhaseTransition = {
+      disabledLocationsRequired: 1,
+      newAiArchetype: 'elite',
+      statBonuses: { attackPoolBonus: 1, soakBonus: 1 },
+    };
+    const result1 = applyBossPhaseTransition(fig1, transition1);
+
+    // Second transition on the updated figure
+    const transition2: BossPhaseTransition = {
+      disabledLocationsRequired: 2,
+      newAiArchetype: 'melee',
+      statBonuses: { attackPoolBonus: 1, damageBonus: 3 },
+    };
+    const result2 = applyBossPhaseTransition(result1, transition2);
+
+    expect(result2.bossPhase).toBe(2);
+    expect(result2.bossPhaseStatBonuses!.attackPoolBonus).toBe(2); // 1 + 1
+    expect(result2.bossPhaseStatBonuses!.soakBonus).toBe(1); // from first only
+    expect(result2.bossPhaseStatBonuses!.damageBonus).toBe(3); // from second only
+  });
+
+  it('produces no stat bonuses when transition has none', () => {
+    const fig = makeBossFigure({ bossPhase: 0 });
+    const transition: BossPhaseTransition = {
+      disabledLocationsRequired: 1,
+      newAiArchetype: 'elite',
+    };
+
+    const result = applyBossPhaseTransition(fig, transition);
+    expect(result.bossPhase).toBe(1);
+    expect(result.bossPhaseStatBonuses).toBeUndefined();
+  });
+
+  it('clears stat bonuses when all values are zero', () => {
+    const fig = makeBossFigure({ bossPhase: 0 });
+    const transition: BossPhaseTransition = {
+      disabledLocationsRequired: 1,
+      newAiArchetype: 'elite',
+      statBonuses: { attackPoolBonus: 0, damageBonus: 0 },
+    };
+
+    const result = applyBossPhaseTransition(fig, transition);
+    expect(result.bossPhaseStatBonuses).toBeUndefined();
+  });
+});
+
+// ============================================================================
 // LOCATION SUMMARY TESTS
 // ============================================================================
 

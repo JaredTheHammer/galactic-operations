@@ -31,8 +31,12 @@ export const BossHitLocations: React.FC<BossHitLocationsProps> = ({
   const locations = figure.hitLocations
 
   if (compact) {
+    const allDisabledCompact = locations.every(loc => loc.isDisabled)
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '10px' }}>
+        {allDisabledCompact && (
+          <span style={{ color: '#ff4444', fontWeight: 'bold', fontSize: '9px' }}>FULLY EXPOSED</span>
+        )}
         {locations.map(loc => (
           <div key={loc.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span style={{
@@ -84,11 +88,30 @@ export const BossHitLocations: React.FC<BossHitLocationsProps> = ({
     marginBottom: '6px',
   }
 
+  const allDisabled = locations.every(loc => loc.isDisabled)
+
   return (
     <div style={containerStyle}>
       <div style={titleStyle}>
-        {targeting ? 'Select Target Location' : 'Hit Locations'}
+        {targeting ? 'Select Target Location' : allDisabled ? 'All Locations Destroyed' : 'Hit Locations'}
       </div>
+      {allDisabled && !targeting && (
+        <div style={{
+          textAlign: 'center',
+          padding: '6px 4px',
+          marginBottom: '4px',
+          color: '#ff4444',
+          fontWeight: 'bold',
+          fontSize: '10px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+          border: '1px dashed #ff4444',
+          borderRadius: '4px',
+          backgroundColor: 'rgba(255, 68, 68, 0.08)',
+        }}>
+          Fully Exposed — No Armor
+        </div>
+      )}
       {locations.map(loc => (
         <LocationBar
           key={loc.id}

@@ -2568,7 +2568,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Close social phase and return to mission select.
    */
   closeSocialPhase: () => {
-    const { campaignState } = get()
     const { campaignState, activeSaveSlot } = get()
     set({
       showSocialPhase: false,

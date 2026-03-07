@@ -205,6 +205,18 @@ for (const [id, npc] of Object.entries(allNpcs)) {
         if (!pt.newAiArchetype || typeof pt.newAiArchetype !== 'string') {
           fail('Boss NPC ' + id + ' phase transition missing newAiArchetype');
         }
+        // Validate optional statBonuses structure
+        if (pt.statBonuses) {
+          const validKeys = ['attackPoolBonus', 'defensePoolBonus', 'soakBonus', 'speedBonus', 'damageBonus'];
+          for (const key of Object.keys(pt.statBonuses)) {
+            if (!validKeys.includes(key)) {
+              fail('Boss NPC ' + id + ' phase transition has unknown statBonuses key: ' + key);
+            }
+            if (typeof pt.statBonuses[key] !== 'number') {
+              fail('Boss NPC ' + id + ' phase transition statBonuses.' + key + ' must be a number');
+            }
+          }
+        }
       }
     }
   }

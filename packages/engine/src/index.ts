@@ -154,6 +154,7 @@ export {
   getSuppressionState,
   getNPCCourage,
   getHeroCourage,
+  getFigureSpeed,
 } from './turn-machine-v2.js';
 export type { ArmyCompositionV2, SuppressionState } from './turn-machine-v2.js';
 
