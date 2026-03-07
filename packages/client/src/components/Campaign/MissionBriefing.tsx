@@ -7,6 +7,8 @@
 import React from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { getThreatClockEffects } from '../../../../engine/src/social-phase'
+import type { ExpandedSocialPhaseResult } from '../../../../engine/src/types'
 
 // ============================================================================
 // Component
@@ -22,6 +24,13 @@ export default function MissionBriefing() {
   const heroes = Object.values(campaignState.heroes)
   const primaryObjectives = mission.objectives.filter(o => o.priority === 'primary')
   const secondaryObjectives = mission.objectives.filter(o => o.priority === 'secondary')
+
+  // Threat clock effects from last social phase
+  const lastSocialResult = campaignState.socialPhaseResults?.at(-1) as ExpandedSocialPhaseResult | undefined
+  const clockEffects = lastSocialResult?.threatClockEffects ?? null
+
+  // Active bounty targets for this mission
+  const activeBounties = campaignState.activeBounties ?? []
 
   const containerStyle: React.CSSProperties = {
     width: '100vw',
@@ -172,6 +181,53 @@ export default function MissionBriefing() {
             <div style={{ fontSize: '14px', color: '#ff6644', fontWeight: 'bold' }}>{mission.imperialThreat}</div>
           </div>
         </div>
+
+        {/* Threat Clock Effects */}
+        {clockEffects && clockEffects.level !== 'normal' && (
+          <div style={{
+            marginBottom: '16px',
+            padding: '10px 14px',
+            borderRadius: '6px',
+            backgroundColor: clockEffects.level === 'caught_off_guard' ? '#44ff4410' : '#ff440015',
+            border: `1px solid ${clockEffects.level === 'caught_off_guard' ? '#44ff4440' : '#ff444040'}`,
+          }}>
+            <div style={{
+              fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1.5px',
+              color: clockEffects.level === 'caught_off_guard' ? '#44ff44' : '#ff6644',
+              marginBottom: '4px',
+            }}>
+              Intel Assessment: {clockEffects.level.replace(/_/g, ' ')}
+            </div>
+            <div style={{ fontSize: '12px', color: '#aaa' }}>
+              {clockEffects.operativeSurpriseRound && 'Your team will get a surprise round -- enemies are caught off guard.'}
+              {clockEffects.enemySurpriseRound && 'Enemy forces are aware of your approach -- expect an ambush.'}
+              {clockEffects.bonusReinforcements > 0 && !clockEffects.enemySurpriseRound &&
+                `Enemy reinforcements detected: +${clockEffects.bonusReinforcements} additional group${clockEffects.bonusReinforcements > 1 ? 's' : ''}.`}
+              {clockEffects.enemiesStartInCover && ' Enemies have fortified positions.'}
+            </div>
+          </div>
+        )}
+
+        {/* Active Bounties */}
+        {activeBounties.length > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <div style={sectionTitleStyle}>Active Bounties</div>
+            {activeBounties.map(bounty => (
+              <div key={bounty.id} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '6px 10px', marginBottom: '4px',
+                backgroundColor: '#0a0a12', border: '1px solid #2a2a3f', borderRadius: '4px',
+                fontSize: '12px',
+              }}>
+                <div>
+                  <span style={{ color: '#ffd966', fontWeight: 'bold' }}>{bounty.targetName}</span>
+                  <span style={{ color: '#888', marginLeft: '8px' }}>({bounty.condition})</span>
+                </div>
+                <span style={{ color: '#cc8800' }}>+{bounty.creditReward} cr</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Objectives */}
         {primaryObjectives.length > 0 && (

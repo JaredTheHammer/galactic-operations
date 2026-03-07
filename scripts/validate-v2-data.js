@@ -41,6 +41,7 @@ const npcFiles = [
   'data/npcs/bounty-hunters.json',
   'data/npcs/warlord-forces.json',
   'data/npcs/companions.json',
+  'data/npcs/bounty-targets.json',
 ];
 
 const missionFiles = [
@@ -160,7 +161,7 @@ for (const [id, npc] of Object.entries(allNpcs)) {
     if (typeof npc.courage !== 'number' || npc.courage < 1) fail('NPC ' + id + ' courage must be a positive number');
   }
   // Mechanical keywords (optional array, validate names)
-  const validKeywords = ['Armor', 'Agile', 'Relentless', 'Cumbersome', 'Disciplined', 'Dauntless', 'Guardian'];
+  const validKeywords = ['Armor', 'Agile', 'Relentless', 'Cumbersome', 'Disciplined', 'Dauntless', 'Guardian', 'Droid', 'Elusive', 'Adversary'];
   if (npc.mechanicalKeywords) {
     if (!Array.isArray(npc.mechanicalKeywords)) fail('NPC ' + id + ' mechanicalKeywords must be an array');
     for (const kw of npc.mechanicalKeywords) {

@@ -89,6 +89,7 @@ import diceD6Data from '@data/dice-d6.json'
 import imperialsNpcData from '@data/npcs/imperials.json'
 import bountyHuntersNpcData from '@data/npcs/bounty-hunters.json'
 import warlordForcesNpcData from '@data/npcs/warlord-forces.json'
+import bountyTargetsNpcData from '@data/npcs/bounty-targets.json'
 import weaponsV2Data from '@data/weapons-v2.json'
 import armorData from '@data/armor.json'
 import speciesData from '@data/species.json'
@@ -152,7 +153,7 @@ const BOARD_TEMPLATES: BoardTemplate[] = [
 function loadGameDataV2(): GameData {
   // NPC profiles (merge all faction files)
   const npcProfiles: Record<string, NPCProfile> = {}
-  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData]
+  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData, bountyTargetsNpcData]
   for (const npcFile of npcDataFiles) {
     const npcsRaw = (npcFile as any).npcs ?? npcFile
     for (const [id, npc] of Object.entries(npcsRaw)) {
@@ -2153,11 +2154,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
+    // Build imperial forces: mission enemies + bounty targets
+    const imperialForces = mission.initialEnemies.map(g => ({
+      npcId: g.npcProfileId,
+      count: g.count,
+    }))
+
+    // Inject accepted bounty targets as bonus enemy spawns
+    const activeBounties = campaignState.activeBounties ?? []
+    const bountyTargetLog: string[] = []
+    for (const bounty of activeBounties) {
+      if (gameData.npcProfiles[bounty.targetNpcId]) {
+        imperialForces.push({ npcId: bounty.targetNpcId, count: 1 })
+        bountyTargetLog.push(`Bounty target spotted: ${bounty.targetName} (${bounty.condition})`)
+      }
+    }
+
     const army: ArmyCompositionV2 = {
-      imperial: mission.initialEnemies.map(g => ({
-        npcId: g.npcProfileId,
-        count: g.count,
-      })),
+      imperial: imperialForces,
       operative: operativeUnits,
     }
     gameState = deployFiguresV2(gameState, army, gameData)
@@ -2172,6 +2186,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
     gameState.currentActivationIndex = 0
     gameState.turnPhase = 'Activation'
 
+    // Build combat log with threat clock and bounty info
+    const startLog: string[] = [`Mission started: ${mission.name}`]
+    const effects = gameState.threatClockEffects
+    if (effects) {
+      if (effects.operativeSurpriseRound) {
+        startLog.push('** SURPRISE ROUND: Operatives act first -- enemies caught off guard! **')
+      } else if (effects.enemySurpriseRound) {
+        startLog.push('** AMBUSH: Enemies get a surprise round! **')
+      }
+      if (effects.bonusReinforcements > 0) {
+        startLog.push(`Threat clock: +${effects.bonusReinforcements * 3} bonus threat pool (${effects.level})`)
+      }
+      if (effects.enemiesStartInCover) {
+        startLog.push('Enemies deployed in fortified positions (cover)')
+      }
+    }
+    startLog.push(...bountyTargetLog)
+
     set({
       gameState,
       gameData,
@@ -2181,7 +2213,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       isAIBattle: false,
       activeMissionDef: mission,
       triggeredWaveIds: [],
-      combatLog: [`Mission started: ${mission.name}`],
+      combatLog: startLog,
       gameStateHistory: [],
     })
   },
