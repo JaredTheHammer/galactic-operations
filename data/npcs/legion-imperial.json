@@ -1,0 +1,1900 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Galactic Empire units from Star Wars: Legion. Adapted to d6 dice pool system. Miniature-compatible -- players can field their Legion Empire minis. Units that overlap with Imperial Assault have 'legion-' prefix IDs. Bosses have hit locations and phase transitions for special battle encounters.",
+    "source": "Star Wars: Legion (AMG/FFG)",
+    "faction": "Galactic Empire"
+  },
+  "npcs": {
+    "legion-darth-vader": {
+      "id": "legion-darth-vader",
+      "name": "Darth Vader (Legion)",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 18,
+      "strainThreshold": 14,
+      "soak": 6,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "legion-vader-saber",
+          "name": "Vader's Lightsaber",
+          "baseDamage": 10,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Vicious",
+              "value": 3
+            },
+            {
+              "name": "Pierce",
+              "value": 3
+            },
+            {
+              "name": "Impact",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-vader-throw",
+          "name": "Force Throw",
+          "baseDamage": 6,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 3
+            },
+            {
+              "name": "Impact",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Imperial",
+        "Force-sensitive",
+        "Dark Side",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Commander",
+        "Relentless"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Retaliate",
+          "value": 3
+        },
+        {
+          "name": "Pierce",
+          "value": 3
+        },
+        {
+          "name": "Steadfast"
+        },
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Master of the Force: May use 2 Force powers per activation.",
+        "Deflect: When targeted by a ranged attack, add 1 Challenge die to the defense pool. On 3+ net defense successes, reflect 2 damage back at attacker.",
+        "Force Choke: As an action, choose a figure within Short range. That figure suffers 4 strain and is Immobilized.",
+        "Saber Throw: Perform a melee attack at Short range using lightsaber profile at -2 damage.",
+        "Relentless: After performing a Force action, may perform a free Move maneuver.",
+        "Immune: Pierce (incoming Pierce has no effect on this figure)"
+      ],
+      "threatCost": 16,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "chest-unit",
+          "name": "Chest Control Unit",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "soakModifier": -3,
+            "conditionInflicted": "System Failure"
+          }
+        },
+        {
+          "id": "saber-arm",
+          "name": "Saber Arm",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "attackPoolModifier": -2,
+            "disabledWeapons": [
+              "legion-vader-throw"
+            ],
+            "conditionInflicted": "Weakened"
+          }
+        },
+        {
+          "id": "respirator",
+          "name": "Respirator",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "speedModifier": -1,
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Labored Breathing"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 1,
+          "newAiArchetype": "melee",
+          "narrativeText": "Vader's breathing grows labored, but his fury mounts. The Dark Side swells around him.",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 1,
+            "speedBonus": 1
+          }
+        },
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Critically damaged, Vader channels all remaining power into devastating attacks!",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 3,
+            "speedBonus": 0
+          }
+        }
+      ]
+    },
+    "legion-emperor-palpatine": {
+      "id": "legion-emperor-palpatine",
+      "name": "Emperor Palpatine (Legion)",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 0,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 14,
+      "strainThreshold": 18,
+      "soak": 3,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "legion-palp-lightning",
+          "name": "Force Lightning",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 3
+            },
+            {
+              "name": "Stun setting",
+              "value": null
+            },
+            {
+              "name": "Blast",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-palp-saber",
+          "name": "Palpatine's Lightsaber",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "hero",
+      "keywords": [
+        "Imperial",
+        "Force-sensitive",
+        "Dark Side",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Commander",
+        "Sith"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "abilities": [
+        "Master of the Force: May use 2 Force powers per activation.",
+        "And Now You Will Die: Force Lightning can target up to 2 additional figures within Short range of the primary target.",
+        "Pulling the Strings: As an action, choose a friendly trooper within Medium range. That unit may immediately perform a free attack or move.",
+        "Entourage: Imperial Royal Guard -- reduce deployment cost of Royal Guard by 2.",
+        "Give In to Your Anger: Once per round, when a friendly figure is defeated, the attacker suffers 3 strain."
+      ],
+      "threatCost": 14,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "force-conduit",
+          "name": "Force Conduit",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Force Disrupted"
+          }
+        },
+        {
+          "id": "robes",
+          "name": "Sith Robes",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "soakModifier": -1,
+            "conditionInflicted": "Exposed"
+          }
+        },
+        {
+          "id": "mobility",
+          "name": "Frail Body",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "conditionInflicted": "Hobbled"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "hero",
+          "narrativeText": "The Emperor cackles. 'Your feeble skills are no match for the power of the Dark Side!'",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 2,
+            "speedBonus": 0
+          }
+        }
+      ]
+    },
+    "legion-iden-versio": {
+      "id": "legion-iden-versio",
+      "name": "Iden Versio",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 12,
+      "strainThreshold": 10,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-iden-tl50",
+          "name": "TL-50 Repeater",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-iden-pulse-cannon",
+          "name": "Pulse Cannon",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Impact",
+              "value": 2
+            },
+            {
+              "name": "Limited Ammo",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Unique",
+        "Legion",
+        "Commander",
+        "Inferno Squad"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        },
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Tactical Strike: Friendly troopers within Short range add 1 Ability die to attacks this round.",
+        "ID10 Seeker Droid: Once per round, choose an enemy within Medium range. Remove 1 dodge or standby token from that target.",
+        "Inferno: When attacking with Pulse Cannon, ignore cover bonuses.",
+        "Sharpshooter: Reduce target's cover bonus by 1."
+      ],
+      "threatCost": 10
+    },
+    "legion-director-krennic": {
+      "id": "legion-director-krennic",
+      "name": "Director Krennic",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 12,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-krennic-dt29",
+          "name": "DT-29 Heavy Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Imperial",
+        "Officer",
+        "Unique",
+        "Legion",
+        "Commander"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Compel: At the start of a friendly trooper's activation, it may gain 1 suppression to perform a free Move.",
+        "Entourage: Death Troopers -- reduce deployment cost of Death Troopers by 2.",
+        "Cunning: When issuing orders, you may issue 1 additional order.",
+        "Deploy the Garrison!: As an action, all Imperial troopers within Medium range gain +1 to attack pools until end of round."
+      ],
+      "threatCost": 8
+    },
+    "legion-general-veers": {
+      "id": "legion-general-veers",
+      "name": "General Veers",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-veers-e11",
+          "name": "E-11 Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Imperial",
+        "Officer",
+        "Unique",
+        "Legion",
+        "Commander"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Maximum Firepower: As an action, choose a friendly vehicle or emplacement within Long range. It may perform a free attack with +2 damage.",
+        "Spotter: Friendly vehicles within Long range may reroll up to 2 attack dice.",
+        "Evasive: After being wounded, perform a free Move maneuver.",
+        "Inspire: At the start of activation, remove 1 suppression from a friendly unit within Short range."
+      ],
+      "threatCost": 8
+    },
+    "legion-agent-kallus": {
+      "id": "legion-agent-kallus",
+      "name": "Agent Kallus",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 12,
+      "strainThreshold": 10,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-kallus-bo-rifle",
+          "name": "Bo-Rifle (Ranged)",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-kallus-bo-rifle-melee",
+          "name": "Bo-Rifle (Melee)",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Stun setting",
+              "value": null
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Imperial",
+        "ISB",
+        "Unique",
+        "Legion",
+        "Commander"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Contingency: At deployment, set aside 1 order token. May reveal it later to issue an order to any friendly unit.",
+        "Hunter: +1 Proficiency die when attacking wounded targets.",
+        "Tactical: Gain 1 aim token after issuing orders.",
+        "Mastery: May use Bo-Rifle in either ranged or melee mode without switching."
+      ],
+      "threatCost": 9
+    },
+    "legion-imperial-officer": {
+      "id": "legion-imperial-officer",
+      "name": "Imperial Officer (Legion)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": 8,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-officer-pistol",
+          "name": "Officer's Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Imperial",
+        "Officer",
+        "Leader",
+        "Legion",
+        "Commander"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Inspire: At the start of activation, remove 1 suppression from a friendly unit within Short range.",
+        "Compel: A friendly trooper may gain 1 suppression to perform a free Move.",
+        "Commanding Presence: Imperial Minions within Short range do not flee due to morale."
+      ],
+      "threatCost": 3
+    },
+    "legion-snowtrooper": {
+      "id": "legion-snowtrooper",
+      "name": "Snowtrooper",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 0
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "legion-snowtrooper-e11",
+          "name": "E-11 Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-snowtrooper-flamer",
+          "name": "Flamethrower",
+          "baseDamage": 5,
+          "range": "Short",
+          "critical": 4,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 2
+            },
+            {
+              "name": "Burn",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Legion",
+        "Corps"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Steady: After performing a Move, may perform a free ranged attack.",
+        "Cold Assault: Ignore movement penalties from snow/ice terrain."
+      ],
+      "threatCost": 3
+    },
+    "legion-shoretroopers": {
+      "id": "legion-shoretroopers",
+      "name": "Shoretrooper",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-shore-e22",
+          "name": "E-22 Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Legion",
+        "Corps"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Coordinate: After being issued an order, choose a friendly Corps unit at Short range. It gains an aim token.",
+        "Target: 1 -- When firing, gain +1 Ability die if targeting a figure already targeted this round."
+      ],
+      "threatCost": 3
+    },
+    "legion-death-troopers": {
+      "id": "legion-death-troopers",
+      "name": "Death Trooper",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 6,
+      "strainThreshold": 6,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-death-e11d",
+          "name": "E-11D Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-death-dlt19d",
+          "name": "DLT-19D Heavy Blaster",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Elite",
+        "Legion",
+        "Special Forces",
+        "Death Trooper"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        },
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Ready: After performing a standby action, gain 1 aim token.",
+        "Precise: When spending aim tokens, reroll up to 2 additional dice.",
+        "Compel: A friendly trooper may gain 1 suppression to perform a free Move."
+      ],
+      "threatCost": 6
+    },
+    "legion-imperial-royal-guard": {
+      "id": "legion-imperial-royal-guard",
+      "name": "Imperial Royal Guard",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 8,
+      "strainThreshold": 6,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-guard-pike",
+          "name": "Force Pike",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            },
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-guard-ec17",
+          "name": "EC-17 Hold-out Blaster",
+          "baseDamage": 6,
+          "range": "Short",
+          "critical": 3,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Elite",
+        "Legion",
+        "Special Forces",
+        "Royal Guard"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Retaliate",
+          "value": 1
+        }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Guardian: When a friendly Commander within Short range would suffer wounds, this figure may suffer up to 2 of those wounds instead.",
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Disciplined: Reduce suppression by 1 at start of activation."
+      ],
+      "threatCost": 5
+    },
+    "legion-scout-troopers": {
+      "id": "legion-scout-troopers",
+      "name": "Scout Trooper",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-scout-ec17",
+          "name": "EC-17 Hold-out Blaster",
+          "baseDamage": 6,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Scout",
+        "Legion",
+        "Special Forces"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Scout: Deploy up to 2 tiles ahead of the normal deployment zone.",
+        "Sharpshooter: Reduce target's cover bonus by 1.",
+        "Low Profile: While in cover, improve cover by 1 rank (light becomes heavy)."
+      ],
+      "threatCost": 3
+    },
+    "legion-scout-troopers-strike-team": {
+      "id": "legion-scout-troopers-strike-team",
+      "name": "Scout Trooper Sniper",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 0,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 3,
+      "strainThreshold": 4,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-scout-sniper-dlt20a",
+          "name": "DLT-20A Sniper Rifle",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Sniper",
+        "Legion",
+        "Special Forces"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Scout: Deploy up to 2 tiles ahead of the normal deployment zone.",
+        "Sharpshooter: Reduce target's cover bonus by 1.",
+        "Low Profile: While in cover, improve cover by 1 rank.",
+        "Marksman: May convert 1 aim token to Pierce 1."
+      ],
+      "threatCost": 4
+    },
+    "legion-imperial-special-forces": {
+      "id": "legion-imperial-special-forces",
+      "name": "Imperial Special Forces (ISF)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 6,
+      "strainThreshold": 6,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-isf-e11",
+          "name": "E-11 Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Elite",
+        "Legion",
+        "Special Forces",
+        "Inferno Squad"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Tactical: Gain 1 aim token after being issued an order.",
+        "Ready: After performing standby, gain 1 aim token.",
+        "Precise: Reroll up to 2 additional dice when spending aim tokens."
+      ],
+      "threatCost": 5
+    },
+    "legion-dewback-rider": {
+      "id": "legion-dewback-rider",
+      "name": "Dewback Rider",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 5,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-dewback-shock",
+          "name": "Shock Prod",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-dewback-t21",
+          "name": "T-21 Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Creature",
+        "Mounted",
+        "Legion",
+        "Support"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Relentless: After performing a Move, may perform a free attack.",
+        "Spur: Gain +2 speed this activation but suffer 1 wound.",
+        "Unhindered: Ignore difficult terrain."
+      ],
+      "threatCost": 5
+    },
+    "legion-speeder-bikes": {
+      "id": "legion-speeder-bikes",
+      "name": "74-Z Speeder Bikes",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 0,
+        "challenge": 1
+      },
+      "woundThreshold": 5,
+      "strainThreshold": 4,
+      "soak": 2,
+      "speed": 6,
+      "weapons": [
+        {
+          "weaponId": "legion-speeder-ax20",
+          "name": "Ax-20 Blaster Cannon",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Imperial",
+        "Vehicle",
+        "Speeder",
+        "Legion",
+        "Support",
+        "Repulsor"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Cover: 1 -- Immune to Pierce while in cover.",
+        "Compulsory Move: Must move at least 1 tile per activation.",
+        "Speeder: Ignore terrain height 1 or lower. Cannot be engaged."
+      ],
+      "threatCost": 4
+    },
+    "legion-at-st": {
+      "id": "legion-at-st",
+      "name": "AT-ST",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 16,
+      "strainThreshold": 8,
+      "soak": 6,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "legion-atst-chin-gun",
+          "name": "MS-4 Twin Blaster Cannon",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 2
+            },
+            {
+              "name": "Auto-fire",
+              "value": null
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-atst-grenade",
+          "name": "88i Twin Mortar Launcher",
+          "baseDamage": 7,
+          "range": "Long",
+          "critical": 4,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 3
+            },
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Imperial",
+        "Vehicle",
+        "Walker",
+        "Massive",
+        "Legion",
+        "Heavy",
+        "Ground Vehicle"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Arsenal 2: May use up to 2 weapons per attack action.",
+        "Weak Point: Rear -- attacks from behind ignore Armor.",
+        "Immune: Pierce (incoming Pierce has no effect on this figure)."
+      ],
+      "threatCost": 12
+    },
+    "legion-at-rt": {
+      "id": "legion-at-rt",
+      "name": "AT-RT",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 8,
+      "strainThreshold": 4,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-atrt-laser",
+          "name": "AT-RT Laser Cannon",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 2
+            },
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Imperial",
+        "Vehicle",
+        "Walker",
+        "Legion",
+        "Support",
+        "Ground Vehicle"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Climbing Vehicle: May move up terrain of height 1.",
+        "Weak Point: Rear -- attacks from behind ignore Armor."
+      ],
+      "threatCost": 6
+    },
+    "legion-e-web-team": {
+      "id": "legion-e-web-team",
+      "name": "E-Web Heavy Blaster Team",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 6,
+      "strainThreshold": 4,
+      "soak": 3,
+      "speed": 2,
+      "weapons": [
+        {
+          "weaponId": "legion-eweb-blaster",
+          "name": "E-Web Heavy Repeating Blaster",
+          "baseDamage": 11,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Auto-fire",
+              "value": null
+            },
+            {
+              "name": "Cumbersome",
+              "value": 4
+            },
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Imperial",
+        "Heavy Weapons",
+        "Emplacement",
+        "Legion",
+        "Support"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Shield",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Emplaced: Cannot take Move maneuvers. Must be set up at deployment.",
+        "Sentinel: Standby range increased to Long.",
+        "Barrage: +1 Proficiency die when this unit has not moved this activation."
+      ],
+      "threatCost": 5
+    },
+    "legion-occupier-tank": {
+      "id": "legion-occupier-tank",
+      "name": "TX-225 GAVw Occupier Tank",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 2,
+        "challenge": 1
+      },
+      "woundThreshold": 14,
+      "strainThreshold": 8,
+      "soak": 6,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "legion-occupier-cannon",
+          "name": "MK 2e/w Medium Laser Cannon",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 3
+            },
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-occupier-mortar",
+          "name": "DLT-19 Side Guns",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Imperial",
+        "Vehicle",
+        "Tank",
+        "Massive",
+        "Legion",
+        "Heavy",
+        "Ground Vehicle",
+        "Repulsor"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Arsenal 2: May use up to 2 weapons per attack action.",
+        "Weak Point: Sides -- attacks from flanking positions ignore Armor.",
+        "Immune: Pierce.",
+        "Transport: Carry up to 1 friendly trooper unit. Deploy them when stopping."
+      ],
+      "threatCost": 11
+    },
+    "legion-dark-troopers": {
+      "id": "legion-dark-troopers",
+      "name": "Dark Trooper",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 7,
+      "strainThreshold": null,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-dark-trooper-fists",
+          "name": "Crushing Fists",
+          "baseDamage": 6,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            },
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Imperial",
+        "Droid",
+        "Trooper",
+        "Elite",
+        "Legion",
+        "Special Forces",
+        "Dark Trooper"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Retaliate",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Immune: Pierce, Suppression.",
+        "Programmed: Cannot be rallied by friendly abilities. Suppression has no effect.",
+        "Durasteel Chassis: Reduce all incoming damage by 1 (stacks with soak)."
+      ],
+      "threatCost": 6
+    },
+    "legion-purge-troopers": {
+      "id": "legion-purge-troopers",
+      "name": "Purge Trooper",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 6,
+      "strainThreshold": 6,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-purge-electrostaff",
+          "name": "Electrostaff",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Stun setting",
+              "value": null
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-purge-dc15",
+          "name": "DC-15A Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Long",
+          "critical": 3,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Elite",
+        "Legion",
+        "Special Forces"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Jedi Hunter: +2 damage against Force-sensitive targets.",
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Electrostaff Mastery: When engaged with a Force-sensitive target, that target cannot use Deflect."
+      ],
+      "threatCost": 5
+    },
+    "legion-blizzard-force-stormtroopers": {
+      "id": "legion-blizzard-force-stormtroopers",
+      "name": "Blizzard Force Stormtrooper",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-blizzard-e11",
+          "name": "E-11 Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Legion",
+        "Corps",
+        "Blizzard Force"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Steady: After performing a Move, may perform a free ranged attack.",
+        "Cold Assault: Ignore movement penalties from snow/ice terrain."
+      ],
+      "threatCost": 3
+    },
+    "legion-moff-gideon": {
+      "id": "legion-moff-gideon",
+      "name": "Moff Gideon",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 12,
+      "strainThreshold": 10,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-gideon-darksaber",
+          "name": "The Darksaber",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-gideon-blaster",
+          "name": "Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Imperial",
+        "Officer",
+        "Unique",
+        "Legion",
+        "Commander",
+        "Imperial Remnant"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Entourage: Dark Troopers -- reduce deployment cost of Dark Troopers by 2.",
+        "Cunning: When issuing orders, may issue 1 additional order.",
+        "Ruthless: As an action, defeat a friendly Minion within Short range. All Imperial units within Short range gain +2 damage until end of round.",
+        "Supreme Commander: Once per game, all Imperial units within Medium range perform a free action."
+      ],
+      "threatCost": 10
+    },
+    "legion-grand-inquisitor": {
+      "id": "legion-grand-inquisitor",
+      "name": "Grand Inquisitor",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 14,
+      "strainThreshold": 12,
+      "soak": 4,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-gi-saber",
+          "name": "Double-Bladed Spinning Lightsaber",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Imperial",
+        "Force-sensitive",
+        "Dark Side",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Operative",
+        "Inquisitor"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Retaliate",
+          "value": 2
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "abilities": [
+        "Master of the Force: May use 1 Force power per activation.",
+        "Deflect: When targeted by a ranged attack, add 1 Challenge die to defense pool.",
+        "Saber Throw: Perform a melee attack at Short range at -2 damage.",
+        "Fear and Dead Men: Hostile figures within Short range suffer +1 suppression at start of their activation.",
+        "Helicopter Saber: May move 2 additional tiles when performing a Move. Ignore terrain height 1."
+      ],
+      "threatCost": 12,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "saber-hilt",
+          "name": "Lightsaber Mechanism",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weapon Damaged"
+          }
+        },
+        {
+          "id": "dark-focus",
+          "name": "Dark Side Focus",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "soakModifier": -2,
+            "conditionInflicted": "Force Disrupted"
+          }
+        },
+        {
+          "id": "legs",
+          "name": "Mobility",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "conditionInflicted": "Hobbled"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 1,
+          "newAiArchetype": "melee",
+          "narrativeText": "The Grand Inquisitor's eyes blaze with fury. 'There are some things far more frightening than death!'",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 1,
+            "speedBonus": 1
+          }
+        },
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Broken but defiant, the Grand Inquisitor channels all remaining Dark Side power into one final onslaught!",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 3,
+            "speedBonus": 0
+          }
+        }
+      ]
+    },
+    "legion-inferno-squad": {
+      "id": "legion-inferno-squad",
+      "name": "Inferno Squad Operative",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 6,
+      "strainThreshold": 6,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-inferno-e11",
+          "name": "Modified E-11 Blaster",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Imperial",
+        "Trooper",
+        "Elite",
+        "Legion",
+        "Special Forces",
+        "Inferno Squad"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Tactical: Gain 1 aim token after being issued an order.",
+        "Covert Ops: May deploy anywhere on the battlefield outside of Short range of enemy figures.",
+        "Elite Training: May reroll 1 attack die per attack."
+      ],
+      "threatCost": 5
+    }
+  }
+}

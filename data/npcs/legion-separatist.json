@@ -1,0 +1,1214 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Separatist Alliance (CIS) units from Star Wars: Legion. Adapted to d6 dice pool system. Miniature-compatible -- players can field their Legion Separatist minis. Droids emphasize numbers and AI coordination. Named villains (Grievous, Dooku, Ventress) are boss-tier.",
+    "source": "Star Wars: Legion (AMG/FFG)",
+    "faction": "Separatist Alliance"
+  },
+  "npcs": {
+    "legion-general-grievous": {
+      "id": "legion-general-grievous",
+      "name": "General Grievous",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 16,
+      "strainThreshold": 10,
+      "soak": 5,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-grievous-sabers",
+          "name": "Stolen Lightsabers (x4)",
+          "baseDamage": 9,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 3
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            },
+            {
+              "name": "Linked",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Cyborg",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Commander",
+        "General"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Retaliate",
+          "value": 3
+        }
+      ],
+      "abilities": [
+        "Arsenal 2: May perform 2 melee attacks as a single action (represents 4 arms).",
+        "Relentless: After performing a Move, may perform a free attack.",
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Scale: Climb terrain freely. Ignore elevation costs.",
+        "Jedi Hunter: +2 damage against Force-sensitive targets. Gain Pierce 1 against them.",
+        "Immune: Pierce, Suppression (droid body).",
+        "Your Lightsabers Will Make a Fine Addition: When Grievous defeats a Force-sensitive figure, gain +1 Proficiency die permanently."
+      ],
+      "threatCost": 15,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "right-arms",
+          "name": "Right Arm Pair",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Arms Severed"
+          }
+        },
+        {
+          "id": "left-arms",
+          "name": "Left Arm Pair",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Arms Severed"
+          }
+        },
+        {
+          "id": "chest-plate",
+          "name": "Chest Plate",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "soakModifier": -3,
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Organ Sac Exposed"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 1,
+          "newAiArchetype": "melee",
+          "narrativeText": "Grievous snarls, discarding damaged limbs. He fights faster, more desperately!",
+          "statBonuses": {
+            "attackPoolBonus": 0,
+            "damageBonus": 2,
+            "speedBonus": 1
+          }
+        },
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Grievous's chest plate cracks open, revealing the vulnerable organ sac within. He fights with savage abandon!",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 3,
+            "speedBonus": 2
+          }
+        }
+      ]
+    },
+    "legion-count-dooku": {
+      "id": "legion-count-dooku",
+      "name": "Count Dooku",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 0,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 14,
+      "strainThreshold": 14,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-dooku-saber",
+          "name": "Dooku's Curved-Hilt Lightsaber",
+          "baseDamage": 9,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 3
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-dooku-lightning",
+          "name": "Force Lightning",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Separatist",
+        "Force-sensitive",
+        "Dark Side",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Commander",
+        "Sith"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Retaliate",
+          "value": 2
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "abilities": [
+        "Master of the Force: May use 2 Force powers per activation.",
+        "Deflect: When targeted by a ranged attack, add 1 Challenge die to defense pool. On 3+ net defense successes, reflect 2 damage back.",
+        "Makashi Mastery: In melee, this figure's attacks gain Pierce 1. After defending in melee, may riposte for free (1 attack at -1 Proficiency).",
+        "Fear: Hostile figures within Short range suffer +1 suppression at start of their activation.",
+        "Cunning: When issuing orders, may issue 1 additional order."
+      ],
+      "threatCost": 14,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "saber-arm",
+          "name": "Dueling Arm",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weakened"
+          }
+        },
+        {
+          "id": "force-conduit",
+          "name": "Dark Side Conduit",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "soakModifier": -1,
+            "conditionInflicted": "Force Disrupted"
+          }
+        },
+        {
+          "id": "composure",
+          "name": "Aristocratic Composure",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -1,
+            "conditionInflicted": "Shaken"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Dooku's refined composure breaks. The full weight of the Dark Side flows through him.",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 2,
+            "speedBonus": 0
+          }
+        }
+      ]
+    },
+    "legion-asajj-ventress": {
+      "id": "legion-asajj-ventress",
+      "name": "Asajj Ventress",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
+      "woundThreshold": 12,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 6,
+      "weapons": [
+        {
+          "weaponId": "legion-ventress-sabers",
+          "name": "Dual Curved-Hilt Lightsabers",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            {
+              "name": "Breach",
+              "value": 1
+            },
+            {
+              "name": "Pierce",
+              "value": 2
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            },
+            {
+              "name": "Linked",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Separatist",
+        "Force-sensitive",
+        "Dark Side",
+        "Unique",
+        "Boss",
+        "Legion",
+        "Operative",
+        "Nightsister"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        },
+        {
+          "name": "Retaliate",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Master of the Force: May use 1 Force power per activation.",
+        "Deflect: When targeted by a ranged attack, add 1 Challenge die to defense pool.",
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Jump: Ignore terrain height 1 when moving.",
+        "Disengage: May leave engagement without penalty.",
+        "Juyo Mastery: After performing 2 melee attacks in one activation, gain +1 to all defense pools until next activation.",
+        "Independent: Does not need to be issued orders. Always activates when desired."
+      ],
+      "threatCost": 12,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "sabers",
+          "name": "Dual Lightsabers",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weakened"
+          }
+        },
+        {
+          "id": "dark-focus",
+          "name": "Dark Side Connection",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Force Disrupted"
+          }
+        },
+        {
+          "id": "agility",
+          "name": "Agility",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "speedModifier": -3,
+            "conditionInflicted": "Hobbled"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Ventress screams in rage, channeling pure hatred into her strikes!",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 3,
+            "speedBonus": 0
+          }
+        }
+      ]
+    },
+    "legion-super-tactical-droid": {
+      "id": "legion-super-tactical-droid",
+      "name": "Super Tactical Droid",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": null,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-std-blaster",
+          "name": "Integrated Blaster",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Unique",
+        "Legion",
+        "Commander",
+        "Tactical Droid"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Steadfast"
+        }
+      ],
+      "abilities": [
+        "Direct: After issuing orders, a friendly droid unit at Short range may perform a free attack or move.",
+        "Programmed: Immune to suppression. Cannot benefit from rally abilities.",
+        "Calculating: At start of activation, choose 1: all friendly droids gain +1 aim, or all friendly droids gain +1 dodge.",
+        "Override: Once per round, a friendly droid at Medium range performs a free action (costs 1 strain from the droid if able)."
+      ],
+      "threatCost": 8
+    },
+    "legion-b1-battle-droids": {
+      "id": "legion-b1-battle-droids",
+      "name": "B1 Battle Droid",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 0
+      },
+      "defensePool": {
+        "difficulty": 0,
+        "challenge": 0
+      },
+      "woundThreshold": 3,
+      "strainThreshold": null,
+      "soak": 1,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-b1-e5",
+          "name": "E-5 Blaster Rifle",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Trooper",
+        "Legion",
+        "Corps",
+        "Battle Droid"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Coordinate: After being issued an order, 1 friendly droid at Short range gains a surge token.",
+        "Programmed: Immune to suppression.",
+        "Expendable: When this unit is defeated, gain 1 threat refund.",
+        "Roger Roger: After another friendly B1 unit within Short range is defeated, this unit gains +1 to attack pool until end of round."
+      ],
+      "threatCost": 1
+    },
+    "legion-b2-super-battle-droids": {
+      "id": "legion-b2-super-battle-droids",
+      "name": "B2 Super Battle Droid",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 4,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "legion-b2-wrist-blaster",
+          "name": "Integrated Wrist Blaster",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Trooper",
+        "Legion",
+        "Corps",
+        "Super Battle Droid"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Programmed: Immune to suppression.",
+        "Ready: After performing a standby, gain 1 aim token.",
+        "Armored Chassis: May reroll 1 defense die per attack."
+      ],
+      "threatCost": 3
+    },
+    "legion-droidekas": {
+      "id": "legion-droidekas",
+      "name": "Droideka (Destroyer Droid)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 6,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "legion-droideka-blasters",
+          "name": "Twin Blaster Cannons",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 1
+            },
+            {
+              "name": "Linked",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Trooper",
+        "Legion",
+        "Support",
+        "Destroyer Droid"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Shield",
+          "value": 2
+        },
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Wheel Mode: As an action, switch to wheel mode. Speed becomes 6 but cannot attack. Next activation switches back to combat mode.",
+        "Deflector Shields: Shield tokens reduce incoming damage before soak. Regenerate 1 shield at start of activation.",
+        "Programmed: Immune to suppression.",
+        "Impervious: Immune to Pierce while shields are active."
+      ],
+      "threatCost": 6
+    },
+    "legion-magnaguard": {
+      "id": "legion-magnaguard",
+      "name": "MagnaGuard",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 7,
+      "strainThreshold": null,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-magna-electrostaff",
+          "name": "Electrostaff",
+          "baseDamage": 6,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Stun setting",
+              "value": null
+            },
+            {
+              "name": "Vicious",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Trooper",
+        "Elite",
+        "Legion",
+        "Special Forces",
+        "MagnaGuard"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Retaliate",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Guardian: When a friendly Commander within Short range would suffer wounds, this figure may suffer up to 2 of those wounds instead.",
+        "Programmed: Immune to suppression.",
+        "Relentless: Continue functioning at 0 wounds for 1 more activation, then defeated.",
+        "Jedi Killer: +1 damage against Force-sensitive targets."
+      ],
+      "threatCost": 5
+    },
+    "legion-bx-commando-droids": {
+      "id": "legion-bx-commando-droids",
+      "name": "BX Commando Droid",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-bx-e5s",
+          "name": "E-5s Sniper Rifle",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-bx-vibrosword",
+          "name": "Vibrosword",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Trooper",
+        "Elite",
+        "Legion",
+        "Special Forces",
+        "Commando Droid"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Scout: Deploy up to 2 tiles ahead of normal deployment zone.",
+        "Scale: Climb terrain freely.",
+        "Programmed: Immune to suppression.",
+        "Infiltrate: May deploy disguised. While disguised, appear as friendly troopers to enemies.",
+        "Target: 1 -- +1 Ability die when attacking a figure already damaged this round."
+      ],
+      "threatCost": 5
+    },
+    "legion-b2-rocket-droids": {
+      "id": "legion-b2-rocket-droids",
+      "name": "B2-RP Rocket Droid",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-b2rp-blaster",
+          "name": "Wrist Blaster",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": []
+        },
+        {
+          "weaponId": "legion-b2rp-fists",
+          "name": "Duranium Fists",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Knockdown",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Trooper",
+        "Legion",
+        "Special Forces",
+        "Rocket Droid"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Rocket Boost: Ignore terrain when moving. May move through hostile figures.",
+        "Programmed: Immune to suppression.",
+        "Charge: After performing a Move, may perform a free melee attack.",
+        "Jump: Ignore terrain height 2 when moving."
+      ],
+      "threatCost": 4
+    },
+    "legion-aat-trade-federation-tank": {
+      "id": "legion-aat-trade-federation-tank",
+      "name": "AAT Trade Federation Tank",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 2,
+        "challenge": 1
+      },
+      "woundThreshold": 16,
+      "strainThreshold": 8,
+      "soak": 7,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "legion-aat-main-cannon",
+          "name": "Heavy Laser Cannon",
+          "baseDamage": 11,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 3
+            },
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-aat-shells",
+          "name": "Anti-Personnel Shells",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-aat-lateral",
+          "name": "Lateral Laser Cannons",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Accurate",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Separatist",
+        "Vehicle",
+        "Tank",
+        "Massive",
+        "Repulsor",
+        "Legion",
+        "Heavy",
+        "Ground Vehicle"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Arsenal 2: May use up to 2 weapons per attack action.",
+        "Weak Point: Sides and Rear -- attacks from flanking or behind ignore Armor.",
+        "Immune: Pierce.",
+        "Programmed: Immune to suppression (droid crew).",
+        "Hover: Ignore difficult terrain."
+      ],
+      "threatCost": 12
+    },
+    "legion-snail-droid-tank": {
+      "id": "legion-snail-droid-tank",
+      "name": "NR-N99 Persuader (Snail Tank)",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 14,
+      "strainThreshold": null,
+      "soak": 6,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "legion-snail-ion-cannon",
+          "name": "Heavy Ion Cannon",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 2
+            },
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-snail-blasters",
+          "name": "Lateral Blaster Cannons",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Vehicle",
+        "Tank",
+        "Legion",
+        "Heavy",
+        "Ground Vehicle"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 2
+        }
+      ],
+      "abilities": [
+        "Arsenal 2: May use up to 2 weapons per attack action.",
+        "Programmed: Immune to suppression.",
+        "Weak Point: Rear -- attacks from behind ignore Armor.",
+        "Immune: Pierce.",
+        "Tread Crush: When moving through a tile with a hostile Minion, deal 5 damage to it."
+      ],
+      "threatCost": 10
+    },
+    "legion-dwarf-spider-droid": {
+      "id": "legion-dwarf-spider-droid",
+      "name": "DSD1 Dwarf Spider Droid",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 8,
+      "strainThreshold": null,
+      "soak": 4,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "legion-spider-laser",
+          "name": "Blaster Cannon",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Vehicle",
+        "Walker",
+        "Legion",
+        "Support",
+        "Ground Vehicle"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Programmed: Immune to suppression.",
+        "Climbing Vehicle: May move up terrain of height 1.",
+        "Weak Point: Rear -- attacks from behind ignore Armor.",
+        "Sentinel: Standby range increased to Long."
+      ],
+      "threatCost": 5
+    },
+    "legion-stap-riders": {
+      "id": "legion-stap-riders",
+      "name": "STAP Rider",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 0
+      },
+      "defensePool": {
+        "difficulty": 0,
+        "challenge": 1
+      },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 6,
+      "weapons": [
+        {
+          "weaponId": "legion-stap-blasters",
+          "name": "Twin Blaster Cannons",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Impact",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Vehicle",
+        "Speeder",
+        "Repulsor",
+        "Legion",
+        "Support"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Compulsory Move: Must move at least 1 tile per activation.",
+        "Speeder: Ignore terrain height 1 or lower.",
+        "Programmed: Immune to suppression.",
+        "Cover: 1 -- Immune to Pierce while in cover."
+      ],
+      "threatCost": 3
+    },
+    "legion-cad-bane": {
+      "id": "legion-cad-bane",
+      "name": "Cad Bane",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "legion-bane-dual-ll30",
+          "name": "Dual LL-30 Blaster Pistols",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Linked",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "weaponId": "legion-bane-electro",
+          "name": "Electro Gauntlets",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            },
+            {
+              "name": "Pierce",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": [
+        "Separatist",
+        "Bounty Hunter",
+        "Duros",
+        "Unique",
+        "Legion",
+        "Operative"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Gunslinger: After performing a ranged attack, may perform a second ranged attack against a different target at -1 Proficiency.",
+        "Rocket Boots: Ignore terrain. May move through hostile figures.",
+        "Sharpshooter: Reduce target's cover bonus by 1.",
+        "I Make the Rules Now: Once per round, may spend 2 strain to force a hostile figure within Short range to suffer 1 suppression.",
+        "Bounty: Choose 1 enemy figure at deployment. +2 damage against that figure."
+      ],
+      "threatCost": 9
+    },
+    "legion-b1-security-droid": {
+      "id": "legion-b1-security-droid",
+      "name": "B1 Security Droid",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 0
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "legion-b1sec-e5",
+          "name": "E-5 Blaster Rifle",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": []
+        },
+        {
+          "weaponId": "legion-b1sec-radiation-cannon",
+          "name": "Radiation Cannon",
+          "baseDamage": 8,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            {
+              "name": "Pierce",
+              "value": 1
+            },
+            {
+              "name": "Blast",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": [
+        "Separatist",
+        "Droid",
+        "Trooper",
+        "Legion",
+        "Corps"
+      ],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Coordinate: After being issued an order, 1 friendly droid at Short range gains a surge token.",
+        "Programmed: Immune to suppression.",
+        "Ready: After performing standby, gain 1 aim token."
+      ],
+      "threatCost": 2
+    }
+  }
+}

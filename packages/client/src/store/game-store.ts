@@ -156,6 +156,11 @@ import mercenariesNpcData from '@data/npcs/mercenaries.json'
 import iaImperialNpcData from '@data/npcs/imperial-assault-imperial.json'
 import iaMercenaryNpcData from '@data/npcs/imperial-assault-mercenary.json'
 import iaRebelNpcData from '@data/npcs/imperial-assault-rebel.json'
+import legionImperialNpcData from '@data/npcs/legion-imperial.json'
+import legionRebelNpcData from '@data/npcs/legion-rebel.json'
+import legionRepublicNpcData from '@data/npcs/legion-republic.json'
+import legionSeparatistNpcData from '@data/npcs/legion-separatist.json'
+import legionShadowCollectiveNpcData from '@data/npcs/legion-shadow-collective.json'
 
 // Campaign mission data - Act 1
 import mission1Data from '@data/missions/act1-mission1-arrival.json'
@@ -208,7 +213,7 @@ const BOARD_TEMPLATES: BoardTemplate[] = [
 function loadGameDataV2(): GameData {
   // NPC profiles (merge all faction files)
   const npcProfiles: Record<string, NPCProfile> = {}
-  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData, bountyTargetsNpcData, mercenariesNpcData, iaImperialNpcData, iaMercenaryNpcData, iaRebelNpcData]
+  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData, bountyTargetsNpcData, mercenariesNpcData, iaImperialNpcData, iaMercenaryNpcData, iaRebelNpcData, legionImperialNpcData, legionRebelNpcData, legionRepublicNpcData, legionSeparatistNpcData, legionShadowCollectiveNpcData]
   for (const npcFile of npcDataFiles) {
     const npcsRaw = (npcFile as any).npcs ?? npcFile
     for (const [id, npc] of Object.entries(npcsRaw)) {
