@@ -1,6 +1,9 @@
 /**
  * SocialPhase - Top-level orchestrator for the between-mission social phase.
  * State machine: 'hub' | 'encounter' | 'check-result' | 'shop' | 'summary'
+ *
+ * Expansion: Manages time slots, rival NPC, threat clock, and bounty system
+ * alongside the original encounter/shop/healing flows.
  */
 
 import React, { useState, useMemo, useCallback } from 'react'
@@ -13,16 +16,29 @@ import type {
   SocialNPC,
   SocialCheckResult,
   SocialOutcome,
-  Shop,
+  SocialPhaseState,
+  RivalNPC,
+  BountyContract,
 } from '../../../../../engine/src/types'
 import {
   applySocialOutcomes,
-  completeSocialPhase as finalizeSocialPhase,
+  completeSocialPhase as finalizeSocialPhaseOld,
+  initializeSocialPhase,
+  spendSlot,
+  acceptBounty as engineAcceptBounty,
+  prepBounty as enginePrepBounty,
+  scoutMission as engineScoutMission,
+  confrontRival as engineConfrontRival,
+  deployEarly as engineDeployEarly,
+  finalizeExpandedSocialPhase,
+  getEffectiveDisposition,
+  isItemAvailable,
 } from '../../../../../engine/src/social-phase'
 import { recoverHero, MEDICAL_RECOVERY_COST } from '../../../../../engine/src/campaign-v2'
 import act1HubData from '../../../../../../data/social/act1-hub.json'
 import act2HubData from '../../../../../../data/social/act2-hub.json'
 import act3HubData from '../../../../../../data/social/act3-hub.json'
+import campaignData from '../../../../../../data/campaigns/tangrene-liberation.json'
 
 interface SocialHubData {
   location: SocialPhaseLocation
@@ -67,6 +83,20 @@ const getContainerStyle = (isMobile: boolean): React.CSSProperties => ({
   overflow: isMobile ? 'auto' : 'hidden',
 })
 
+/** Load rival definition from campaign data */
+function getRival(): RivalNPC | undefined {
+  const raw = (campaignData as Record<string, unknown>).rival as RivalNPC | undefined
+  return raw
+}
+
+/** Load bounties for a given act from campaign data */
+function getBountiesForAct(act: number): BountyContract[] {
+  const bounties = (campaignData as Record<string, unknown>).bounties as Record<string, BountyContract[]> | undefined
+  if (!bounties) return []
+  const key = `act${act}`
+  return bounties[key] ?? []
+}
+
 export function SocialPhase() {
   const { isMobile } = useIsMobile()
   const { campaignState, closeSocialPhase, updateCampaignState } = useGameStore()
@@ -97,6 +127,18 @@ export function SocialPhase() {
     return raw.npcs
   }, [currentAct])
 
+  // Expansion: rival and bounties
+  const rival = useMemo(() => getRival(), [])
+  const bounties = useMemo(() => getBountiesForAct(currentAct), [currentAct])
+
+  // Initialize expanded social phase state
+  const [phaseState, setPhaseState] = useState<SocialPhaseState>(() => {
+    if (!campaignState) {
+      return initializeSocialPhase({ credits: 0, completedMissions: [], narrativeItems: [], consumableInventory: {}, threatLevel: 0, threatMultiplier: 1, missionsPlayed: 0, currentAct: 1, heroes: {}, id: '', name: '', difficulty: 'standard', createdAt: '', lastPlayedAt: '', availableMissionIds: [] } as CampaignState, currentAct, bounties)
+    }
+    return initializeSocialPhase(campaignState, currentAct, bounties)
+  })
+
   if (!campaignState) {
     return (
       <div style={getContainerStyle(isMobile)}>
@@ -126,7 +168,7 @@ export function SocialPhase() {
     setView('summary')
   }, [])
 
-  // When a social check resolves
+  // When a social check resolves (spends a slot)
   const onCheckResolved = useCallback((
     result: SocialCheckResult,
     outcomes: SocialOutcome[],
@@ -135,6 +177,12 @@ export function SocialPhase() {
     // Apply outcomes to campaign state
     const updated = applySocialOutcomes(campaignState, outcomes, result.heroId)
     updateCampaignState(updated)
+
+    // Spend a slot for the encounter
+    setPhaseState(prev => spendSlot(
+      prev, 'encounter', result.encounterId, result.heroId,
+      rival, location, npcs, narrativeText,
+    ))
 
     // Record in session
     setSession(prev => ({
@@ -146,9 +194,9 @@ export function SocialPhase() {
       lastNarrativeText: narrativeText,
     }))
     setView('check-result')
-  }, [campaignState, updateCampaignState])
+  }, [campaignState, updateCampaignState, rival, location, npcs])
 
-  // Purchase item
+  // Purchase item (spends a slot on first purchase per shop visit)
   const onPurchase = useCallback((itemId: string, price: number, updatedCampaign: CampaignState) => {
     updateCampaignState(updatedCampaign)
     setSession(prev => ({
@@ -166,7 +214,16 @@ export function SocialPhase() {
     }))
   }, [updateCampaignState])
 
-  // Heal hero
+  // Enter shop (spends a slot)
+  const onEnterShop = useCallback((shopId: string) => {
+    setPhaseState(prev => spendSlot(
+      prev, 'shop', shopId, undefined,
+      rival, location, npcs, `Visited shop.`,
+    ))
+    goToShop(shopId)
+  }, [rival, location, npcs, goToShop])
+
+  // Heal hero (spends a slot for rest_recover)
   const onHealHero = useCallback((heroId: string) => {
     const result = recoverHero(campaignState, heroId)
     if (result) {
@@ -175,12 +232,62 @@ export function SocialPhase() {
         ...prev,
         healingCreditsSpent: prev.healingCreditsSpent + MEDICAL_RECOVERY_COST,
       }))
+      setPhaseState(prev => spendSlot(
+        prev, 'rest_recover', undefined, heroId,
+        rival, location, npcs, `Healed ${campaignState.heroes[heroId]?.name ?? heroId}.`,
+      ))
     }
-  }, [campaignState, updateCampaignState])
+  }, [campaignState, updateCampaignState, rival, location, npcs])
+
+  // Accept a bounty (free action)
+  const onAcceptBounty = useCallback((bountyId: string) => {
+    setPhaseState(prev => {
+      const result = engineAcceptBounty(prev, bountyId)
+      return result ?? prev
+    })
+  }, [])
+
+  // Prep a bounty (spends a slot)
+  const onPrepBounty = useCallback((bountyId: string, heroId: string) => {
+    const hero = campaignState.heroes[heroId]
+    if (!hero) return
+    setPhaseState(prev => {
+      const { state } = enginePrepBounty(prev, bountyId, hero, rival, location, npcs)
+      return state
+    })
+  }, [campaignState, rival, location, npcs])
+
+  // Scout mission (spends a slot)
+  const onScoutMission = useCallback((heroId: string) => {
+    const hero = campaignState.heroes[heroId]
+    if (!hero) return
+    setPhaseState(prev => {
+      const { state } = engineScoutMission(prev, hero, rival, location, npcs)
+      return state
+    })
+  }, [campaignState, rival, location, npcs])
+
+  // Confront rival (spends a slot)
+  const onConfrontRival = useCallback((heroId: string) => {
+    if (!rival) return
+    const hero = campaignState.heroes[heroId]
+    if (!hero) return
+    setPhaseState(prev => {
+      const { state } = engineConfrontRival(prev, hero, rival, location, npcs)
+      return state
+    })
+  }, [campaignState, rival, location, npcs])
+
+  // Deploy early (forfeit remaining slots)
+  const onDeployEarly = useCallback(() => {
+    setPhaseState(prev => engineDeployEarly(prev))
+    goToSummary()
+  }, [goToSummary])
 
   // Complete phase and return to mission select
   const onComplete = useCallback(() => {
-    const finalCampaign = finalizeSocialPhase(
+    const { campaign: finalCampaign } = finalizeExpandedSocialPhase(
+      phaseState,
       campaignState,
       location.id,
       session.encounterResults,
@@ -190,7 +297,7 @@ export function SocialPhase() {
     )
     updateCampaignState(finalCampaign)
     closeSocialPhase()
-  }, [campaignState, location, session, updateCampaignState, closeSocialPhase])
+  }, [campaignState, phaseState, location, session, updateCampaignState, closeSocialPhase])
 
   // Skip social phase entirely
   const onSkip = useCallback(() => {
@@ -209,11 +316,18 @@ export function SocialPhase() {
           npcs={npcs}
           campaign={campaignState}
           session={session}
+          phaseState={phaseState}
+          rival={rival}
           onSelectEncounter={goToEncounter}
-          onSelectShop={goToShop}
+          onSelectShop={onEnterShop}
           onHealHero={onHealHero}
           onComplete={goToSummary}
           onSkip={onSkip}
+          onAcceptBounty={onAcceptBounty}
+          onPrepBounty={onPrepBounty}
+          onScoutMission={onScoutMission}
+          onConfrontRival={onConfrontRival}
+          onDeployEarly={onDeployEarly}
         />
       )}
       {view === 'encounter' && session.currentEncounter && (
@@ -247,6 +361,8 @@ export function SocialPhase() {
           session={session}
           npcs={npcs}
           location={location}
+          phaseState={phaseState}
+          rival={rival}
           onComplete={onComplete}
         />
       )}
