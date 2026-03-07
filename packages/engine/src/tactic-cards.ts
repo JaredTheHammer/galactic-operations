@@ -402,6 +402,21 @@ export function hasStrategicEffect(card: TacticCard): boolean {
  * Get cards from a side's hand that have strategic effects.
  */
 export function getStrategicCards(
+  deck: TacticDeckState,
+  gameData: GameData,
+  side: Side,
+): TacticCard[] {
+  if (!gameData.tacticCards) return [];
+
+  const hand = side === 'Operative'
+    ? deck.operativeHand
+    : deck.imperialHand;
+
+  return hand
+    .map(id => gameData.tacticCards![id])
+    .filter((card): card is TacticCard => !!card && hasStrategicEffect(card));
+}
+
 // DUAL-USE CARD SYSTEM (Brass: Birmingham-inspired)
 // ============================================================================
 
@@ -448,26 +463,14 @@ export function getAltModeCards(
 
   return hand
     .map(id => gameData.tacticCards![id])
-    .filter((card): card is TacticCard => !!card && hasStrategicEffect(card));
-}
-
-/**
- * Play a tactic card for its strategic effect (instead of its combat effect).
- * The card is discarded after use. This is the dual-use mechanic from WotR:
- * each Event card can be played for its text effect OR as a combat card, never both.
- *
- * Returns the strategic result and updated deck state.
- */
-export function playStrategicCard(
     .filter((card): card is TacticCard => !!card && hasAltMode(card));
 }
 
 /**
- * Play a tactic card in its alternative mode (outside of combat).
- * Discards the card and returns the alt mode result.
- * Returns null if the card doesn't have an alt mode or isn't in hand.
+ * Play a tactic card for its strategic effect (instead of its combat effect).
+ * The card is discarded after use.
  */
-export function playCardAltMode(
+export function playStrategicCard(
   deck: TacticDeckState,
   gameData: GameData,
   side: Side,
@@ -553,6 +556,17 @@ export function aiShouldPlayStrategic(
   }
 
   return false;
+}
+
+/**
+ * Play a tactic card in its alternative (non-combat) mode.
+ * Returns the alt mode result and updated deck, or null if invalid.
+ */
+export function playCardAltMode(
+  deck: TacticDeckState,
+  gameData: GameData,
+  side: Side,
+  cardId: string,
 ): { deck: TacticDeckState; result: AltModeResult } | null {
   if (!gameData.tacticCards) return null;
 

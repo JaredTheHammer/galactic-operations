@@ -23,12 +23,6 @@ import type {
   RelicFragmentType,
   GameData,
   MissionSecretObjectiveState,
-} from './types';
-
-import { DEFAULT_XP_AWARDS, THREAT_SCALING } from './types';
-import { addFragment } from './relic-fragments';
-import { decrementDirectiveDurations, getDirectiveXPBonus } from './agenda-phase';
-import { resolveSecretObjectives, applySecretObjectiveRewards } from './secret-objectives';
   BountyContract,
   CriticalInjuryDefinition,
   LegacyEventDefinition,
@@ -47,6 +41,9 @@ import {
   getExposureStatus,
   getActOutcomeTier,
 } from './types';
+import { addFragment } from './relic-fragments';
+import { decrementDirectiveDurations, getDirectiveXPBonus } from './agenda-phase';
+import { resolveSecretObjectives, applySecretObjectiveRewards } from './secret-objectives';
 import { processNaturalRecovery } from './critical-injuries';
 import { updateMomentum, applyMomentumCredits } from './momentum';
 import { processOverworldPostMission } from './campaign-overworld';
@@ -314,7 +311,6 @@ export function completeMission(
   input: MissionCompletionInput,
   allMissions: Record<string, MissionDefinition>,
   gameData?: GameData,
-): { campaign: CampaignState; result: MissionResult } {
 ): { campaign: CampaignState; result: MissionResult; bountyCompletions: BountyCompletionResult[] } {
   const { mission, outcome, roundsPlayed, completedObjectiveIds, heroKills, lootCollected, heroesIncapacitated, leaderKilled } = input;
   const heroesWounded = input.heroesWounded ?? [];
@@ -565,7 +561,6 @@ export function completeMission(
     }
   }
 
-  const newCampaign: CampaignState = {
   // --- Pandemic Legacy: Critical Injuries ---
   // Apply new critical injuries from this mission and process natural recovery
   const criticalInjuryDefs = input.criticalInjuryDefs ?? {};

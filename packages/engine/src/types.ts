@@ -814,15 +814,15 @@ export type GameAction =
   | { type: 'AimManeuver';   figureId: string; payload: {} }
   | { type: 'StrainForManeuver'; figureId: string; payload: {} }
   | { type: 'UseConsumable'; figureId: string; payload: UseConsumablePayload }
-  | { type: 'SpendFocusToken'; figureId: string; payload: SpendFocusTokenPayload };
+  | { type: 'SpendFocusToken'; figureId: string; payload: SpendFocusTokenPayload }
+  | { type: 'RevealExploration'; figureId: string; payload: { tokenId: string } }
+  | { type: 'SpendCommandToken'; figureId: string; payload: SpendCommandTokenPayload }
+  | { type: 'SpendFocus';   figureId: string; payload: SpendFocusPayload };
 
 /** Payload for spending a focus token */
 export interface SpendFocusTokenPayload {
   spendType: FocusSpendType;
 }
-  | { type: 'RevealExploration'; figureId: string; payload: { tokenId: string } }
-  | { type: 'SpendCommandToken'; figureId: string; payload: SpendCommandTokenPayload };
-  | { type: 'SpendFocus';   figureId: string; payload: SpendFocusPayload };
 
 export interface UseConsumablePayload {
   /** Consumable item ID */
@@ -2269,6 +2269,8 @@ export interface CommandDicePool {
 export interface CommandDiceState {
   operative: CommandDicePool;
   imperial: CommandDicePool;
+}
+
 // TWILIGHT IMPERIUM-INSPIRED MECHANICS
 // Secret Objectives, Command Tokens, Exploration, Relic Fragments, Agenda Phase
 // ============================================================================
@@ -2581,6 +2583,8 @@ export interface AgendaVoteResult {
   heroInfluence: Record<string, number>;
   /** When this vote occurred */
   votedAt: string;
+}
+
 // PROJECT CARDS (Engine Building / Terraforming Mars-inspired)
 // ============================================================================
 

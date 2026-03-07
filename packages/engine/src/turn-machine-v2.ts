@@ -1905,6 +1905,8 @@ export function executeActionV2(
         newState.figures[figIdx] = updatedFigure;
       }
       // Focus token spending is a free action (does not consume action or maneuver)
+      break;
+    }
     // ---- TI4-INSPIRED ACTIONS ----
     case 'RevealExploration': {
       const { tokenId } = action.payload;

@@ -83,7 +83,6 @@ export function loadGameDataFromObjects(data: {
   equipment: any;
   factions?: any;
 }): GameData {
-}): Record<string, unknown> {
   // Merge imperial and operative units into a single Record
   const units: Record<string, V1_UnitDefinition> = {
     ...data.imperials,
@@ -137,7 +136,6 @@ export function loadGameDataFromObjects(data: {
     tacticCards,
     equipment,
     factions: Object.keys(factions).length > 0 ? factions : undefined,
-  };
   } as any;
 }
 

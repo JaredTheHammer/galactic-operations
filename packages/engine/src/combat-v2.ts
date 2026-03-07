@@ -346,6 +346,8 @@ export function buildCombatPools(
     attackPool = {
       ...attackPool,
       ability: attackPool.ability + focusAttackBoost,
+    };
+  }
   // Boss hit location penalties: reduce attack pool if locations are disabled
   if (attacker.hitLocations) {
     attackPool = applyBossAttackPenalties(attackPool, attacker);
@@ -448,6 +450,8 @@ export function buildCombatPools(
     defensePool = {
       ...defensePool,
       difficulty: defensePool.difficulty + focusDefenseBoost,
+    };
+  }
   // DefenseStance (tactic card alt mode): add difficulty dice
   if (defenderConditions.includes('DefenseStance')) {
     defensePool = {
@@ -1297,6 +1301,7 @@ export function applyCombatResult(
       // Award focus tokens from combos and crits (hero attackers only)
       if (resolution.focusTokensAwarded && resolution.focusTokensAwarded > 0 && updatedFig.entityType === 'hero') {
         updatedFig = awardFocusTokens(updatedFig, resolution.focusTokensAwarded);
+      }
       // Consume Focus bonus damage flag (effect already applied in resolveCombatV2)
       if (updatedFig.focusBonusDamage) {
         updatedFig = { ...updatedFig, focusBonusDamage: false };
