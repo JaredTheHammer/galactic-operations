@@ -937,6 +937,9 @@ export interface GameState {
 
   // Tactic card deck state (hands, draw pile, discard)
   tacticDeck?: TacticDeckState;
+
+  // Spirit Island-inspired optional subsystems (all toggleable)
+  spiritIsland?: SpiritIslandState;
 }
 
 // ============================================================================
@@ -1538,6 +1541,296 @@ export interface SocialPhaseResult {
   itemsSold: Array<{ itemId: string; revenue: number }>;
   creditsSpentOnHealing: number;
   completedAt: string;
+}
+
+// ============================================================================
+// SPIRIT ISLAND SUBSYSTEMS (all toggleable via OptionalSubsystems)
+// ============================================================================
+
+/** Master toggle for optional subsystems. All default to false (off). */
+export interface OptionalSubsystems {
+  /** #1 Disruption Track: accumulating fear shifts victory conditions */
+  disruptionTrack?: boolean;
+  /** #2 Dual-Timing: talents/abilities tagged as Fast (before enemies) or Slow (after, stronger) */
+  dualTiming?: boolean;
+  /** #3 Imperial Threat Cadence: predictable Scout->Fortify->Strike cycle */
+  threatCadence?: boolean;
+  /** #4 Element Synergy: abilities generate elements that fuel innate power thresholds */
+  elementSynergy?: boolean;
+  /** #5 Collateral Damage: environmental destruction with cascade effects */
+  collateralDamage?: boolean;
+}
+
+// --- #1 Disruption Track ---
+
+/** Terror level thresholds that shift victory conditions */
+export type TerrorLevel = 1 | 2 | 3;
+
+/** A tiered victory condition that activates at a specific terror level */
+export interface TieredVictoryCondition {
+  terrorLevel: TerrorLevel;
+  side: Side;
+  description: string;
+  condition: string;
+  /** Objectives required at this terror level (fewer = easier) */
+  objectiveThreshold?: number;
+}
+
+/** Runtime state for the Disruption Track */
+export interface DisruptionTrackState {
+  /** Current disruption points (0+) */
+  disruption: number;
+  /** Points needed to reach each terror level */
+  thresholds: [number, number, number]; // [TL1, TL2, TL3]
+  /** Current terror level (starts at 1) */
+  terrorLevel: TerrorLevel;
+  /** Tiered victory conditions that replace base conditions at higher terror */
+  tieredConditions: TieredVictoryCondition[];
+  /** Log of disruption events this mission */
+  eventLog: Array<{ round: number; source: string; amount: number }>;
+}
+
+/** Events that generate disruption points */
+export type DisruptionEvent =
+  | 'elite_defeated'      // +3: Rival/Nemesis taken out
+  | 'leader_defeated'     // +5: mission leader killed
+  | 'objective_completed' // +2: any objective completed
+  | 'terminal_hacked'     // +1: terminal interaction
+  | 'loot_secured'        // +1: loot token collected
+  | 'morale_broken';      // +4: enemy morale hits Broken
+
+/** Disruption point values per event */
+export const DISRUPTION_VALUES: Record<DisruptionEvent, number> = {
+  elite_defeated: 3,
+  leader_defeated: 5,
+  objective_completed: 2,
+  terminal_hacked: 1,
+  loot_secured: 1,
+  morale_broken: 4,
+};
+
+// --- #2 Dual-Timing Actions ---
+
+/** Timing classification for abilities */
+export type ActionTiming = 'fast' | 'slow';
+
+/** A queued slow action waiting for end-of-round resolution */
+export interface QueuedSlowAction {
+  figureId: string;
+  action: GameAction;
+  /** Bonus applied when the slow action resolves */
+  slowBonus: SlowBonus;
+  /** Round it was queued */
+  queuedRound: number;
+}
+
+/** Bonuses applied to slow actions when they resolve */
+export interface SlowBonus {
+  bonusDamage?: number;
+  bonusPierce?: number;
+  bonusHealing?: number;
+  upgradePool?: number; // upgrade N green dice to yellow
+  freeManeuver?: boolean;
+}
+
+/** Runtime state for dual-timing system */
+export interface DualTimingState {
+  /** Slow actions queued this round, resolved at end of Activation phase */
+  slowQueue: QueuedSlowAction[];
+  /** Slow actions that were cancelled (figure defeated before resolution) */
+  cancelledThisRound: string[]; // figure IDs
+}
+
+// --- #3 Imperial Threat Cadence ---
+
+/** The three phases of the Imperial threat cycle */
+export type ThreatCadencePhase = 'Scout' | 'Fortify' | 'Strike';
+
+/** Runtime state for the threat cadence system */
+export interface ThreatCadenceState {
+  /** Current phase in the cycle */
+  currentPhase: ThreatCadencePhase;
+  /** Cycle count (increments every 3 rounds) */
+  cycleCount: number;
+  /** Whether the current phase was disrupted by operative action */
+  phaseDisrupted: boolean;
+  /** Regions/zones scouted this cycle (tile coordinates) */
+  scoutedZones: GridCoordinate[];
+  /** Fortification bonuses applied this cycle */
+  fortifications: Array<{ position: GridCoordinate; defenseBonus: number }>;
+}
+
+/** Phase effects that modify AI behavior and game state */
+export interface ThreatCadenceEffect {
+  phase: ThreatCadencePhase;
+  /** AI behavior modifier for this phase */
+  aiBehavior: 'cautious' | 'defensive' | 'aggressive';
+  /** Reinforcement modifier (multiplier on threat income) */
+  threatIncomeMultiplier: number;
+  /** Defense modifier for Imperial figures during this phase */
+  imperialDefenseBonus: number;
+  /** Attack modifier for Imperial figures during this phase */
+  imperialAttackBonus: number;
+}
+
+/** Default phase effects */
+export const THREAT_CADENCE_EFFECTS: Record<ThreatCadencePhase, ThreatCadenceEffect> = {
+  Scout: {
+    phase: 'Scout',
+    aiBehavior: 'cautious',
+    threatIncomeMultiplier: 0.5,
+    imperialDefenseBonus: 0,
+    imperialAttackBonus: 0,
+  },
+  Fortify: {
+    phase: 'Fortify',
+    aiBehavior: 'defensive',
+    threatIncomeMultiplier: 1.5,
+    imperialDefenseBonus: 1,
+    imperialAttackBonus: 0,
+  },
+  Strike: {
+    phase: 'Strike',
+    aiBehavior: 'aggressive',
+    threatIncomeMultiplier: 1.0,
+    imperialDefenseBonus: 0,
+    imperialAttackBonus: 1,
+  },
+};
+
+// --- #4 Element Synergy System ---
+
+/** Element types generated by abilities and talents */
+export type SynergyElement =
+  | 'Aggression'  // offensive combat actions
+  | 'Precision'   // aimed shots, skill checks
+  | 'Fortitude'   // defensive actions, healing
+  | 'Cunning'     // stealth, hacking, social
+  | 'Force';      // Force-powered abilities
+
+/** Threshold requirement for an innate power */
+export interface ElementThreshold {
+  element: SynergyElement;
+  count: number;
+}
+
+/** An innate power that activates when element thresholds are met */
+export interface InnatePower {
+  id: string;
+  name: string;
+  description: string;
+  /** Required element counts to activate (all must be met) */
+  thresholds: ElementThreshold[];
+  /** Effect when activated */
+  effect: InnatePowerEffect;
+}
+
+/** Effects that innate powers can produce */
+export interface InnatePowerEffect {
+  /** Flat bonus damage on all attacks for the rest of the mission */
+  bonusDamage?: number;
+  /** Pierce bonus on all attacks */
+  bonusPierce?: number;
+  /** Bonus soak until end of mission */
+  bonusSoak?: number;
+  /** Heal wounds */
+  healWounds?: number;
+  /** Recover strain */
+  recoverStrain?: number;
+  /** Free maneuver at start of each activation */
+  freeManeuver?: boolean;
+  /** Upgrade N attack dice (green -> yellow) */
+  upgradeAttack?: number;
+  /** Upgrade N defense dice (purple -> red) */
+  upgradeDefense?: number;
+}
+
+/** Per-hero element tracking for a mission */
+export interface ElementTracker {
+  /** Elements accumulated this mission, per hero */
+  heroElements: Record<string, Record<SynergyElement, number>>;
+  /** Innate powers that have been activated this mission, per hero */
+  activatedPowers: Record<string, string[]>; // heroId -> innatePowerId[]
+}
+
+/** Element generation config: which action types produce which elements */
+export const ELEMENT_GENERATION: Record<string, SynergyElement> = {
+  Attack: 'Aggression',
+  Aim: 'Precision',
+  AimManeuver: 'Precision',
+  GuardedStance: 'Fortitude',
+  Rally: 'Fortitude',
+  TakeCover: 'Fortitude',
+  Dodge: 'Fortitude',
+  UseSkill: 'Cunning',
+  Interact: 'Cunning',
+  InteractTerminal: 'Cunning',
+  CollectLoot: 'Cunning',
+};
+
+// --- #5 Collateral Damage System ---
+
+/** Collateral damage level for a tile */
+export type CollateralLevel = 0 | 1 | 2 | 3; // 0=pristine, 3=destroyed
+
+/** A tile that has taken collateral damage */
+export interface DamagedTile {
+  position: GridCoordinate;
+  level: CollateralLevel;
+  /** Source of the damage */
+  source: string;
+}
+
+/** Runtime state for the collateral damage system */
+export interface CollateralDamageState {
+  /** Damaged tiles on the map */
+  damagedTiles: DamagedTile[];
+  /** Total collateral points accumulated */
+  totalCollateral: number;
+  /** Threshold for mission penalty */
+  penaltyThreshold: number;
+  /** Whether penalty has been triggered */
+  penaltyTriggered: boolean;
+  /** XP penalty multiplier (1.0 = no penalty, 0.5 = half XP) */
+  xpMultiplier: number;
+}
+
+/** Weapons/effects that generate collateral damage */
+export interface CollateralSource {
+  /** Weapon quality that causes collateral */
+  quality: string;
+  /** Base collateral points generated */
+  baseCollateral: number;
+  /** Whether this causes cascade to adjacent tiles */
+  cascades: boolean;
+}
+
+/** Default collateral sources */
+export const COLLATERAL_SOURCES: CollateralSource[] = [
+  { quality: 'Blast', baseCollateral: 2, cascades: true },
+  { quality: 'Burn', baseCollateral: 1, cascades: true },
+  { quality: 'Breach', baseCollateral: 1, cascades: false },
+  { quality: 'Sunder', baseCollateral: 1, cascades: false },
+];
+
+/** Collateral effects at each damage level */
+export const COLLATERAL_EFFECTS: Record<CollateralLevel, string> = {
+  0: 'Pristine',
+  1: 'Damaged: light cover removed',
+  2: 'Wrecked: becomes difficult terrain',
+  3: 'Destroyed: impassable rubble, cascades to adjacent',
+};
+
+// --- Spirit Island State on GameState ---
+
+/** Combined state for all Spirit Island subsystems */
+export interface SpiritIslandState {
+  subsystems: OptionalSubsystems;
+  disruption?: DisruptionTrackState;
+  dualTiming?: DualTimingState;
+  threatCadence?: ThreatCadenceState;
+  elementSynergy?: ElementTracker;
+  collateralDamage?: CollateralDamageState;
 }
 
 // ============================================================================
