@@ -7,12 +7,15 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult } from '../../../../engine/src/types'
+import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult, CriticalInjuryDefinition } from '../../../../engine/src/types'
 import { getCampaignStats } from '../../../../engine/src/campaign-v2'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
 import { usePortraitStore } from '../../store/portrait-store'
 import { listSaveSlots, MAX_SLOTS, findEmptySlot, type SaveSlotMeta } from '../../services/save-slots'
+import { MomentumIndicator } from './MomentumIndicator'
+import { SectorControlDisplay } from './SectorControlDisplay'
+import { CriticalInjuryPanel } from './CriticalInjuryPanel'
 
 // ============================================================================
 // STYLES
@@ -606,6 +609,10 @@ export default function MissionSelect() {
     openPortraitManager,
     openCampaignStats,
     openCampaignJournal,
+    openCampaignOverworld,
+    travelToSector,
+    treatCriticalInjury,
+    criticalInjuryDefs,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -762,6 +769,14 @@ export default function MissionSelect() {
           >
             PORTRAITS
           </button>
+          {campaignState.overworld && (
+            <button
+              style={{ ...buttonStyle, backgroundColor: '#2a1a3a', color: '#bb66ff', flex: isMobile ? '1 1 auto' : undefined }}
+              onClick={openCampaignOverworld}
+            >
+              OVERWORLD
+            </button>
+          )}
           <button
             style={{ ...buttonStyle, backgroundColor: '#1a2a3a', color: '#cc8800', flex: isMobile ? '1 1 auto' : undefined }}
             onClick={openCampaignJournal}
@@ -924,6 +939,21 @@ export default function MissionSelect() {
           {campaignState.factionReputation && Object.keys(campaignState.factionReputation).length > 0 && (
             <FactionReputationPanel reputation={campaignState.factionReputation} />
           )}
+
+          <MomentumIndicator campaign={campaignState} />
+
+          <SectorControlDisplay
+            campaign={campaignState}
+            onTravelToSector={travelToSector}
+          />
+
+          <CriticalInjuryPanel
+            heroes={heroes}
+            injuryDefs={criticalInjuryDefs}
+            compact
+            onTreatInjury={treatCriticalInjury}
+            credits={campaignState.credits}
+          />
 
           <InventoryPanel campaign={campaignState} />
 

@@ -9,6 +9,9 @@ import { useIsMobile } from '../../hooks/useIsMobile'
 import type { MissionResult, HeroCharacter } from '../../../../engine/src/types'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { t } from '../../styles/theme'
+import { CriticalInjuryPanel } from './CriticalInjuryPanel'
+import { MomentumIndicator } from './MomentumIndicator'
+import { LegacyEventReveal } from './LegacyEventReveal'
 
 const containerStyle: React.CSSProperties = {
   width: '100vw',
@@ -127,7 +130,11 @@ function HeroStatusCard({
 // ============================================================================
 
 export default function PostMission() {
-  const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState, activeMissionDef, campaignMissions } = useGameStore()
+  const {
+    lastMissionResult, returnToMissionSelect, openSocialPhase,
+    campaignState, activeMissionDef, campaignMissions,
+    criticalInjuryDefs, legacyEventDefs, showLegacyEvents, acknowledgeLegacyEvents,
+  } = useGameStore()
   const { isMobile } = useIsMobile()
 
   if (!lastMissionResult) {
@@ -380,6 +387,20 @@ export default function PostMission() {
           </div>
         )}
 
+        {/* Critical Injuries */}
+        {campaignState && heroes.length > 0 && Object.keys(criticalInjuryDefs).length > 0 && (
+          <CriticalInjuryPanel
+            heroes={heroes}
+            injuryDefs={criticalInjuryDefs}
+            compact
+          />
+        )}
+
+        {/* Momentum */}
+        {campaignState && (
+          <MomentumIndicator campaign={campaignState} />
+        )}
+
         {/* Continue button */}
         <button
           style={{
@@ -392,6 +413,15 @@ export default function PostMission() {
           {campaignState ? 'CONTINUE TO CANTINA' : 'CONTINUE TO CAMPAIGN'}
         </button>
       </div>
+
+      {/* Legacy Event Reveal overlay */}
+      {showLegacyEvents && campaignState && (
+        <LegacyEventReveal
+          campaign={campaignState}
+          eventDefs={legacyEventDefs}
+          onAcknowledge={acknowledgeLegacyEvents}
+        />
+      )}
     </div>
   )
 }

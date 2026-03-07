@@ -33,6 +33,9 @@ import type {
   ObjectivePointTemplate,
   ConsumableItem,
   TacticCard,
+  CriticalInjuryDefinition,
+  LegacyEventDefinition,
+  CampaignOverworldDefinition,
 } from '@engine/types.js'
 import { MAP_PRESETS, computeGameScale } from '@engine/types.js'
 import {
@@ -79,6 +82,9 @@ import {
   removeFromInventory,
 } from '@engine/campaign-v2.js'
 import type { MissionCompletionInput } from '@engine/campaign-v2.js'
+import { initializeCampaignOverworld, travelToSector as travelToSectorFn } from '@engine/campaign-overworld.js'
+import { initializeLegacyDeck, acknowledgePendingEvents } from '@engine/legacy-events.js'
+import { professionalTreatment } from '@engine/critical-injuries.js'
 import { combatAnimations } from '../canvas/animation-manager'
 import { saveToSlot, loadFromSlot, deleteSlot, AUTO_SAVE_SLOT, findEmptySlot, migrateLegacySave } from '../services/save-slots'
 
@@ -121,6 +127,9 @@ import act3Mission3aData from '@data/missions/act3-mission3a-stronghold.json'
 import act3Mission3bData from '@data/missions/act3-mission3b-betrayal.json'
 import act3Mission4Data from '@data/missions/act3-mission4-endgame.json'
 import campaignData from '@data/campaigns/tangrene-liberation.json'
+import overworldData from '@data/campaigns/tangrene-overworld.json'
+import criticalInjuryData from '@data/critical-injuries.json'
+import legacyEventData from '@data/legacy-events.json'
 
 // v1 data still used for board templates
 import openGround from '@data/boards/open-ground.json'
@@ -262,6 +271,42 @@ function loadCampaignMissions(): Record<string, MissionDefinition> {
     missions[m.id] = m
   }
   return missions
+}
+
+function loadCriticalInjuryDefs(): Record<string, CriticalInjuryDefinition> {
+  const defs: Record<string, CriticalInjuryDefinition> = {}
+  const injuries = (criticalInjuryData as any).injuries ?? criticalInjuryData
+  if (Array.isArray(injuries)) {
+    for (const inj of injuries) {
+      defs[inj.id] = inj as CriticalInjuryDefinition
+    }
+  } else {
+    for (const [id, inj] of Object.entries(injuries)) {
+      defs[id] = inj as CriticalInjuryDefinition
+    }
+  }
+  return defs
+}
+
+function loadLegacyEventDefs(): Record<string, LegacyEventDefinition> {
+  const defs: Record<string, LegacyEventDefinition> = {}
+  const events = (legacyEventData as any).events ?? legacyEventData
+  if (Array.isArray(events)) {
+    for (const evt of events) {
+      defs[evt.id] = evt as LegacyEventDefinition
+    }
+  } else {
+    for (const [id, evt] of Object.entries(events)) {
+      defs[id] = evt as LegacyEventDefinition
+    }
+  }
+  return defs
+}
+
+function loadOverworldDef(): CampaignOverworldDefinition | null {
+  const raw = (overworldData as any).overworld ?? overworldData
+  if (!raw || !raw.id) return null
+  return raw as CampaignOverworldDefinition
 }
 
 const CAMPAIGN_STORAGE_KEY = 'galactic-ops-campaign-save'
@@ -464,6 +509,13 @@ export interface GameStore {
   triggeredWaveIds: string[] // mission reinforcement waves already deployed
   activeMission: Mission | null // lightweight mission object for victory checking (useAITurn reads this)
 
+  // Pandemic Legacy system state
+  showCampaignOverworld: boolean
+  showLegacyEvents: boolean
+  criticalInjuryDefs: Record<string, CriticalInjuryDefinition>
+  legacyEventDefs: Record<string, LegacyEventDefinition>
+  overworldDef: CampaignOverworldDefinition | null
+
   // AI visualization state
   aiMovePath: GridCoordinate[] | null
   aiAttackTarget: { from: GridCoordinate; to: GridCoordinate } | null
@@ -573,6 +625,13 @@ export interface GameStore {
   closeSocialPhase: () => void
   updateCampaignState: (cs: CampaignState) => void
 
+  // Pandemic Legacy actions
+  openCampaignOverworld: () => void
+  closeCampaignOverworld: () => void
+  travelToSector: (sectorId: string) => void
+  treatCriticalInjury: (heroId: string, injuryIndex: number) => void
+  acknowledgeLegacyEvents: () => void
+
   // Hero progression actions
   openHeroProgression: () => void
   closeHeroProgression: () => void
@@ -662,6 +721,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   activeMissionDef: null,
   triggeredWaveIds: [],
   activeMission: null,
+
+  // Pandemic Legacy system state
+  showCampaignOverworld: false,
+  showLegacyEvents: false,
+  criticalInjuryDefs: loadCriticalInjuryDefs(),
+  legacyEventDefs: loadLegacyEventDefs(),
+  overworldDef: loadOverworldDef(),
 
   // AI visualization state
   aiMovePath: null,
@@ -1988,13 +2054,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { createdHeroes, campaignState, campaignMissions } = get()
     if (!campaignState || createdHeroes.length === 0) return
 
-    const campaign = createCampaign({
+    let campaign = createCampaign({
       name: (campaignData as any).name ?? 'Campaign',
       difficulty: campaignState.difficulty,
       heroes: createdHeroes,
       startingMissionId: (campaignData as any).startingMissionId ?? 'act1-m1-arrival',
       startingCredits: (campaignData as any).startingCredits ?? 0,
     })
+
+    // Initialize pandemic legacy systems
+    const { overworldDef, legacyEventDefs } = get()
+    if (overworldDef) {
+      campaign = initializeCampaignOverworld(campaign, overworldDef, 'docking-district')
+    }
+    if (Object.keys(legacyEventDefs).length > 0) {
+      campaign = { ...campaign, legacyDeck: initializeLegacyDeck() }
+    }
+    // Initialize momentum at 0 (opt-in by setting the field)
+    campaign = { ...campaign, momentum: 0 }
 
     // Find an empty slot for the new campaign
     const newSlot = findEmptySlot() ?? 1
@@ -2179,10 +2256,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       campaignMissions,
     )
 
+    // Show legacy event reveal if there are pending events
+    const hasPendingEvents = (newCampaign.legacyDeck?.pendingEventIds?.length ?? 0) > 0
+
     set({
       campaignState: newCampaign,
       lastMissionResult: result,
       showPostMission: true,
+      showLegacyEvents: hasPendingEvents,
       isInitialized: false,
       gameState: null,
       // Flag act transition if act advanced
@@ -2380,6 +2461,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showPortraitManager: false,
       showCampaignStats: false,
       showMapEditor: false,
+      showCampaignOverworld: false,
+      showLegacyEvents: false,
       // Clear stale combat state from previous campaign
       gameState: null,
       selectedFigureId: null,
@@ -2432,6 +2515,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showPortraitManager: false,
       showCampaignStats: false,
       showMapEditor: false,
+      showCampaignOverworld: false,
+      showLegacyEvents: false,
       campaignHeroCreation: false,
       activeMissionDef: null,
       activeMission: null,
@@ -2467,7 +2552,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Close social phase and return to mission select.
    */
   closeSocialPhase: () => {
-    const { campaignState } = get()
     const { campaignState, activeSaveSlot } = get()
     set({
       showSocialPhase: false,
@@ -2503,6 +2587,64 @@ export const useGameStore = create<GameStore>((set, get) => ({
    */
   updateCampaignState: (cs: CampaignState) => {
     set({ campaignState: cs })
+    get().saveCampaignToStorage()
+  },
+
+  // ---- Pandemic Legacy Actions ----
+
+  openCampaignOverworld: () => {
+    set({
+      showMissionSelect: false,
+      showCampaignOverworld: true,
+    })
+  },
+
+  closeCampaignOverworld: () => {
+    set({
+      showCampaignOverworld: false,
+      showMissionSelect: true,
+    })
+  },
+
+  travelToSector: (sectorId: string) => {
+    const { campaignState } = get()
+    if (!campaignState?.overworld) return
+    try {
+      const updated = travelToSectorFn(campaignState, sectorId)
+      set({ campaignState: updated })
+      get().saveCampaignToStorage()
+    } catch (e) {
+      console.error('Failed to travel to sector:', e)
+    }
+  },
+
+  treatCriticalInjury: (heroId: string, injuryIndex: number) => {
+    const { campaignState, criticalInjuryDefs } = get()
+    if (!campaignState) return
+    const hero = campaignState.heroes[heroId]
+    if (!hero || !hero.criticalInjuries || injuryIndex >= hero.criticalInjuries.length) return
+
+    const injury = hero.criticalInjuries[injuryIndex]
+    const def = criticalInjuryDefs[injury.injuryId]
+    if (!def || campaignState.credits < def.treatmentCost) return
+
+    try {
+      const updatedCampaign = professionalTreatment(campaignState, heroId, injuryIndex, criticalInjuryDefs)
+      set({ campaignState: updatedCampaign })
+      get().saveCampaignToStorage()
+    } catch (e) {
+      console.error('Failed to treat injury:', e)
+    }
+  },
+
+  acknowledgeLegacyEvents: () => {
+    const { campaignState } = get()
+    if (!campaignState?.legacyDeck) return
+    const updated = acknowledgePendingEvents(campaignState)
+    set({
+      campaignState: updated,
+      showLegacyEvents: false,
+    })
     get().saveCampaignToStorage()
   },
 
