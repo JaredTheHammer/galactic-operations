@@ -41,21 +41,6 @@ import { updateMomentum, applyMomentumCredits } from './momentum';
 import { processOverworldPostMission } from './campaign-overworld';
 import { processLegacyEvents } from './legacy-events';
 import type { LegacyEventContext } from './legacy-events';
-  ActProgress,
-  ActOutcome,
-  ActOutcomeTier,
-  ExposureStatus,
-  CampaignEpilogue,
-  CampaignEpilogueTier,
-} from './types';
-
-import {
-  DEFAULT_XP_AWARDS,
-  THREAT_SCALING,
-  createActProgress,
-  getExposureStatus,
-  getActOutcomeTier,
-} from './types';
 
 // ============================================================================
 // CAMPAIGN CREATION
@@ -484,48 +469,6 @@ export function completeMission(
     }
 
     newHeroes[heroId] = updatedHero;
-  // --- Rebellion Mechanics: Exposure & Influence/Control ---
-  let actProgress = campaign.actProgress ?? createActProgress(campaign.currentAct);
-
-  // Ensure actProgress matches current act (backward compat)
-  if (actProgress.act !== campaign.currentAct) {
-    actProgress = createActProgress(campaign.currentAct);
-  }
-
-  const exposureDelta = calculateMissionExposure(
-    mission, outcome, heroesIncapacitated, completedObjectiveIds,
-    totalKills, roundsPlayed,
-  );
-  const influenceDelta = calculateMissionInfluence(outcome, completedObjectiveIds);
-  const controlDelta = calculateMissionControl(outcome, heroesIncapacitated);
-
-  // Check if intel was gathered this mission (reduces exposure, max once per act)
-  const newIntelItems = lootCollected.filter(id => {
-    const token = mission.lootTokens.find(l => l.id === id);
-    return token?.reward.type === 'narrative';
-  });
-  // Intel reduction: -1 exposure, max once per act
-  const intelReduction = (newIntelItems.length > 0 && !actProgress.intelReductionUsed) ? -1 : 0;
-
-  actProgress = updateActProgress(
-    actProgress,
-    exposureDelta + intelReduction,
-    influenceDelta,
-    controlDelta,
-  );
-
-  if (intelReduction < 0) {
-    actProgress = { ...actProgress, intelReductionUsed: true };
-  }
-
-  // Handle act finale: freeze outcome and apply consequences
-  let actOutcomes = [...(campaign.actOutcomes ?? [])];
-  let actOutcomeForResult: ActOutcome | undefined;
-
-  if (isActFinale) {
-    const frozenOutcome = freezeActOutcome(actProgress);
-    actOutcomes = [...actOutcomes, frozenOutcome];
-    actOutcomeForResult = frozenOutcome;
   }
 
   // --- Rebellion Mechanics: Exposure & Influence/Control ---
@@ -631,10 +574,6 @@ export function completeMission(
       newCampaign, input.legacyEventDefs, eventContext,
     );
     newCampaign = postEventCampaign;
-  // If act advanced, apply consequences from the completed act and reset progress
-  if (currentAct > campaign.currentAct && actOutcomeForResult) {
-    newCampaign = applyActOutcomeConsequences(newCampaign, actOutcomeForResult);
-    newCampaign.actProgress = createActProgress(currentAct);
   }
 
   // If act advanced, apply consequences from the completed act and reset progress
