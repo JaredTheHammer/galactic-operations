@@ -200,8 +200,8 @@ The MapEditor import and campaign import both parse JSON and perform basic struc
 | MEDIUM-1a | Medium | Input Validation / DoS | **Fixed** -- added bounds checking in `moveFigure()` |
 | MEDIUM-2 | Medium | Input Validation | **Fixed** -- added try-catch + `validateCampaignBounds()` in `campaign-v2.ts` |
 | MEDIUM-3 | Medium | Auth Boundaries | Open -- future risk when multiplayer is implemented |
-| LOW-1 | Low | Info Disclosure | Open |
-| LOW-2 | Low | Defense in Depth | Open |
-| LOW-3 | Low | Input Validation | Open |
+| LOW-1 | Low | Info Disclosure | **Fixed** -- `sourcemap: false` added to Vite production build config |
+| LOW-2 | Low | Defense in Depth | **Fixed** -- CSP meta tag added to `index.html` |
+| LOW-3 | Low | Input Validation | **Fixed** -- structural validation added to board and campaign imports |
 
-**Overall Assessment:** Three medium-severity input validation issues have been fixed. One medium (server stub) and three low findings remain open. The server finding is a future risk that should be addressed when multiplayer is implemented.
+**Overall Assessment:** Six of seven findings have been fixed. The remaining open item (MEDIUM-3: server stub) is a future risk that should be addressed when multiplayer is implemented.
