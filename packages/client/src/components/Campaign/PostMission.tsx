@@ -403,6 +403,11 @@ export default function PostMission() {
                 }}>
                   {so.objectiveId.replace(/-/g, ' ')} (+{so.xpAwarded}XP)
                 </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Bounty Completions */}
         {lastBountyCompletions.length > 0 && (
           <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
