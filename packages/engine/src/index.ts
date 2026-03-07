@@ -30,6 +30,8 @@ export type {
   TacticCardEffectType,
   TacticCardEffect,
   TacticCard,
+  TacticCardAltMode,
+  TacticCardAltModeType,
   // Combat
   CombatState,
   CombatResolution,
@@ -68,6 +70,58 @@ export type {
   FocusConfig,
   FocusEffect,
   SpendFocusPayload,
+  // Supply Network
+  SupplyNodeType,
+  SupplyNode,
+  SupplyRoute,
+  SupplyNetwork,
+  SectorLocation,
+  SectorMapDefinition,
+  SupplyNodeBonus,
+  // Rebellion Mechanics
+  ActProgress,
+  ActOutcome,
+  ActOutcomeTier,
+  ExposureStatus,
+  CampaignEpilogue,
+  CampaignEpilogueTier,
+  // v1 Legacy types
+  V1_UnitDefinition,
+} from './types.js';
+
+// Re-export rebellion mechanics helpers from types
+export {
+  getExposureStatus,
+  getActOutcomeTier,
+  createActProgress,
+} from './types.js';
+
+// Dune-inspired mechanics types
+export type {
+  ContractTier,
+  ContractConditionType,
+  ContractCondition,
+  ContractReward,
+  Contract,
+  ActiveContract,
+  IntelAssetType,
+  IntelAsset,
+  MissionIntel,
+  IntelRecallResult,
+  SpyNetworkState,
+  TacticCardMarketEntry,
+  CustomTacticDeck,
+  DeckBuildingState,
+  ResearchNode,
+  ResearchEffect,
+  ResearchEffectType,
+  ResearchTrackState,
+  MercenarySpecialization,
+  MercenaryProfile,
+  MercenaryPassiveEffect,
+  HiredMercenary,
+  MercenaryRosterState,
+  DuneMechanicsState,
 } from './types.js';
 
 // Re-export data loader functions
@@ -229,6 +283,43 @@ export {
   runCombatBatch,
 } from './ai/index.js';
 
+// Re-export supply network system (Brass: Birmingham-inspired)
+export {
+  createSupplyNetwork,
+  initializeNetwork,
+  canBuildNode,
+  buildNode,
+  getActiveNodes,
+  getConnectedLocations,
+  getNetworkUnlockedMissions,
+  getNetworkAvailableGear,
+  getNetworkThreatReduction,
+  getNetworkReinforcementBonus,
+  getNetworkBonuses,
+  applyNetworkUpkeep,
+  severNodesAtLocation,
+  repairNode,
+  getNetworkFilteredMissions,
+  getNetworkSummary,
+  NODE_BUILD_COSTS,
+  NODE_UPKEEP_COSTS,
+  NODE_INCOME,
+  SAFEHOUSE_THREAT_REDUCTION,
+  MAX_REINFORCEMENT_BONUS,
+} from './supply-network.js';
+
+// Re-export dual-use tactic card functions
+export {
+  hasAltMode,
+  getAltModeCards,
+  playCardAltMode,
+  aiShouldUseAltMode,
+} from './tactic-cards.js';
+
+export type {
+  AltModeResult,
+} from './tactic-cards.js';
+
 // Re-export power ranking system
 export {
   computeAnalyticalRating,
@@ -279,6 +370,87 @@ export {
   getFocusPercent,
   getFocusEffectLabel,
 } from './focus-resource.js';
+// Re-export Dune-inspired mechanics
+
+// Contracts system
+export {
+  MAX_ACTIVE_CONTRACTS,
+  TIER_REWARD_MULTIPLIERS,
+  getAvailableContracts,
+  canAcceptContract,
+  acceptContract,
+  abandonContract,
+  updateContractProgress,
+  isContractComplete,
+  evaluateContracts,
+  collectContractRewards,
+  createDefaultDuneMechanics,
+} from './contracts.js';
+
+// Intelligence/Spy Network system
+export {
+  RECALL_CREDITS_PER_TURN,
+  RECALL_TACTIC_CARDS,
+  RECRUIT_ASSET_COST,
+  RECRUIT_COST_SCALING,
+  recruitAsset,
+  getRecruitCost,
+  deployAsset,
+  recallAsset,
+  dismissAsset,
+  advanceIntelNetwork,
+  getMissionIntel,
+  getReserveAssets,
+  getDeployedAssets,
+} from './intel-network.js';
+
+// Deck-building system
+export {
+  STARTER_DECK_SIZE,
+  MAX_DECK_SIZE,
+  MIN_DECK_SIZE,
+  TRASH_COST,
+  MARKET_DISPLAY_SIZE,
+  OPERATIVE_STARTER_CARDS,
+  IMPERIAL_STARTER_CARDS,
+  enableDeckBuilding,
+  disableDeckBuilding,
+  getMarketCards,
+  purchaseMarketCard,
+  trashCard,
+  buildCustomTacticDeck,
+  getDeckContents,
+  getDeckSize,
+  refreshMarket,
+} from './deck-building.js';
+
+// Research track system
+export {
+  DEFAULT_RESEARCH_TRACK,
+  getAvailableResearchNodes,
+  canUnlockNode,
+  unlockResearchNode,
+  getActiveResearchEffects,
+  getResearchBonus,
+  getCurrentResearchTier,
+  getUnlockedNodes,
+} from './research-track.js';
+
+// Mercenaries system
+export {
+  DEFAULT_MERCENARY_PROFILES,
+  getAvailableMercenaries,
+  canHireMercenary,
+  hireMercenary,
+  dismissMercenary,
+  payMercenaryUpkeep,
+  markMercenaryKIA,
+  updateMercenaryWounds,
+  healMercenary,
+  getActiveMercenaries,
+  getMercenaryProfile,
+  getTotalUpkeepCost,
+} from './mercenaries.js';
 
 export type {
   AIProfilesData,
@@ -299,3 +471,96 @@ export type {
   EnemyDistance,
   DamageEntry,
 } from './ai/index.js';
+
+// Re-export critical injury system
+export {
+  MAX_CRITICAL_INJURIES,
+  FORCED_REST_THRESHOLD,
+  SEVERITY_ROLL_RANGES,
+  rollCriticalInjuryD66,
+  getCriticalInjuryForRoll,
+  applyCriticalInjury,
+  removeCriticalInjury,
+  removeCriticalInjuryById,
+  getCriticalInjuryCharacteristicPenalties,
+  getCriticalInjuryWoundPenalty,
+  getCriticalInjuryStrainPenalty,
+  getCriticalInjurySpeedPenalty,
+  getCriticalInjurySoakPenalty,
+  getCriticalInjurySkillPenalties,
+  isHeroForcedToRest,
+  getHeroCriticalInjuryStatus,
+  attemptTreatment,
+  professionalTreatment,
+  processNaturalRecovery,
+} from './critical-injuries.js';
+
+// Re-export sector control system
+export {
+  initializeOverworld,
+  modifySectorControl,
+  computePostMissionControlChanges,
+  applyControlEscalation,
+  addSectorMutation,
+  getSectorMissionEffects,
+  getSectorThreatBonus,
+  getSectorShopMultiplier,
+  getSectorSocialDifficultyMod,
+  findSectorForMission,
+  moveToSector,
+  getOverworldSummary,
+} from './sector-control.js';
+
+// Re-export legacy event system
+export {
+  initializeLegacyDeck,
+  evaluateTrigger,
+  evaluateAllTriggers,
+  checkForTriggeredEvents,
+  applyLegacyEffect,
+  resolveEvent,
+  processLegacyEvents,
+  acknowledgePendingEvents,
+  isRuleChangeActive,
+} from './legacy-events.js';
+export type { LegacyEventContext } from './legacy-events.js';
+
+// Re-export momentum system
+export {
+  updateMomentum,
+  getMomentumEffects,
+  applyMomentumCredits,
+  getMomentumThreatAdjustment,
+  getMomentumTacticCardBonus,
+  getMomentumNarrative,
+  resetMomentum,
+} from './momentum.js';
+
+// Re-export campaign overworld system
+export {
+  initializeCampaignOverworld,
+  processOverworldPostMission,
+  getAvailableMissionsInSector,
+  computeEffectiveThreatWithSector,
+  getAccessibleSectors,
+  travelToSector,
+  getCampaignOverworldSummary,
+} from './campaign-overworld.js';
+
+// Re-export new types from types.ts
+export type {
+  CriticalInjurySeverity,
+  CriticalInjuryEffectType,
+  CriticalInjuryEffect,
+  CriticalInjuryDefinition,
+  ActiveCriticalInjury,
+  SectorControlLevel,
+  CampaignSector,
+  SectorMutation,
+  LegacyEventTrigger,
+  LegacyEventEffect,
+  LegacyEventDefinition,
+  LegacyDeckState,
+  CampaignOverworldDefinition,
+  CampaignOverworldState,
+} from './types.js';

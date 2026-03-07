@@ -7,6 +7,7 @@ import type {
   MoraleTrack,
   MoraleState,
   Figure,
+  ActionType,
 } from './types.js';
 
 /**
@@ -82,7 +83,7 @@ export function checkMoraleEffect(
 ): boolean {
   // If morale is Broken, only Move and Rest are allowed
   if (moraleState === 'Broken') {
-    return actionType === 'Move' || actionType === 'Rest';
+    return (actionType as string) === 'Move' || (actionType as string) === 'Rest';
   }
 
   // All other morale states allow all actions

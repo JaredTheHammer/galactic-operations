@@ -70,6 +70,11 @@ export const ActTransition: React.FC = () => {
   const totalCredits = campaignState?.credits ?? 0
   const heroCount = campaignState?.heroes?.length ?? 0
 
+  // Act outcome from completed act
+  const completedActOutcome = campaignState?.actOutcomes?.find(
+    o => o.act === (transitionData?.fromAct ?? 1)
+  )
+
   return (
     <div style={{
       position: 'fixed',
@@ -198,6 +203,60 @@ export const ActTransition: React.FC = () => {
               <StatBlock label="Heroes" value={heroCount} color={actInfo.color} />
               <StatBlock label="Credits" value={totalCredits} color={actInfo.color} />
             </div>
+
+            {/* Act Outcome Tier */}
+            {completedActOutcome && (() => {
+              const tierColors: Record<string, string> = {
+                dominant: '#44ff44', favorable: '#88ccff',
+                contested: '#ffaa00', unfavorable: '#ff8844', dire: '#ff4444',
+              };
+              const tierLabels: Record<string, string> = {
+                dominant: 'DOMINANT', favorable: 'FAVORABLE',
+                contested: 'CONTESTED', unfavorable: 'UNFAVORABLE', dire: 'DIRE',
+              };
+              const tierDesc: Record<string, string> = {
+                dominant: 'The Rebellion has a stranglehold on this sector',
+                favorable: 'Momentum is with the operatives',
+                contested: 'Neither side holds a clear advantage',
+                unfavorable: 'The Empire is tightening its grip',
+                dire: 'The Rebellion is barely holding on',
+              };
+              const tc = tierColors[completedActOutcome.tier] ?? '#888';
+              return (
+                <div style={{
+                  textAlign: 'center',
+                  marginBottom: '24px',
+                  padding: '16px 24px',
+                  border: `1px solid ${tc}40`,
+                  borderRadius: '4px',
+                  background: `${tc}08`,
+                }}>
+                  <div style={{
+                    fontSize: '10px', letterSpacing: '3px', color: '#666',
+                    textTransform: 'uppercase', marginBottom: '8px',
+                  }}>
+                    Act {completedActOutcome.act} Outcome
+                  </div>
+                  <div style={{
+                    fontSize: '24px', fontWeight: 'bold', color: tc,
+                    letterSpacing: '6px', marginBottom: '6px',
+                  }}>
+                    {tierLabels[completedActOutcome.tier]}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#888', fontStyle: 'italic' }}>
+                    {tierDesc[completedActOutcome.tier]}
+                  </div>
+                  <div style={{
+                    display: 'flex', justifyContent: 'center', gap: '24px',
+                    marginTop: '12px', fontSize: '11px', color: '#777',
+                  }}>
+                    <span>Influence: {completedActOutcome.influence}</span>
+                    <span>Control: {completedActOutcome.control}</span>
+                    <span>Exposure: {completedActOutcome.exposure}</span>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Continue button */}
             <button

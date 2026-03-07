@@ -17,7 +17,15 @@ import type {
   D6DieType,
   D6DieDefinition,
   BoardTemplate,
+  V1_DieColor,
+  V1_UnitDefinition,
 } from './types.js';
+
+// Legacy type aliases for the v1 data loader
+type DieColor = V1_DieColor;
+type UnitDefinition = V1_UnitDefinition;
+type Equipment = Record<string, unknown>;
+type DieDefinition = Record<string, unknown>;
 
 /**
  * Load game data from the file system
@@ -27,7 +35,8 @@ import type {
  *
  * Note: This function is designed for Node.js file system access
  */
-export async function loadGameData(basePath: string): Promise<GameData> {
+/** @deprecated Use loadGameDataV2 instead */
+export async function loadGameData(basePath: string): Promise<Record<string, unknown>> {
   // Dynamic import of fs to support both Node.js and browser environments
   const { readFile } = await import('fs/promises');
   const { join } = await import('path');
@@ -61,13 +70,14 @@ export async function loadGameData(basePath: string): Promise<GameData> {
  * Load game data from pre-imported JSON objects
  * This version is useful for browser contexts where modules are pre-loaded
  */
+/** @deprecated Use loadGameDataV2 instead */
 export function loadGameDataFromObjects(data: {
   dice: any;
   imperials: any;
   operatives: any;
   tactics: any;
   equipment: any;
-}): GameData {
+}): Record<string, unknown> {
   // Merge imperial and operative units into a single Record
   const units: Record<string, V1_UnitDefinition> = {
     ...data.imperials,

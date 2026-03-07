@@ -418,6 +418,12 @@ export interface HeroCharacter {
    * At 1+ missions rested, a wounded hero recovers automatically.
    */
   missionsRested?: number;
+
+  /**
+   * Active critical injuries sustained across campaign missions.
+   * Stacking injuries compound penalties without permadeath.
+   */
+  criticalInjuries?: ActiveCriticalInjury[];
 }
 
 // ============================================================================
@@ -607,7 +613,8 @@ export type Condition =
   | 'SideStep'          // talent: upgrade ranged defense pool until next activation
   | 'TrueAim'           // talent: upgrade attack pool for next check this turn
   | 'HeroicFortitude'   // talent: ignore critical injury effects until end of encounter
-  | 'CripplingBlow';    // talent: next critical gets +20 but costs 1 more advantage
+  | 'CripplingBlow'     // talent: next critical gets +20 but costs 1 more advantage
+  | 'DefenseStance';    // tactic card alt mode: +N Block on next attack against this figure
   // Note: 'Suppressed' removed in favor of graduated suppressionTokens on Figure
 
 // ============================================================================
@@ -1022,6 +1029,9 @@ export interface GameState {
 
   // Tactic card deck state (hands, draw pile, discard)
   tacticDeck?: TacticDeckState;
+
+  // Active contracts being tracked this mission (Dune: contracts system)
+  activeContracts?: ActiveContract[];
 }
 
 // ============================================================================
@@ -1288,6 +1298,106 @@ export interface CampaignState {
 
   /** Active shop discounts (percentage, from social outcomes) */
   activeDiscounts?: Record<string, number>;
+
+  // --- Pandemic Legacy Systems ---
+
+  /** Active critical injuries on heroes (keyed by hero ID) */
+  criticalInjuries?: Record<string, ActiveCriticalInjury[]>;
+
+  /** Campaign overworld state (sector control, mutations, party position) */
+  overworld?: CampaignOverworldState;
+
+  /** Legacy event deck state (triggered events, pending reveals, rule changes) */
+  legacyDeck?: LegacyDeckState;
+
+  /** Campaign momentum (-3 to +3): negative = losing streak, positive = winning streak */
+  momentum?: number;
+
+  /** Supply network: player-built infrastructure of contacts, safe houses, and supply routes */
+  supplyNetwork?: SupplyNetwork;
+  /** Per-act rebellion mechanics (Exposure + Influence/Control, reset each act) */
+  actProgress?: ActProgress;
+
+  /** Historical act outcomes (carry consequences forward between acts) */
+  actOutcomes?: ActOutcome[];
+
+  /** Dune: Imperium inspired mechanics (contracts, intel, deck-building, research, mercenaries) */
+  duneMechanics?: DuneMechanicsState;
+}
+
+// ============================================================================
+// ACT PROGRESS & OUTCOME TYPES (Rebellion Mechanics)
+// ============================================================================
+
+/** Per-act tracker for Exposure and Influence/Control */
+export interface ActProgress {
+  /** Which act this progress belongs to (1, 2, or 3) */
+  act: number;
+  /** Exposure tracker (clamped 0-10). Higher = Empire is closing in. */
+  exposure: number;
+  /** Rebellion Influence (accumulated from successes) */
+  influence: number;
+  /** Imperial Control (accumulated from passive pressure + failures) */
+  control: number;
+  /** One-time exposure threshold bonuses already applied to Control */
+  exposureThresholdsTriggered: number[];
+  /** Whether intel exposure reduction has been used this act (max once per act) */
+  intelReductionUsed?: boolean;
+}
+
+/** Act outcome tier based on influence - control delta */
+export type ActOutcomeTier = 'dominant' | 'favorable' | 'contested' | 'unfavorable' | 'dire';
+
+/** Frozen outcome of a completed act */
+export interface ActOutcome {
+  act: number;
+  exposure: number;
+  influence: number;
+  control: number;
+  delta: number;
+  tier: ActOutcomeTier;
+}
+
+/** Exposure status derived from current exposure value */
+export type ExposureStatus = 'ghost' | 'detected' | 'hunted';
+
+/** Get exposure status from exposure value */
+export function getExposureStatus(exposure: number): ExposureStatus {
+  if (exposure >= 7) return 'hunted';
+  if (exposure >= 4) return 'detected';
+  return 'ghost';
+}
+
+/** Determine act outcome tier from influence - control delta */
+export function getActOutcomeTier(delta: number): ActOutcomeTier {
+  if (delta >= 5) return 'dominant';
+  if (delta >= 2) return 'favorable';
+  if (delta >= -1) return 'contested';
+  if (delta >= -4) return 'unfavorable';
+  return 'dire';
+}
+
+/** Create a fresh ActProgress for a given act */
+export function createActProgress(act: number): ActProgress {
+  return {
+    act,
+    exposure: 0,
+    influence: 0,
+    control: 0,
+    exposureThresholdsTriggered: [],
+  };
+}
+
+export type CampaignEpilogueTier = 'legendary' | 'heroic' | 'pyrrhic' | 'bittersweet' | 'fallen';
+
+export interface CampaignEpilogue {
+  tier: CampaignEpilogueTier;
+  title: string;
+  narrative: string;
+  actSummaries: { act: number; tier: ActOutcomeTier }[];
+  cumulativeScore: number;
+  /** Dune: Imperium inspired mechanics (contracts, intel, deck-building, research, mercenaries) */
+  duneMechanics?: DuneMechanicsState;
 }
 
 /** Campaign save file format (serializable to JSON) */
@@ -1295,6 +1405,79 @@ export interface CampaignSaveFile {
   version: string;
   savedAt: string;
   campaign: CampaignState;
+}
+
+// ============================================================================
+// SUPPLY NETWORK (Brass: Birmingham-inspired network/supply line building)
+// ============================================================================
+
+/** Types of network nodes players can build */
+export type SupplyNodeType = 'contact' | 'safehouse' | 'supply_route';
+
+/** A node in the player's supply network */
+export interface SupplyNode {
+  id: string;
+  type: SupplyNodeType;
+  name: string;
+  description: string;
+  /** Sector location ID where this node is built */
+  locationId: string;
+  /** Cost in credits to establish */
+  buildCost: number;
+  /** Ongoing upkeep per mission (deducted at mission start) */
+  upkeepCost: number;
+  /** Whether this node has been severed (by mission failure in connected sector) */
+  severed: boolean;
+  /** Campaign act when this node was built */
+  builtInAct: number;
+}
+
+/** A connection between two supply nodes */
+export interface SupplyRoute {
+  fromNodeId: string;
+  toNodeId: string;
+}
+
+/** Sector location on the strategic map */
+export interface SectorLocation {
+  id: string;
+  name: string;
+  description: string;
+  /** Which campaign act this location becomes available */
+  availableInAct: number;
+  /** Adjacent location IDs (for route-building) */
+  connectedLocations: string[];
+  /** Bonuses granted when a node is built here */
+  bonuses: SupplyNodeBonus[];
+  /** Mission IDs gated behind having a node here */
+  unlocksMissions?: string[];
+  /** Shop item IDs available for purchase when connected */
+  unlocksGear?: string[];
+}
+
+/** Bonus granted by building infrastructure at a sector location */
+export interface SupplyNodeBonus {
+  type: 'mission_unlock' | 'gear_access' | 'reinforcement' | 'credit_income' | 'intel' | 'threat_reduction';
+  /** For mission_unlock: mission ID; for gear_access: item IDs; for intel: narrative item ID */
+  value: string | number;
+  description: string;
+}
+
+/** The player's full supply network state */
+export interface SupplyNetwork {
+  nodes: SupplyNode[];
+  routes: SupplyRoute[];
+  /** Total credit income per mission from the network */
+  networkIncome: number;
+}
+
+/** Sector map definition loaded from JSON */
+export interface SectorMapDefinition {
+  id: string;
+  name: string;
+  locations: SectorLocation[];
+  /** Starting location ID (always has a free node) */
+  startingLocationId: string;
 }
 
 /** XP award configuration (from design spec section 3.8) */
@@ -1379,7 +1562,8 @@ export type SocialOutcomeType =
   | 'discount'          // Apply shop discount percentage
   | 'xp'               // Gain XP
   | 'reputation'        // Modify faction reputation
-  | 'healing';          // Heal wounded hero for free
+  | 'healing'           // Heal wounded hero for free
+  | 'cover_tracks';     // Reduce exposure (rebellion mechanics)
 
 /** A single outcome applied from a social encounter result */
 export interface SocialOutcome {
@@ -1404,6 +1588,8 @@ export interface SocialOutcome {
   reputationDelta?: number;
   /** For healing: hero ID (or 'any' for player choice) */
   healTargetId?: string;
+  /** For cover_tracks: exposure reduction (negative value, e.g. -1) */
+  exposureDelta?: number;
   /** Narrative description of this outcome */
   description: string;
 }
@@ -1564,6 +1750,21 @@ export interface TacticCardEffect {
   condition?: string;
 }
 
+/** Alternative mode for dual-use tactic cards (Brass: Birmingham-inspired) */
+export type TacticCardAltModeType =
+  | 'movement'       // Bonus movement points
+  | 'action_point'   // Extra action this activation
+  | 'defense_stance' // Temporary defensive bonus
+  | 'strain_recovery' // Recover strain
+  | 'draw_card';     // Draw additional tactic cards
+
+/** Alternative (non-combat) mode for a dual-use tactic card */
+export interface TacticCardAltMode {
+  type: TacticCardAltModeType;
+  value: number;
+  text: string;
+}
+
 /** A tactic card definition (loaded from JSON) */
 export interface TacticCard {
   id: string;
@@ -1573,6 +1774,9 @@ export interface TacticCard {
   effects: TacticCardEffect[];
   text: string;
   cost: number;
+  /** Dual-use: alternative non-combat mode (Brass: Birmingham-inspired card duality).
+   *  If present, the card can be played either for its combat effects or this alt mode. */
+  altMode?: TacticCardAltMode;
 }
 
 /** State of a tactic card deck during a mission */
@@ -1726,6 +1930,554 @@ export const DEFAULT_FOCUS_BY_CAREER: Record<string, FocusConfig> = {
 
 /** Fallback Focus config when career is not mapped */
 export const DEFAULT_FOCUS_CONFIG: FocusConfig = { max: 4, recoveryPerActivation: 2 };
+// CRITICAL INJURY SYSTEM (Pandemic Legacy-inspired persistent consequences)
+// ============================================================================
+
+/** Severity tiers for critical injuries */
+export type CriticalInjurySeverity = 'minor' | 'moderate' | 'severe';
+
+/** Categories of mechanical effects a critical injury can impose */
+export type CriticalInjuryEffectType =
+  | 'reduce_characteristic'    // -1 to a specific characteristic
+  | 'reduce_wound_threshold'   // Lower max wounds
+  | 'reduce_strain_threshold'  // Lower max strain
+  | 'reduce_speed'             // -1 movement
+  | 'reduce_soak'              // -1 soak
+  | 'skill_penalty'            // -1 to specific skill checks
+  | 'upgrade_difficulty'       // Upgrade 1 difficulty die on specific action types
+  | 'lose_free_maneuver'       // Must spend strain to get first maneuver on some turns
+  | 'condition_vulnerability'  // Easier to apply specific condition
+  | 'limit_actions';           // Cannot perform a specific action type
+
+/** A single mechanical effect from a critical injury */
+export interface CriticalInjuryEffect {
+  type: CriticalInjuryEffectType;
+  /** Numeric magnitude of the effect (e.g., -1 for characteristic reduction) */
+  value: number;
+  /** Target of the effect (characteristic name, skill id, action type, condition, etc.) */
+  target?: string;
+  /** Optional description of the mechanical impact */
+  description?: string;
+}
+
+/** Definition of a critical injury (loaded from JSON data) */
+export interface CriticalInjuryDefinition {
+  id: string;
+  name: string;
+  description: string;
+  severity: CriticalInjurySeverity;
+  /** d66 roll range: [min, max] inclusive (e.g., [1, 10] for minor injuries) */
+  rollRange: [number, number];
+  /** Mechanical effects applied while this injury is active */
+  effects: CriticalInjuryEffect[];
+  /** Whether this injury can be recovered from (all can, but some are harder) */
+  recoverable: boolean;
+  /** Difficulty (purple dice) for the Medicine/Mechanics check to treat */
+  treatmentDifficulty: number;
+  /** Challenge dice (red) added to the treatment check */
+  treatmentChallengeDice?: number;
+  /** Skill used for treatment (medicine for organic, mechanics for droid) */
+  treatmentSkill: 'medicine' | 'mechanics';
+  /** Credit cost for professional medical treatment (bypasses skill check) */
+  treatmentCost: number;
+  /** Number of rest missions required for natural recovery (0 = never heals naturally) */
+  naturalRecoveryMissions: number;
+}
+
+/** An active critical injury on a hero */
+export interface ActiveCriticalInjury {
+  /** Reference to the CriticalInjuryDefinition.id */
+  injuryId: string;
+  /** When this injury was sustained (mission ID) */
+  sustainedInMission: string;
+  /** Number of missions rested since sustaining this injury */
+  missionsRested: number;
+  /** Whether treatment has been attempted (to prevent repeated free attempts) */
+  treatmentAttempted: boolean;
+}
+
+// ============================================================================
+// SECTOR CONTROL SYSTEM (Pandemic Legacy-inspired escalating threat)
+// ============================================================================
+
+/** Control level of a sector (higher = more Imperial control) */
+export type SectorControlLevel = 0 | 1 | 2 | 3 | 4 | 5;
+
+/** Labels for sector control levels */
+export const SECTOR_CONTROL_LABELS: Record<SectorControlLevel, string> = {
+  0: 'Liberated',
+  1: 'Contested',
+  2: 'Occupied',
+  3: 'Fortified',
+  4: 'Lockdown',
+  5: 'Crushed',
+};
+
+/** Effects applied at each sector control level */
+export const SECTOR_CONTROL_EFFECTS: Record<SectorControlLevel, {
+  threatBonus: number;
+  reinforcementBonus: number;
+  shopPriceMultiplier: number;
+  socialDifficultyMod: number;
+  description: string;
+}> = {
+  0: { threatBonus: -2, reinforcementBonus: 0, shopPriceMultiplier: 0.8, socialDifficultyMod: -1, description: 'Rebel-friendly zone. Reduced threat, cheaper supplies.' },
+  1: { threatBonus: 0, reinforcementBonus: 0, shopPriceMultiplier: 1.0, socialDifficultyMod: 0, description: 'Active resistance. Standard conditions.' },
+  2: { threatBonus: 1, reinforcementBonus: 0, shopPriceMultiplier: 1.1, socialDifficultyMod: 0, description: 'Imperial presence increasing. Slightly elevated threat.' },
+  3: { threatBonus: 2, reinforcementBonus: 1, shopPriceMultiplier: 1.25, socialDifficultyMod: 1, description: 'Heavy garrison. Extra reinforcements, social checks harder.' },
+  4: { threatBonus: 3, reinforcementBonus: 2, shopPriceMultiplier: 1.5, socialDifficultyMod: 1, description: 'Martial law. Significant reinforcements, supply shortages.' },
+  5: { threatBonus: 5, reinforcementBonus: 3, shopPriceMultiplier: 2.0, socialDifficultyMod: 2, description: 'Total Imperial domination. Maximum threat and restrictions.' },
+};
+
+/** A sector on the campaign overworld */
+export interface CampaignSector {
+  id: string;
+  name: string;
+  description: string;
+  /** Current Imperial control level (0-5) */
+  controlLevel: SectorControlLevel;
+  /** Mission IDs that take place in this sector */
+  missionIds: string[];
+  /** Social hub ID for this sector (if any) */
+  socialHubId?: string;
+  /** Adjacent sector IDs (for spread mechanics) */
+  adjacentSectorIds: string[];
+  /** Whether this sector has been visited */
+  visited: boolean;
+  /** Persistent map mutations applied to this sector */
+  mutations: SectorMutation[];
+}
+
+/** A persistent mutation to a sector's map/state */
+export interface SectorMutation {
+  id: string;
+  type: 'destroyed' | 'fortified' | 'secured' | 'contaminated' | 'reinforced';
+  /** Description of what changed */
+  description: string;
+  /** Position on the campaign map (for visual rendering) */
+  position?: GridCoordinate;
+  /** Mission that caused this mutation */
+  causedByMission: string;
+  /** Mechanical effect on missions in this sector */
+  effect?: {
+    /** Additional initial enemies */
+    bonusEnemies?: NPCSpawnGroup[];
+    /** Terrain modifications */
+    terrainOverrides?: Array<{ position: GridCoordinate; terrain: TerrainType }>;
+    /** Deploy zone restrictions */
+    deployZoneRestrictions?: GridCoordinate[];
+  };
+}
+
+// ============================================================================
+// LEGACY EVENT DECK (Pandemic Legacy-inspired triggered narrative events)
+// ============================================================================
+
+/** Trigger conditions for legacy events */
+export type LegacyEventTrigger =
+  | { type: 'mission_complete'; missionId: string; outcome?: 'victory' | 'defeat' }
+  | { type: 'act_start'; act: number }
+  | { type: 'act_end'; act: number }
+  | { type: 'hero_wounded'; heroCount?: number }
+  | { type: 'hero_critical_injury'; severity?: CriticalInjurySeverity }
+  | { type: 'sector_control'; sectorId: string; minLevel: SectorControlLevel }
+  | { type: 'narrative_item'; itemId: string }
+  | { type: 'momentum_threshold'; minMomentum?: number; maxMomentum?: number }
+  | { type: 'missions_played'; count: number }
+  | { type: 'companion_recruited'; companionId: string };
+
+/** Effects that a legacy event can apply */
+export type LegacyEventEffect =
+  | { type: 'unlock_mission'; missionId: string }
+  | { type: 'add_narrative_item'; itemId: string }
+  | { type: 'remove_narrative_item'; itemId: string }
+  | { type: 'modify_sector_control'; sectorId: string; delta: number }
+  | { type: 'award_credits'; amount: number }
+  | { type: 'award_xp'; amount: number }
+  | { type: 'add_critical_injury'; heroSelector: 'random' | 'most_wounded' | 'all'; injuryId: string }
+  | { type: 'heal_critical_injury'; heroSelector: 'random' | 'most_injured' | 'all'; injuryId?: string }
+  | { type: 'modify_momentum'; delta: number }
+  | { type: 'add_sector_mutation'; sectorId: string; mutation: SectorMutation }
+  | { type: 'unlock_shop_item'; shopId: string; itemId: string }
+  | { type: 'modify_threat_multiplier'; delta: number }
+  | { type: 'add_companion'; companionId: string }
+  | { type: 'remove_companion'; companionId: string }
+  | { type: 'add_rule_change'; ruleId: string };
+
+/** A single legacy event definition */
+export interface LegacyEventDefinition {
+  id: string;
+  name: string;
+  /** Narrative text shown to the player when the event triggers */
+  narrativeText: string;
+  /** Conditions that must ALL be met for this event to trigger */
+  triggers: LegacyEventTrigger[];
+  /** Effects applied when the event fires */
+  effects: LegacyEventEffect[];
+  /** Whether this event can only fire once per campaign */
+  oneShot: boolean;
+  /** Priority for ordering when multiple events trigger simultaneously */
+  priority: number;
+  /** Campaign act this event belongs to (for deck ordering) */
+  act: number;
+  /** If true, event is revealed to player before effects apply (dossier-style) */
+  isRevealed: boolean;
+}
+
+/** State of the legacy event deck in a campaign */
+export interface LegacyDeckState {
+  /** Events that have been triggered and resolved */
+  resolvedEventIds: string[];
+  /** Active rule changes from legacy events */
+  activeRuleChanges: string[];
+  /** Events waiting to be revealed (triggered but not yet shown to player) */
+  pendingEventIds: string[];
+}
+
+// ============================================================================
+// MOMENTUM SYSTEM (Pandemic Legacy-inspired win/loss rubber-banding)
+// ============================================================================
+
+/** Momentum level thresholds and their effects */
+export const MOMENTUM_EFFECTS: Record<number, {
+  label: string;
+  bonusTacticCards: number;
+  bonusCredits: number;
+  bonusDeployPoints: number;
+  threatReduction: number;
+  description: string;
+}> = {
+  [-3]: { label: 'Desperate', bonusTacticCards: 3, bonusCredits: 150, bonusDeployPoints: 2, threatReduction: 3, description: 'Rebel forces receive significant reinforcements and supply drops.' },
+  [-2]: { label: 'Struggling', bonusTacticCards: 2, bonusCredits: 100, bonusDeployPoints: 1, threatReduction: 2, description: 'Allied networks provide extra support.' },
+  [-1]: { label: 'Disadvantaged', bonusTacticCards: 1, bonusCredits: 50, bonusDeployPoints: 0, threatReduction: 1, description: 'Sympathizers offer modest assistance.' },
+  [0]: { label: 'Balanced', bonusTacticCards: 0, bonusCredits: 0, bonusDeployPoints: 0, threatReduction: 0, description: 'Standard operations. No adjustment.' },
+  [1]: { label: 'Advantaged', bonusTacticCards: 0, bonusCredits: -25, bonusDeployPoints: 0, threatReduction: -1, description: 'Imperial forces respond to rebel successes with increased patrols.' },
+  [2]: { label: 'Dominant', bonusTacticCards: 0, bonusCredits: -50, bonusDeployPoints: 0, threatReduction: -2, description: 'Empire redirects resources to counter rebel momentum.' },
+  [3]: { label: 'Overwhelming', bonusTacticCards: -1, bonusCredits: -75, bonusDeployPoints: 0, threatReduction: -3, description: 'Full Imperial counterstrike. Prepare for heavy resistance.' },
+};
+
+/** Clamp range for momentum value */
+export const MOMENTUM_MIN = -3;
+export const MOMENTUM_MAX = 3;
+
+// ============================================================================
+// CAMPAIGN OVERWORLD MAP (Pandemic Legacy-inspired persistent world)
+// ============================================================================
+
+/** Campaign overworld map definition (loaded from JSON) */
+export interface CampaignOverworldDefinition {
+  id: string;
+  name: string;
+  description: string;
+  /** Sectors that make up the overworld */
+  sectors: CampaignSector[];
+  /** Visual layout data for rendering the overworld map */
+  sectorPositions: Record<string, { x: number; y: number }>;
+  /** Connections between sectors (for adjacency rendering) */
+  connections: Array<{ from: string; to: string }>;
+}
+
+/** Runtime overworld state stored in CampaignState */
+export interface CampaignOverworldState {
+  /** Current sector states (keyed by sector ID) */
+  sectors: Record<string, CampaignSector>;
+  /** ID of the sector the party is currently in */
+  currentSectorId: string;
+  /** History of sector control changes */
+  controlHistory: Array<{
+    sectorId: string;
+    previousLevel: SectorControlLevel;
+    newLevel: SectorControlLevel;
+    causedByMission: string;
+    timestamp: string;
+  }>;
+}
+
+// ============================================================================
+// DUNE-INSPIRED MECHANICS (5 systems from Dune: Imperium)
+// ============================================================================
+
+// --- 1. Contract/Bounty System ---
+
+/** Contract difficulty tiers affect reward scaling */
+export type ContractTier = 'bronze' | 'silver' | 'gold';
+
+/** Condition types that can trigger contract completion */
+export type ContractConditionType =
+  | 'eliminate_count'       // Kill N enemies
+  | 'eliminate_type'        // Kill a specific NPC tier/type
+  | 'no_wounds'             // Complete mission without hero taking wounds
+  | 'no_incapacitation'     // No hero incapacitated
+  | 'complete_in_rounds'    // Finish within N rounds
+  | 'collect_loot'          // Collect N loot tokens
+  | 'use_combo'             // Trigger a specific Yahtzee combo type
+  | 'interact_objectives'   // Interact with N objective points
+  | 'maintain_morale'       // Keep morale above threshold
+  | 'hero_kills';           // A single hero gets N kills
+
+/** A single condition that must be met for contract completion */
+export interface ContractCondition {
+  type: ContractConditionType;
+  /** For count-based conditions */
+  targetCount?: number;
+  /** For type-based conditions (e.g., NPC tier or combo type) */
+  targetValue?: string;
+  /** For threshold conditions (e.g., morale >= N, rounds <= N) */
+  threshold?: number;
+}
+
+/** Reward given upon contract completion */
+export interface ContractReward {
+  credits?: number;
+  xp?: number;
+  narrativeItemId?: string;
+  equipmentId?: string;
+  consumableId?: string;
+  consumableQty?: number;
+}
+
+/** A bounty/contract available at social hubs or mission start */
+export interface Contract {
+  id: string;
+  name: string;
+  description: string;
+  /** Who posted the bounty (NPC name for flavor) */
+  postedBy: string;
+  tier: ContractTier;
+  /** All conditions must be met (AND logic) */
+  conditions: ContractCondition[];
+  reward: ContractReward;
+  /** Which acts this contract is available in */
+  availableInActs: number[];
+  /** Can this contract be taken multiple times? */
+  repeatable: boolean;
+}
+
+/** Runtime tracking of an active contract during a mission */
+export interface ActiveContract {
+  contractId: string;
+  /** Per-condition progress tracking */
+  progress: Record<string, number>;
+  completed: boolean;
+}
+
+// --- 2. Intelligence/Spy Network System ---
+
+/** Intelligence asset types that can be deployed */
+export type IntelAssetType = 'informant' | 'slicer' | 'scout' | 'saboteur';
+
+/** An intelligence asset placed on the network */
+export interface IntelAsset {
+  id: string;
+  type: IntelAssetType;
+  /** Which mission this asset is deployed against (or 'reserve') */
+  deployedTo: string;
+  /** How many missions this asset has been deployed (affects reliability) */
+  turnsDeployed: number;
+}
+
+/** Intelligence gathered about an upcoming mission */
+export interface MissionIntel {
+  missionId: string;
+  /** Reveal enemy count range */
+  enemyCountRevealed: boolean;
+  /** Reveal specific NPC profiles in initial enemies */
+  revealedEnemyIds: string[];
+  /** Reveal reinforcement wave timing */
+  reinforcementTimingRevealed: boolean;
+  /** Reveal loot token positions */
+  lootPositionsRevealed: boolean;
+  /** Tactical advantage: bonus tactic cards at mission start */
+  bonusTacticCards: number;
+  /** Sabotage: reduce initial imperial threat */
+  threatReduction: number;
+}
+
+/** Result of recalling an intel asset */
+export interface IntelRecallResult {
+  assetId: string;
+  /** Cards drawn from tactic deck when recalled */
+  tacticCardsDrawn: number;
+  /** Bonus credits from intelligence sale */
+  creditsGained: number;
+}
+
+/** Persistent spy network state in campaign */
+export interface SpyNetworkState {
+  /** Available assets (undeployed) */
+  assets: IntelAsset[];
+  /** Maximum number of assets the network supports */
+  maxAssets: number;
+  /** Intel gathered per mission (keyed by mission ID) */
+  intelGathered: Record<string, MissionIntel>;
+  /** Network level (upgrades via research track) */
+  networkLevel: number;
+}
+
+// --- 3. Tactic Card Deck-Building System ---
+
+/** A card available for purchase in the tactic card market */
+export interface TacticCardMarketEntry {
+  cardId: string;
+  /** Cost in credits to add to your deck */
+  creditCost: number;
+  /** Minimum campaign act to be available */
+  minAct: number;
+  /** Whether this card has been purchased (for non-repeatable cards) */
+  purchased?: boolean;
+}
+
+/** Per-side custom tactic deck (replaces shared deck in deck-building mode) */
+export interface CustomTacticDeck {
+  /** Card IDs in this side's personal deck */
+  cardIds: string[];
+  /** Cards removed from the starter deck (thinning) */
+  removedCardIds: string[];
+}
+
+/** State for the deck-building meta-game */
+export interface DeckBuildingState {
+  /** Whether deck-building mode is enabled for this campaign */
+  enabled: boolean;
+  /** Operative side's custom deck */
+  operativeDeck: CustomTacticDeck;
+  /** Imperial side gets a curated deck per act (AI-managed) */
+  imperialDeck: CustomTacticDeck;
+  /** Cards available in the market this act */
+  marketPool: TacticCardMarketEntry[];
+  /** Cards removed permanently (cannot be re-purchased) */
+  trashedCardIds: string[];
+}
+
+// --- 4. Research/Tech Track System ---
+
+/** A single node on the research track */
+export interface ResearchNode {
+  id: string;
+  name: string;
+  description: string;
+  /** Mechanical effect applied when this node is unlocked */
+  effect: ResearchEffect;
+  /** Position on the track (tier 1-5, branch A or B) */
+  tier: number;
+  branch: 'A' | 'B';
+  /** Cost in AP to unlock */
+  apCost: number;
+  /** Prerequisite node IDs (must have unlocked at least one) */
+  prerequisites: string[];
+}
+
+/** Types of effects research nodes can grant */
+export type ResearchEffectType =
+  | 'max_intel_assets'       // +N intel asset slots
+  | 'bonus_credits'          // +N credits per mission
+  | 'bonus_xp'              // +N XP per mission
+  | 'heal_between_missions'  // Heal N wounds between missions for free
+  | 'bonus_tactic_cards'     // +N starting tactic cards per mission
+  | 'threat_reduction'       // Reduce imperial threat by N per mission
+  | 'shop_discount'          // N% discount at all shops
+  | 'companion_slot'         // +1 companion slot
+  | 'mercenary_slot'         // +1 mercenary slot
+  | 'bonus_contract_reward'  // +N% contract rewards
+  | 'starting_consumable'    // Start each mission with a free consumable
+  | 'morale_bonus';          // +N starting morale
+
+/** A research effect with its type and magnitude */
+export interface ResearchEffect {
+  type: ResearchEffectType;
+  value: number;
+  /** For starting_consumable: which consumable to grant */
+  consumableId?: string;
+}
+
+/** Persistent research track state in campaign */
+export interface ResearchTrackState {
+  /** IDs of unlocked research nodes */
+  unlockedNodes: string[];
+  /** Total AP spent on research */
+  totalAPSpent: number;
+}
+
+// --- 5. Elite Mercenary Hire System ---
+
+/** Mercenary specialization determines their combat role */
+export type MercenarySpecialization =
+  | 'demolitions'   // Ignores cover, bonus vs structures
+  | 'medic'         // Heals adjacent allies each round
+  | 'slicer'        // Disables turrets/objectives at range
+  | 'sharpshooter'  // Extended range, bonus aim
+  | 'enforcer';     // High soak, Guardian keyword
+
+/** A mercenary available for hire */
+export interface MercenaryProfile {
+  id: string;
+  name: string;
+  description: string;
+  specialization: MercenarySpecialization;
+  /** NPC profile ID to use in combat (reuses NPC stat block system) */
+  npcProfileId: string;
+  /** Credit cost to hire */
+  hireCost: number;
+  /** Credit cost per mission to retain (upkeep) */
+  upkeepCost: number;
+  /** Which acts this mercenary is available in */
+  availableInActs: number[];
+  /** Which social hub location offers this mercenary */
+  hubLocationId: string;
+  /** Special passive ability description */
+  passiveAbility: string;
+  /** Mechanical effect of the passive */
+  passiveEffect: MercenaryPassiveEffect;
+  /** Whether this mercenary has been permanently lost */
+  isKIA?: boolean;
+}
+
+/** Passive effects mercenaries provide */
+export interface MercenaryPassiveEffect {
+  type: 'heal_adjacent' | 'ignore_cover' | 'disable_at_range' | 'bonus_aim' | 'guardian';
+  value: number;
+}
+
+/** A hired mercenary in the campaign */
+export interface HiredMercenary {
+  mercenaryId: string;
+  /** Missions deployed (for tracking) */
+  missionsDeployed: number;
+  /** Accumulated wounds that persist between missions */
+  woundsCurrent: number;
+  /** Whether incapacitated (permanently lost) */
+  isKIA: boolean;
+}
+
+/** Persistent mercenary state in campaign */
+export interface MercenaryRosterState {
+  /** Currently hired mercenaries */
+  hired: HiredMercenary[];
+  /** Maximum active mercenaries (default 2, upgradeable via research) */
+  maxActive: number;
+  /** Mercenary IDs that are permanently dead */
+  killedInAction: string[];
+}
+
+// --- Extended CampaignState fields (Dune mechanics) ---
+// These are added as optional fields to CampaignState above via module augmentation.
+// Implementation adds them directly to campaign creation/loading.
+
+/** All five Dune-inspired systems bundled for CampaignState */
+export interface DuneMechanicsState {
+  /** Active contracts for current/next mission */
+  activeContracts: ActiveContract[];
+  /** Completed contract IDs (for tracking repeatable status) */
+  completedContractIds: string[];
+  /** Spy network state */
+  spyNetwork: SpyNetworkState;
+  /** Deck-building meta-game state */
+  deckBuilding: DeckBuildingState;
+  /** Research track progression */
+  researchTrack: ResearchTrackState;
+  /** Mercenary roster */
+  mercenaryRoster: MercenaryRosterState;
+}
 
 // ============================================================================
 // v1 LEGACY TYPES (kept for backward compatibility during migration)
