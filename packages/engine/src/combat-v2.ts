@@ -67,6 +67,9 @@ import {
   getSpeciesAttackBonus,
   getSpeciesWoundedMeleeBonus,
   getSpeciesSoakBonus,
+  getSpeciesNaturalWeaponDamage,
+  getSpeciesSilhouetteDefense,
+  hasSpeciesDarkVision,
 } from './species-abilities';
 
 // ============================================================================
@@ -273,6 +276,7 @@ export function buildCombatPools(
     defenderConditions?: Condition[];
     rangeBand?: import('./types').RangeBand;  // for talent range-conditional effects
     incapacitatedAllies?: number;             // for Last One Standing talent
+    darkness?: boolean;                       // true if combat zone is in darkness
   } = {},
 ): CombatPoolContext {
   const {
@@ -283,6 +287,7 @@ export function buildCombatPools(
     defenderConditions = defender.conditions,
     rangeBand = 'Medium',
     incapacitatedAllies = 0,
+    darkness = false,
   } = options;
 
   const attackerEntity = getEntity(attacker, gameState);
@@ -401,6 +406,28 @@ export function buildCombatPools(
   if (isHero(defenderEntity)) {
     const defMods = getPassiveDefensePoolModifiers(defenderEntity, gameData);
     defensePool = applyTalentDefensePoolModifiers(defensePool, defMods);
+
+    // Species silhouette bonus (small targets harder to hit at range)
+    if (weapon.range !== 'Engaged') {
+      const silhouetteBonus = getSpeciesSilhouetteDefense(defenderEntity, gameData);
+      if (silhouetteBonus > 0) {
+        defensePool = {
+          ...defensePool,
+          difficulty: defensePool.difficulty + silhouetteBonus,
+        };
+      }
+    }
+  }
+
+  // Darkness penalty: +1 difficulty die unless attacker has dark vision
+  if (darkness) {
+    const hasDarkVision = isHero(attackerEntity) && hasSpeciesDarkVision(attackerEntity, gameData);
+    if (!hasDarkVision) {
+      defensePool = {
+        ...defensePool,
+        difficulty: defensePool.difficulty + 1,
+      };
+    }
   }
 
   // Minimum defense: always at least 1 difficulty die
@@ -831,6 +858,11 @@ export function resolveCombatV2(
     // Species damage bonus (e.g., Wookiee Rage: +1 melee damage when wounded)
     talentBonusDamage += getSpeciesWoundedMeleeBonus(
       attacker, attackerEntity, gameData, poolCtx.weapon.skill ?? poolCtx.weapon.type,
+    );
+
+    // Species natural weapon damage (e.g., Gamorrean Tusks: +1 Brawl damage always)
+    talentBonusDamage += getSpeciesNaturalWeaponDamage(
+      attackerEntity, gameData, poolCtx.weapon.skill ?? poolCtx.weapon.type,
     );
   }
 

@@ -1,7 +1,7 @@
 /**
  * Tests for species-abilities.ts -- Species Ability Resolution
  *
- * Covers all 8 ability effect types and their integration points:
+ * Covers all 11 ability effect types and their integration points:
  * - Human: bonus_strain_recovery (+1 on Rest/Rally)
  * - Twi'lek: social_skill_upgrade (+1 upgrade on social checks)
  * - Wookiee: wounded_melee_bonus (+1 melee when wounded) + condition_immunity (Fear)
@@ -9,6 +9,9 @@
  * - Trandoshan: regeneration (recover 1 wound at activation start)
  * - Bothan: skill_bonus (+1 on deception/streetwise)
  * - Droid: condition_immunity (Poison) + soak_bonus (+1 soak)
+ * - Gamorrean: natural_weapon_damage (+1 Brawl damage always)
+ * - Gand: dark_vision (ignore darkness setback)
+ * - Jawa: silhouette_small (+1 ranged defense)
  */
 
 import { describe, it, expect } from 'vitest';
@@ -25,6 +28,9 @@ import {
   isImmuneToCondition,
   filterImmuneConditions,
   getSpeciesSkillBonus,
+  getSpeciesNaturalWeaponDamage,
+  hasSpeciesDarkVision,
+  getSpeciesSilhouetteDefense,
 } from '../src/species-abilities.js';
 
 import type {
@@ -95,6 +101,24 @@ const SPECIES_DATA: Record<string, SpeciesDefinition> = {
     {
       id: 'droid_endurance', name: 'Enduring Chassis', description: '+1 soak',
       type: 'passive', effect: { type: 'soak_bonus', value: 1 },
+    },
+  ]),
+  gamorrean: makeSpecies('gamorrean', [
+    {
+      id: 'gamorrean_tusks', name: 'Tusked Gore', description: '+1 Brawl damage',
+      type: 'passive', effect: { type: 'natural_weapon_damage', value: 1 },
+    },
+  ]),
+  gand: makeSpecies('gand', [
+    {
+      id: 'gand_dark_vision', name: 'Ultraviolet Vision', description: 'Dark vision',
+      type: 'passive', effect: { type: 'dark_vision', value: 1 },
+    },
+  ]),
+  jawa: makeSpecies('jawa', [
+    {
+      id: 'silhouette_0_jawa', name: 'Silhouette 0', description: '+1 ranged defense',
+      type: 'passive', effect: { type: 'silhouette_small', value: 1 },
     },
   ]),
 };
@@ -459,5 +483,69 @@ describe('null safety', () => {
     const hero = makeHero('human');
     expect(getSpeciesSoakBonus(hero, gd)).toBe(0);
     expect(hasSpeciesAbility(hero, gd, 'bonus_strain_recovery')).toBe(false);
+  });
+});
+
+// ============================================================================
+// NEW SPECIES ABILITY EFFECTS (natural_weapon_damage, dark_vision, silhouette_small)
+// ============================================================================
+
+describe('getSpeciesNaturalWeaponDamage (Gamorrean Tusked Gore)', () => {
+  const gd = makeGameData();
+  const gamorrean = makeHero('gamorrean');
+
+  it('returns +1 for Brawl attacks', () => {
+    expect(getSpeciesNaturalWeaponDamage(gamorrean, gd, 'brawl')).toBe(1);
+    expect(getSpeciesNaturalWeaponDamage(gamorrean, gd, 'Brawl')).toBe(1);
+  });
+
+  it('returns 0 for melee (not Brawl) attacks', () => {
+    expect(getSpeciesNaturalWeaponDamage(gamorrean, gd, 'melee')).toBe(0);
+    expect(getSpeciesNaturalWeaponDamage(gamorrean, gd, 'Melee')).toBe(0);
+  });
+
+  it('returns 0 for ranged attacks', () => {
+    expect(getSpeciesNaturalWeaponDamage(gamorrean, gd, 'ranged-heavy')).toBe(0);
+    expect(getSpeciesNaturalWeaponDamage(gamorrean, gd, 'ranged-light')).toBe(0);
+  });
+
+  it('returns 0 for species without natural weapons', () => {
+    expect(getSpeciesNaturalWeaponDamage(makeHero('human'), gd, 'brawl')).toBe(0);
+  });
+});
+
+describe('hasSpeciesDarkVision (Gand Ultraviolet Vision)', () => {
+  const gd = makeGameData();
+
+  it('returns true for Gand', () => {
+    expect(hasSpeciesDarkVision(makeHero('gand'), gd)).toBe(true);
+  });
+
+  it('returns false for species without dark vision', () => {
+    expect(hasSpeciesDarkVision(makeHero('human'), gd)).toBe(false);
+    expect(hasSpeciesDarkVision(makeHero('wookiee'), gd)).toBe(false);
+  });
+
+  it('returns false for missing species data', () => {
+    const emptyGd = { species: {} } as any as GameData;
+    expect(hasSpeciesDarkVision(makeHero('gand'), emptyGd)).toBe(false);
+  });
+});
+
+describe('getSpeciesSilhouetteDefense (Jawa Silhouette 0)', () => {
+  const gd = makeGameData();
+
+  it('returns +1 for Jawa', () => {
+    expect(getSpeciesSilhouetteDefense(makeHero('jawa'), gd)).toBe(1);
+  });
+
+  it('returns 0 for normal-sized species', () => {
+    expect(getSpeciesSilhouetteDefense(makeHero('human'), gd)).toBe(0);
+    expect(getSpeciesSilhouetteDefense(makeHero('wookiee'), gd)).toBe(0);
+  });
+
+  it('returns 0 for missing species data', () => {
+    const emptyGd = { species: {} } as any as GameData;
+    expect(getSpeciesSilhouetteDefense(makeHero('jawa'), emptyGd)).toBe(0);
   });
 });
