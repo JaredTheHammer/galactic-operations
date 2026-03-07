@@ -19,6 +19,7 @@ import type {
   GameData,
   GameAction,
   GridCoordinate,
+  BossHitLocationState,
 } from '../types.js';
 
 import { getPath, getValidMoves, getDistance } from '../movement.js';
@@ -66,6 +67,21 @@ function getPrimaryWeaponId(
     }
   }
   return 'unarmed'; // fallback
+}
+
+/**
+ * Build an AttackPayload with automatic boss hit location targeting.
+ */
+function buildAttackPayload(
+  figure: Figure,
+  targetId: string,
+  gameState: GameState,
+  gameData: GameData,
+): { targetId: string; weaponId: string; targetLocationId?: string } {
+  const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
+  const target = gameState.figures.find(f => f.id === targetId);
+  const targetLocationId = target ? chooseBossHitLocation(target) : undefined;
+  return { targetId, weaponId, ...(targetLocationId ? { targetLocationId } : {}) };
 }
 
 // ============================================================================
@@ -141,11 +157,57 @@ export function buildAttackAction(
 
   const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
 
+  // Boss hit location targeting: pick the best location to target
+  const target = gameState.figures.find(f => f.id === targetId);
+  const targetLocationId = target ? chooseBossHitLocation(target) : undefined;
+
   return {
     type: 'Attack',
     figureId: figure.id,
-    payload: { targetId, weaponId },
+    payload: { targetId, weaponId, ...(targetLocationId ? { targetLocationId } : {}) },
   };
+}
+
+/**
+ * Choose the best boss hit location to target.
+ *
+ * Priority:
+ * 1. Locations with weapon-disabling effects (highest impact)
+ * 2. Locations with attack reduction effects
+ * 3. Locations closest to being disabled (fewest remaining wounds)
+ * 4. Skip if all locations are already disabled
+ *
+ * Returns undefined for non-boss targets or if no locations are available.
+ */
+export function chooseBossHitLocation(target: Figure): string | undefined {
+  if (!target.hitLocations || target.hitLocations.length === 0) return undefined;
+
+  const active = target.hitLocations.filter(loc => !loc.isDisabled);
+  if (active.length === 0) return undefined;
+
+  // Score each active location
+  const scored = active.map(loc => {
+    let score = 0;
+    const remaining = loc.woundCapacity - loc.woundsCurrent;
+
+    // Bonus for locations close to being disabled (fewer remaining wounds = higher value)
+    score += 10 / Math.max(1, remaining);
+
+    // Bonus for high-impact disabled effects
+    if (loc.disabledEffects) {
+      if (loc.disabledEffects.disableWeapons?.length) score += 8;
+      if (loc.disabledEffects.attackPoolPenalty) score += 5;
+      if (loc.disabledEffects.soakReduction) score += 4;
+      if (loc.disabledEffects.defensePoolPenalty) score += 3;
+      if (loc.disabledEffects.speedReduction) score += 2;
+      if (loc.disabledEffects.applyConditions?.length) score += 3;
+    }
+
+    return { id: loc.id, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0].id;
 }
 
 /**
@@ -369,11 +431,10 @@ function buildAttackKillTarget(
   if (context.attackPosition) {
     const move = buildMoveAction(figure, context.attackPosition, gameState);
     if (move) {
-      const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
       const atk: GameAction = {
         type: 'Attack',
         figureId: figure.id,
-        payload: { targetId, weaponId },
+        payload: buildAttackPayload(figure, targetId, gameState, gameData),
       };
       return [move, atk];
     }
@@ -399,11 +460,10 @@ function buildMoveToCoverThenAttack(
   const move = buildMoveAction(figure, context.attackPosition, gameState);
   if (!move) return [];
 
-  const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
   const atk: GameAction = {
     type: 'Attack',
     figureId: figure.id,
-    payload: { targetId: context.targetId, weaponId },
+    payload: buildAttackPayload(figure, context.targetId, gameState, gameData),
   };
 
   return [move, atk];
@@ -545,11 +605,10 @@ function buildAdvanceWithCover(
 
     if (validTargetsAfterMove.length > 0) {
       // Score targets and attack the best one
-      const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
       actions.push({
         type: 'Attack',
         figureId: figure.id,
-        payload: { targetId: validTargetsAfterMove[0], weaponId },
+        payload: buildAttackPayload(figure, validTargetsAfterMove[0], gameState, gameData),
       });
     } else {
       // No enemy in range after move. Use action for something useful.
@@ -687,13 +746,12 @@ function buildMeleeCharge(
   const move = buildMoveAction(figure, meleePositions[0], gameState);
   if (!move) return [];
 
-  const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
   return [
     move,
     {
       type: 'Attack',
       figureId: figure.id,
-      payload: { targetId, weaponId },
+      payload: buildAttackPayload(figure, targetId, gameState, gameData),
     },
   ];
 }
@@ -747,11 +805,10 @@ function buildMoveTowardEnemy(
   // After first move, check if enemy is now in attack range
   const targetsAfterMove = getValidTargetsV2(figure, bestMove, gameState, gameData);
   if (targetsAfterMove.length > 0 && figure.actionsRemaining >= 1) {
-    const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
     actions.push({
       type: 'Attack',
       figureId: figure.id,
-      payload: { targetId: targetsAfterMove[0], weaponId },
+      payload: buildAttackPayload(figure, targetsAfterMove[0], gameState, gameData),
     });
   } else if (!figure.hasUsedStrainForManeuver) {
     // No attack available: strain-for-maneuver for second move
@@ -913,11 +970,10 @@ function buildUseBoughtTimeAdvance(
                 figure, sorted2[0].coord, movedState, gameData,
               );
               if (targetsAfterMove2.length > 0) {
-                const weaponId = getPrimaryWeaponId(figure, gameState, gameData);
                 actions.push({
                   type: 'Attack',
                   figureId: figure.id,
-                  payload: { targetId: targetsAfterMove2[0], weaponId },
+                  payload: buildAttackPayload(figure, targetsAfterMove2[0], gameState, gameData),
                 });
               }
             }

@@ -22,7 +22,10 @@ import type {
   GameState,
   GameData,
   GameAction,
+  FocusEffect,
 } from '../types.js';
+
+import { FOCUS_COSTS } from '../types.js';
 
 import type {
   AIArchetypeProfile,
@@ -36,6 +39,7 @@ import { evaluateCondition } from './evaluate-v2.js';
 import { buildActionsForAIAction, buildRallyAction } from './actions-v2.js';
 import { getMoraleState } from '../morale.js';
 import { getSuppressionState } from '../turn-machine-v2.js';
+import { hasFocusResource, canSpendFocus } from '../focus-resource.js';
 
 // ============================================================================
 // PROFILE RESOLUTION
@@ -215,8 +219,10 @@ export function determineActions(
 
       // Verify we got valid actions
       if (actions.length > 0) {
+        // Prepend Focus spending for hero figures (Focus is a free action)
+        const focusActions = buildFocusActions(figure, actions);
         return {
-          actions,
+          actions: [...focusActions, ...actions],
           matchedRule: rule,
           reasoning: `Rule #${rule.rank} (${rule.condition}): ${result.context.reasoning}`,
         };
@@ -386,6 +392,87 @@ function buildSuppressedDecision(
     matchedRule: profile.priorityRules[0],
     reasoning: `SUPPRESSED (${figure.suppressionTokens} >= ${figure.courage}): Holding position, no Action available.`,
   };
+}
+
+// ============================================================================
+// AI FOCUS SPENDING
+// ============================================================================
+
+/**
+ * Determine which Focus effects an AI-controlled hero should spend before acting.
+ *
+ * Strategy:
+ * - If about to attack: spend bonus_damage (if affordable), then bonus_aim
+ * - If about to move toward enemies: spend bonus_move
+ * - If retreating or low health: spend bonus_defense
+ * - If high strain: spend recover_strain
+ * - If has a debilitating condition: spend shake_condition
+ *
+ * Focus spending is a free action, so these are prepended before the main actions.
+ * The AI spends conservatively (1-2 effects max per activation) to avoid burning
+ * the entire pool immediately.
+ */
+function buildFocusActions(figure: Figure, plannedActions: GameAction[]): GameAction[] {
+  if (!hasFocusResource(figure)) return [];
+  if ((figure.focusCurrent ?? 0) <= 0) return [];
+
+  const focusActions: GameAction[] = [];
+
+  // Analyze planned actions to determine best Focus effects
+  const hasAttack = plannedActions.some(a => a.type === 'Attack');
+  const hasMove = plannedActions.some(a => a.type === 'Move');
+  const isRetreating = plannedActions.some(a => a.type === 'Rally') && !hasAttack;
+
+  // Track simulated remaining Focus to avoid overspending
+  let remainingFocus = figure.focusCurrent ?? 0;
+
+  const trySpend = (effect: FocusEffect): boolean => {
+    const cost = FOCUS_COSTS[effect];
+    if (remainingFocus >= cost && canSpendFocus(figure, effect)) {
+      focusActions.push({
+        type: 'SpendFocus',
+        figureId: figure.id,
+        payload: { effect },
+      });
+      remainingFocus -= cost;
+      return true;
+    }
+    return false;
+  };
+
+  // Priority 1: Remove debilitating conditions (Staggered, Immobilized, Disoriented)
+  const debilitatingConditions = ['Staggered', 'Immobilized', 'Disoriented'];
+  const hasDebilitating = figure.conditions.some(c => debilitatingConditions.includes(c));
+  if (hasDebilitating) {
+    trySpend('shake_condition');
+  }
+
+  // Priority 2: Recover strain if critically high (>= 75% of threshold)
+  const strainThreshold = figure.strainThreshold ?? 10;
+  if (figure.strainCurrent >= strainThreshold * 0.75) {
+    trySpend('recover_strain');
+  }
+
+  // Priority 3: Offensive Focus when attacking
+  if (hasAttack && remainingFocus > 0) {
+    // Prefer bonus_damage (high impact) over bonus_aim (lower cost but less impact)
+    if (!trySpend('bonus_damage')) {
+      trySpend('bonus_aim');
+    }
+  }
+
+  // Priority 4: Bonus move when advancing (no attack planned)
+  if (hasMove && !hasAttack && remainingFocus > 0) {
+    trySpend('bonus_move');
+  }
+
+  // Priority 5: Defensive Focus when retreating or low health
+  const healthFraction = figure.woundsCurrent / Math.max(1, figure.woundsThreshold);
+  if ((isRetreating || healthFraction >= 0.6) && remainingFocus > 0) {
+    trySpend('bonus_defense');
+  }
+
+  return focusActions;
 }
 
 // ============================================================================
