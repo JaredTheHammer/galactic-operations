@@ -2166,9 +2166,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       name: mission.name,
       description: mission.description,
       mapId: mission.mapId,
-      roundLimit: mission.roundLimit,
-      imperialThreat: effectiveThreat,
-      imperialReinforcementPoints: effectiveThreatPerRound,
       roundLimit: Math.max(4, mission.roundLimit + exposureModifiers.roundLimitModifier),
       imperialThreat: mission.imperialThreat + exposureModifiers.threatBonus,
       imperialReinforcementPoints: mission.threatPerRound,
@@ -2263,15 +2260,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       triggeredWaveIds: [],
       combatLog: [
         `Mission started: ${mission.name}`,
+        ...(isActFinale && exposureModifiers.threatBonus > 0 ? [`** IMPERIAL ALERT: Exposure level has drawn additional forces! **`] : []),
         ...(networkThreatReduction > 0 ? [`Supply network reduces Imperial threat by ${networkThreatReduction}`] : []),
         ...(networkReinforcementBonus > 0 ? [`Supply routes disrupt reinforcements: -${networkReinforcementBonus} threat/round`] : []),
       ],
-      combatLog: isActFinale && exposureModifiers.threatBonus > 0
-        ? [
-            `Mission started: ${mission.name}`,
-            `** IMPERIAL ALERT: Exposure level has drawn additional forces! **`,
-          ]
-        : [`Mission started: ${mission.name}`],
       gameStateHistory: [],
     })
   },

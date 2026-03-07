@@ -7,7 +7,6 @@ import React from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { MissionResult, HeroCharacter, SectorMapDefinition } from '../../../../engine/src/types'
-import type { MissionResult, HeroCharacter } from '../../../../engine/src/types'
 import { getExposureStatus } from '../../../../engine/src/types'
 import { calculateMissionExposure, calculateMissionInfluence, calculateMissionControl } from '../../../../engine/src/campaign-v2'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
@@ -473,6 +472,8 @@ export default function PostMission() {
           }
 
           return null
+        })()}
+
         {/* Rebellion Mechanics Deltas */}
         {campaignState?.actProgress && activeMissionDef && (() => {
           const totalKillsAll = Object.values(result.heroKills).reduce((sum, k) => sum + k, 0);

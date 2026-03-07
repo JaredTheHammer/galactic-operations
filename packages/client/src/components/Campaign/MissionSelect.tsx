@@ -186,6 +186,11 @@ function NetworkStatsWidget({ campaign }: { campaign: CampaignState }) {
           <div>Reinforce bonus: <span style={{ color: '#4a9eff' }}>+{summary.reinforcementBonus}</span></div>
         )}
         <div>Locations: {summary.connectedLocations.length}</div>
+      </div>
+    </div>
+  )
+}
+
 function RebellionStatusPanel({ actProgress }: { actProgress: ActProgress }) {
   const exposureStatus = getExposureStatus(actProgress.exposure)
   const exposurePct = (actProgress.exposure / 10) * 100
@@ -1145,6 +1150,7 @@ export default function MissionSelect() {
 
           {campaignState.supplyNetwork && campaignState.supplyNetwork.nodes.length > 0 && (
             <NetworkStatsWidget campaign={campaignState} />
+          )}
           {campaignState.actProgress && (
             <RebellionStatusPanel actProgress={campaignState.actProgress} />
           )}
