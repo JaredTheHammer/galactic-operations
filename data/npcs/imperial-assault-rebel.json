@@ -1,0 +1,1723 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Rebel faction deployment cards and hero NPC profiles from Star Wars: Imperial Assault. All expansions included. Stats faithfully adapted from IA dice system to d6 dice pools. Includes iconic Rebel allies (Luke, Han, Leia, etc.) and all campaign heroes as NPC companions."
+  },
+  "npcs": {
+    "ia-rebel-trooper": {
+      "id": "ia-rebel-trooper",
+      "name": "Rebel Trooper",
+      "side": "operative",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-a280-rifle",
+          "name": "A280 Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Rebel", "Trooper", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [],
+      "threatCost": 2
+    },
+    "ia-rebel-trooper-elite": {
+      "id": "ia-rebel-trooper-elite",
+      "name": "Rebel Trooper (Elite)",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": 4,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-a280-rifle-elite",
+          "name": "A280 Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Trooper", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["Take Cover: +1 defense die when in cover."],
+      "threatCost": 4
+    },
+    "ia-rebel-saboteur": {
+      "id": "ia-rebel-saboteur",
+      "name": "Rebel Saboteur",
+      "side": "operative",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 0, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 1,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-thermal-det",
+          "name": "Thermal Detonator",
+          "baseDamage": 8,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 3 },
+            { "name": "Limited Ammo", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-saboteur-pistol",
+          "name": "Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Rebel", "Saboteur", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["Demolish: +3 damage against objects and doors."],
+      "threatCost": 3
+    },
+    "ia-rebel-saboteur-elite": {
+      "id": "ia-rebel-saboteur-elite",
+      "name": "Rebel Saboteur (Elite)",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 4,
+      "soak": 1,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-thermal-det-elite",
+          "name": "Thermal Detonator",
+          "baseDamage": 9,
+          "range": "Short",
+          "critical": 2,
+          "qualities": [
+            { "name": "Blast", "value": 4 },
+            { "name": "Limited Ammo", "value": 2 }
+          ]
+        },
+        {
+          "weaponId": "ia-saboteur-pistol-elite",
+          "name": "Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Saboteur", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Demolish: +5 damage against objects and doors.",
+        "Booby Trap: May place a trap token on adjacent tile. Hostile figures entering suffer 4 damage."
+      ],
+      "threatCost": 5
+    },
+    "ia-echo-base-trooper": {
+      "id": "ia-echo-base-trooper",
+      "name": "Echo Base Trooper",
+      "side": "operative",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-echo-rifle",
+          "name": "A295 Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Rebel", "Trooper", "Cold Weather", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["Entrenched: +1 soak when this figure has not moved this activation."],
+      "threatCost": 3
+    },
+    "ia-echo-base-trooper-elite": {
+      "id": "ia-echo-base-trooper-elite",
+      "name": "Echo Base Trooper (Elite)",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 4,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-echo-rifle-elite",
+          "name": "A295 Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Trooper", "Cold Weather", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Disciplined", "value": 1 }],
+      "abilities": [
+        "Entrenched: +2 soak when this figure has not moved this activation.",
+        "Hold the Line: Adjacent friendly Rebel figures gain +1 soak."
+      ],
+      "threatCost": 5
+    },
+    "ia-wookiee-warrior": {
+      "id": "ia-wookiee-warrior",
+      "name": "Wookiee Warrior",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 10,
+      "strainThreshold": 5,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-wookiee-bowcaster",
+          "name": "Bowcaster",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Knockdown", "value": null }]
+        },
+        {
+          "weaponId": "ia-wookiee-fists",
+          "name": "Wookiee Fists",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Disorient", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Wookiee", "Warrior", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 1 }],
+      "abilities": [
+        "Wookiee Rage: +1 damage on melee attacks when wounded.",
+        "Intimidating: Hostile figures engaged with this figure suffer -1 to attack pools."
+      ],
+      "threatCost": 5
+    },
+    "ia-wookiee-warrior-elite": {
+      "id": "ia-wookiee-warrior-elite",
+      "name": "Wookiee Warrior (Elite)",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 13,
+      "strainThreshold": 6,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-wookiee-bowcaster-elite",
+          "name": "Bowcaster",
+          "baseDamage": 9,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Pierce", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-wookiee-fists-elite",
+          "name": "Wookiee Fists",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Disorient", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Wookiee", "Warrior", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 2 }],
+      "abilities": [
+        "Wookiee Rage: +2 damage on all attacks when wounded.",
+        "Intimidating: Hostile figures engaged with this figure suffer -1 to attack pools.",
+        "Unstoppable: Immune to Stun and Immobilize."
+      ],
+      "threatCost": 7
+    },
+    "ia-alliance-ranger": {
+      "id": "ia-alliance-ranger",
+      "name": "Alliance Ranger",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 1 },
+      "woundThreshold": 5,
+      "strainThreshold": 5,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-ranger-rifle",
+          "name": "Sniper Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 2 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Rebel", "Trooper", "Sniper", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Long Shot: No range penalty at Long range.",
+        "Camouflage: +1 defense die when in cover."
+      ],
+      "threatCost": 4
+    },
+    "ia-alliance-ranger-elite": {
+      "id": "ia-alliance-ranger-elite",
+      "name": "Alliance Ranger (Elite)",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 0, "proficiency": 2 },
+      "defensePool": { "difficulty": 0, "challenge": 1 },
+      "woundThreshold": 7,
+      "strainThreshold": 6,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-ranger-rifle-elite",
+          "name": "Marksman Rifle",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 1,
+          "qualities": [
+            { "name": "Accurate", "value": 2 },
+            { "name": "Pierce", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Rebel", "Trooper", "Sniper", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Long Shot: No range penalty at Long range.",
+        "Camouflage: +2 defense dice when in cover.",
+        "Headshot: Critical injuries from this figure gain +10 to the roll."
+      ],
+      "threatCost": 6
+    },
+    "ia-alliance-smuggler": {
+      "id": "ia-alliance-smuggler",
+      "name": "Alliance Smuggler",
+      "side": "operative",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 1 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 1,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-smuggler-pistol",
+          "name": "DL-44 Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Rebel", "Smuggler", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Slippery: This figure does not provoke attacks when leaving engaged range.",
+        "Run and Gun: May attack after moving."
+      ],
+      "threatCost": 2
+    },
+    "ia-alliance-smuggler-elite": {
+      "id": "ia-alliance-smuggler-elite",
+      "name": "Alliance Smuggler (Elite)",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 1 },
+      "woundThreshold": 6,
+      "strainThreshold": 5,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-smuggler-pistol-elite",
+          "name": "Modified DL-44 Blaster Pistol",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Smuggler", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Slippery: This figure does not provoke attacks when leaving engaged range.",
+        "Run and Gun: May attack after moving.",
+        "Trick Shot: +2 damage when attacking from cover."
+      ],
+      "threatCost": 4
+    },
+    "ia-luke-skywalker": {
+      "id": "ia-luke-skywalker",
+      "name": "Luke Skywalker",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-luke-saber",
+          "name": "Anakin's Lightsaber",
+          "baseDamage": 7,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-luke-blaster",
+          "name": "DL-44 Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Force-sensitive", "Light Side", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Dauntless" }],
+      "abilities": [
+        "Son of Skywalker: Perform 2 melee attacks as a single action.",
+        "Force Leap: As a maneuver, move up to 3 tiles ignoring terrain and figures.",
+        "Deflection: When targeted by a ranged attack, add 1 Challenge die to defense pool."
+      ],
+      "threatCost": 8
+    },
+    "ia-luke-skywalker-jedi": {
+      "id": "ia-luke-skywalker-jedi",
+      "name": "Luke Skywalker (Jedi Knight)",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 3 },
+      "defensePool": { "difficulty": 1, "challenge": 2 },
+      "woundThreshold": 14,
+      "strainThreshold": 12,
+      "soak": 4,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-luke-jedi-saber",
+          "name": "Luke's Green Lightsaber",
+          "baseDamage": 9,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Vicious", "value": 2 },
+            { "name": "Pierce", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Force-sensitive", "Jedi", "Light Side", "Unique", "Boss", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Dauntless" },
+        { "name": "Retaliate", "value": 2 }
+      ],
+      "abilities": [
+        "Jedi Master: Perform 2 melee attacks as a single action. Each may target a different figure.",
+        "Force Leap: As a maneuver, move up to 4 tiles ignoring terrain and figures.",
+        "Deflection: When targeted by a ranged attack, add 2 Challenge dice to defense pool.",
+        "Parry: When hit by melee, suffer 3 strain to reduce damage by 5.",
+        "Force Push: As an action, push a figure within Short range 3 tiles and deal 3 damage."
+      ],
+      "threatCost": 12
+    },
+    "ia-han-solo": {
+      "id": "ia-han-solo",
+      "name": "Han Solo",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-han-dl44",
+          "name": "Han's Modified DL-44",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Smuggler", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Shoot First: At the start of each round, if Han has not activated, he may perform a free attack.",
+        "Distracting: After attacking, the target suffers -1 to attack pools until end of round.",
+        "Return Fire: When missed by an attack, may perform a free attack against the attacker.",
+        "Smuggler's Luck: Once per round, reroll all attack dice."
+      ],
+      "threatCost": 8
+    },
+    "ia-chewbacca": {
+      "id": "ia-chewbacca",
+      "name": "Chewbacca",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 14,
+      "strainThreshold": 8,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-chewie-bowcaster",
+          "name": "Chewbacca's Bowcaster",
+          "baseDamage": 9,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Pierce", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-chewie-fists",
+          "name": "Wookiee Strength",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Disorient", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Wookiee", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Retaliate", "value": 2 },
+        { "name": "Guardian", "value": 3 }
+      ],
+      "abilities": [
+        "Protector: When a friendly figure within Engaged range would take damage, Chewbacca may suffer up to 3 damage instead.",
+        "Wookiee Rage: +2 damage on all attacks when wounded.",
+        "Slam: As an action, push all adjacent hostile figures 2 tiles and deal 3 damage."
+      ],
+      "threatCost": 9
+    },
+    "ia-leia-organa": {
+      "id": "ia-leia-organa",
+      "name": "Leia Organa",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 8,
+      "strainThreshold": 12,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-leia-pistol",
+          "name": "Sporting Blaster",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Stun setting", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Leader", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Steadfast" }],
+      "courage": 4,
+      "abilities": [
+        "Battlefield Leadership: All friendly figures within Medium range may reroll 1 defense die.",
+        "War Council: As an action, choose up to 2 friendly figures within Short range. Each may perform a free move or attack.",
+        "Heart of the Rebellion: Friendly figures within Short range recover 1 strain at start of each round.",
+        "Inspiring Presence: Friendly figures within Short range are immune to Suppression."
+      ],
+      "threatCost": 7
+    },
+    "ia-r2d2-c3po": {
+      "id": "ia-r2d2-c3po",
+      "name": "R2-D2 and C-3PO",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 0, "proficiency": 0 },
+      "defensePool": { "difficulty": 0, "challenge": 1 },
+      "woundThreshold": 6,
+      "strainThreshold": 8,
+      "soak": 2,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "ia-r2-zapper",
+          "name": "R2-D2's Electroshock Prod",
+          "baseDamage": 3,
+          "range": "Engaged",
+          "critical": 5,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Droid", "Support", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Terminal Hack: As an action, interact with any terminal or computer within Engaged range automatically (no check required).",
+        "Distraction: C-3PO can cause hostile figures within Short range to suffer -1 to attack pools.",
+        "Repair: R2-D2 can restore 2 wounds to an adjacent Droid figure as an action.",
+        "Scomp Link: May open locked doors within Engaged range."
+      ],
+      "threatCost": 3
+    },
+    "ia-obi-wan-kenobi": {
+      "id": "ia-obi-wan-kenobi",
+      "name": "Obi-Wan Kenobi",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 3 },
+      "defensePool": { "difficulty": 1, "challenge": 2 },
+      "woundThreshold": 14,
+      "strainThreshold": 14,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-kenobi-saber",
+          "name": "Kenobi's Lightsaber",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Defensive", "value": 2 },
+            { "name": "Vicious", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Force-sensitive", "Jedi", "Light Side", "Unique", "Boss", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Dauntless" },
+        { "name": "Retaliate", "value": 2 }
+      ],
+      "abilities": [
+        "Soresu Mastery: When defending in melee, add 2 Proficiency dice to defense pool.",
+        "Deflection: When targeted by a ranged attack, add 2 Challenge dice to defense pool.",
+        "Force Push: Push a figure within Short range 3 tiles and deal 3 damage.",
+        "Mind Trick: Choose a hostile figure within Short range. That figure cannot attack Obi-Wan until end of round.",
+        "If You Strike Me Down: When defeated, all friendly figures recover 3 strain and gain +2 damage until end of round."
+      ],
+      "threatCost": 12
+    },
+    "ia-lando-calrissian": {
+      "id": "ia-lando-calrissian",
+      "name": "Lando Calrissian",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-lando-pistol",
+          "name": "X-8 Night Sniper Blaster Pistol",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Smuggler", "Leader", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Gambler: Once per round, before rolling attack, predict the number of successes. If correct, double damage.",
+        "Charming: Hostile figures within Short range must spend 1 strain to attack Lando.",
+        "Smooth Exit: When wounded, may immediately move up to 3 tiles (once per activation)."
+      ],
+      "threatCost": 7
+    },
+    "ia-ahsoka-tano": {
+      "id": "ia-ahsoka-tano",
+      "name": "Ahsoka Tano",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 0, "proficiency": 3 },
+      "defensePool": { "difficulty": 1, "challenge": 2 },
+      "woundThreshold": 12,
+      "strainThreshold": 12,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-ahsoka-sabers",
+          "name": "Dual White Lightsabers",
+          "baseDamage": 7,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Linked", "value": 1 },
+            { "name": "Defensive", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Force-sensitive", "Light Side", "Unique", "Boss", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Dauntless" },
+        { "name": "Retaliate", "value": 2 }
+      ],
+      "abilities": [
+        "Dual Wield: Perform 2 melee attacks per action, each at -1 damage.",
+        "Force Speed: After performing an attack, may move up to 3 tiles.",
+        "Deflection: When targeted by a ranged attack, add 2 Challenge dice to defense pool.",
+        "Parry: When hit by melee, suffer 3 strain to reduce damage by 5."
+      ],
+      "threatCost": 10
+    },
+    "ia-hera-syndulla": {
+      "id": "ia-hera-syndulla",
+      "name": "Hera Syndulla",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-hera-blaster",
+          "name": "Blurrg-1120 Holdout Blaster",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Linked", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Leader", "Pilot", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Steadfast" }],
+      "courage": 4,
+      "abilities": [
+        "Spectre Leader: All friendly figures within Medium range gain +1 to attack pools.",
+        "Tactical Advantage: As an action, choose a friendly figure within Short range. That figure immediately activates.",
+        "Born Leader: Friendly figures within Short range recover 1 strain when Hera activates."
+      ],
+      "threatCost": 7
+    },
+    "ia-chopper": {
+      "id": "ia-chopper",
+      "name": "Chopper (C1-10P)",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 7,
+      "strainThreshold": 6,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-chopper-zapper",
+          "name": "Electroshock Prod",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Stun setting", "value": null },
+            { "name": "Disorient", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Droid", "Support", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Cantankerous: When an adjacent hostile figure performs an action, that figure suffers 1 strain.",
+        "Jury-Rig: As an action, restore 2 wounds to an adjacent friendly Droid or Vehicle.",
+        "Terminal Hack: May interact with terminals automatically."
+      ],
+      "threatCost": 4
+    },
+    "ia-ezra-bridger": {
+      "id": "ia-ezra-bridger",
+      "name": "Ezra Bridger",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-ezra-saber-blaster",
+          "name": "Lightsaber-Blaster Hybrid",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Force-sensitive", "Light Side", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Dauntless" }],
+      "abilities": [
+        "Hybrid Weapon: May use this weapon for both melee (Engaged range, +1 damage) and ranged (Medium range) attacks.",
+        "Street Smart: +2 damage when attacking from cover.",
+        "Force Connection: Once per round, recover 2 strain.",
+        "Deflection: When targeted by a ranged attack, add 1 Challenge die to defense pool."
+      ],
+      "threatCost": 7
+    },
+    "ia-kanan-jarrus": {
+      "id": "ia-kanan-jarrus",
+      "name": "Kanan Jarrus",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 2 },
+      "woundThreshold": 12,
+      "strainThreshold": 12,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-kanan-saber",
+          "name": "Kanan's Lightsaber",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Defensive", "value": 1 },
+            { "name": "Vicious", "value": 2 }
+          ]
+        },
+        {
+          "weaponId": "ia-kanan-blaster",
+          "name": "DL-18 Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Force-sensitive", "Jedi", "Light Side", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Dauntless" },
+        { "name": "Retaliate", "value": 1 }
+      ],
+      "abilities": [
+        "Mentor: Friendly Force-sensitive figures within Short range gain +1 to attack pools.",
+        "Deflection: When targeted by a ranged attack, add 1 Challenge die to defense pool.",
+        "Parry: When hit by melee, suffer 3 strain to reduce damage by 4.",
+        "Force Sense: Once per round, when a hostile figure declares an attack against a friendly figure within Short range, upgrade the defense pool once."
+      ],
+      "threatCost": 8
+    },
+    "ia-sabine-wren": {
+      "id": "ia-sabine-wren",
+      "name": "Sabine Wren",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": 8,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-sabine-pistols",
+          "name": "Dual WESTAR-35 Blaster Pistols",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Linked", "value": 1 },
+            { "name": "Accurate", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-sabine-darksaber",
+          "name": "Darksaber",
+          "baseDamage": 7,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Mandalorian", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Armor", "value": 1 }],
+      "abilities": [
+        "Explosives Expert: As an action, place a detonator on adjacent tile. Detonate at start of next activation dealing 6 damage in Blast 2.",
+        "Mandalorian Agility: Ignore difficult terrain and may climb without spending extra movement.",
+        "Spray Paint: Mark a tile. Hostile figures on marked tiles suffer -1 to defense pools."
+      ],
+      "threatCost": 8
+    },
+    "ia-zeb-orrelios": {
+      "id": "ia-zeb-orrelios",
+      "name": "Zeb Orrelios",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 14,
+      "strainThreshold": 8,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-zeb-borifle",
+          "name": "AB-75 Bo-Rifle",
+          "baseDamage": 6,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Stun setting", "value": null },
+            { "name": "Defensive", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Lasat", "Warrior", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 2 }],
+      "abilities": [
+        "Bo-Rifle Mode: May switch between melee mode (+2 damage) and rifle mode (Medium range, baseDamage 8).",
+        "Honor Guard: Adjacent friendly figures gain +1 soak.",
+        "Devastating Strike: When rolling 3+ successes on a melee attack, stun the target."
+      ],
+      "threatCost": 8
+    },
+    "ia-gaarkhan": {
+      "id": "ia-gaarkhan",
+      "name": "Gaarkhan",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 14,
+      "strainThreshold": 6,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-gaarkhan-vibro-axe",
+          "name": "Vibro-axe",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Vicious", "value": 2 },
+            { "name": "Pierce", "value": 1 },
+            { "name": "Knockdown", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Wookiee", "Warrior", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 2 }],
+      "abilities": [
+        "Wookiee Rage: +2 damage on melee attacks when wounded.",
+        "Ferocity: May suffer 2 strain to perform an additional melee attack.",
+        "Charge: +2 damage after moving 3+ tiles before attacking."
+      ],
+      "threatCost": 8
+    },
+    "ia-fenn-signis": {
+      "id": "ia-fenn-signis",
+      "name": "Fenn Signis",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 12,
+      "strainThreshold": 8,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-fenn-rifle",
+          "name": "Modified Infantry Blaster",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Rebel", "Trooper", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Havoc Shot: +3 damage but suffer 2 strain.",
+        "Tactical Movement: After attacking, may move 2 tiles.",
+        "Assault: May perform 2 ranged attacks per activation (each at -1 damage)."
+      ],
+      "threatCost": 8
+    },
+    "ia-jyn-odan": {
+      "id": "ia-jyn-odan",
+      "name": "Jyn Odan",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-jyn-pistols",
+          "name": "Dual Blaster Pistols",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Linked", "value": 1 },
+            { "name": "Accurate", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Smuggler", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Quick Draw: At the start of each round, may perform a free attack at -2 damage.",
+        "Nimble: After being targeted by an attack, may move 1 tile.",
+        "Trick Shot: +2 damage against targets at Medium range or further."
+      ],
+      "threatCost": 7
+    },
+    "ia-gideon-argus": {
+      "id": "ia-gideon-argus",
+      "name": "Gideon Argus",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-gideon-pistol",
+          "name": "Holdout Blaster",
+          "baseDamage": 6,
+          "range": "Short",
+          "critical": 4,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Officer", "Leader", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Steadfast" }],
+      "courage": 4,
+      "abilities": [
+        "Command: As an action, choose a friendly figure within Short range. That figure may perform a free attack or move.",
+        "Masterstroke: Once per round, choose a friendly figure within Medium range. That figure gains +2 to all attack pools until end of round.",
+        "Called Shot: Allies within Short range may reroll 1 attack die per attack."
+      ],
+      "threatCost": 6
+    },
+    "ia-mak-eshkarey": {
+      "id": "ia-mak-eshkarey",
+      "name": "Mak Eshka'rey",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 8,
+      "strainThreshold": 10,
+      "soak": 1,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-mak-rifle",
+          "name": "Modified Sniper Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 2 },
+            { "name": "Pierce", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Rebel", "Bothan", "Sniper", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Ambush: +3 damage when attacking from stealth or from a tile the target cannot see.",
+        "Covert: After attacking, if in cover, this figure becomes Hidden (cannot be targeted until it moves or attacks again).",
+        "Recon: At the start of each round, reveal all hostile figures within Long range."
+      ],
+      "threatCost": 6
+    },
+    "ia-diala-passil": {
+      "id": "ia-diala-passil",
+      "name": "Diala Passil",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-diala-plasteel-staff",
+          "name": "Plasteel Staff",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Defensive", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Force-sensitive", "Twi'lek", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Dauntless" }],
+      "abilities": [
+        "Force Throw: As an action, push a figure within Short range 2 tiles and deal 3 damage.",
+        "Defensive Stance: Suffer 1 strain to add 1 Challenge die to defense pool.",
+        "Precise Strike: May spend 2 advantages to deal +3 damage on melee attacks."
+      ],
+      "threatCost": 7
+    },
+    "ia-biv-bodhrik": {
+      "id": "ia-biv-bodhrik",
+      "name": "Biv Bodhrik",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 12,
+      "strainThreshold": 6,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-biv-cannon",
+          "name": "Modified Assault Cannon",
+          "baseDamage": 9,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Auto-fire", "value": null },
+            { "name": "Cumbersome", "value": 3 }
+          ]
+        },
+        {
+          "weaponId": "ia-biv-fists",
+          "name": "Brawling",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Disorient", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Trooper", "Heavy Weapons", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Armor", "value": 1 }],
+      "abilities": [
+        "Close and Personal: +2 damage on ranged attacks against adjacent targets.",
+        "Headbutt: After a melee attack hits, the target is Stunned.",
+        "Vengeance: +1 damage for each wound this figure has suffered (max +4)."
+      ],
+      "threatCost": 8
+    },
+    "ia-saska-tansen": {
+      "id": "ia-saska-tansen",
+      "name": "Saska Tansen",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-saska-pistol",
+          "name": "Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Technician", "Mon Calamari", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Tinker: As an action, choose a friendly figure within Short range. That figure's weapon gains +2 damage until end of round.",
+        "Energy Shield: As a maneuver, grant a friendly figure within Short range +2 soak until end of round.",
+        "Overcharge: Suffer 3 strain to double the effect of Tinker or Energy Shield."
+      ],
+      "threatCost": 6
+    },
+    "ia-loku-kanoloa": {
+      "id": "ia-loku-kanoloa",
+      "name": "Loku Kanoloa",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-loku-rifle",
+          "name": "Sniper Rifle",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 2 },
+            { "name": "Pierce", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Rebel", "Mon Calamari", "Sniper", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Recon Token: Place a recon token on a hostile figure within Long range. Attacks against that figure gain +1 damage.",
+        "Marksman: Ignore cover bonuses.",
+        "Mon Calamari Resolve: Recover 1 strain at the start of each activation."
+      ],
+      "threatCost": 7
+    },
+    "ia-mhd-19": {
+      "id": "ia-mhd-19",
+      "name": "MHD-19",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 0, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 10,
+      "strainThreshold": 8,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-mhd-surgical-tool",
+          "name": "Surgical Laser",
+          "baseDamage": 3,
+          "range": "Engaged",
+          "critical": 5,
+          "qualities": [{ "name": "Pierce", "value": 2 }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Droid", "Medic", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Medical Protocol: As an action, restore 3 wounds to an adjacent friendly figure.",
+        "Emergency Stimulant: As a maneuver, adjacent friendly figure recovers 2 strain.",
+        "Bacta Infusion: Once per mission, fully heal an adjacent friendly figure to maximum wounds.",
+        "Bedside Manner: Friendly figures within Short range gain +1 soak."
+      ],
+      "threatCost": 5
+    },
+    "ia-verena-talos": {
+      "id": "ia-verena-talos",
+      "name": "Verena Talos",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 12,
+      "strainThreshold": 8,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-verena-fists",
+          "name": "Martial Arts",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Pierce", "value": 1 },
+            { "name": "Knockdown", "value": null },
+            { "name": "Disorient", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-verena-pistol",
+          "name": "Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Brawler", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 1 }],
+      "abilities": [
+        "Flurry of Blows: Perform 2 melee attacks as a single action.",
+        "Counter-Strike: When attacked in melee, may perform a free melee attack against the attacker.",
+        "Adrenaline Rush: Suffer 2 strain to gain +1 speed and +1 damage until end of activation."
+      ],
+      "threatCost": 7
+    },
+    "ia-davith-elso": {
+      "id": "ia-davith-elso",
+      "name": "Davith Elso",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-davith-saber",
+          "name": "Lightsaber Pike",
+          "baseDamage": 6,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Force-sensitive", "Light Side", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Dauntless" }],
+      "abilities": [
+        "Force Leap: As a maneuver, move up to 3 tiles ignoring terrain and figures.",
+        "Vanish: After attacking, become Hidden (cannot be targeted until start of next activation).",
+        "Falling Leaf: When entering a tile adjacent to a hostile figure, may perform a free melee attack at -2 damage."
+      ],
+      "threatCost": 7
+    },
+    "ia-murne-rin": {
+      "id": "ia-murne-rin",
+      "name": "Murne Rin",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 12,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-murne-pistol",
+          "name": "Sporting Blaster",
+          "baseDamage": 5,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Ithorian", "Diplomat", "Support", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Steadfast" }],
+      "abilities": [
+        "False Orders: As an action, choose a hostile figure within Short range. That figure must move up to 3 tiles in a direction you choose.",
+        "Inspiring Speech: All friendly figures within Short range recover 2 strain.",
+        "Ithorian Bellow: As an action, all hostile figures within Engaged range suffer 3 strain and are pushed 1 tile."
+      ],
+      "threatCost": 5
+    },
+    "ia-shyla-varad": {
+      "id": "ia-shyla-varad",
+      "name": "Shyla Varad",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 0, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 12,
+      "strainThreshold": 8,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-shyla-blade",
+          "name": "Mandalorian Beskad",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Pierce", "value": 2 },
+            { "name": "Vicious", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Mandalorian", "Warrior", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Armor", "value": 1 },
+        { "name": "Retaliate", "value": 1 }
+      ],
+      "abilities": [
+        "Mandalorian Whip: As a maneuver, pull a figure within Short range adjacent to Shyla.",
+        "Protector: When an adjacent friendly figure would be attacked, Shyla may become the target instead.",
+        "Mandalorian Resolve: +1 to all defense pools when wounded."
+      ],
+      "threatCost": 7
+    },
+    "ia-vinto-hreeda": {
+      "id": "ia-vinto-hreeda",
+      "name": "Vinto Hreeda",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 8,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-vinto-pistol",
+          "name": "Modified Blaster Pistol",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Rodian", "Gunslinger", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Boltslinger: May perform 2 ranged attacks per activation (each at -1 damage).",
+        "Rapid Fire: When rolling 3+ successes, perform a bonus attack against a different target within Short range.",
+        "Agile: After being missed by an attack, move 2 tiles."
+      ],
+      "threatCost": 7
+    },
+    "ia-jarrod-kelvin": {
+      "id": "ia-jarrod-kelvin",
+      "name": "Jarrod Kelvin",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 12,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-jarrod-saber",
+          "name": "Lightsaber",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Vicious", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Force-sensitive", "Light Side", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Dauntless" }],
+      "abilities": [
+        "Force Wave: As an action, push all figures within Engaged range 2 tiles and deal 3 damage.",
+        "Battle Meditation: Friendly figures within Short range gain +1 to attack pools.",
+        "Deflection: When targeted by a ranged attack, add 1 Challenge die to defense pool."
+      ],
+      "threatCost": 8
+    },
+    "ia-ko-tun-feralo": {
+      "id": "ia-ko-tun-feralo",
+      "name": "Ko-Tun Feralo",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-kotun-pistol",
+          "name": "Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        },
+        {
+          "weaponId": "ia-kotun-detonator",
+          "name": "Thermal Detonator",
+          "baseDamage": 8,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 3 },
+            { "name": "Limited Ammo", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Mirialan", "Demolitions", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Demolitions Expert: +4 damage against objects, doors, and terrain features.",
+        "Shaped Charge: Place an explosive on adjacent terrain. Detonate next activation for 8 damage in Blast 3.",
+        "Concussive Blast: Targets hit by explosives are Disoriented."
+      ],
+      "threatCost": 7
+    },
+    "ia-drokkatta": {
+      "id": "ia-drokkatta",
+      "name": "Drokkatta",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 14,
+      "strainThreshold": 6,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-drokkatta-launcher",
+          "name": "Grenade Launcher",
+          "baseDamage": 9,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 3 },
+            { "name": "Cumbersome", "value": 3 }
+          ]
+        },
+        {
+          "weaponId": "ia-drokkatta-fists",
+          "name": "Wookiee Strength",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Disorient", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Wookiee", "Heavy Weapons", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Armor", "value": 1 }],
+      "abilities": [
+        "Wookiee Rage: +1 damage on all attacks when wounded.",
+        "Area Denial: Place a blast marker on a tile within Medium range. Hostile figures entering suffer 4 damage.",
+        "Fortify: As a maneuver, gain +2 soak until end of round (cannot move this activation)."
+      ],
+      "threatCost": 8
+    },
+    "ia-ct-1701": {
+      "id": "ia-ct-1701",
+      "name": "CT-1701",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 12,
+      "strainThreshold": 8,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-ct1701-dc15",
+          "name": "DC-15A Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Rebel", "Clone", "Trooper", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Armor", "value": 1 },
+        { "name": "Disciplined", "value": 1 }
+      ],
+      "abilities": [
+        "Clone Training: May reroll 1 attack die per attack.",
+        "Fire Support: When a friendly figure within Short range attacks, may add +1 damage.",
+        "Veterans Instinct: Immune to Suppression."
+      ],
+      "threatCost": 8
+    },
+    "ia-tress-hacnua": {
+      "id": "ia-tress-hacnua",
+      "name": "Tress Hacnua",
+      "side": "operative",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 0, "challenge": 2 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 2,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-tress-blade",
+          "name": "Energy Staff",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Defensive", "value": 1 },
+            { "name": "Stun setting", "value": null },
+            { "name": "Pierce", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-tress-pistol",
+          "name": "Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Rebel", "Togruta", "Hero", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Spatial Awareness: Togruta echolocation grants +1 defense die in melee.",
+        "Acrobatic: Ignore difficult terrain and may move through hostile figures.",
+        "Staff Sweep: Melee attacks may target up to 2 adjacent figures."
+      ],
+      "threatCost": 7
+    }
+  }
+}

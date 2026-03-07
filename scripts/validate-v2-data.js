@@ -42,6 +42,10 @@ const npcFiles = [
   'data/npcs/warlord-forces.json',
   'data/npcs/companions.json',
   'data/npcs/bounty-targets.json',
+  'data/npcs/mercenaries.json',
+  'data/npcs/imperial-assault-imperial.json',
+  'data/npcs/imperial-assault-mercenary.json',
+  'data/npcs/imperial-assault-rebel.json',
 ];
 
 const missionFiles = [

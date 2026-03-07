@@ -1,0 +1,348 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Hero creation templates for Imperial Assault campaign heroes. Each template maps an IA hero to the species/career/specialization system, providing recommended builds that capture the hero's identity. Players select a template during hero creation to get pre-filled species, career, specialization, and starting equipment."
+  },
+  "templates": {
+    "ia-gaarkhan": {
+      "id": "ia-gaarkhan",
+      "name": "Gaarkhan",
+      "source": "Imperial Assault: Core Set",
+      "description": "Ferocious Wookiee berserker. Channels rage into devastating melee attacks, growing more dangerous as he takes damage.",
+      "species": "wookiee",
+      "career": "hired-gun",
+      "specialization": "mercenary",
+      "startingEquipment": {
+        "primaryWeapon": "vibro-blade",
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["melee", "brawl", "athletics", "resilience"],
+      "backgroundNotes": "A Kashyyyk slave freed during an Imperial prison transport raid. His rage burns as hot as a Mustafar lava flow."
+    },
+    "ia-fenn-signis": {
+      "id": "ia-fenn-signis",
+      "name": "Fenn Signis",
+      "source": "Imperial Assault: Core Set",
+      "description": "Veteran Rebel soldier and sharpshooter. Expert marksman who excels at ranged combat with military precision.",
+      "species": "human",
+      "career": "hired-gun",
+      "specialization": "mercenary",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-rifle",
+        "secondaryWeapon": null,
+        "armor": "padded-armor",
+        "gear": []
+      },
+      "recommendedSkills": ["ranged-heavy", "ranged-light", "athletics", "vigilance"],
+      "backgroundNotes": "Former Alliance SpecForce soldier. Fenn fought at Scarif and survived by shooting straighter than anyone else."
+    },
+    "ia-jyn-odan": {
+      "id": "ia-jyn-odan",
+      "name": "Jyn Odan",
+      "source": "Imperial Assault: Core Set",
+      "description": "Quick-drawing smuggler with dual blasters. Fast, elusive, and deadly accurate at medium range.",
+      "species": "human",
+      "career": "scoundrel",
+      "specialization": "gunslinger",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-pistol",
+        "secondaryWeapon": "blaster-pistol",
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["ranged-light", "cool", "coordination", "skulduggery"],
+      "backgroundNotes": "Smuggler turned Rebel operative. Quick on the draw and quicker with an exit strategy."
+    },
+    "ia-gideon-argus": {
+      "id": "ia-gideon-argus",
+      "name": "Gideon Argus",
+      "source": "Imperial Assault: Core Set",
+      "description": "Rebel officer and tactical commander. Empowers allies through commands rather than personal combat prowess.",
+      "species": "human",
+      "career": "commander",
+      "specialization": "tactician",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-pistol",
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["leadership", "cool", "discipline", "perception"],
+      "backgroundNotes": "Alliance Intelligence officer who leads from beside his team, not behind them."
+    },
+    "ia-mak-eshkarey": {
+      "id": "ia-mak-eshkarey",
+      "name": "Mak Eshka'rey",
+      "source": "Imperial Assault: Core Set",
+      "description": "Bothan spy and expert sniper. Uses stealth and long-range precision to eliminate targets before they know he's there.",
+      "species": "bothan",
+      "career": "bounty-hunter",
+      "specialization": "assassin",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-rifle",
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["ranged-heavy", "stealth", "perception", "vigilance"],
+      "backgroundNotes": "Bothan spy network operative who transitioned to fieldwork. Many Bothans died, but Mak keeps surviving."
+    },
+    "ia-diala-passil": {
+      "id": "ia-diala-passil",
+      "name": "Diala Passil",
+      "source": "Imperial Assault: Core Set",
+      "description": "Twi'lek Force-sensitive with a hidden connection to the Jedi. Combines agility with burgeoning Force powers.",
+      "species": "twilek",
+      "career": "mystic",
+      "specialization": "force-adept",
+      "startingEquipment": {
+        "primaryWeapon": "vibro-blade",
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["melee", "discipline", "coordination", "vigilance"],
+      "backgroundNotes": "Survivor of Order 66, raised in hiding. The Force whispers to her, growing louder each day."
+    },
+    "ia-biv-bodhrik": {
+      "id": "ia-biv-bodhrik",
+      "name": "Biv Bodhrik",
+      "source": "Imperial Assault: Twin Shadows",
+      "description": "Heavy weapons specialist who fights up close. Combines ranged firepower with brutal brawling.",
+      "species": "human",
+      "career": "hired-gun",
+      "specialization": "demolitionist",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-rifle",
+        "secondaryWeapon": null,
+        "armor": "heavy-battle-armor",
+        "gear": []
+      },
+      "recommendedSkills": ["ranged-heavy", "brawl", "resilience", "athletics"],
+      "backgroundNotes": "Former Imperial Army trooper who deserted after witnessing atrocities on Jedha. Now he turns Imperial weapons against them."
+    },
+    "ia-saska-tansen": {
+      "id": "ia-saska-tansen",
+      "name": "Saska Tansen",
+      "source": "Imperial Assault: Twin Shadows",
+      "description": "Mon Calamari tech specialist. Enhances allies' weapons and provides energy shields through engineering expertise.",
+      "species": "duros",
+      "career": "technician",
+      "specialization": "outlaw-tech",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-pistol",
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["mechanics", "computers", "ranged-light", "perception"],
+      "backgroundNotes": "Mon Calamari engineer who builds weapons and shields from salvaged Imperial tech. If it has circuits, she can improve it."
+    },
+    "ia-loku-kanoloa": {
+      "id": "ia-loku-kanoloa",
+      "name": "Loku Kanoloa",
+      "source": "Imperial Assault: Return to Hoth",
+      "description": "Mon Calamari reconnaissance sniper. Patient, precise, and deadly from extreme range.",
+      "species": "duros",
+      "career": "bounty-hunter",
+      "specialization": "assassin",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-rifle",
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["ranged-heavy", "perception", "stealth", "vigilance"],
+      "backgroundNotes": "Mon Calamari military scout who served at the Battle of Mon Cala. Now provides overwatch for Rebel ground operations."
+    },
+    "ia-mhd-19": {
+      "id": "ia-mhd-19",
+      "name": "MHD-19",
+      "source": "Imperial Assault: Return to Hoth",
+      "description": "Medical droid combat medic. Keeps the team alive through advanced medical protocols and emergency treatment.",
+      "species": "droid",
+      "career": "technician",
+      "specialization": "droid-tech",
+      "startingEquipment": {
+        "primaryWeapon": null,
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["medicine", "mechanics", "discipline", "resilience"],
+      "backgroundNotes": "Reprogrammed Imperial medical droid. MHD-19 violates his own programming daily by patching up Rebels in combat zones."
+    },
+    "ia-verena-talos": {
+      "id": "ia-verena-talos",
+      "name": "Verena Talos",
+      "source": "Imperial Assault: Return to Hoth",
+      "description": "Expert martial artist and hand-to-hand combatant. Fast, aggressive, and devastating in close quarters.",
+      "species": "human",
+      "career": "hired-gun",
+      "specialization": "bodyguard",
+      "startingEquipment": {
+        "primaryWeapon": "vibro-knife",
+        "secondaryWeapon": "blaster-pistol",
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["brawl", "melee", "athletics", "coordination"],
+      "backgroundNotes": "Trained by the Echani martial tradition. Verena reads opponents' movements like a datapad."
+    },
+    "ia-davith-elso": {
+      "id": "ia-davith-elso",
+      "name": "Davith Elso",
+      "source": "Imperial Assault: The Bespin Gambit",
+      "description": "Stealthy Force-sensitive operative. Combines Force-enhanced mobility with hit-and-fade melee strikes.",
+      "species": "human",
+      "career": "mystic",
+      "specialization": "force-adept",
+      "startingEquipment": {
+        "primaryWeapon": "vibro-blade",
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["melee", "stealth", "coordination", "discipline"],
+      "backgroundNotes": "A shadow. Davith Elso moves unseen, strikes without warning, and vanishes before the body hits the ground."
+    },
+    "ia-murne-rin": {
+      "id": "ia-murne-rin",
+      "name": "Murne Rin",
+      "source": "Imperial Assault: The Bespin Gambit",
+      "description": "Ithorian diplomat and support specialist. Controls the battlefield through commands, deception, and inspiring speeches.",
+      "species": "gran",
+      "career": "commander",
+      "specialization": "figurehead",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-pistol",
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["leadership", "cool", "deception", "perception"],
+      "backgroundNotes": "Ithorian peace advocate turned Rebel diplomat. Her voice can soothe a riot or shatter transparisteel."
+    },
+    "ia-shyla-varad": {
+      "id": "ia-shyla-varad",
+      "name": "Shyla Varad",
+      "source": "Imperial Assault: Jabba's Realm",
+      "description": "Mandalorian warrior wielding a beskad blade. Tough, protective, and fights with Mandalorian honor.",
+      "species": "human",
+      "career": "hired-gun",
+      "specialization": "bodyguard",
+      "startingEquipment": {
+        "primaryWeapon": "vibro-blade",
+        "secondaryWeapon": null,
+        "armor": "laminate-armor",
+        "gear": []
+      },
+      "recommendedSkills": ["melee", "athletics", "vigilance", "resilience"],
+      "backgroundNotes": "Clan Varad warrior seeking to restore her people's honor. Her beskad blade has tasted Imperial blood."
+    },
+    "ia-vinto-hreeda": {
+      "id": "ia-vinto-hreeda",
+      "name": "Vinto Hreeda",
+      "source": "Imperial Assault: Jabba's Realm",
+      "description": "Rodian gunslinger with lightning-fast reflexes. Fires rapidly and moves before return fire arrives.",
+      "species": "rodian",
+      "career": "scoundrel",
+      "specialization": "gunslinger",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-pistol",
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["ranged-light", "cool", "coordination", "perception"],
+      "backgroundNotes": "Rodian bounty hunter who switched sides after the Empire burned his clan's hunting grounds. Fastest draw in the Outer Rim."
+    },
+    "ia-jarrod-kelvin": {
+      "id": "ia-jarrod-kelvin",
+      "name": "Jarrod Kelvin",
+      "source": "Imperial Assault: Heart of the Empire",
+      "description": "Force-sensitive warrior who channels raw power into devastating attacks and protective barriers.",
+      "species": "human",
+      "career": "mystic",
+      "specialization": "niman-disciple",
+      "startingEquipment": {
+        "primaryWeapon": "vibro-blade",
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["melee", "discipline", "cool", "vigilance"],
+      "backgroundNotes": "Discovered his Force sensitivity after a near-death experience. Now learning to wield powers he barely understands."
+    },
+    "ia-ko-tun-feralo": {
+      "id": "ia-ko-tun-feralo",
+      "name": "Ko-Tun Feralo",
+      "source": "Imperial Assault: Heart of the Empire",
+      "description": "Mirialan demolitions expert. Specializes in explosives, area denial, and structural destruction.",
+      "species": "human",
+      "career": "hired-gun",
+      "specialization": "demolitionist",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-pistol",
+        "secondaryWeapon": null,
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["ranged-light", "mechanics", "perception", "coordination"],
+      "backgroundNotes": "Mirialan sapper who learned demolitions in the mines of Gorse. She can bring down a building or blow a lock with equal finesse."
+    },
+    "ia-drokkatta": {
+      "id": "ia-drokkatta",
+      "name": "Drokkatta",
+      "source": "Imperial Assault: Heart of the Empire",
+      "description": "Wookiee heavy weapons specialist. Carries a grenade launcher and fights with explosive area-of-effect attacks.",
+      "species": "wookiee",
+      "career": "hired-gun",
+      "specialization": "demolitionist",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-rifle",
+        "secondaryWeapon": null,
+        "armor": "heavy-battle-armor",
+        "gear": []
+      },
+      "recommendedSkills": ["ranged-heavy", "resilience", "athletics", "mechanics"],
+      "backgroundNotes": "Wookiee weaponsmith who builds custom ordnance. Her grenade launcher 'Boomer' has a kill radius measured in rooms, not meters."
+    },
+    "ia-ct-1701": {
+      "id": "ia-ct-1701",
+      "name": "CT-1701",
+      "source": "Imperial Assault: Tyrants of Lothal",
+      "description": "Clone Wars veteran clone trooper. Disciplined, experienced, and equipped with time-tested military tactics.",
+      "species": "human",
+      "career": "hired-gun",
+      "specialization": "mercenary",
+      "startingEquipment": {
+        "primaryWeapon": "blaster-rifle",
+        "secondaryWeapon": null,
+        "armor": "laminate-armor",
+        "gear": []
+      },
+      "recommendedSkills": ["ranged-heavy", "discipline", "vigilance", "resilience"],
+      "backgroundNotes": "Clone trooper who removed his inhibitor chip and deserted during Order 66. Decades later, he still fights for the Republic -- or what's left of it."
+    },
+    "ia-tress-hacnua": {
+      "id": "ia-tress-hacnua",
+      "name": "Tress Hacnua",
+      "source": "Imperial Assault: Tyrants of Lothal",
+      "description": "Togruta acrobat and close-quarters fighter. Uses agility and spatial awareness to outmaneuver opponents.",
+      "species": "twilek",
+      "career": "scoundrel",
+      "specialization": "charmer",
+      "startingEquipment": {
+        "primaryWeapon": "vibro-blade",
+        "secondaryWeapon": "blaster-pistol",
+        "armor": null,
+        "gear": []
+      },
+      "recommendedSkills": ["melee", "coordination", "stealth", "perception"],
+      "backgroundNotes": "Togruta performer turned Rebel operative. Her stage acrobatics translate surprisingly well to dodging blaster fire."
+    }
+  }
+}

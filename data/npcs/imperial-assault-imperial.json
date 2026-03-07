@@ -1,0 +1,1920 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Imperial faction deployment cards from Star Wars: Imperial Assault. All expansions included. Stats faithfully adapted from IA dice system to d6 dice pools. Regular deployments are Minion tier, elite deployments are Rival tier, unique villains are Nemesis tier."
+  },
+  "npcs": {
+    "ia-stormtrooper": {
+      "id": "ia-stormtrooper",
+      "name": "Stormtrooper",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-e-11",
+          "name": "E-11 Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Imperial", "Trooper", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [],
+      "threatCost": 3
+    },
+    "ia-stormtrooper-elite": {
+      "id": "ia-stormtrooper-elite",
+      "name": "Stormtrooper (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 5,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-e-11",
+          "name": "E-11 Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Trooper", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Disciplined", "value": 1 }],
+      "abilities": ["Focus Fire: +1 damage when attacking a target already attacked this round."],
+      "threatCost": 5
+    },
+    "ia-imperial-officer": {
+      "id": "ia-imperial-officer",
+      "name": "Imperial Officer",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 1,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-officer-blaster",
+          "name": "Blaster Pistol",
+          "baseDamage": 5,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Officer", "Leader", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Steadfast" }],
+      "abilities": [
+        "Executive Order: Choose a friendly figure within Short range. That figure may perform an attack.",
+        "Commanding Presence: Imperial Minions within Short range do not flee due to morale."
+      ],
+      "threatCost": 2
+    },
+    "ia-imperial-officer-elite": {
+      "id": "ia-imperial-officer-elite",
+      "name": "Imperial Officer (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 6,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-officer-blaster",
+          "name": "Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Officer", "Leader", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Steadfast" },
+        { "name": "Disciplined", "value": 1 }
+      ],
+      "courage": 3,
+      "abilities": [
+        "Executive Order: Choose a friendly figure within Short range. That figure may perform an attack.",
+        "Inspiring: All Imperial allies within Short range recover 2 strain when this figure activates.",
+        "Commanding Presence: Imperial Minions within Short range do not flee due to morale."
+      ],
+      "threatCost": 4
+    },
+    "ia-probe-droid": {
+      "id": "ia-probe-droid",
+      "name": "Probe Droid",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 0 },
+      "defensePool": { "difficulty": 0, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 1,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "ia-probe-blaster",
+          "name": "Integrated Blaster",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Imperial", "Droid", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Self-Destruct: When defeated, deal 4 damage to all figures within Engaged range.",
+        "Mobile: Can move through hostile figures."
+      ],
+      "threatCost": 2
+    },
+    "ia-probe-droid-elite": {
+      "id": "ia-probe-droid-elite",
+      "name": "Probe Droid (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": 4,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-probe-blaster-elite",
+          "name": "Integrated Blaster Array",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Imperial", "Droid", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Self-Destruct: When defeated, deal 5 damage to all figures within Engaged range.",
+        "Mobile: Can move through hostile figures.",
+        "Relay: Imperial figures within Short range gain +1 Accuracy."
+      ],
+      "threatCost": 4
+    },
+    "ia-royal-guard": {
+      "id": "ia-royal-guard",
+      "name": "Royal Guard",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-force-pike",
+          "name": "Force Pike",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Pierce", "value": 1 },
+            { "name": "Stun setting", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Imperial", "Guard", "Melee", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Guardian", "value": 2 }],
+      "abilities": [
+        "Protector: When an adjacent Imperial figure would take damage, this figure may suffer up to 2 damage instead."
+      ],
+      "threatCost": 4
+    },
+    "ia-royal-guard-elite": {
+      "id": "ia-royal-guard-elite",
+      "name": "Royal Guard (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 9,
+      "strainThreshold": 6,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-force-pike-elite",
+          "name": "Force Pike",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Pierce", "value": 2 },
+            { "name": "Stun setting", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Imperial", "Guard", "Elite", "Melee", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Guardian", "value": 3 },
+        { "name": "Armor", "value": 1 }
+      ],
+      "abilities": [
+        "Protector: When an adjacent Imperial figure would take damage, this figure may suffer up to 3 damage instead.",
+        "Executor's Strike: +2 damage when attacking a Wounded target."
+      ],
+      "threatCost": 6
+    },
+    "ia-royal-guard-champion": {
+      "id": "ia-royal-guard-champion",
+      "name": "Royal Guard Champion",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 12,
+      "strainThreshold": 8,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-champion-pike",
+          "name": "Electrostaff",
+          "baseDamage": 6,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Pierce", "value": 2 },
+            { "name": "Stun setting", "value": null },
+            { "name": "Defensive", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Imperial", "Guard", "Elite", "Melee", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Guardian", "value": 3 },
+        { "name": "Armor", "value": 1 },
+        { "name": "Retaliate", "value": 2 }
+      ],
+      "abilities": [
+        "Protector: When an adjacent Imperial figure would take damage, this figure may suffer up to 3 damage instead.",
+        "Flurry: Perform 2 melee attacks as a single action (each with -1 damage).",
+        "Executor's Wrath: +3 damage when attacking a Wounded target."
+      ],
+      "threatCost": 7
+    },
+    "ia-e-web-engineer": {
+      "id": "ia-e-web-engineer",
+      "name": "E-Web Engineer",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 1,
+      "weapons": [
+        {
+          "weaponId": "ia-e-web",
+          "name": "E-Web Heavy Repeating Blaster",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            { "name": "Auto-fire", "value": null },
+            { "name": "Cumbersome", "value": 4 }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Imperial", "Heavy Weapons", "Emplacement", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["Emplaced: Cannot take Move maneuvers. Must be set up at deployment."],
+      "threatCost": 4
+    },
+    "ia-e-web-engineer-elite": {
+      "id": "ia-e-web-engineer-elite",
+      "name": "E-Web Engineer (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 7,
+      "strainThreshold": 5,
+      "soak": 3,
+      "speed": 1,
+      "weapons": [
+        {
+          "weaponId": "ia-e-web-elite",
+          "name": "E-Web Heavy Repeating Blaster",
+          "baseDamage": 11,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            { "name": "Auto-fire", "value": null },
+            { "name": "Cumbersome", "value": 4 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Imperial", "Heavy Weapons", "Emplacement", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Shield", "value": 1 }],
+      "abilities": [
+        "Emplaced: Cannot take Move maneuvers. Must be set up at deployment.",
+        "Overcharge: Once per round, add +3 damage to an attack (suffer 2 strain)."
+      ],
+      "threatCost": 6
+    },
+    "ia-at-st": {
+      "id": "ia-at-st",
+      "name": "AT-ST",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 15,
+      "strainThreshold": 8,
+      "soak": 6,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-at-st-cannon",
+          "name": "MS-4 Twin Blaster Cannon",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 3 },
+            { "name": "Auto-fire", "value": null }
+          ]
+        },
+        {
+          "weaponId": "ia-at-st-stomp",
+          "name": "Stomp",
+          "baseDamage": 6,
+          "range": "Engaged",
+          "critical": 4,
+          "qualities": [
+            { "name": "Knockdown", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Vehicle", "Heavy", "Massive", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Armor", "value": 2 }
+      ],
+      "abilities": [
+        "Massive: Occupies a 2x2 space. Cannot enter narrow corridors.",
+        "Armored Hull: Reduce all incoming damage by 2 (in addition to soak).",
+        "Trample: May move through hostile small figures, dealing 3 damage."
+      ],
+      "threatCost": 9,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "left-cannon",
+          "name": "Left Cannon",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weapon Damaged"
+          }
+        },
+        {
+          "id": "right-leg",
+          "name": "Right Leg Actuator",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "conditionInflicted": "Hobbled"
+          }
+        },
+        {
+          "id": "cockpit",
+          "name": "Cockpit",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Exposed"
+          }
+        }
+      ]
+    },
+    "ia-general-weiss": {
+      "id": "ia-general-weiss",
+      "name": "General Weiss",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 18,
+      "strainThreshold": 10,
+      "soak": 7,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-weiss-cannon",
+          "name": "Modified AT-ST Cannons",
+          "baseDamage": 11,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Blast", "value": 4 },
+            { "name": "Auto-fire", "value": null },
+            { "name": "Pierce", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-weiss-stomp",
+          "name": "Crushing Stomp",
+          "baseDamage": 7,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Stun setting", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Vehicle", "Heavy", "Massive", "Unique", "Leader", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Armor", "value": 2 }
+      ],
+      "abilities": [
+        "Massive: Occupies a 2x2 space. Cannot enter narrow corridors.",
+        "Armored Command: All Imperial figures within Medium range gain +1 soak.",
+        "Assault Mode: As an action, perform 2 ranged attacks against different targets.",
+        "Trample: May move through hostile small figures, dealing 4 damage."
+      ],
+      "threatCost": 12,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "left-cannon",
+          "name": "Left Cannon Array",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weapon Damaged"
+          }
+        },
+        {
+          "id": "right-leg",
+          "name": "Right Leg Actuator",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "conditionInflicted": "Hobbled"
+          }
+        },
+        {
+          "id": "cockpit",
+          "name": "Command Cockpit",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Exposed"
+          }
+        }
+      ]
+    },
+    "ia-darth-vader": {
+      "id": "ia-darth-vader",
+      "name": "Darth Vader",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 3 },
+      "defensePool": { "difficulty": 1, "challenge": 2 },
+      "woundThreshold": 16,
+      "strainThreshold": 14,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-vader-saber",
+          "name": "Vader's Lightsaber",
+          "baseDamage": 9,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Vicious", "value": 3 },
+            { "name": "Pierce", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Imperial", "Force-sensitive", "Dark Side", "Unique", "Boss", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Dauntless" },
+        { "name": "Retaliate", "value": 3 },
+        { "name": "Pierce", "value": 2 },
+        { "name": "Steadfast" }
+      ],
+      "abilities": [
+        "Brutality: Perform 2 melee attacks as a single action.",
+        "Force Choke: As an action, choose a figure within Short range. That figure suffers 4 strain and is Immobilized.",
+        "Deflection: When targeted by a ranged attack, add 1 Challenge die to the defense pool.",
+        "Parry: When hit by melee, suffer 3 strain to reduce damage by 5."
+      ],
+      "threatCost": 14,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "chest-unit",
+          "name": "Chest Control Unit",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "soakModifier": -2,
+            "conditionInflicted": "System Failure"
+          }
+        },
+        {
+          "id": "saber-arm",
+          "name": "Saber Arm",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weakened"
+          }
+        },
+        {
+          "id": "respirator",
+          "name": "Respirator",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "speedModifier": -1,
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Labored Breathing"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "melee",
+          "narrativeText": "Vader's rage intensifies as his suit sustains critical damage.",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 2,
+            "speedBonus": 0
+          }
+        }
+      ]
+    },
+    "ia-heavy-stormtrooper": {
+      "id": "ia-heavy-stormtrooper",
+      "name": "Heavy Stormtrooper",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 4,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "ia-repeating-blaster",
+          "name": "Repeating Blaster",
+          "baseDamage": 9,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Auto-fire", "value": null },
+            { "name": "Cumbersome", "value": 3 }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Imperial", "Trooper", "Heavy Weapons", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Armor", "value": 1 }],
+      "abilities": ["Heavy Armor: +1 soak against ranged attacks."],
+      "threatCost": 3
+    },
+    "ia-heavy-stormtrooper-elite": {
+      "id": "ia-heavy-stormtrooper-elite",
+      "name": "Heavy Stormtrooper (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 7,
+      "strainThreshold": 5,
+      "soak": 4,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "ia-repeating-blaster-elite",
+          "name": "Repeating Blaster",
+          "baseDamage": 10,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Auto-fire", "value": null },
+            { "name": "Cumbersome", "value": 3 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Trooper", "Heavy Weapons", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Armor", "value": 1 }],
+      "abilities": [
+        "Heavy Armor: +1 soak against ranged attacks.",
+        "Suppressive Fire: Targets hit by this figure suffer +1 suppression token."
+      ],
+      "threatCost": 5
+    },
+    "ia-snowtrooper": {
+      "id": "ia-snowtrooper",
+      "name": "Snowtrooper",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-e-11-snowtrooper",
+          "name": "E-11 Blaster Rifle",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Imperial", "Trooper", "Cold Weather", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["Assault: +1 damage on the first attack after moving."],
+      "threatCost": 3
+    },
+    "ia-snowtrooper-elite": {
+      "id": "ia-snowtrooper-elite",
+      "name": "Snowtrooper (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 5,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-e-11-snowtrooper-elite",
+          "name": "E-11 Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Stun setting", "value": null },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Trooper", "Cold Weather", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Disciplined", "value": 1 }],
+      "abilities": [
+        "Assault: +2 damage on the first attack after moving.",
+        "Focused Fire: Adjacent friendly Snowtroopers add +1 to attack pool."
+      ],
+      "threatCost": 5
+    },
+    "ia-death-trooper": {
+      "id": "ia-death-trooper",
+      "name": "Death Trooper",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 5,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-e-11d",
+          "name": "E-11D Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            { "name": "Pierce", "value": 1 },
+            { "name": "Accurate", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Trooper", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Disciplined", "value": 1 }],
+      "abilities": [
+        "Tactical Advance: After defeating a hostile figure, may immediately move up to 2 tiles.",
+        "Deathtrooper Conditioning: Immune to Fear and Suppression."
+      ],
+      "threatCost": 5
+    },
+    "ia-death-trooper-elite": {
+      "id": "ia-death-trooper-elite",
+      "name": "Death Trooper (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 0, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 8,
+      "strainThreshold": 6,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-e-11d-elite",
+          "name": "E-11D Blaster Rifle",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Pierce", "value": 2 },
+            { "name": "Accurate", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Trooper", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Disciplined", "value": 2 },
+        { "name": "Armor", "value": 1 }
+      ],
+      "abilities": [
+        "Tactical Advance: After defeating a hostile figure, may immediately move up to 3 tiles.",
+        "Deathtrooper Conditioning: Immune to Fear, Suppression, and Stun.",
+        "Coordinated Fire: +1 damage for each other friendly Death Trooper within Short range."
+      ],
+      "threatCost": 7
+    },
+    "ia-riot-trooper": {
+      "id": "ia-riot-trooper",
+      "name": "Riot Trooper",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-riot-baton",
+          "name": "Riot Baton",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Stun setting", "value": null },
+            { "name": "Disorient", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Imperial", "Trooper", "Melee", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Shield", "value": 1 }],
+      "abilities": [
+        "Riot Shield: +1 defense die against ranged attacks from the front.",
+        "Mobile Shield Wall: Adjacent friendly Imperial figures gain +1 soak against ranged attacks."
+      ],
+      "threatCost": 3
+    },
+    "ia-riot-trooper-elite": {
+      "id": "ia-riot-trooper-elite",
+      "name": "Riot Trooper (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 8,
+      "strainThreshold": 5,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-riot-baton-elite",
+          "name": "Riot Baton",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Stun setting", "value": null },
+            { "name": "Disorient", "value": 2 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Imperial", "Trooper", "Melee", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Shield", "value": 2 },
+        { "name": "Armor", "value": 1 }
+      ],
+      "abilities": [
+        "Riot Shield: +2 defense dice against ranged attacks from the front.",
+        "Mobile Shield Wall: Adjacent friendly Imperial figures gain +1 soak against ranged attacks.",
+        "Stun Charge: After moving adjacent to a hostile figure, that figure suffers 2 strain."
+      ],
+      "threatCost": 5
+    },
+    "ia-jet-trooper": {
+      "id": "ia-jet-trooper",
+      "name": "Jet Trooper",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-jet-blaster",
+          "name": "EC-17 Hold-out Blaster",
+          "baseDamage": 6,
+          "range": "Short",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Imperial", "Trooper", "Mobile", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Fly-By: May move through hostile figures and obstacles.",
+        "Jetpack: Ignore difficult terrain and elevation changes during movement."
+      ],
+      "threatCost": 3
+    },
+    "ia-jet-trooper-elite": {
+      "id": "ia-jet-trooper-elite",
+      "name": "Jet Trooper (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 5,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-jet-blaster-elite",
+          "name": "EC-17 Hold-out Blaster",
+          "baseDamage": 7,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Trooper", "Mobile", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Fly-By: May move through hostile figures and obstacles.",
+        "Jetpack: Ignore difficult terrain and elevation changes during movement.",
+        "Strafing Run: +2 damage when attacking a figure you moved through this turn."
+      ],
+      "threatCost": 5
+    },
+    "ia-sentry-droid": {
+      "id": "ia-sentry-droid",
+      "name": "Sentry Droid",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-sentry-blaster",
+          "name": "Integrated Blaster",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Imperial", "Droid", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["Patrol: When no hostile figures are in line of sight, move toward nearest objective."],
+      "threatCost": 2
+    },
+    "ia-sentry-droid-elite": {
+      "id": "ia-sentry-droid-elite",
+      "name": "Sentry Droid (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 4,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-sentry-blaster-elite",
+          "name": "Integrated Blaster Array",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Droid", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Patrol: When no hostile figures are in line of sight, move toward nearest objective.",
+        "Alert: When a hostile figure moves within Short range, this figure may perform a free attack."
+      ],
+      "threatCost": 4
+    },
+    "ia-hk-assassin-droid": {
+      "id": "ia-hk-assassin-droid",
+      "name": "HK Assassin Droid",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 5,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-hk-blaster-rifle",
+          "name": "Blaster Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Imperial", "Droid", "Hunter", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Assassin Protocol: +2 damage against Wounded targets.",
+        "Calculation: May reroll 1 attack die per attack."
+      ],
+      "threatCost": 4
+    },
+    "ia-hk-assassin-droid-elite": {
+      "id": "ia-hk-assassin-droid-elite",
+      "name": "HK Assassin Droid (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 0, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 8,
+      "strainThreshold": 6,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-hk-blaster-rifle-elite",
+          "name": "Precision Blaster Rifle",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 2 },
+            { "name": "Pierce", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Imperial", "Droid", "Hunter", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Pierce", "value": 1 }],
+      "abilities": [
+        "Assassin Protocol: +3 damage against Wounded targets.",
+        "Calculation: May reroll up to 2 attack dice per attack.",
+        "Terminate: When this figure defeats a figure, recover 3 wounds."
+      ],
+      "threatCost": 6
+    },
+    "ia-isb-infiltrator": {
+      "id": "ia-isb-infiltrator",
+      "name": "ISB Infiltrator",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-isb-pistol",
+          "name": "Holdout Blaster",
+          "baseDamage": 6,
+          "range": "Short",
+          "critical": 4,
+          "qualities": []
+        },
+        {
+          "weaponId": "ia-isb-knife",
+          "name": "Vibro-knife",
+          "baseDamage": 3,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Spy", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Covert: This figure does not provoke attacks when leaving engaged range.",
+        "Intel: When this figure activates, you may look at 1 facedown mission token within Short range."
+      ],
+      "threatCost": 3
+    },
+    "ia-isb-infiltrator-elite": {
+      "id": "ia-isb-infiltrator-elite",
+      "name": "ISB Infiltrator (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 7,
+      "strainThreshold": 6,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-isb-pistol-elite",
+          "name": "Holdout Blaster",
+          "baseDamage": 7,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        },
+        {
+          "weaponId": "ia-isb-knife-elite",
+          "name": "Vibro-knife",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Pierce", "value": 2 },
+            { "name": "Vicious", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Spy", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Covert: This figure does not provoke attacks when leaving engaged range.",
+        "Intel: When this figure activates, you may look at all facedown mission tokens within Short range.",
+        "Interrogate: After defeating a hostile figure, gain 1 bonus threat."
+      ],
+      "threatCost": 5
+    },
+    "ia-wing-guard": {
+      "id": "ia-wing-guard",
+      "name": "Wing Guard",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-wing-blaster",
+          "name": "Relby-k23 Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Imperial", "Trooper", "Guard", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["City Security: +1 defense die when within Short range of a door or terminal."],
+      "threatCost": 2
+    },
+    "ia-wing-guard-elite": {
+      "id": "ia-wing-guard-elite",
+      "name": "Wing Guard (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 4,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-wing-blaster-elite",
+          "name": "Relby-k23 Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Stun setting", "value": null },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Trooper", "Guard", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Disciplined", "value": 1 }],
+      "abilities": [
+        "City Security: +1 defense die when within Short range of a door or terminal.",
+        "Detain: May spend 1 advantage to Immobilize the target."
+      ],
+      "threatCost": 4
+    },
+    "ia-tusken-raider": {
+      "id": "ia-tusken-raider",
+      "name": "Tusken Raider",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-cycler-rifle",
+          "name": "Cycler Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        },
+        {
+          "weaponId": "ia-gaffi-stick",
+          "name": "Gaffi Stick",
+          "baseDamage": 3,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [{ "name": "Disorient", "value": 2 }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Imperial", "Creature", "Desert", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["Ambush: +2 damage on the first attack of the mission."],
+      "threatCost": 3
+    },
+    "ia-tusken-raider-elite": {
+      "id": "ia-tusken-raider-elite",
+      "name": "Tusken Raider (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 7,
+      "strainThreshold": 5,
+      "soak": 3,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-cycler-rifle-elite",
+          "name": "Cycler Rifle",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [{ "name": "Pierce", "value": 2 }]
+        },
+        {
+          "weaponId": "ia-gaffi-stick-elite",
+          "name": "Gaffi Stick",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Disorient", "value": 2 },
+            { "name": "Knockdown", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Creature", "Desert", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Ambush: +3 damage on the first attack of the mission.",
+        "War Cry: When this figure activates, hostile figures within Engaged range suffer 1 strain."
+      ],
+      "threatCost": 5
+    },
+    "ia-wampa": {
+      "id": "ia-wampa",
+      "name": "Wampa",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 7,
+      "strainThreshold": 4,
+      "soak": 4,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "ia-wampa-claws",
+          "name": "Razor Claws",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Vicious", "value": 2 },
+            { "name": "Knockdown", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Creature", "Beast", "Cold Weather", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 2 }],
+      "abilities": [
+        "Ferocious: +1 damage for each wound this figure has suffered.",
+        "Stun Swipe: May spend 2 advantages to Stun the target."
+      ],
+      "threatCost": 4
+    },
+    "ia-wampa-elite": {
+      "id": "ia-wampa-elite",
+      "name": "Wampa (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 0, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 10,
+      "strainThreshold": 5,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-wampa-claws-elite",
+          "name": "Razor Claws",
+          "baseDamage": 6,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Vicious", "value": 3 },
+            { "name": "Knockdown", "value": null },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Creature", "Beast", "Cold Weather", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 3 }],
+      "abilities": [
+        "Ferocious: +2 damage for each wound this figure has suffered.",
+        "Stun Swipe: May spend 1 advantage to Stun the target.",
+        "Ravage: When this figure defeats a figure, it may immediately attack another adjacent figure."
+      ],
+      "threatCost": 6
+    },
+    "ia-sc2m-repulsor-tank": {
+      "id": "ia-sc2m-repulsor-tank",
+      "name": "SC2-M Repulsor Tank",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 14,
+      "strainThreshold": 8,
+      "soak": 6,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-tank-cannon",
+          "name": "Heavy Laser Cannon",
+          "baseDamage": 11,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 3 },
+            { "name": "Breach", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-tank-ram",
+          "name": "Ram",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 4,
+          "qualities": [{ "name": "Knockdown", "value": null }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Vehicle", "Heavy", "Massive", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Armor", "value": 2 }],
+      "abilities": [
+        "Massive: Occupies a 2x2 space. Cannot enter narrow corridors.",
+        "Repulsorlift: Ignores difficult terrain.",
+        "Mobile Firebase: May perform a ranged attack after moving."
+      ],
+      "threatCost": 10,
+      "isBoss": true
+    },
+    "ia-at-dp": {
+      "id": "ia-at-dp",
+      "name": "AT-DP",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 12,
+      "strainThreshold": 6,
+      "soak": 5,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-at-dp-cannon",
+          "name": "Chin-mounted Laser Cannon",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 2 },
+            { "name": "Auto-fire", "value": null }
+          ]
+        },
+        {
+          "weaponId": "ia-at-dp-stomp",
+          "name": "Stomp",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 4,
+          "qualities": [{ "name": "Knockdown", "value": null }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Vehicle", "Heavy", "Massive", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Armor", "value": 1 }],
+      "abilities": [
+        "Massive: Occupies a 2x2 space. Cannot enter narrow corridors.",
+        "Armored Walker: Reduce ranged damage by 1."
+      ],
+      "threatCost": 8,
+      "isBoss": true
+    },
+    "ia-captain-terro": {
+      "id": "ia-captain-terro",
+      "name": "Captain Terro",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 12,
+      "strainThreshold": 8,
+      "soak": 4,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-terro-flamethrower",
+          "name": "Flamethrower",
+          "baseDamage": 7,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 2 },
+            { "name": "Burn", "value": 2 }
+          ]
+        },
+        {
+          "weaponId": "ia-dewback-bite",
+          "name": "Dewback Bite",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Disorient", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Imperial", "Trooper", "Mounted", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Armor", "value": 1 },
+        { "name": "Retaliate", "value": 1 }
+      ],
+      "abilities": [
+        "Mounted: Occupies a large base. May move through small hostile figures.",
+        "Flamethrower Sweep: May target all figures in a cone (Short range, 3 tiles wide).",
+        "Trample: Deal 3 damage to figures moved through."
+      ],
+      "threatCost": 8
+    },
+    "ia-kayn-somos": {
+      "id": "ia-kayn-somos",
+      "name": "Kayn Somos",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": 8,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-kayn-blaster",
+          "name": "Modified E-11",
+          "baseDamage": 9,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Officer", "Leader", "Trooper", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Disciplined", "value": 2 },
+        { "name": "Steadfast" }
+      ],
+      "courage": 4,
+      "abilities": [
+        "Squad Command: All friendly Stormtrooper and Snowtrooper figures within Short range gain +1 damage.",
+        "Assault Formation: As an action, choose up to 3 friendly Trooper figures within Medium range. Each may immediately move up to 2 tiles.",
+        "Reinforcement Beacon: Once per round, reduce the threat cost of deploying Trooper groups by 1."
+      ],
+      "threatCost": 7
+    },
+    "ia-grand-inquisitor": {
+      "id": "ia-grand-inquisitor",
+      "name": "The Grand Inquisitor",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 3 },
+      "defensePool": { "difficulty": 1, "challenge": 2 },
+      "woundThreshold": 14,
+      "strainThreshold": 12,
+      "soak": 4,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-inquisitor-saber",
+          "name": "Double-bladed Spinning Lightsaber",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Vicious", "value": 2 },
+            { "name": "Defensive", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Imperial", "Force-sensitive", "Dark Side", "Unique", "Boss", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Dauntless" },
+        { "name": "Retaliate", "value": 2 },
+        { "name": "Pierce", "value": 2 },
+        { "name": "Steadfast" }
+      ],
+      "abilities": [
+        "Spinning Strike: Perform a melee attack against each adjacent hostile figure.",
+        "Force Throw: As an action, choose a figure within Short range and push it 3 tiles. It suffers 3 damage.",
+        "Dark Insight: Add 1 Proficiency die to defense pool against Force users.",
+        "Parry: When hit by melee, suffer 3 strain to reduce damage by 5."
+      ],
+      "threatCost": 10,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "saber-hilt",
+          "name": "Lightsaber Hilt",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weapon Damaged"
+          }
+        },
+        {
+          "id": "armor-plating",
+          "name": "Armor Plating",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "soakModifier": -2,
+            "conditionInflicted": "Exposed"
+          }
+        },
+        {
+          "id": "force-focus",
+          "name": "Force Focus",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Unfocused"
+          }
+        }
+      ]
+    },
+    "ia-agent-blaise": {
+      "id": "ia-agent-blaise",
+      "name": "Agent Blaise",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-blaise-pistol",
+          "name": "ISB Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Stun setting", "value": null },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Spy", "Leader", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Steadfast" }],
+      "abilities": [
+        "Interrogation: When a hostile figure within Short range suffers strain, that figure suffers 1 additional strain.",
+        "ISB Authority: Once per round, choose a friendly Imperial figure within Medium range. That figure may perform an additional action.",
+        "Intelligence Network: At the start of each round, gain 1 bonus threat."
+      ],
+      "threatCost": 7
+    },
+    "ia-general-sorin": {
+      "id": "ia-general-sorin",
+      "name": "General Sorin",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-sorin-pistol",
+          "name": "Officer's Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Officer", "Leader", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Steadfast" },
+        { "name": "Disciplined", "value": 2 }
+      ],
+      "courage": 4,
+      "abilities": [
+        "Assault Command: All friendly Imperial Vehicle figures within Medium range gain +2 damage.",
+        "Bombardment: As an action, choose a space within Long range. All figures within 2 tiles of that space suffer 4 damage.",
+        "Iron Will: Imperial figures within Short range are immune to Suppression."
+      ],
+      "threatCost": 7
+    },
+    "ia-emperor-palpatine": {
+      "id": "ia-emperor-palpatine",
+      "name": "Emperor Palpatine",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 0, "proficiency": 3 },
+      "defensePool": { "difficulty": 0, "challenge": 3 },
+      "woundThreshold": 14,
+      "strainThreshold": 16,
+      "soak": 3,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "ia-force-lightning",
+          "name": "Force Lightning",
+          "baseDamage": 8,
+          "range": "Medium",
+          "critical": 2,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Stun setting", "value": null },
+            { "name": "Linked", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Force-sensitive", "Dark Side", "Unique", "Boss", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Dauntless" },
+        { "name": "Steadfast" }
+      ],
+      "abilities": [
+        "Unlimited Power: Force Lightning may target up to 3 figures. Make a separate attack against each.",
+        "Dark Side Mastery: All hostile figures within Short range suffer -1 to all attack pools.",
+        "Temptation: As an action, choose a hostile figure within Short range. Make an opposed Willpower check. On success, that figure performs a basic attack against an ally of your choice.",
+        "Force Barrier: Negate 1 hit per round (before damage is calculated)."
+      ],
+      "threatCost": 14,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "dark-aura",
+          "name": "Dark Side Aura",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Aura Disrupted"
+          }
+        },
+        {
+          "id": "force-conduit",
+          "name": "Force Conduit",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Force Weakened"
+          }
+        },
+        {
+          "id": "physical-form",
+          "name": "Physical Form",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "speedModifier": -1,
+            "soakModifier": -1,
+            "conditionInflicted": "Frail"
+          }
+        }
+      ],
+      "bossPhaseTransitions": [
+        {
+          "disabledLocationsRequired": 2,
+          "newAiArchetype": "elite",
+          "narrativeText": "The Emperor's rage becomes terrible as his connection to the Dark Side intensifies.",
+          "statBonuses": {
+            "attackPoolBonus": 1,
+            "damageBonus": 3,
+            "speedBonus": 0
+          }
+        }
+      ]
+    },
+    "ia-thrawn": {
+      "id": "ia-thrawn",
+      "name": "Grand Admiral Thrawn",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": 14,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-thrawn-blaster",
+          "name": "Charric Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Imperial", "Officer", "Leader", "Unique", "Boss", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Steadfast" },
+        { "name": "Disciplined", "value": 3 }
+      ],
+      "courage": 5,
+      "abilities": [
+        "Grand Strategy: At the start of each round, choose one: all Imperial figures gain +1 speed, +1 damage, or +1 soak until end of round.",
+        "Predictive Analysis: Once per round, when a hostile figure declares an action, you may force it to choose a different action.",
+        "Art of War: All Imperial figures within Medium range may reroll 1 attack die per attack.",
+        "Contingency Plan: When Thrawn would be defeated, instead recover to 5 wounds and perform a free action (once per mission)."
+      ],
+      "threatCost": 9,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "tactical-mind",
+          "name": "Tactical Mind",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "conditionInflicted": "Strategy Disrupted"
+          }
+        },
+        {
+          "id": "command-presence",
+          "name": "Command Presence",
+          "woundCapacity": 3,
+          "disabledEffects": {
+            "conditionInflicted": "Authority Shaken"
+          }
+        },
+        {
+          "id": "composure",
+          "name": "Composure",
+          "woundCapacity": 3,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Rattled"
+          }
+        }
+      ]
+    },
+    "ia-maul": {
+      "id": "ia-maul",
+      "name": "Maul",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 0, "proficiency": 3 },
+      "defensePool": { "difficulty": 1, "challenge": 2 },
+      "woundThreshold": 14,
+      "strainThreshold": 12,
+      "soak": 4,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-maul-saber",
+          "name": "Double-bladed Lightsaber",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Breach", "value": 1 },
+            { "name": "Vicious", "value": 3 },
+            { "name": "Linked", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Force-sensitive", "Dark Side", "Unique", "Boss", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Dauntless" },
+        { "name": "Retaliate", "value": 3 },
+        { "name": "Pierce", "value": 2 }
+      ],
+      "abilities": [
+        "Whirlwind: As an action, attack each hostile figure within Engaged range.",
+        "Force Speed: May move up to 3 extra tiles after performing an attack.",
+        "Hatred: +2 damage against Force-sensitive targets.",
+        "Parry: When hit by melee, suffer 3 strain to reduce damage by 5.",
+        "Savage Ferocity: When wounded below half health, gain +1 to all attack pools."
+      ],
+      "threatCost": 12,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "cybernetic-legs",
+          "name": "Cybernetic Legs",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "speedModifier": -2,
+            "conditionInflicted": "Mobility Impaired"
+          }
+        },
+        {
+          "id": "saber-arm",
+          "name": "Weapon Arm",
+          "woundCapacity": 4,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Weakened"
+          }
+        },
+        {
+          "id": "dark-focus",
+          "name": "Dark Side Focus",
+          "woundCapacity": 5,
+          "disabledEffects": {
+            "defensePoolModifier": -1,
+            "conditionInflicted": "Force Disrupted"
+          }
+        }
+      ]
+    },
+    "ia-loth-cat": {
+      "id": "ia-loth-cat",
+      "name": "Loth-cat",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 0 },
+      "defensePool": { "difficulty": 0, "challenge": 0 },
+      "woundThreshold": 3,
+      "strainThreshold": null,
+      "soak": 0,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-loth-cat-claws",
+          "name": "Claws",
+          "baseDamage": 2,
+          "range": "Engaged",
+          "critical": 5,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Creature", "Beast", "Small", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["Pounce: After moving adjacent to a hostile figure, may perform a free melee attack."],
+      "threatCost": 1
+    },
+    "ia-loth-cat-elite": {
+      "id": "ia-loth-cat-elite",
+      "name": "Loth-cat (Elite)",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 0, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 0,
+      "speed": 6,
+      "weapons": [
+        {
+          "weaponId": "ia-loth-cat-claws-elite",
+          "name": "Claws",
+          "baseDamage": 3,
+          "range": "Engaged",
+          "critical": 4,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Creature", "Beast", "Small", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Pounce: After moving adjacent to a hostile figure, may perform a free melee attack.",
+        "Feral Frenzy: +1 damage for each other friendly Loth-cat within Short range."
+      ],
+      "threatCost": 2
+    }
+  }
+}

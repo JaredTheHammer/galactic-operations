@@ -1,0 +1,936 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Mercenary/Scum faction deployment cards from Star Wars: Imperial Assault. All expansions included. Stats faithfully adapted from IA dice system to d6 dice pools. Mercenary figures can be fielded by either side depending on scenario."
+  },
+  "npcs": {
+    "ia-trandoshan-hunter": {
+      "id": "ia-trandoshan-hunter",
+      "name": "Trandoshan Hunter",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": null,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-trandoshan-shotgun",
+          "name": "Scattergun",
+          "baseDamage": 8,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Mercenary", "Hunter", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["Ferocity: +1 damage on melee attacks."],
+      "threatCost": 3
+    },
+    "ia-trandoshan-hunter-elite": {
+      "id": "ia-trandoshan-hunter-elite",
+      "name": "Trandoshan Hunter (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 8,
+      "strainThreshold": 5,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-trandoshan-shotgun-elite",
+          "name": "Scattergun",
+          "baseDamage": 9,
+          "range": "Short",
+          "critical": 2,
+          "qualities": [
+            { "name": "Pierce", "value": 2 },
+            { "name": "Knockdown", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Mercenary", "Hunter", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 1 }],
+      "abilities": [
+        "Ferocity: +2 damage on melee attacks.",
+        "Regeneration: Recover 1 wound at the start of each activation."
+      ],
+      "threatCost": 5
+    },
+    "ia-nexu": {
+      "id": "ia-nexu",
+      "name": "Nexu",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": null,
+      "soak": 1,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-nexu-claws",
+          "name": "Claws and Fangs",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Vicious", "value": 2 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Mercenary", "Creature", "Beast", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Pounce: After moving 3+ tiles, +2 damage on the next melee attack.",
+        "Predator: Ignore difficult terrain."
+      ],
+      "threatCost": 3
+    },
+    "ia-nexu-elite": {
+      "id": "ia-nexu-elite",
+      "name": "Nexu (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 0, "proficiency": 2 },
+      "defensePool": { "difficulty": 0, "challenge": 0 },
+      "woundThreshold": 9,
+      "strainThreshold": 4,
+      "soak": 1,
+      "speed": 6,
+      "weapons": [
+        {
+          "weaponId": "ia-nexu-claws-elite",
+          "name": "Claws and Fangs",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 1,
+          "qualities": [
+            { "name": "Vicious", "value": 3 },
+            { "name": "Pierce", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Mercenary", "Creature", "Beast", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 2 }],
+      "abilities": [
+        "Pounce: After moving 3+ tiles, +3 damage on the next melee attack.",
+        "Predator: Ignore difficult terrain.",
+        "Ravage: When this figure defeats a figure, it may immediately attack another adjacent figure."
+      ],
+      "threatCost": 6
+    },
+    "ia-gamorrean-guard": {
+      "id": "ia-gamorrean-guard",
+      "name": "Gamorrean Guard",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": null,
+      "soak": 4,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "ia-gamorrean-axe",
+          "name": "Vibro-axe",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Vicious", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Mercenary", "Guard", "Melee", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 1 }],
+      "abilities": ["Brutish: Cannot be pushed or pulled by enemy abilities."],
+      "threatCost": 3
+    },
+    "ia-gamorrean-guard-elite": {
+      "id": "ia-gamorrean-guard-elite",
+      "name": "Gamorrean Guard (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 0, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 9,
+      "strainThreshold": 4,
+      "soak": 5,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "ia-gamorrean-axe-elite",
+          "name": "Vibro-axe",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Vicious", "value": 2 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Mercenary", "Guard", "Melee", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 2 }],
+      "abilities": [
+        "Brutish: Cannot be pushed or pulled by enemy abilities.",
+        "Rage: +1 damage for each wound this figure has suffered (max +3)."
+      ],
+      "threatCost": 5
+    },
+    "ia-weequay-pirate": {
+      "id": "ia-weequay-pirate",
+      "name": "Weequay Pirate",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-weequay-blaster",
+          "name": "Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": []
+        },
+        {
+          "weaponId": "ia-weequay-blade",
+          "name": "Vibro-blade",
+          "baseDamage": 3,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Mercenary", "Pirate", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["Raider: +1 damage when attacking a figure adjacent to another friendly figure."],
+      "threatCost": 2
+    },
+    "ia-weequay-pirate-elite": {
+      "id": "ia-weequay-pirate-elite",
+      "name": "Weequay Pirate (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 6,
+      "strainThreshold": 4,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-weequay-blaster-elite",
+          "name": "Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        },
+        {
+          "weaponId": "ia-weequay-blade-elite",
+          "name": "Vibro-blade",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Pierce", "value": 2 },
+            { "name": "Vicious", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Mercenary", "Pirate", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Raider: +2 damage when attacking a figure adjacent to another friendly figure.",
+        "Plunder: When this figure defeats a hostile figure, gain 1 bonus threat."
+      ],
+      "threatCost": 4
+    },
+    "ia-hired-gun": {
+      "id": "ia-hired-gun",
+      "name": "Hired Gun",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 0, "challenge": 0 },
+      "woundThreshold": 3,
+      "strainThreshold": null,
+      "soak": 1,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-hired-blaster",
+          "name": "Blaster Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Mercenary", "Thug", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": ["Parting Shot: When defeated, may perform one last attack."],
+      "threatCost": 2
+    },
+    "ia-hired-gun-elite": {
+      "id": "ia-hired-gun-elite",
+      "name": "Hired Gun (Elite)",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 5,
+      "strainThreshold": null,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-hired-blaster-elite",
+          "name": "Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Mercenary", "Thug", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Parting Shot: When defeated, may perform one last attack.",
+        "Desperate: +2 damage when this figure has 2 or fewer wounds remaining."
+      ],
+      "threatCost": 3
+    },
+    "ia-clawdite-shapeshifter": {
+      "id": "ia-clawdite-shapeshifter",
+      "name": "Clawdite Shapeshifter",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 0 },
+      "defensePool": { "difficulty": 0, "challenge": 1 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 1,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-clawdite-blaster",
+          "name": "Holdout Blaster",
+          "baseDamage": 5,
+          "range": "Short",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Mercenary", "Spy", "Shapeshifter", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Shapeshift: This figure is deployed disguised. While disguised, it cannot be targeted. Reveal when performing an attack or at start of activation.",
+        "Infiltrate: May be deployed adjacent to any hostile figure."
+      ],
+      "threatCost": 2
+    },
+    "ia-clawdite-shapeshifter-elite": {
+      "id": "ia-clawdite-shapeshifter-elite",
+      "name": "Clawdite Shapeshifter (Elite)",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 0 },
+      "defensePool": { "difficulty": 0, "challenge": 1 },
+      "woundThreshold": 6,
+      "strainThreshold": 5,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-clawdite-blaster-elite",
+          "name": "Holdout Blaster",
+          "baseDamage": 6,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        },
+        {
+          "weaponId": "ia-clawdite-knife",
+          "name": "Concealed Blade",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Pierce", "value": 2 },
+            { "name": "Vicious", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Mercenary", "Spy", "Shapeshifter", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Shapeshift: This figure is deployed disguised. While disguised, it cannot be targeted. Reveal when performing an attack or at start of activation.",
+        "Infiltrate: May be deployed adjacent to any hostile figure.",
+        "Ambush Strike: +3 damage on the first attack after revealing from disguise."
+      ],
+      "threatCost": 4
+    },
+    "ia-jawa-scavenger": {
+      "id": "ia-jawa-scavenger",
+      "name": "Jawa Scavenger",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 0 },
+      "defensePool": { "difficulty": 0, "challenge": 0 },
+      "woundThreshold": 3,
+      "strainThreshold": null,
+      "soak": 0,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-jawa-ionblaster",
+          "name": "Ion Blaster",
+          "baseDamage": 5,
+          "range": "Short",
+          "critical": 5,
+          "qualities": [{ "name": "Stun setting", "value": null }]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Mercenary", "Scavenger", "Small", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Scavenge: When a Droid or Vehicle figure is defeated within Short range, gain 1 bonus threat.",
+        "Diminutive: +1 defense die against ranged attacks."
+      ],
+      "threatCost": 1
+    },
+    "ia-jawa-scavenger-elite": {
+      "id": "ia-jawa-scavenger-elite",
+      "name": "Jawa Scavenger (Elite)",
+      "side": "imperial",
+      "tier": "Minion",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 0, "challenge": 0 },
+      "woundThreshold": 4,
+      "strainThreshold": null,
+      "soak": 1,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-jawa-ionblaster-elite",
+          "name": "Modified Ion Blaster",
+          "baseDamage": 6,
+          "range": "Short",
+          "critical": 4,
+          "qualities": [
+            { "name": "Stun setting", "value": null },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Mercenary", "Scavenger", "Small", "Elite", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Scavenge: When a Droid or Vehicle figure is defeated within Short range, gain 2 bonus threat.",
+        "Diminutive: +1 defense die against ranged attacks.",
+        "Jury-Rig: As an action, recover 2 wounds on an adjacent Droid or Vehicle figure."
+      ],
+      "threatCost": 2
+    },
+    "ia-bantha-rider": {
+      "id": "ia-bantha-rider",
+      "name": "Bantha Rider",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 14,
+      "strainThreshold": 6,
+      "soak": 5,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "ia-bantha-tusks",
+          "name": "Bantha Tusks",
+          "baseDamage": 6,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Blast", "value": 2 }
+          ]
+        },
+        {
+          "weaponId": "ia-tusken-lance",
+          "name": "Tusken Lance",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [{ "name": "Pierce", "value": 1 }]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Mercenary", "Creature", "Mounted", "Massive", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Armor", "value": 1 }],
+      "abilities": [
+        "Massive: Occupies a 2x2 space. Cannot enter narrow corridors.",
+        "Stampede: When moving, deal 3 damage to each hostile figure moved through.",
+        "Beast of Burden: Friendly small figures adjacent to this figure gain +1 soak."
+      ],
+      "threatCost": 7
+    },
+    "ia-rancor": {
+      "id": "ia-rancor",
+      "name": "Rancor",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 2, "challenge": 0 },
+      "woundThreshold": 18,
+      "strainThreshold": 8,
+      "soak": 6,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "ia-rancor-claws",
+          "name": "Massive Claws",
+          "baseDamage": 7,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Vicious", "value": 3 },
+            { "name": "Pierce", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Mercenary", "Creature", "Beast", "Massive", "Boss", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Retaliate", "value": 3 },
+        { "name": "Armor", "value": 1 }
+      ],
+      "abilities": [
+        "Massive: Occupies a 2x2 space. Cannot enter narrow corridors.",
+        "Devour: When this figure defeats a small figure with a melee attack, recover 3 wounds.",
+        "Frenzy: When wounded below half health, perform 2 attacks per action.",
+        "Terrifying: Hostile figures within Short range suffer -1 to attack pools."
+      ],
+      "threatCost": 12,
+      "isBoss": true,
+      "bossHitLocations": [
+        {
+          "id": "left-arm",
+          "name": "Left Arm",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "attackPoolModifier": -1,
+            "conditionInflicted": "Arm Wounded"
+          }
+        },
+        {
+          "id": "right-leg",
+          "name": "Right Leg",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "speedModifier": -1,
+            "conditionInflicted": "Hobbled"
+          }
+        },
+        {
+          "id": "hide",
+          "name": "Thick Hide",
+          "woundCapacity": 6,
+          "disabledEffects": {
+            "soakModifier": -3,
+            "conditionInflicted": "Hide Pierced"
+          }
+        }
+      ]
+    },
+    "ia-boba-fett": {
+      "id": "ia-boba-fett",
+      "name": "Boba Fett",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 12,
+      "strainThreshold": 10,
+      "soak": 4,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-ee3-carbine",
+          "name": "EE-3 Carbine Rifle",
+          "baseDamage": 8,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-fett-flamethrower",
+          "name": "Wrist Flamethrower",
+          "baseDamage": 6,
+          "range": "Short",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 2 },
+            { "name": "Burn", "value": 2 }
+          ]
+        },
+        {
+          "weaponId": "ia-fett-whipcord",
+          "name": "Whipcord Launcher",
+          "baseDamage": 1,
+          "range": "Short",
+          "critical": 5,
+          "qualities": [{ "name": "Ensnare", "value": 2 }]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Mercenary", "Bounty Hunter", "Unique", "Boss", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Armor", "value": 1 },
+        { "name": "Pierce", "value": 1 }
+      ],
+      "abilities": [
+        "Jetpack: Ignore terrain and elevation. May move through hostile figures.",
+        "No Disintegrations: +3 damage against Wounded targets.",
+        "Battle Focus: May perform a ranged attack after moving.",
+        "Mandalorian Armor: Reduce damage from Blast and Burn effects by 2."
+      ],
+      "threatCost": 10
+    },
+    "ia-ig-88": {
+      "id": "ia-ig-88",
+      "name": "IG-88",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 0, "proficiency": 3 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 12,
+      "strainThreshold": 8,
+      "soak": 4,
+      "speed": 5,
+      "weapons": [
+        {
+          "weaponId": "ia-ig88-blaster",
+          "name": "DLT-20A Blaster Rifle",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Auto-fire", "value": null },
+            { "name": "Pierce", "value": 2 }
+          ]
+        },
+        {
+          "weaponId": "ia-ig88-vibroblade",
+          "name": "Vibro-blade",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Pierce", "value": 2 },
+            { "name": "Vicious", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Mercenary", "Droid", "Bounty Hunter", "Unique", "Boss", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Armor", "value": 1 },
+        { "name": "Pierce", "value": 1 }
+      ],
+      "abilities": [
+        "Assassin Protocol: May perform both a ranged and melee attack in the same activation.",
+        "Targeting Computer: May reroll up to 2 attack dice per attack.",
+        "Relentless: Immune to Stun, Fear, and Suppression."
+      ],
+      "threatCost": 10
+    },
+    "ia-bossk": {
+      "id": "ia-bossk",
+      "name": "Bossk",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 14,
+      "strainThreshold": 8,
+      "soak": 4,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-bossk-mortar",
+          "name": "Relby-v10 Mortar Gun",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 2 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-bossk-claws",
+          "name": "Trandoshan Claws",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Vicious", "value": 2 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Mercenary", "Bounty Hunter", "Trandoshan", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Retaliate", "value": 2 }],
+      "abilities": [
+        "Regeneration: Recover 2 wounds at the start of each activation.",
+        "Hunting Instinct: +2 damage against targets with fewer than half wounds remaining.",
+        "Feral Rage: When wounded, +1 to all melee attack pools."
+      ],
+      "threatCost": 8
+    },
+    "ia-dengar": {
+      "id": "ia-dengar",
+      "name": "Dengar",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": 8,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-dengar-rifle",
+          "name": "Modified DLT-19 Heavy Blaster",
+          "baseDamage": 9,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Auto-fire", "value": null },
+            { "name": "Pierce", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-dengar-blade",
+          "name": "Vibro-blade",
+          "baseDamage": 4,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Pierce", "value": 1 },
+            { "name": "Vicious", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Mercenary", "Bounty Hunter", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Payback: After being attacked, gain +2 damage on next attack against the attacker.",
+        "Ruthless: +1 damage against targets that have already activated this round.",
+        "Tough: Reduce the first instance of damage each round by 2."
+      ],
+      "threatCost": 7
+    },
+    "ia-greedo": {
+      "id": "ia-greedo",
+      "name": "Greedo",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 1 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 7,
+      "strainThreshold": 6,
+      "soak": 2,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-greedo-dt12",
+          "name": "DT-12 Heavy Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Accurate", "value": 1 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "trooper",
+      "keywords": ["Mercenary", "Bounty Hunter", "Rodian", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Slow on the Draw: Attacks against this figure gain +1 damage during the first round.",
+        "Cheap Shot: +2 damage against figures that have not yet activated this round."
+      ],
+      "threatCost": 4
+    },
+    "ia-jabba-the-hutt": {
+      "id": "ia-jabba-the-hutt",
+      "name": "Jabba the Hutt",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 0, "proficiency": 1 },
+      "defensePool": { "difficulty": 2, "challenge": 0 },
+      "woundThreshold": 12,
+      "strainThreshold": 14,
+      "soak": 5,
+      "speed": 2,
+      "weapons": [
+        {
+          "weaponId": "ia-jabba-tail",
+          "name": "Tail Lash",
+          "baseDamage": 3,
+          "range": "Engaged",
+          "critical": 4,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Stun setting", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Mercenary", "Leader", "Crime Lord", "Unique", "Boss", "Massive", "Imperial Assault"],
+      "mechanicalKeywords": [
+        { "name": "Armor", "value": 1 },
+        { "name": "Steadfast" }
+      ],
+      "courage": 5,
+      "abilities": [
+        "Crime Lord: At the start of each round, gain 2 bonus threat for deploying Mercenary figures.",
+        "Hired Muscle: As an action, deploy a Hired Gun group adjacent to Jabba for free.",
+        "Intimidate: Hostile figures within Short range suffer -1 to all attack pools.",
+        "Underworld Connections: Once per round, reduce the deployment cost of a Mercenary group by 2.",
+        "Corpulent: Cannot be pushed, pulled, or moved by enemy abilities."
+      ],
+      "threatCost": 6,
+      "isBoss": true
+    },
+    "ia-bt1-triple-zero": {
+      "id": "ia-bt1-triple-zero",
+      "name": "BT-1 and 0-0-0",
+      "side": "imperial",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "woundThreshold": 8,
+      "strainThreshold": 6,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-bt1-rockets",
+          "name": "BT-1 Rocket Launcher",
+          "baseDamage": 9,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 2 },
+            { "name": "Pierce", "value": 1 }
+          ]
+        },
+        {
+          "weaponId": "ia-triple-zero-injector",
+          "name": "0-0-0 Torture Implements",
+          "baseDamage": 3,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Stun setting", "value": null },
+            { "name": "Pierce", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Mercenary", "Droid", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [],
+      "abilities": [
+        "Tag Team: This figure represents 2 droids. Each activation, perform 2 attacks (one ranged, one melee if adjacent).",
+        "Sadistic Protocol: When inflicting strain damage, deal 1 additional strain.",
+        "Calculating: May reroll 1 attack die per attack."
+      ],
+      "threatCost": 6
+    },
+    "ia-hondo-ohnaka": {
+      "id": "ia-hondo-ohnaka",
+      "name": "Hondo Ohnaka",
+      "side": "imperial",
+      "tier": "Nemesis",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 10,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "ia-hondo-blaster",
+          "name": "Blaster Pistol",
+          "baseDamage": 7,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [{ "name": "Accurate", "value": 1 }]
+        },
+        {
+          "weaponId": "ia-hondo-electrostaff",
+          "name": "Electrostaff",
+          "baseDamage": 5,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Stun setting", "value": null },
+            { "name": "Disorient", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Mercenary", "Pirate", "Leader", "Unique", "Imperial Assault"],
+      "mechanicalKeywords": [{ "name": "Steadfast" }],
+      "abilities": [
+        "Pirate King: All friendly Mercenary figures within Short range gain +1 damage.",
+        "Profitable Venture: When any figure is defeated within Medium range, gain 1 bonus threat.",
+        "Smooth Talker: As an action, choose a hostile figure within Short range. That figure cannot attack Hondo until end of round.",
+        "I Smell Profit: May switch sides once per mission (changes from Imperial to Operative or vice versa)."
+      ],
+      "threatCost": 7
+    }
+  }
+}
