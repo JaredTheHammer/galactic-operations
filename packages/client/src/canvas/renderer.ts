@@ -156,6 +156,9 @@ export class TacticalGridRenderer {
     // Draw loot tokens (over highlights, under figures)
     this.drawLootTokens(gameState)
 
+    // Draw exploration tokens (over highlights, under figures)
+    this.drawExplorationTokens(gameState)
+
     // Draw figures
     this.drawFigures(gameState, uiState)
 
@@ -1236,6 +1239,52 @@ export class TacticalGridRenderer {
       this.ctx.lineTo(screenX - radius, drawY)
       this.ctx.closePath()
       this.ctx.stroke()
+
+      this.ctx.restore()
+    }
+  }
+
+  private drawExplorationTokens(gameState: GameState) {
+    const tokens = gameState.explorationTokens
+    if (!this.ctx || !tokens || tokens.length === 0) return
+
+    for (const token of tokens) {
+      if (token.isRevealed) continue
+
+      const screenX = token.position.x * TILE_SIZE + TILE_SIZE / 2
+      const screenY = token.position.y * TILE_SIZE + TILE_SIZE / 2
+      const radius = 8
+
+      this.ctx.save()
+
+      // Pulse animation
+      const pulse = Math.sin(Date.now() / 600 + token.position.x * 0.5 + token.position.y * 0.3) * 0.15 + 0.85
+      this.ctx.globalAlpha = pulse
+
+      // Outer glow (cyan/teal for exploration)
+      this.ctx.shadowColor = '#00ccaa'
+      this.ctx.shadowBlur = 8
+
+      // Question mark circle
+      this.ctx.fillStyle = '#0a2a2a'
+      this.ctx.beginPath()
+      this.ctx.arc(screenX, screenY, radius, 0, Math.PI * 2)
+      this.ctx.fill()
+
+      // Ring
+      this.ctx.strokeStyle = '#00ccaa'
+      this.ctx.lineWidth = 1.5
+      this.ctx.beginPath()
+      this.ctx.arc(screenX, screenY, radius, 0, Math.PI * 2)
+      this.ctx.stroke()
+
+      // Question mark
+      this.ctx.shadowBlur = 0
+      this.ctx.fillStyle = '#00ffcc'
+      this.ctx.font = 'bold 10px monospace'
+      this.ctx.textAlign = 'center'
+      this.ctx.textBaseline = 'middle'
+      this.ctx.fillText('?', screenX, screenY + 1)
 
       this.ctx.restore()
     }

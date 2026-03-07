@@ -1750,7 +1750,8 @@ export function executeActionV2(
 
     case 'SpendCommandToken': {
       const { usage } = action.payload;
-      const side = figure.side;
+      const tokenPlayer = newState.players.find(p => p.id === figure.playerId);
+      const side = (tokenPlayer?.role ?? 'Imperial') as Side;
 
       const validation = validateTokenUsage(usage, action.payload, newState, figure.id);
       if (validation.valid) {
@@ -1779,12 +1780,12 @@ export function executeActionV2(
         if (fig.isDefeated && fig.playerId !== figure.playerId) {
           const oldFig = gameState.figures.find(f => f.id === fig.id);
           if (oldFig && !oldFig.isDefeated) {
-            const tier = fig.entityType === 'npc'
-              ? (newState.npcProfiles[fig.entityId]?.tier ?? 'minion')
+            const npcTier = fig.entityType === 'npc'
+              ? (newState.npcProfiles[fig.entityId]?.tier ?? 'Minion')
               : 'hero';
-            soState = updateSecretObjectiveProgress(soState, { type: 'enemy_killed', heroId, enemyTier: tier }, gameData);
+            soState = updateSecretObjectiveProgress(soState, { type: 'enemy_killed', heroId, enemyTier: npcTier }, gameData);
             // Check for nemesis kills
-            if (tier === 'nemesis') {
+            if (npcTier === 'Nemesis') {
               soState = updateSecretObjectiveProgress(soState, { type: 'nemesis_killed', heroId }, gameData);
             }
           }
