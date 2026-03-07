@@ -19,9 +19,16 @@ import type {
   Side,
   Figure,
   GameState,
+  ExplorationReward,
+  RelicFragmentType,
+  GameData,
+  MissionSecretObjectiveState,
 } from './types';
 
 import { DEFAULT_XP_AWARDS, THREAT_SCALING } from './types';
+import { addFragment } from './relic-fragments';
+import { decrementDirectiveDurations, getDirectiveXPBonus } from './agenda-phase';
+import { resolveSecretObjectives, applySecretObjectiveRewards } from './secret-objectives';
 
 // ============================================================================
 // CAMPAIGN CREATION
@@ -233,6 +240,10 @@ export interface MissionCompletionInput {
   heroesWounded?: string[];
   leaderKilled: boolean;
   narrativeBonus?: number;
+  /** Exploration rewards collected during the mission */
+  explorationRewards?: ExplorationReward[];
+  /** Secret objective state at mission end (for resolution) */
+  secretObjectiveState?: MissionSecretObjectiveState;
 }
 
 /**
@@ -243,6 +254,7 @@ export function completeMission(
   campaign: CampaignState,
   input: MissionCompletionInput,
   allMissions: Record<string, MissionDefinition>,
+  gameData?: GameData,
 ): { campaign: CampaignState; result: MissionResult } {
   const { mission, outcome, roundsPlayed, completedObjectiveIds, heroKills, lootCollected, heroesIncapacitated, leaderKilled } = input;
   const heroesWounded = input.heroesWounded ?? [];
@@ -251,10 +263,11 @@ export function completeMission(
   // Calculate total kills
   const totalKills = Object.values(heroKills).reduce((sum, k) => sum + k, 0);
 
-  // Calculate XP
+  // Calculate XP (including agenda directive bonuses)
+  const directiveXPBonus = getDirectiveXPBonus(campaign);
   const xpBreakdown = calculateMissionXP(
     mission, outcome, completedObjectiveIds,
-    lootCollected, totalKills, leaderKilled, narrativeBonus,
+    lootCollected, totalKills, leaderKilled, narrativeBonus + directiveXPBonus,
   );
 
   // Calculate AP
@@ -360,6 +373,49 @@ export function completeMission(
     }
   }
 
+  // Process exploration rewards (relic fragments, extra credits, equipment, etc.)
+  let campaignWithFragments = { ...campaign, credits, narrativeItems, inventory } as CampaignState;
+  const explorationRewards = input.explorationRewards ?? [];
+  for (const reward of explorationRewards) {
+    switch (reward.type) {
+      case 'relic_fragment':
+        campaignWithFragments = addFragment(campaignWithFragments, reward.fragmentType, 1);
+        break;
+      case 'credits':
+        credits += reward.value;
+        break;
+      case 'narrative_item':
+        if (!narrativeItems.includes(reward.itemId)) {
+          narrativeItems.push(reward.itemId);
+        }
+        break;
+      case 'equipment':
+        inventory.push(reward.itemId);
+        break;
+    }
+  }
+
+  // Resolve secret objectives
+  let completedSecretObjectives = campaign.completedSecretObjectives ?? [];
+  if (input.secretObjectiveState && gameData) {
+    const newlyCompleted = resolveSecretObjectives(input.secretObjectiveState, mission.id, gameData);
+    if (newlyCompleted.length > 0) {
+      // applySecretObjectiveRewards handles XP/AP/credits for individual heroes
+      const afterRewards = applySecretObjectiveRewards(
+        { ...campaignWithFragments, heroes: newHeroes, completedSecretObjectives },
+        newlyCompleted,
+      );
+      // Pull updated heroes and credits from the rewards application
+      Object.assign(newHeroes, afterRewards.heroes);
+      credits = afterRewards.credits;
+      completedSecretObjectives = afterRewards.completedSecretObjectives ?? [];
+    }
+  }
+
+  // Decrement active agenda directive durations
+  const afterDirectives = decrementDirectiveDurations(campaign);
+  const updatedDirectives = afterDirectives.activeDirectives;
+
   // Determine newly available missions
   const completedMissions = [...campaign.completedMissions, result];
   const completedIds = new Set(completedMissions.map(r => r.missionId));
@@ -421,6 +477,10 @@ export function completeMission(
     currentAct,
     threatLevel: campaign.threatLevel + scaling.perMission,
     missionsPlayed: campaign.missionsPlayed + 1,
+    // TI4-inspired systems
+    relicFragments: campaignWithFragments.relicFragments,
+    completedSecretObjectives,
+    activeDirectives: updatedDirectives,
   };
 
   return { campaign: newCampaign, result };

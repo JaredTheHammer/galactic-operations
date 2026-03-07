@@ -21,6 +21,10 @@ import type {
   D6DieType,
   D6DieDefinition,
   BoardTemplate,
+  SecretObjectiveDefinition,
+  ExplorationTokenType,
+  RelicDefinition,
+  AgendaDirectiveDefinition,
 } from './types.js';
 
 /**
@@ -186,6 +190,32 @@ export async function loadGameDataV2(basePath: string): Promise<GameData> {
     }
   }
 
+  // TI4-inspired data files (optional -- gracefully handle missing files)
+  let secretObjectives: Record<string, SecretObjectiveDefinition> | undefined;
+  let explorationTokenTypes: Record<string, ExplorationTokenType> | undefined;
+  let relicDefinitions: Record<string, RelicDefinition> | undefined;
+  let agendaDirectives: Record<string, AgendaDirectiveDefinition> | undefined;
+
+  try {
+    const raw = JSON.parse(await readFile(join(basePath, 'secret-objectives.json'), 'utf-8'));
+    secretObjectives = raw.secretObjectives ?? raw;
+  } catch { /* file not present */ }
+
+  try {
+    const raw = JSON.parse(await readFile(join(basePath, 'exploration-tokens.json'), 'utf-8'));
+    explorationTokenTypes = raw.explorationTokenTypes ?? raw;
+  } catch { /* file not present */ }
+
+  try {
+    const raw = JSON.parse(await readFile(join(basePath, 'relics.json'), 'utf-8'));
+    relicDefinitions = raw.relicDefinitions ?? raw;
+  } catch { /* file not present */ }
+
+  try {
+    const raw = JSON.parse(await readFile(join(basePath, 'agenda-directives.json'), 'utf-8'));
+    agendaDirectives = raw.agendaDirectives ?? raw;
+  } catch { /* file not present */ }
+
   return {
     dice,
     species,
@@ -194,6 +224,10 @@ export async function loadGameDataV2(basePath: string): Promise<GameData> {
     weapons,
     armor,
     npcProfiles,
+    secretObjectives,
+    explorationTokenTypes,
+    relicDefinitions,
+    agendaDirectives,
   };
 }
 

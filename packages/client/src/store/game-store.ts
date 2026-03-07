@@ -63,6 +63,9 @@ import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization, eq
 import type { HeroCreationInput, EquipmentSlot } from '@engine/character-v2.js'
 import { getEquippedTalents, canActivateTalent } from '@engine/talent-v2.js'
 import { initializeTacticDeck, drawCardsForBothSides, playCard } from '@engine/tactic-cards.js'
+import { generateExplorationTokens } from '@engine/exploration-tokens.js'
+import { initializeCommandTokens } from '@engine/command-tokens.js'
+import { initializeSecretObjectives } from '@engine/secret-objectives.js'
 import {
   createCampaign,
   getAvailableMissions,
@@ -95,6 +98,13 @@ import aiProfilesRaw from '@data/ai-profiles.json'
 import consumablesData from '@data/consumables.json'
 import tacticsData from '@data/cards/tactics.json'
 import companionsNpcData from '@data/npcs/companions.json'
+
+// TI4-inspired data
+import secretObjectivesData from '@data/secret-objectives.json'
+import explorationTokensData from '@data/exploration-tokens.json'
+import relicsData from '@data/relics.json'
+import agendaDirectivesData from '@data/agenda-directives.json'
+
 import mercenarySpecData from '@data/specializations/mercenary.json'
 import smugglerSpecData from '@data/specializations/smuggler.json'
 import droidTechSpecData from '@data/specializations/droid-tech.json'
@@ -244,6 +254,10 @@ function loadGameDataV2(): GameData {
     consumables,
     tacticCards,
     companionProfiles,
+    secretObjectives: (secretObjectivesData as any).secretObjectives ?? secretObjectivesData,
+    explorationTokenTypes: (explorationTokensData as any).explorationTokenTypes ?? explorationTokensData,
+    relicDefinitions: (relicsData as any).relicDefinitions ?? relicsData,
+    agendaDirectives: (agendaDirectivesData as any).agendaDirectives ?? agendaDirectivesData,
   }
 }
 
@@ -1707,6 +1721,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
           // Delayed transition to PostMission (gives player time to see the result)
           setTimeout(() => {
+            // Collect exploration rewards from revealed tokens
+            const explorationRewards = (newGameState.explorationTokens ?? [])
+              .filter(t => t.isRevealed && t.revealResult?.rewards)
+              .flatMap(t => t.revealResult!.rewards)
             get().completeCampaignMission({
               mission,
               outcome: outcome as 'victory' | 'defeat',
@@ -1717,6 +1735,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
               heroesIncapacitated,
               leaderKilled,
               narrativeBonus: outcome === 'victory' ? 2 : 0,
+              explorationRewards,
+              secretObjectiveState: newGameState.secretObjectives,
             })
           }, 3000)
           return
@@ -2141,6 +2161,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameState.tacticDeck = initializeTacticDeck(gameData)
     }
 
+    // Initialize TI4-inspired systems
+    // Exploration tokens: place on valid map tiles for heroes to discover
+    const explorationTokens = generateExplorationTokens(gameState.map, gameData)
+    if (explorationTokens.length > 0) {
+      gameState.explorationTokens = explorationTokens
+    }
+
+    // Command tokens: per-mission resource for tactical abilities
+    const commandTokens = initializeCommandTokens(
+      heroesRegistry,
+      campaignState.threatLevel,
+    )
+    gameState.commandTokens = commandTokens
+
+    // Secret objectives: draw one per hero from the available deck
+    const heroIds = Object.keys(heroesRegistry)
+    const previouslyCompleted = (campaignState.completedSecretObjectives ?? []).map(so => so.objectiveId)
+    const secretObjectives = initializeSecretObjectives(gameData, heroIds, previouslyCompleted)
+    if (secretObjectives.assignments.length > 0) {
+      gameState.secretObjectives = secretObjectives
+    }
+
     // Build activation order
     gameState.activationOrder = buildActivationOrderV2(gameState)
     gameState.currentActivationIndex = 0
@@ -2173,10 +2215,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       : campaignState
 
     const previousAct = updatedCampaign.currentAct
+    const gameData = loadGameDataV2()
     const { campaign: newCampaign, result } = completeMission(
       updatedCampaign,
       input,
       campaignMissions,
+      gameData,
     )
 
     set({
