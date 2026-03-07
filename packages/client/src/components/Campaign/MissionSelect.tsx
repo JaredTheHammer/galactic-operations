@@ -14,6 +14,7 @@ import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
 import { usePortraitStore } from '../../store/portrait-store'
 import { listSaveSlots, MAX_SLOTS, findEmptySlot, type SaveSlotMeta } from '../../services/save-slots'
+import { CampaignVictory } from './CampaignVictory'
 
 // ============================================================================
 // STYLES
@@ -1093,11 +1094,10 @@ export default function MissionSelect() {
           </h2>
 
           {availableMissions.length === 0 ? (
-            <CampaignCompleteScreen
+            <CampaignVictory
               campaign={campaignState}
               onNewCampaign={exitCampaign}
               onExport={handleExport}
-              isMobile={isMobile}
             />
           ) : (
             <div style={{ display: 'flex', gap: isMobile ? '16px' : '24px', flexDirection: isMobile ? 'column' : 'row' }}>
