@@ -606,6 +606,7 @@ export default function MissionSelect() {
     openPortraitManager,
     openCampaignStats,
     openCampaignJournal,
+    openStrategicCommand,
   } = useGameStore()
 
   const { isMobile } = useIsMobile()
@@ -749,6 +750,12 @@ export default function MissionSelect() {
             onClick={openSocialPhase}
           >
             VISIT CANTINA
+          </button>
+          <button
+            style={{ ...buttonStyle, backgroundColor: '#2a1a1a', color: '#cc8800', flex: isMobile ? '1 1 auto' : undefined }}
+            onClick={openStrategicCommand}
+          >
+            COMMAND
           </button>
           <button
             style={{ ...buttonStyle, backgroundColor: '#2a2a3a', color: '#bb99ff', flex: isMobile ? '1 1 auto' : undefined }}

@@ -227,14 +227,12 @@ export function buildCustomTacticDeck(
 
   const rng = rollFn ?? Math.random;
 
-  // Build separate draw piles per side, then merge for compatibility
-  // with the existing TacticDeckState interface
+  // Build separate draw piles per side (keep as IDs), filtering out
+  // any IDs that don't exist in allCards
   const operativeCards = db.operativeDeck.cardIds
-    .map((id) => allCards[id])
-    .filter(Boolean);
+    .filter((id) => !!allCards[id]);
   const imperialCards = db.imperialDeck.cardIds
-    .map((id) => allCards[id])
-    .filter(Boolean);
+    .filter((id) => !!allCards[id]);
 
   // Shuffle both decks
   const shuffledOp = shuffle([...operativeCards], rng);
