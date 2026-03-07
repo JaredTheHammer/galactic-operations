@@ -271,18 +271,6 @@ export default function MissionBriefing() {
               <div style={{ fontSize: '14px', color: '#ff6644', fontWeight: 'bold' }}>{mission.imperialThreat}</div>
             </div>
           </div>
-          <div style={infoCardStyle}>
-            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Round Limit</div>
-            <div style={{ fontSize: '14px', color: '#ffd966', fontWeight: 'bold' }}>{mission.roundLimit}</div>
-          </div>
-          <div style={infoCardStyle}>
-            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Squad</div>
-            <div style={{ fontSize: '14px', color: '#ffd966', fontWeight: 'bold' }}>{heroes.length} heroes</div>
-          </div>
-          <div style={infoCardStyle}>
-            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Threat</div>
-            <div style={{ fontSize: '14px', color: '#ff6644', fontWeight: 'bold' }}>{mission.imperialThreat}</div>
-          </div>
           {mission.fogOfWar && (
             <div style={infoCardStyle}>
               <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Visibility</div>
@@ -338,18 +326,6 @@ export default function MissionBriefing() {
           </div>
         )}
 
-        {/* Objectives */}
-        {primaryObjectives.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
-            <div style={sectionTitleStyle}>Primary Objectives</div>
-            {primaryObjectives.map(obj => (
-              <div key={obj.id} style={objectiveStyle(true)}>
-                <div style={markerStyle(true)} />
-                <span>{obj.description}</span>
-              </div>
-            ))}
-          </div>
-        )}
           {/* Objectives */}
           {primaryObjectives.length > 0 && (
             <div style={{ marginBottom: '16px' }}>

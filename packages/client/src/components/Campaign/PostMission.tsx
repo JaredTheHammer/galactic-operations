@@ -133,9 +133,8 @@ function HeroStatusCard({
 // ============================================================================
 
 export default function PostMission() {
-  const { lastMissionResult, lastBountyCompletions, returnToMissionSelect, openSocialPhase, campaignState, activeMissionDef, campaignMissions } = useGameStore()
   const {
-    lastMissionResult, returnToMissionSelect, openSocialPhase,
+    lastMissionResult, lastBountyCompletions, returnToMissionSelect, openSocialPhase,
     campaignState, activeMissionDef, campaignMissions,
     criticalInjuryDefs, legacyEventDefs, showLegacyEvents, acknowledgeLegacyEvents,
   } = useGameStore()
@@ -432,6 +431,7 @@ export default function PostMission() {
               ))}
             </div>
           </div>
+        )}
         {/* Critical Injuries */}
         {campaignState && heroes.length > 0 && Object.keys(criticalInjuryDefs).length > 0 && (
           <CriticalInjuryPanel

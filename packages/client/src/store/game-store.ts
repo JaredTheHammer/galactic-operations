@@ -172,8 +172,7 @@ const BOARD_TEMPLATES: BoardTemplate[] = [
 function loadGameDataV2(): GameData {
   // NPC profiles (merge all faction files)
   const npcProfiles: Record<string, NPCProfile> = {}
-  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData, bountyTargetsNpcData]
-  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData, mercenariesNpcData]
+  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData, bountyTargetsNpcData, mercenariesNpcData]
   for (const npcFile of npcDataFiles) {
     const npcsRaw = (npcFile as any).npcs ?? npcFile
     for (const [id, npc] of Object.entries(npcsRaw)) {
@@ -2551,9 +2550,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ? { ...campaignState, consumableInventory: { ...gameState.consumableInventory } }
       : campaignState
 
-    const previousAct = updatedCampaign.currentAct
-    const { campaign: newCampaign, result, bountyCompletions } = completeMission(
-      updatedCampaign,
     // On defeat, sever supply nodes at the mission's sector location
     let campaignForCompletion = updatedCampaign
     if (input.outcome === 'defeat' && updatedCampaign.supplyNetwork) {
@@ -2569,7 +2565,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     const previousAct = campaignForCompletion.currentAct
-    const { campaign: newCampaign, result } = completeMission(
+    const { campaign: newCampaign, result, bountyCompletions } = completeMission(
       campaignForCompletion,
       input,
       campaignMissions,
