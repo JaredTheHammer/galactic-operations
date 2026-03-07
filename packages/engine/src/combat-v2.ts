@@ -70,6 +70,7 @@ import {
   getSpeciesNaturalWeaponDamage,
   getSpeciesSilhouetteDefense,
   hasSpeciesDarkVision,
+  filterImmuneConditions,
 } from './species-abilities';
 
 // ============================================================================
@@ -934,6 +935,7 @@ export function applyCombatResult(
   gameState: GameState,
   scenario: CombatScenario,
   resolution: CombatResolution,
+  gameData?: GameData,
 ): GameState {
   // Determine if this is a ranged attack (for suppression token generation)
   const isRangedAttack = scenario.rangeBand !== 'Engaged';
@@ -965,13 +967,17 @@ export function applyCombatResult(
       const threshold = getWoundThreshold(fig, entity);
       const reachedThreshold = newWounds >= threshold && defenderEffectiveWounds > 0;
 
-      // Collect new conditions from combo effects
+      // Collect new conditions from combo effects, filtering species immunities
       const comboEffects = resolution.rollResult.isHit
         ? aggregateComboEffects(resolution.rollResult.combos)
         : null;
       const newConditions = [...fig.conditions];
       if (comboEffects) {
-        for (const cond of comboEffects.conditions) {
+        const hero = fig.entityType === 'hero' ? gameState.heroes[fig.entityId] : null;
+        const eligibleConditions = hero && gameData
+          ? filterImmuneConditions(hero, gameData, comboEffects.conditions)
+          : comboEffects.conditions;
+        for (const cond of eligibleConditions) {
           if (!newConditions.includes(cond as Condition)) {
             newConditions.push(cond as Condition);
           }

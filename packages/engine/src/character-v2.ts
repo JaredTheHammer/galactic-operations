@@ -38,6 +38,8 @@ import {
   defaultRollFn,
 } from './dice-v2';
 
+import { getSpeciesSkillBonus } from './species-abilities';
+
 // ============================================================================
 // SKILL DEFINITIONS: CANONICAL SKILL LIST WITH CHARACTERISTIC MAPPINGS
 // ============================================================================
@@ -610,6 +612,8 @@ export function resolveSkillCheck(
   rollFn: RollFn = defaultRollFn,
   /** If true, apply -1 to characteristic (min 1) per wounded hero mechanic */
   isWounded: boolean = false,
+  /** Optional: pass gameData to apply species skill bonuses */
+  gameData?: GameData,
 ): SkillCheckResult {
   const skillDef = SKILL_MAP[skillId];
   if (!skillDef) throw new Error(`Unknown skill: ${skillId}`);
@@ -619,6 +623,14 @@ export function resolveSkillCheck(
   const skillRank = hero.skills[skillId] ?? 0;
 
   const pool = buildAttackPool(charValue, skillRank);
+
+  // Apply species skill bonuses (e.g. Twi'lek social upgrade, Bothan skill bonus)
+  if (gameData) {
+    const speciesBonus = getSpeciesSkillBonus(hero, gameData, skillId);
+    pool.ability += speciesBonus.bonusAbility;
+    pool.proficiency += speciesBonus.bonusUpgrade;
+  }
+
   const defensePool: DefensePool = { difficulty, challenge: 0 };
 
   const result = resolveOpposedCheck(pool, defensePool, rollFn);
@@ -648,6 +660,8 @@ export function resolveOpposedSkillCheck(
   rollFn: RollFn = defaultRollFn,
   /** If true, apply -1 to characteristic (min 1) per wounded hero mechanic */
   isWounded: boolean = false,
+  /** Optional: pass gameData to apply species skill bonuses */
+  gameData?: GameData,
 ): SkillCheckResult {
   const skillDef = SKILL_MAP[activeSkillId];
   if (!skillDef) throw new Error(`Unknown skill: ${activeSkillId}`);
@@ -657,6 +671,14 @@ export function resolveOpposedSkillCheck(
   const skillRank = activeHero.skills[activeSkillId] ?? 0;
 
   const pool = buildAttackPool(charValue, skillRank);
+
+  // Apply species skill bonuses (e.g. Twi'lek social upgrade, Bothan skill bonus)
+  if (gameData) {
+    const speciesBonus = getSpeciesSkillBonus(activeHero, gameData, activeSkillId);
+    pool.ability += speciesBonus.bonusAbility;
+    pool.proficiency += speciesBonus.bonusUpgrade;
+  }
+
   const defensePool = buildDefensePool(opponentCharacteristic, opponentSkillRank);
 
   const result = resolveOpposedCheck(pool, defensePool, rollFn);

@@ -61,7 +61,6 @@ import { hasKeyword, getKeywordValue } from './keywords.js';
 import {
   getSpeciesRegeneration,
   getSpeciesBonusStrainRecovery,
-  isImmuneToCondition,
 } from './species-abilities.js';
 
 // ============================================================================
@@ -1215,7 +1214,7 @@ export function resolveStandbyTriggers(
     );
 
     const resolution = resolveCombatV2(scenario, state, gameData);
-    state = applyCombatResult(state, scenario, resolution);
+    state = applyCombatResult(state, scenario, resolution, gameData);
 
     // Consume the standby token
     const watcherIdx = state.figures.findIndex(f => f.id === watcher.id);
@@ -1373,7 +1372,7 @@ export function executeActionV2(
             }
           }
 
-          const checkResult = resolveSkillCheck(hero, skillToUse, objPoint.difficulty, undefined, figure.isWounded);
+          const checkResult = resolveSkillCheck(hero, skillToUse, objPoint.difficulty, undefined, figure.isWounded, gameData);
 
           if (checkResult.isSuccess) {
             newState.objectivePoints = newState.objectivePoints.map(op =>
@@ -1453,7 +1452,7 @@ export function executeActionV2(
         );
 
         const resolution = resolveCombatV2(scenario, newState, gameData);
-        newState = applyCombatResult(newState, scenario, resolution);
+        newState = applyCombatResult(newState, scenario, resolution, gameData);
       } else if (defender && defender.isDefeated) {
         // Target already dead; attempt retarget
         const retarget = newState.figures.find(f =>
@@ -1468,7 +1467,7 @@ export function executeActionV2(
               figure, retarget, weaponId, cover, elevationDiff, true,
             );
             const resolution = resolveCombatV2(scenario, newState, gameData);
-            newState = applyCombatResult(newState, scenario, resolution);
+            newState = applyCombatResult(newState, scenario, resolution, gameData);
           }
         }
       }
@@ -1787,7 +1786,7 @@ function resolveAreaAttack(
     );
 
     const resolution = resolveCombatV2(scenario, state, gameData);
-    state = applyCombatResult(state, scenario, resolution);
+    state = applyCombatResult(state, scenario, resolution, gameData);
   }
 
   return state;

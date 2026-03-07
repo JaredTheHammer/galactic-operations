@@ -549,3 +549,79 @@ describe('getSpeciesSilhouetteDefense (Jawa Silhouette 0)', () => {
     expect(getSpeciesSilhouetteDefense(makeHero('jawa'), emptyGd)).toBe(0);
   });
 });
+
+// ============================================================================
+// INTEGRATION: resolveSkillCheck with species bonuses
+// ============================================================================
+
+import { resolveSkillCheck, resolveOpposedSkillCheck } from '../src/character-v2.js';
+
+describe('resolveSkillCheck species integration', () => {
+  const gd = makeGameData();
+
+  it('Twi\'lek charm check pool has +1 proficiency from social_skill_upgrade', () => {
+    const twilek = makeHero('twilek');
+    twilek.characteristics.presence = 3;
+    twilek.skills['charm'] = 1;
+
+    // Without gameData: base pool from max(3,1)=3 dice, min(3,1)=1 upgrade -> ability: 2, proficiency: 1
+    const baseResult = resolveSkillCheck(twilek, 'charm', 2, undefined, false);
+    expect(baseResult.pool).toEqual({ ability: 2, proficiency: 1 });
+
+    // With gameData: same base + 1 upgrade from Twi'lek -> ability: 2, proficiency: 2
+    const speciesResult = resolveSkillCheck(twilek, 'charm', 2, undefined, false, gd);
+    expect(speciesResult.pool).toEqual({ ability: 2, proficiency: 2 });
+  });
+
+  it('Bothan deception check pool has +1 ability from skill_bonus', () => {
+    const bothan = makeHero('bothan');
+    bothan.characteristics.cunning = 2;
+    bothan.skills['deception'] = 1;
+
+    // Without gameData: max(2,1)=2, min(2,1)=1 -> ability: 1, proficiency: 1
+    const baseResult = resolveSkillCheck(bothan, 'deception', 2, undefined, false);
+    expect(baseResult.pool).toEqual({ ability: 1, proficiency: 1 });
+
+    // With gameData: same + 1 ability from Bothan -> ability: 2, proficiency: 1
+    const speciesResult = resolveSkillCheck(bothan, 'deception', 2, undefined, false, gd);
+    expect(speciesResult.pool).toEqual({ ability: 2, proficiency: 1 });
+  });
+
+  it('Human gets no skill bonus even with gameData', () => {
+    const human = makeHero('human');
+    human.characteristics.presence = 2;
+    human.skills['charm'] = 1;
+
+    const baseResult = resolveSkillCheck(human, 'charm', 2, undefined, false);
+    const speciesResult = resolveSkillCheck(human, 'charm', 2, undefined, false, gd);
+    expect(speciesResult.pool).toEqual(baseResult.pool);
+  });
+
+  it('Bothan gets no bonus on non-matching skills', () => {
+    const bothan = makeHero('bothan');
+    bothan.characteristics.agility = 3;
+    bothan.skills['ranged-light'] = 1;
+
+    const baseResult = resolveSkillCheck(bothan, 'ranged-light', 2, undefined, false);
+    const speciesResult = resolveSkillCheck(bothan, 'ranged-light', 2, undefined, false, gd);
+    expect(speciesResult.pool).toEqual(baseResult.pool);
+  });
+});
+
+describe('resolveOpposedSkillCheck species integration', () => {
+  const gd = makeGameData();
+
+  it('Twi\'lek negotiation opposed check pool has +1 proficiency', () => {
+    const twilek = makeHero('twilek');
+    twilek.characteristics.presence = 3;
+    twilek.skills['negotiation'] = 2;
+
+    // Without gameData: max(3,2)=3, min(3,2)=2 -> ability: 1, proficiency: 2
+    const baseResult = resolveOpposedSkillCheck(twilek, 'negotiation', 2, 1, undefined, false);
+    expect(baseResult.pool).toEqual({ ability: 1, proficiency: 2 });
+
+    // With gameData: +1 upgrade -> ability: 1, proficiency: 3
+    const speciesResult = resolveOpposedSkillCheck(twilek, 'negotiation', 2, 1, undefined, false, gd);
+    expect(speciesResult.pool).toEqual({ ability: 1, proficiency: 3 });
+  });
+});
