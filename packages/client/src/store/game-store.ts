@@ -2163,10 +2163,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Inject accepted bounty targets as bonus enemy spawns
     const activeBounties = campaignState.activeBounties ?? []
     const bountyTargetLog: string[] = []
+    const weakenedTargetNpcIds = new Set<string>()
+    const bountyPrepResults = campaignState.bountyPrepResults ?? []
     for (const bounty of activeBounties) {
       if (gameData.npcProfiles[bounty.targetNpcId]) {
         imperialForces.push({ npcId: bounty.targetNpcId, count: 1 })
         bountyTargetLog.push(`Bounty target spotted: ${bounty.targetName} (${bounty.condition})`)
+        // Check if this target was weakened by bounty prep
+        const prep = bountyPrepResults.find(p => p.bountyId === bounty.id && p.targetWeakened)
+        if (prep) {
+          weakenedTargetNpcIds.add(bounty.targetNpcId)
+          bountyTargetLog.push(`  Intel advantage: ${bounty.targetName} starts wounded from prep`)
+        }
       }
     }
 
@@ -2175,6 +2183,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
       operative: operativeUnits,
     }
     gameState = deployFiguresV2(gameState, army, gameData)
+
+    // Apply weakening to prepped bounty targets (start with partial wounds)
+    if (weakenedTargetNpcIds.size > 0) {
+      gameState = {
+        ...gameState,
+        figures: gameState.figures.map(f => {
+          if (f.entityType === 'npc' && weakenedTargetNpcIds.has(f.entityId)) {
+            const profile = gameData.npcProfiles[f.entityId]
+            if (profile) {
+              // Apply ~40% wound threshold as starting wounds
+              const startingWounds = Math.floor(profile.woundThreshold * 0.4)
+              return { ...f, woundsCurrent: startingWounds }
+            }
+          }
+          return f
+        }),
+      }
+    }
 
     // Initialize tactic card deck
     if (gameData.tacticCards && Object.keys(gameData.tacticCards).length > 0) {
