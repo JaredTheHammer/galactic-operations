@@ -959,6 +959,17 @@ export function applyCombatResult(
     }
   }
 
+  // Track hit location feedback for resolution enrichment
+  let hitLocationFeedback: {
+    targetedLocationId?: string;
+    targetedLocationName?: string;
+    locationWoundsAbsorbed: number;
+    locationsDisabled: string[];
+    locationsDisabledNames: string[];
+    bossPhaseTransitioned: boolean;
+    newBossPhase?: number;
+  } | null = null;
+
   const newFigures = gameState.figures.map((fig) => {
     // --- DEFENDER ---
     if (fig.id === scenario.defenderId) {
@@ -977,6 +988,16 @@ export function applyCombatResult(
         updatedHitLocations = routeResult.updatedLocations;
         actualWoundsToBody = routeResult.overflowWounds;
 
+        // Build hit location feedback
+        const targetedLoc = targetLocId
+          ? fig.hitLocations.find(l => l.id === targetLocId)
+          : undefined;
+        const disabledNames = routeResult.newlyDisabled.map(id => {
+          const loc = routeResult.updatedLocations.find(l => l.id === id);
+          return loc?.name ?? id;
+        });
+
+        let phaseTransitioned = false;
         // Check phase transitions on newly disabled locations
         if (routeResult.newlyDisabled.length > 0) {
           const npcProfile = gameState.npcProfiles[fig.entityId];
@@ -985,9 +1006,20 @@ export function applyCombatResult(
             const transition = checkBossPhaseTransition(tempFig, npcProfile);
             if (transition) {
               updatedBossPhase = (updatedBossPhase ?? 0) + 1;
+              phaseTransitioned = true;
             }
           }
         }
+
+        hitLocationFeedback = {
+          targetedLocationId: targetLocId,
+          targetedLocationName: targetedLoc?.name,
+          locationWoundsAbsorbed: defenderEffectiveWounds - actualWoundsToBody,
+          locationsDisabled: routeResult.newlyDisabled,
+          locationsDisabledNames: disabledNames,
+          bossPhaseTransitioned: phaseTransitioned,
+          newBossPhase: phaseTransitioned ? updatedBossPhase : undefined,
+        };
       }
 
       const newWounds = fig.woundsCurrent + actualWoundsToBody;
@@ -1122,11 +1154,27 @@ export function applyCombatResult(
     return fig;
   });
 
+  // Enrich resolution with hit location feedback
+  const enrichedResolution: CombatResolution = hitLocationFeedback
+    ? {
+        ...resolution,
+        targetedLocationId: hitLocationFeedback.targetedLocationId,
+        targetedLocationName: hitLocationFeedback.targetedLocationName,
+        locationWoundsAbsorbed: hitLocationFeedback.locationWoundsAbsorbed,
+        locationsDisabled: hitLocationFeedback.locationsDisabled.length > 0
+          ? hitLocationFeedback.locationsDisabled : undefined,
+        locationsDisabledNames: hitLocationFeedback.locationsDisabledNames.length > 0
+          ? hitLocationFeedback.locationsDisabledNames : undefined,
+        bossPhaseTransitioned: hitLocationFeedback.bossPhaseTransitioned || undefined,
+        newBossPhase: hitLocationFeedback.newBossPhase,
+      }
+    : resolution;
+
   // Update activeCombat scenario to Complete
   const completedScenario: CombatScenario = {
     ...scenario,
     state: 'Complete' as CombatState,
-    resolution,
+    resolution: enrichedResolution,
   };
 
   // Update tactic deck: move played cards from hands to discard pile

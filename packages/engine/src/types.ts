@@ -843,6 +843,22 @@ export interface CombatResolution {
   isDefeated: boolean;
   isNewlyWounded: boolean;     // true if hero just became Wounded (first wound threshold)
   defenderRemainingWounds: number;
+
+  // Boss hit location results
+  /** ID of the targeted hit location (if targeted shot) */
+  targetedLocationId?: string;
+  /** Name of the targeted hit location */
+  targetedLocationName?: string;
+  /** Wounds absorbed by hit locations (not applied to main body) */
+  locationWoundsAbsorbed?: number;
+  /** Location IDs newly disabled by this attack */
+  locationsDisabled?: string[];
+  /** Names of newly disabled locations */
+  locationsDisabledNames?: string[];
+  /** Whether a boss phase transition was triggered */
+  bossPhaseTransitioned?: boolean;
+  /** New boss phase number after transition */
+  newBossPhase?: number;
 }
 
 /** Active combat encounter */

@@ -1198,6 +1198,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
             .join(', ')
           addCombatLog(`  Tactic cards: ${names}`)
         }
+
+        // Boss hit location feedback
+        if (resolution.targetedLocationName) {
+          addCombatLog(`  Targeted: ${resolution.targetedLocationName} (+1 difficulty)`)
+        }
+        if (resolution.locationWoundsAbsorbed && resolution.locationWoundsAbsorbed > 0) {
+          addCombatLog(`  Location absorbed ${resolution.locationWoundsAbsorbed} wounds`)
+        }
+        if (resolution.locationsDisabledNames && resolution.locationsDisabledNames.length > 0) {
+          for (const name of resolution.locationsDisabledNames) {
+            addCombatLog(`  !! ${name} DISABLED!`)
+            const { addFloatingText: addFloat } = get()
+            addFloat({
+              gridX: defender.position.x, gridY: defender.position.y,
+              text: `${name} DISABLED`,
+              color: '#ff6600',
+              type: 'damage',
+            })
+          }
+        }
+        if (resolution.bossPhaseTransitioned) {
+          addCombatLog(`  !! Boss enters Phase ${resolution.newBossPhase}!`)
+          const { addFloatingText: addFloat } = get()
+          setTimeout(() => addFloat({
+            gridX: defender.position.x, gridY: defender.position.y,
+            text: `PHASE ${resolution.newBossPhase}`,
+            color: '#ff8844',
+            type: 'critical',
+          }), 400)
+        }
       } else {
         addCombatLog(`Combat: ${attacker.id} vs ${defender.id}`)
       }

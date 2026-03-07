@@ -284,6 +284,11 @@ function App() {
           <FloatingCombatTextOverlay />
         </div>
 
+        {/* Focus Bar (shown for activating hero during player turn) */}
+        {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
+          <FocusBar figure={selectedFigure} compact />
+        )}
+
         {/* Action buttons strip (hidden during Imperial AI turns) */}
         {currentActivatingFigure?.id === selectedFigureId && !isImperialTurn && (
           <ActionButtons selectedFigure={selectedFigure} compact />
@@ -293,6 +298,22 @@ function App() {
         {selectedFigure && (
           <InfoPanel selectedFigure={selectedFigure} gameState={gameState} compact />
         )}
+
+        {/* Boss Hit Locations (shown when selecting a boss or targeting) */}
+        {(selectedFigure || pendingBossAttack) && (() => {
+          const bossFigure = pendingBossAttack
+            ? gameState.figures.find(f => f.id === pendingBossAttack.targetId) ?? null
+            : selectedFigure
+          return bossFigure?.hitLocations?.length ? (
+            <BossHitLocations
+              figure={bossFigure}
+              targeting={!!pendingBossAttack}
+              onSelectLocation={confirmBossAttack}
+              onCancelTargeting={cancelBossAttack}
+              compact={!pendingBossAttack}
+            />
+          ) : null
+        })()}
 
         {/* Combat log overlay */}
         <CombatLog messages={combatLog} compact visible={showCombatLog} onClose={() => setShowCombatLog(false)} />
