@@ -1203,6 +1203,9 @@ export interface CampaignState {
 
   /** Active shop discounts (percentage, from social outcomes) */
   activeDiscounts?: Record<string, number>;
+
+  /** Supply network: player-built infrastructure of contacts, safe houses, and supply routes */
+  supplyNetwork?: SupplyNetwork;
 }
 
 /** Campaign save file format (serializable to JSON) */
@@ -1210,6 +1213,79 @@ export interface CampaignSaveFile {
   version: string;
   savedAt: string;
   campaign: CampaignState;
+}
+
+// ============================================================================
+// SUPPLY NETWORK (Brass: Birmingham-inspired network/supply line building)
+// ============================================================================
+
+/** Types of network nodes players can build */
+export type SupplyNodeType = 'contact' | 'safehouse' | 'supply_route';
+
+/** A node in the player's supply network */
+export interface SupplyNode {
+  id: string;
+  type: SupplyNodeType;
+  name: string;
+  description: string;
+  /** Sector location ID where this node is built */
+  locationId: string;
+  /** Cost in credits to establish */
+  buildCost: number;
+  /** Ongoing upkeep per mission (deducted at mission start) */
+  upkeepCost: number;
+  /** Whether this node has been severed (by mission failure in connected sector) */
+  severed: boolean;
+  /** Campaign act when this node was built */
+  builtInAct: number;
+}
+
+/** A connection between two supply nodes */
+export interface SupplyRoute {
+  fromNodeId: string;
+  toNodeId: string;
+}
+
+/** Sector location on the strategic map */
+export interface SectorLocation {
+  id: string;
+  name: string;
+  description: string;
+  /** Which campaign act this location becomes available */
+  availableInAct: number;
+  /** Adjacent location IDs (for route-building) */
+  connectedLocations: string[];
+  /** Bonuses granted when a node is built here */
+  bonuses: SupplyNodeBonus[];
+  /** Mission IDs gated behind having a node here */
+  unlocksMissions?: string[];
+  /** Shop item IDs available for purchase when connected */
+  unlocksGear?: string[];
+}
+
+/** Bonus granted by building infrastructure at a sector location */
+export interface SupplyNodeBonus {
+  type: 'mission_unlock' | 'gear_access' | 'reinforcement' | 'credit_income' | 'intel' | 'threat_reduction';
+  /** For mission_unlock: mission ID; for gear_access: item IDs; for intel: narrative item ID */
+  value: string | number;
+  description: string;
+}
+
+/** The player's full supply network state */
+export interface SupplyNetwork {
+  nodes: SupplyNode[];
+  routes: SupplyRoute[];
+  /** Total credit income per mission from the network */
+  networkIncome: number;
+}
+
+/** Sector map definition loaded from JSON */
+export interface SectorMapDefinition {
+  id: string;
+  name: string;
+  locations: SectorLocation[];
+  /** Starting location ID (always has a free node) */
+  startingLocationId: string;
 }
 
 /** XP award configuration (from design spec section 3.8) */
@@ -1479,6 +1555,21 @@ export interface TacticCardEffect {
   condition?: string;
 }
 
+/** Alternative mode for dual-use tactic cards (Brass: Birmingham-inspired) */
+export type TacticCardAltModeType =
+  | 'movement'       // Bonus movement points
+  | 'action_point'   // Extra action this activation
+  | 'defense_stance' // Temporary defensive bonus
+  | 'strain_recovery' // Recover strain
+  | 'draw_card';     // Draw additional tactic cards
+
+/** Alternative (non-combat) mode for a dual-use tactic card */
+export interface TacticCardAltMode {
+  type: TacticCardAltModeType;
+  value: number;
+  text: string;
+}
+
 /** A tactic card definition (loaded from JSON) */
 export interface TacticCard {
   id: string;
@@ -1488,6 +1579,9 @@ export interface TacticCard {
   effects: TacticCardEffect[];
   text: string;
   cost: number;
+  /** Dual-use: alternative non-combat mode (Brass: Birmingham-inspired card duality).
+   *  If present, the card can be played either for its combat effects or this alt mode. */
+  altMode?: TacticCardAltMode;
 }
 
 /** State of a tactic card deck during a mission */
