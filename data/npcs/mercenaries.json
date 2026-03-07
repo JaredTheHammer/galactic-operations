@@ -1,0 +1,186 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "description": "Elite mercenary NPC combat profiles (Dune: Imperium Bloodlines Sardaukar-inspired)"
+  },
+  "npcs": {
+    "merc-krix-npc": {
+      "id": "merc-krix-npc",
+      "name": "Krix Valdo",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 2 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 12,
+      "strainThreshold": 8,
+      "soak": 4,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "thermal-launcher",
+          "name": "Thermal Detonator Launcher",
+          "baseDamage": 9,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Blast", "value": 6 },
+            { "name": "Limited Ammo", "value": 3 }
+          ]
+        },
+        {
+          "weaponId": "vibro-axe",
+          "name": "Vibro-Axe",
+          "baseDamage": 7,
+          "range": "Engaged",
+          "critical": 2,
+          "qualities": [
+            { "name": "Vicious", "value": 2 }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Demolitions Expert"],
+      "mechanicalKeywords": [
+        { "name": "Armor", "value": 1 }
+      ],
+      "abilities": ["Shaped Charges: Attacks ignore target cover bonuses"],
+      "courage": 3,
+      "threatCost": 0
+    },
+    "merc-sylas-npc": {
+      "id": "merc-sylas-npc",
+      "name": "Sylas Venn",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 2, "proficiency": 1 },
+      "defensePool": { "difficulty": 2, "challenge": 0 },
+      "woundThreshold": 10,
+      "strainThreshold": 12,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "holdout-blaster",
+          "name": "Holdout Blaster",
+          "baseDamage": 5,
+          "range": "Short",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "hero",
+      "keywords": ["Combat Medic"],
+      "mechanicalKeywords": [],
+      "abilities": ["Field Triage: At end of each round, heal 2 wounds on one adjacent ally"],
+      "courage": 2,
+      "threatCost": 0
+    },
+    "merc-rix-npc": {
+      "id": "merc-rix-npc",
+      "name": "RIX-7",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 2 },
+      "defensePool": { "difficulty": 2, "challenge": 1 },
+      "woundThreshold": 8,
+      "strainThreshold": null,
+      "soak": 5,
+      "speed": 3,
+      "weapons": [
+        {
+          "weaponId": "ion-pistol",
+          "name": "Ion Pistol",
+          "baseDamage": 6,
+          "range": "Medium",
+          "critical": 3,
+          "qualities": [
+            { "name": "Ion", "value": null },
+            { "name": "Stun Setting", "value": null }
+          ]
+        }
+      ],
+      "aiArchetype": "elite",
+      "keywords": ["Droid", "Slicer"],
+      "mechanicalKeywords": [
+        { "name": "Armor", "value": 2 }
+      ],
+      "abilities": ["Remote Override: Can interact with objective points within 4 tiles without moving adjacent"],
+      "courage": 3,
+      "threatCost": 0
+    },
+    "merc-talia-npc": {
+      "id": "merc-talia-npc",
+      "name": "Talia Shrike",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 1, "proficiency": 3 },
+      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "woundThreshold": 9,
+      "strainThreshold": 10,
+      "soak": 3,
+      "speed": 4,
+      "weapons": [
+        {
+          "weaponId": "mandalorian-rifle",
+          "name": "Mandalorian Sniper Rifle",
+          "baseDamage": 10,
+          "range": "Long",
+          "critical": 2,
+          "qualities": [
+            { "name": "Accurate", "value": 2 },
+            { "name": "Pierce", "value": 2 },
+            { "name": "Cumbersome", "value": 3 }
+          ]
+        },
+        {
+          "weaponId": "wrist-blaster",
+          "name": "Wrist Blaster",
+          "baseDamage": 5,
+          "range": "Short",
+          "critical": 4,
+          "qualities": []
+        }
+      ],
+      "aiArchetype": "sniper",
+      "keywords": ["Mandalorian", "Sharpshooter"],
+      "mechanicalKeywords": [],
+      "abilities": ["Deadeye: Starts each activation with 1 free Aim token"],
+      "courage": 3,
+      "threatCost": 0
+    },
+    "merc-bogg-npc": {
+      "id": "merc-bogg-npc",
+      "name": "Bogg Drenn",
+      "side": "operative",
+      "tier": "Rival",
+      "attackPool": { "ability": 3, "proficiency": 1 },
+      "defensePool": { "difficulty": 2, "challenge": 1 },
+      "woundThreshold": 16,
+      "strainThreshold": 6,
+      "soak": 6,
+      "speed": 2,
+      "weapons": [
+        {
+          "weaponId": "gamorrean-axe",
+          "name": "Gamorrean War Axe",
+          "baseDamage": 8,
+          "range": "Engaged",
+          "critical": 3,
+          "qualities": [
+            { "name": "Knockdown", "value": null },
+            { "name": "Vicious", "value": 1 }
+          ]
+        }
+      ],
+      "aiArchetype": "melee",
+      "keywords": ["Gamorrean", "Enforcer"],
+      "mechanicalKeywords": [
+        { "name": "Guardian", "value": 2 },
+        { "name": "Armor", "value": 1 }
+      ],
+      "abilities": ["Bodyguard: Guardian 2 -- intercepts attacks targeting adjacent allies, absorbing up to 2 wounds"],
+      "courage": 4,
+      "threatCost": 0
+    }
+  }
+}
