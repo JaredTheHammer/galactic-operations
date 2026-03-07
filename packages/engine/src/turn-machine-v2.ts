@@ -234,13 +234,25 @@ export function deployFiguresV2(
   }
 
   // Deploy Imperial NPCs
-  const impZones = hasZones
+  let impZones = hasZones
     ? getAvailablePositions(gameState.map.deploymentZones.imperial)
     : getAvailablePositions(
       Array.from({ length: gameState.map.height }, (_, y) =>
         [0, 1, 2].map(x => ({ x, y }))
       ).flat()
     );
+
+  // If enemies start in cover (threat clock effect), sort cover tiles first
+  if (gameState.threatClockEffects?.enemiesStartInCover) {
+    const coverRank = (pos: { x: number; y: number }) => {
+      const tile = gameState.map.tiles[pos.y]?.[pos.x];
+      if (!tile) return 0;
+      if (tile.cover === 'Heavy') return 3;
+      if (tile.cover === 'Light') return 2;
+      return 0;
+    };
+    impZones.sort((a, b) => coverRank(b) - coverRank(a));
+  }
 
   let impIdx = 0;
   for (const entry of army.imperial) {
@@ -997,6 +1009,17 @@ export function buildActivationOrderV2(gameState: GameState): string[] {
   const operatives = alive
     .filter(f => gameState.players.find(p => p.id === f.playerId)?.role === 'Operative')
     .sort((a, b) => getFigureSpeed(b, gameState) - getFigureSpeed(a, gameState));
+
+  const effects = gameState.threatClockEffects;
+  const isRound1 = gameState.roundNumber <= 1;
+
+  // Surprise round: only the surprising side activates on round 1
+  if (isRound1 && effects?.operativeSurpriseRound) {
+    return operatives.map(f => f.id);
+  }
+  if (isRound1 && effects?.enemySurpriseRound) {
+    return imperials.map(f => f.id);
+  }
 
   // Interleave: Imperial first (they won initiative in canon), then alternate
   const order: string[] = [];

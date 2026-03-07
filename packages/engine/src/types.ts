@@ -937,6 +937,9 @@ export interface GameState {
 
   // Tactic card deck state (hands, draw pile, discard)
   tacticDeck?: TacticDeckState;
+
+  // Threat clock effects from social phase (applied at mission start)
+  threatClockEffects?: ThreatClockEffects;
 }
 
 // ============================================================================

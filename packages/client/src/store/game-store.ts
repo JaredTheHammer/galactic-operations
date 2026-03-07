@@ -33,6 +33,7 @@ import type {
   ObjectivePointTemplate,
   ConsumableItem,
   TacticCard,
+  ExpandedSocialPhaseResult,
 } from '@engine/types.js'
 import { MAP_PRESETS, computeGameScale } from '@engine/types.js'
 import {
@@ -78,7 +79,8 @@ import {
   addToInventory,
   removeFromInventory,
 } from '@engine/campaign-v2.js'
-import type { MissionCompletionInput } from '@engine/campaign-v2.js'
+import type { MissionCompletionInput, BountyCompletionResult } from '@engine/campaign-v2.js'
+import { getThreatClockEffects } from '@engine/social-phase.js'
 import { combatAnimations } from '../canvas/animation-manager'
 import { saveToSlot, loadFromSlot, deleteSlot, AUTO_SAVE_SLOT, findEmptySlot, migrateLegacySave } from '../services/save-slots'
 
@@ -446,6 +448,7 @@ export interface GameStore {
   campaignState: CampaignState | null
   campaignMissions: Record<string, MissionDefinition>
   lastMissionResult: MissionResult | null
+  lastBountyCompletions: BountyCompletionResult[]
   showMissionSelect: boolean
   showMissionBriefing: boolean
   pendingMissionId: string | null
@@ -645,6 +648,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   campaignState: null,
   campaignMissions: {},
   lastMissionResult: null,
+  lastBountyCompletions: [],
   showMissionSelect: false,
   showMissionBriefing: false,
   pendingMissionId: null,
@@ -1561,6 +1565,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ...(newTacticDeck ? { tacticDeck: newTacticDeck } : {}),
     }
 
+    // Rebuild activation order each round (handles surprise rounds, reinforcements, casualties)
+    if (newPhase === 'Activation') {
+      newGameState.activationOrder = buildActivationOrderV2(newGameState)
+    }
+
     // ===== REINFORCEMENT PHASE: spawn new Imperial units =====
     if (newPhase === 'Reinforcement' && gameData) {
       // 1) Threat-based AI reinforcements (accumulate threat, buy units)
@@ -1702,6 +1711,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
             .filter(f => f.entityType === 'hero' && f.isDefeated)
             .map(f => f.entityId)
 
+          // Collect defeated enemy NPC entity IDs for bounty completion
+          const defeatedNpcIds = newGameState.figures
+            .filter(f => f.entityType === 'npc' && f.isDefeated && f.playerId === imperialPlayer?.id)
+            .map(f => f.entityId)
+
           // Show the victory/defeat state on the tactical grid briefly before transitioning
           set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
 
@@ -1717,6 +1731,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
               heroesIncapacitated,
               leaderKilled,
               narrativeBonus: outcome === 'victory' ? 2 : 0,
+              defeatedNpcIds,
             })
           }, 3000)
           return
@@ -2102,6 +2117,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Store the active mission ID for victory condition checks
     gameState.activeMissionId = mission.id
 
+    // Apply threat clock effects from the last social phase
+    const lastSocialResult = campaignState.socialPhaseResults?.at(-1) as ExpandedSocialPhaseResult | undefined
+    if (lastSocialResult?.threatClockEffects) {
+      const effects = lastSocialResult.threatClockEffects
+      gameState.threatClockEffects = effects
+      // Add bonus reinforcement points from threat clock
+      if (effects.bonusReinforcements > 0) {
+        gameState.threatPool += effects.bonusReinforcements * 3 // each group = 3 threat
+      }
+    }
+
     // Override operative deploy zone with mission-specific positions if provided
     if (mission.operativeDeployZone && mission.operativeDeployZone.length > 0) {
       gameState.map.deploymentZones.operative = mission.operativeDeployZone
@@ -2173,7 +2199,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       : campaignState
 
     const previousAct = updatedCampaign.currentAct
-    const { campaign: newCampaign, result } = completeMission(
+    const { campaign: newCampaign, result, bountyCompletions } = completeMission(
       updatedCampaign,
       input,
       campaignMissions,
@@ -2182,6 +2208,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       campaignState: newCampaign,
       lastMissionResult: result,
+      lastBountyCompletions: bountyCompletions,
       showPostMission: true,
       isInitialized: false,
       gameState: null,
@@ -2221,6 +2248,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         showPostMission: false,
         showActTransition: true,
         lastMissionResult: null,
+        lastBountyCompletions: [],
         activeMissionDef: null,
         activeMission: null,
         triggeredWaveIds: [],
@@ -2232,6 +2260,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         showPostMission: false,
         showMissionSelect: true,
         lastMissionResult: null,
+        lastBountyCompletions: [],
         activeMissionDef: null,
         activeMission: null,
         triggeredWaveIds: [],
@@ -2419,6 +2448,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       campaignState: null,
       campaignMissions: {},
       lastMissionResult: null,
+      lastBountyCompletions: [],
       activeSaveSlot: null,
       showMissionSelect: false,
       showMissionBriefing: false,
@@ -2472,6 +2502,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showSocialPhase: false,
       showMissionSelect: true,
       lastMissionResult: null,
+      lastBountyCompletions: [],
     })
 
     // Autosave after social phase completion

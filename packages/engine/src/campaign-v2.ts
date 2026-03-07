@@ -19,9 +19,24 @@ import type {
   Side,
   Figure,
   GameState,
+  BountyContract,
 } from './types';
 
 import { DEFAULT_XP_AWARDS, THREAT_SCALING } from './types';
+
+// ============================================================================
+// BOUNTY COMPLETION
+// ============================================================================
+
+export interface BountyCompletionResult {
+  bountyId: string;
+  bountyName: string;
+  targetName: string;
+  condition: 'eliminate' | 'capture' | 'interrogate';
+  creditReward: number;
+  reputationReward?: { factionId: string; delta: number };
+  wasPrepped: boolean;
+}
 
 // ============================================================================
 // CAMPAIGN CREATION
@@ -233,6 +248,8 @@ export interface MissionCompletionInput {
   heroesWounded?: string[];
   leaderKilled: boolean;
   narrativeBonus?: number;
+  /** Entity IDs of defeated enemy NPCs (for bounty completion) */
+  defeatedNpcIds?: string[];
 }
 
 /**
@@ -243,7 +260,7 @@ export function completeMission(
   campaign: CampaignState,
   input: MissionCompletionInput,
   allMissions: Record<string, MissionDefinition>,
-): { campaign: CampaignState; result: MissionResult } {
+): { campaign: CampaignState; result: MissionResult; bountyCompletions: BountyCompletionResult[] } {
   const { mission, outcome, roundsPlayed, completedObjectiveIds, heroKills, lootCollected, heroesIncapacitated, leaderKilled } = input;
   const heroesWounded = input.heroesWounded ?? [];
   const narrativeBonus = input.narrativeBonus ?? 0;
@@ -360,6 +377,39 @@ export function completeMission(
     }
   }
 
+  // Check bounty completion
+  const defeatedNpcIds = new Set(input.defeatedNpcIds ?? []);
+  const activeBounties = campaign.activeBounties ?? [];
+  const completedBountyIds = [...(campaign.completedBounties ?? [])];
+  const bountyCompletions: BountyCompletionResult[] = [];
+
+  const bountyFactionRep = { ...(campaign.factionReputation ?? {}) };
+  for (const bounty of activeBounties) {
+    if (defeatedNpcIds.has(bounty.targetNpcId)) {
+      completedBountyIds.push(bounty.id);
+      credits += bounty.creditReward;
+      bountyCompletions.push({
+        bountyId: bounty.id,
+        bountyName: bounty.name,
+        targetName: bounty.targetName,
+        condition: bounty.condition,
+        creditReward: bounty.creditReward,
+        reputationReward: bounty.reputationReward,
+        wasPrepped: (campaign.bountyPrepResults ?? []).some(
+          p => p.bountyId === bounty.id && p.success,
+        ),
+      });
+
+      if (bounty.reputationReward) {
+        bountyFactionRep[bounty.reputationReward.factionId] =
+          (bountyFactionRep[bounty.reputationReward.factionId] ?? 0) + bounty.reputationReward.delta;
+      }
+    }
+  }
+
+  // Remove completed bounties from active list
+  const remainingBounties = activeBounties.filter(b => !defeatedNpcIds.has(b.targetNpcId));
+
   // Determine newly available missions
   const completedMissions = [...campaign.completedMissions, result];
   const completedIds = new Set(completedMissions.map(r => r.missionId));
@@ -421,9 +471,16 @@ export function completeMission(
     currentAct,
     threatLevel: campaign.threatLevel + scaling.perMission,
     missionsPlayed: campaign.missionsPlayed + 1,
+    factionReputation: bountyCompletions.length > 0 ? bountyFactionRep : campaign.factionReputation,
+    completedBounties: completedBountyIds,
+    activeBounties: remainingBounties,
+    // Clear prep results for completed bounties
+    bountyPrepResults: (campaign.bountyPrepResults ?? []).filter(
+      p => !completedBountyIds.includes(p.bountyId),
+    ),
   };
 
-  return { campaign: newCampaign, result };
+  return { campaign: newCampaign, result, bountyCompletions };
 }
 
 // ============================================================================

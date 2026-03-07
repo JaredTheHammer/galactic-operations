@@ -127,7 +127,7 @@ function HeroStatusCard({
 // ============================================================================
 
 export default function PostMission() {
-  const { lastMissionResult, returnToMissionSelect, openSocialPhase, campaignState, activeMissionDef, campaignMissions } = useGameStore()
+  const { lastMissionResult, lastBountyCompletions, returnToMissionSelect, openSocialPhase, campaignState, activeMissionDef, campaignMissions } = useGameStore()
   const { isMobile } = useIsMobile()
 
   if (!lastMissionResult) {
@@ -375,6 +375,49 @@ export default function PostMission() {
                   <span style={{ fontSize: '14px' }}>{'\u2B50'}</span>
                   {item}
                 </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Bounty Completions */}
+        {lastBountyCompletions.length > 0 && (
+          <div style={{ marginBottom: isMobile ? '12px' : '16px' }}>
+            <h3 style={{ ...sectionHeaderStyle, color: t.accentGold }}>
+              Bounties Completed ({lastBountyCompletions.length})
+            </h3>
+            <div style={{
+              backgroundColor: t.bgSurface2,
+              borderRadius: t.radiusMd,
+              padding: isMobile ? '8px' : '12px',
+              border: `1px solid ${t.accentGold}30`,
+            }}>
+              {lastBountyCompletions.map((bounty, i) => (
+                <div key={bounty.bountyId} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '8px 0',
+                  borderBottom: i < lastBountyCompletions.length - 1 ? `1px solid ${t.borderSubtle}` : 'none',
+                }}>
+                  <div>
+                    <div style={{ color: t.textPrimary, fontSize: '13px', fontWeight: 'bold' }}>
+                      {bounty.bountyName}
+                    </div>
+                    <div style={{ fontSize: '11px', color: t.textMuted }}>
+                      {bounty.targetName} -- {bounty.condition}
+                      {bounty.wasPrepped && ' (intel advantage)'}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ color: t.accentGold, fontWeight: 'bold', fontSize: '14px' }}>
+                      +{bounty.creditReward}
+                    </div>
+                    {bounty.reputationReward && (
+                      <div style={{ fontSize: '10px', color: t.accentPurple }}>
+                        {bounty.reputationReward.factionId} {bounty.reputationReward.delta >= 0 ? '+' : ''}{bounty.reputationReward.delta}
+                      </div>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
