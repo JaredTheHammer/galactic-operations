@@ -587,7 +587,7 @@ function getReinforcementPurchases(
     return npc && npc.tier === 'Nemesis';
   });
 
-  // Build purchasable lists by tier
+  // Build purchasable lists by tier (exclude cost-0 units like bounty targets)
   const allUnits = Object.values(npcProfiles)
     .filter(npc => (npc.side as string).toLowerCase() === 'imperial')
     .map(npc => ({
@@ -597,6 +597,7 @@ function getReinforcementPurchases(
       name: npc.name,
       speed: npc.speed ?? 4,
     }))
+    .filter(u => u.cost > 0)
     .sort((a, b) => a.cost - b.cost);
 
   const minions = allUnits.filter(p => p.tier === 'Minion');
