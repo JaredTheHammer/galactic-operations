@@ -730,7 +730,13 @@ export type GameAction =
   | { type: 'InteractTerminal'; figureId: string; payload: { terminalId: string } }
   | { type: 'AimManeuver';   figureId: string; payload: {} }
   | { type: 'StrainForManeuver'; figureId: string; payload: {} }
-  | { type: 'UseConsumable'; figureId: string; payload: UseConsumablePayload };
+  | { type: 'UseConsumable'; figureId: string; payload: UseConsumablePayload }
+  | { type: 'SpendFocusToken'; figureId: string; payload: SpendFocusTokenPayload };
+
+/** Payload for spending a focus token */
+export interface SpendFocusTokenPayload {
+  spendType: FocusSpendType;
+}
 
 export interface UseConsumablePayload {
   /** Consumable item ID */

@@ -63,6 +63,7 @@ import {
   getSpeciesBonusStrainRecovery,
   isImmuneToCondition,
 } from './species-abilities.js';
+import { spendFocusTokens } from './focus-tokens.js';
 
 // ============================================================================
 // OBJECTIVE POINT UTILITIES
@@ -1710,6 +1711,49 @@ export function executeActionV2(
           hasUsedStrainForManeuver: true,
         };
       }
+      break;
+    }
+
+    // ---- FOCUS TOKEN SPENDING (Ark Nova X-token inspired) ----
+    case 'SpendFocusToken': {
+      const { spendType } = action.payload;
+      const spendResult = spendFocusTokens(figure, spendType);
+      if (spendResult) {
+        let updatedFigure = spendResult.figure;
+        const effect = spendResult.effect;
+
+        // Apply movement boost: add to maneuversRemaining for extra distance
+        // (the +2 tiles bonus is tracked on the figure for the movement system to use)
+        if (effect.bonusMovement > 0) {
+          updatedFigure = {
+            ...updatedFigure,
+            // Store bonus movement as a temporary field; the Move action reads it
+            // For now, grant an extra maneuver to use for movement
+            maneuversRemaining: updatedFigure.maneuversRemaining + 1,
+          };
+        }
+
+        // Defense boost: add a temporary condition so buildCombatPools picks it up
+        if (effect.bonusDefenseDice > 0) {
+          const conditions = [...updatedFigure.conditions];
+          if (!conditions.includes('FocusDefense' as Condition)) {
+            conditions.push('FocusDefense' as Condition);
+          }
+          updatedFigure = { ...updatedFigure, conditions };
+        }
+
+        // Attack boost and skill boost are consumed when the next attack/skill check happens
+        // They are tracked via the focus token count change; the combat system reads focusTokens
+        if (effect.bonusAbilityDice > 0) {
+          updatedFigure = {
+            ...updatedFigure,
+            aimTokens: updatedFigure.aimTokens + effect.bonusAbilityDice,
+          };
+        }
+
+        newState.figures[figIdx] = updatedFigure;
+      }
+      // Focus token spending is a free action (does not consume action or maneuver)
       break;
     }
 
