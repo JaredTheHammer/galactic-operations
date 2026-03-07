@@ -196,12 +196,12 @@ The MapEditor import and campaign import both parse JSON and perform basic struc
 
 | ID | Severity | Category | Status |
 |----|----------|----------|--------|
-| MEDIUM-1 | Medium | Input Validation | Open -- mitigated by single-player architecture |
-| MEDIUM-1a | Medium | Input Validation / DoS | Open -- unchecked array access in moveFigure() |
-| MEDIUM-2 | Medium | Input Validation | Open -- affects campaign import |
+| MEDIUM-1 | Medium | Input Validation | **Fixed** -- added `validateGameAction()` in `turn-machine-v2.ts` |
+| MEDIUM-1a | Medium | Input Validation / DoS | **Fixed** -- added bounds checking in `moveFigure()` |
+| MEDIUM-2 | Medium | Input Validation | **Fixed** -- added try-catch + `validateCampaignBounds()` in `campaign-v2.ts` |
 | MEDIUM-3 | Medium | Auth Boundaries | Open -- future risk when multiplayer is implemented |
 | LOW-1 | Low | Info Disclosure | Open |
 | LOW-2 | Low | Defense in Depth | Open |
 | LOW-3 | Low | Input Validation | Open |
 
-**Overall Assessment:** No critical or high-severity issues. The application's client-only architecture significantly limits the attack surface. The medium findings should be addressed before enabling multiplayer functionality.
+**Overall Assessment:** Three medium-severity input validation issues have been fixed. One medium (server stub) and three low findings remain open. The server finding is a future risk that should be addressed when multiplayer is implemented.
