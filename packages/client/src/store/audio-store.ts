@@ -40,14 +40,18 @@ function loadSettings(): { masterVolume: number; sfxVolume: number; muted: boole
         muted: typeof parsed.muted === 'boolean' ? parsed.muted : false,
       };
     }
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.warn('[audio-store] Failed to load settings, using defaults:', e);
+  }
   return { masterVolume: 0.5, sfxVolume: 0.7, muted: false };
 }
 
 function saveSettings(s: { masterVolume: number; sfxVolume: number; muted: boolean }): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.warn('[audio-store] Failed to save settings:', e);
+  }
 }
 
 const initial = loadSettings();

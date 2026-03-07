@@ -45,7 +45,8 @@ function readIndex(): SaveSlotMeta[] {
     const raw = localStorage.getItem(INDEX_KEY)
     if (!raw) return []
     return JSON.parse(raw)
-  } catch {
+  } catch (e) {
+    console.warn('[save-slots] Corrupted save index, returning empty:', e)
     return []
   }
 }
@@ -145,5 +146,7 @@ export function migrateLegacySave(): void {
     // Keep legacy key as backup, don't delete
   } catch (e) {
     console.error('Failed to migrate legacy save:', e)
+    // Legacy key is preserved -- user can still recover via manual import
+    console.warn('Legacy save key preserved at', LEGACY_KEY, '-- manual recovery possible')
   }
 }

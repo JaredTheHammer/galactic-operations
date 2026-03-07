@@ -507,7 +507,7 @@ function heroArmyV2(heroes: HeroCharacter[]): ArmyCompositionV2 {
 /** Notification for UI display (reinforcement popups, narrative events) */
 export interface GameNotification {
   id: string
-  type: 'reinforcement' | 'narrative' | 'objective' | 'info'
+  type: 'reinforcement' | 'narrative' | 'objective' | 'info' | 'error'
   title: string
   message: string
   duration: number  // ms, 0 = manual dismiss only
@@ -2379,6 +2379,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       saveToSlot(AUTO_SAVE_SLOT, campaign)
     } catch (e) {
       console.error('Failed to auto-save new campaign:', e)
+      get().addNotification({ type: 'error', title: 'Save Failed', message: 'Campaign could not be saved. Check storage quota.', duration: 0 })
     }
     get().saveCampaignToStorage()
   },
@@ -2764,6 +2765,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
     } catch (e) {
       console.error('Autosave after mission failed:', e)
+      get().addNotification({ type: 'error', title: 'Save Failed', message: 'Post-mission save failed. Use manual save before closing.', duration: 0 })
     }
     // Auto-save after mission completion
     try {
@@ -2773,6 +2775,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     } catch (e) {
       console.error('Auto-save after mission failed:', e)
+      get().addNotification({ type: 'error', title: 'Save Failed', message: 'Post-mission slot save failed. Check storage quota.', duration: 0 })
     }
     get().saveCampaignToStorage()
   },
@@ -2835,6 +2838,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ lastAutosaveTime: Date.now() })
     } catch (e) {
       console.error('Failed to save campaign:', e)
+      get().addNotification({ type: 'error', title: 'Save Failed', message: 'Campaign autosave failed. Try manual save.', duration: 0 })
     }
   },
 
@@ -2853,6 +2857,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
     } catch (e) {
       console.error('Failed to save campaign to slot:', e)
+      get().addNotification({ type: 'error', title: 'Save Failed', message: 'Failed to save to slot. Check storage quota.', duration: 0 })
     }
   },
 
@@ -2985,6 +2990,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
       } catch (e) {
         console.error('Failed to auto-save on exit:', e)
+        get().addNotification({ type: 'error', title: 'Save Failed', message: 'Auto-save on exit failed. Progress may be lost.', duration: 0 })
       }
     }
 
@@ -3061,6 +3067,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
       } catch (e) {
         console.error('Autosave after social phase failed:', e)
+        get().addNotification({ type: 'error', title: 'Save Failed', message: 'Post-social-phase save failed. Try manual save.', duration: 0 })
       }
     }
     // Auto-save after social phase
@@ -3072,6 +3079,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       } catch (e) {
         console.error('Auto-save after social phase failed:', e)
+        get().addNotification({ type: 'error', title: 'Save Failed', message: 'Social phase slot save failed. Check storage quota.', duration: 0 })
       }
     }
     get().saveCampaignToStorage()
@@ -3167,6 +3175,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       } catch (e) {
         console.error('Auto-save after hero progression failed:', e)
+        get().addNotification({ type: 'error', title: 'Save Failed', message: 'Hero progression save failed. Try manual save.', duration: 0 })
       }
     }
     get().saveCampaignToStorage()

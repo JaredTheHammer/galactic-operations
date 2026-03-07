@@ -138,6 +138,7 @@ const RegularNotification: React.FC<{ notif: GameNotification; onDismiss: () => 
     objective: '#44ff44',
     info: '#4a9eff',
     narrative: '#ffd700',
+    error: '#ff6633',
   }
 
   const borderColor = BORDER_COLORS[notif.type] || '#4a9eff'

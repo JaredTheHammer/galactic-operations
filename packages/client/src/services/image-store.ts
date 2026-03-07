@@ -207,7 +207,7 @@ export async function clearAll(): Promise<void> {
  */
 export function closeDb(): void {
   if (dbPromise) {
-    dbPromise.then(db => db.close()).catch(() => {});
+    dbPromise.then(db => db.close()).catch(e => console.warn('[image-store] DB close failed:', e));
     dbPromise = null;
   }
 }
