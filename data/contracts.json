@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "description": "Contract/Bounty system - side objectives available at social hubs (Dune: Imperium Uprising-inspired)"
+  },
+  "contracts": [
+    {
+      "id": "bounty-clean-sweep",
+      "name": "Clean Sweep",
+      "description": "Eliminate all hostiles in the area without losing anyone.",
+      "postedBy": "Alliance Command",
+      "tier": "bronze",
+      "conditions": [
+        { "type": "eliminate_count", "targetCount": 5 },
+        { "type": "no_incapacitation" }
+      ],
+      "reward": { "credits": 40, "xp": 5 },
+      "availableInActs": [1, 2, 3],
+      "repeatable": true
+    },
+    {
+      "id": "bounty-speed-run",
+      "name": "Blitz Operation",
+      "description": "Complete the mission in 4 rounds or fewer.",
+      "postedBy": "Tactical Operations",
+      "tier": "silver",
+      "conditions": [
+        { "type": "complete_in_rounds", "threshold": 4 }
+      ],
+      "reward": { "credits": 60, "xp": 8 },
+      "availableInActs": [1, 2, 3],
+      "repeatable": true
+    },
+    {
+      "id": "bounty-loot-hound",
+      "name": "Salvage Priority",
+      "description": "Secure at least 3 supply crates during the operation.",
+      "postedBy": "Quartermaster Vex",
+      "tier": "bronze",
+      "conditions": [
+        { "type": "collect_loot", "targetCount": 3 }
+      ],
+      "reward": { "credits": 30, "consumableId": "medpac", "consumableQty": 2 },
+      "availableInActs": [1, 2, 3],
+      "repeatable": true
+    },
+    {
+      "id": "bounty-combo-master",
+      "name": "Show Off",
+      "description": "Trigger a Trips or better Yahtzee combo during combat.",
+      "postedBy": "Arena Bookkeeper",
+      "tier": "bronze",
+      "conditions": [
+        { "type": "use_combo", "targetCount": 1, "targetValue": "Trips" }
+      ],
+      "reward": { "credits": 25, "xp": 3 },
+      "availableInActs": [1, 2, 3],
+      "repeatable": true
+    },
+    {
+      "id": "bounty-iron-will",
+      "name": "Iron Will",
+      "description": "Complete a mission while maintaining morale above 6 throughout.",
+      "postedBy": "General Rieekan",
+      "tier": "silver",
+      "conditions": [
+        { "type": "maintain_morale", "threshold": 6 }
+      ],
+      "reward": { "credits": 50, "xp": 5 },
+      "availableInActs": [1, 2, 3],
+      "repeatable": true
+    },
+    {
+      "id": "bounty-hunter-elite",
+      "name": "Elite Bounty",
+      "description": "A single hero must eliminate 3 or more enemies in one mission.",
+      "postedBy": "Bounty Hunters' Guild",
+      "tier": "gold",
+      "conditions": [
+        { "type": "hero_kills", "targetCount": 3 }
+      ],
+      "reward": { "credits": 100, "xp": 10 },
+      "availableInActs": [2, 3],
+      "repeatable": true
+    },
+    {
+      "id": "bounty-untouchable",
+      "name": "Untouchable",
+      "description": "Complete a mission without any hero taking wounds.",
+      "postedBy": "Mandalorian Trainer",
+      "tier": "gold",
+      "conditions": [
+        { "type": "no_wounds" }
+      ],
+      "reward": { "credits": 80, "xp": 10, "narrativeItemId": "mandalorian-respect" },
+      "availableInActs": [2, 3],
+      "repeatable": false
+    },
+    {
+      "id": "bounty-obj-specialist",
+      "name": "Mission Specialist",
+      "description": "Interact with at least 2 objective points during the mission.",
+      "postedBy": "Intelligence Bureau",
+      "tier": "bronze",
+      "conditions": [
+        { "type": "interact_objectives", "targetCount": 2 }
+      ],
+      "reward": { "credits": 35, "xp": 4 },
+      "availableInActs": [1, 2, 3],
+      "repeatable": true
+    },
+    {
+      "id": "bounty-imperial-officer",
+      "name": "Officer Down",
+      "description": "Eliminate an Imperial Rival or Nemesis-tier unit.",
+      "postedBy": "Rebel High Command",
+      "tier": "silver",
+      "conditions": [
+        { "type": "eliminate_type", "targetCount": 1, "targetValue": "Rival" }
+      ],
+      "reward": { "credits": 55, "xp": 7 },
+      "availableInActs": [1, 2, 3],
+      "repeatable": true
+    },
+    {
+      "id": "bounty-full-house",
+      "name": "Sabacc Hand",
+      "description": "Trigger a Full Run Yahtzee combo -- the ultimate dice achievement.",
+      "postedBy": "Lando's Casino",
+      "tier": "gold",
+      "conditions": [
+        { "type": "use_combo", "targetCount": 1, "targetValue": "FullRun" }
+      ],
+      "reward": { "credits": 150, "xp": 15, "narrativeItemId": "sabacc-champion" },
+      "availableInActs": [1, 2, 3],
+      "repeatable": false
+    }
+  ]
+}

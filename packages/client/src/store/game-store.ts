@@ -77,6 +77,7 @@ import {
   getInventory,
   addToInventory,
   removeFromInventory,
+  getFinaleExposureModifiers,
 } from '@engine/campaign-v2.js'
 import type { MissionCompletionInput } from '@engine/campaign-v2.js'
 import { initializeNetwork, applyNetworkUpkeep, getNetworkThreatReduction, getNetworkReinforcementBonus, severNodesAtLocation } from '@engine/supply-network.js'
@@ -104,6 +105,11 @@ import droidTechSpecData from '@data/specializations/droid-tech.json'
 import forceAdeptSpecData from '@data/specializations/force-adept.json'
 import tacticianSpecData from '@data/specializations/tactician.json'
 import assassinSpecData from '@data/specializations/assassin.json'
+
+// Dune mechanics data
+import contractsData from '@data/contracts.json'
+import researchTrackData from '@data/research-track.json'
+import mercenariesNpcData from '@data/npcs/mercenaries.json'
 
 // Campaign mission data - Act 1
 import mission1Data from '@data/missions/act1-mission1-arrival.json'
@@ -153,7 +159,7 @@ const BOARD_TEMPLATES: BoardTemplate[] = [
 function loadGameDataV2(): GameData {
   // NPC profiles (merge all faction files)
   const npcProfiles: Record<string, NPCProfile> = {}
-  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData]
+  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData, mercenariesNpcData]
   for (const npcFile of npcDataFiles) {
     const npcsRaw = (npcFile as any).npcs ?? npcFile
     for (const [id, npc] of Object.entries(npcsRaw)) {
@@ -461,6 +467,7 @@ export interface GameStore {
   showPortraitManager: boolean
   showSectorMap: boolean
   showCampaignStats: boolean
+  showStrategicCommand: boolean
   showMapEditor: boolean
   campaignHeroCreation: boolean // true when creating heroes for a new campaign
   activeSaveSlot: number | null // which save slot this campaign is using
@@ -595,6 +602,10 @@ export interface GameStore {
   openCampaignStats: () => void
   closeCampaignStats: () => void
 
+  // Strategic command actions
+  openStrategicCommand: () => void
+  closeStrategicCommand: () => void
+
   // Map editor actions
   openMapEditor: () => void
   closeMapEditor: () => void
@@ -666,6 +677,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   showPortraitManager: false,
   showSectorMap: false,
   showCampaignStats: false,
+  showStrategicCommand: false,
   showMapEditor: false,
   campaignHeroCreation: false,
   activeSaveSlot: null,
@@ -2142,6 +2154,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       : 0
     const effectiveThreat = Math.max(0, mission.imperialThreat - networkThreatReduction)
     const effectiveThreatPerRound = Math.max(0, mission.threatPerRound - Math.floor(networkThreatReduction / 2) - networkReinforcementBonus)
+    // Apply exposure modifiers for act finales (missionIndex 4)
+    const isActFinale = mission.missionIndex === 4
+    const exposureModifiers = isActFinale && campaignState.actProgress
+      ? getFinaleExposureModifiers(campaignState.actProgress.exposure)
+      : { threatBonus: 0, roundLimitModifier: 0, extraReinforcements: [] }
 
     // Build a mission object compatible with createInitialGameStateV2
     const gameMission = {
@@ -2152,6 +2169,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       roundLimit: mission.roundLimit,
       imperialThreat: effectiveThreat,
       imperialReinforcementPoints: effectiveThreatPerRound,
+      roundLimit: Math.max(4, mission.roundLimit + exposureModifiers.roundLimitModifier),
+      imperialThreat: mission.imperialThreat + exposureModifiers.threatBonus,
+      imperialReinforcementPoints: mission.threatPerRound,
       victoryConditions: mission.victoryConditions.map(vc => ({
         side: vc.side,
         description: vc.description,
@@ -2221,6 +2241,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     gameState.currentActivationIndex = 0
     gameState.turnPhase = 'Activation'
 
+    // Merge exposure-driven extra reinforcements into the mission definition
+    const effectiveMissionDef = exposureModifiers.extraReinforcements.length > 0
+      ? {
+          ...mission,
+          reinforcements: [
+            ...mission.reinforcements,
+            ...exposureModifiers.extraReinforcements,
+          ],
+        }
+      : mission
+
     set({
       gameState,
       gameData,
@@ -2228,13 +2259,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showMissionSelect: false,
       showPostMission: false,
       isAIBattle: false,
-      activeMissionDef: mission,
+      activeMissionDef: effectiveMissionDef,
       triggeredWaveIds: [],
       combatLog: [
         `Mission started: ${mission.name}`,
         ...(networkThreatReduction > 0 ? [`Supply network reduces Imperial threat by ${networkThreatReduction}`] : []),
         ...(networkReinforcementBonus > 0 ? [`Supply routes disrupt reinforcements: -${networkReinforcementBonus} threat/round`] : []),
       ],
+      combatLog: isActFinale && exposureModifiers.threatBonus > 0
+        ? [
+            `Mission started: ${mission.name}`,
+            `** IMPERIAL ALERT: Exposure level has drawn additional forces! **`,
+          ]
+        : [`Mission started: ${mission.name}`],
       gameStateHistory: [],
     })
   },
@@ -2473,6 +2510,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showPortraitManager: false,
       showSectorMap: false,
       showCampaignStats: false,
+      showStrategicCommand: false,
       showMapEditor: false,
       // Clear stale combat state from previous campaign
       gameState: null,
@@ -2526,6 +2564,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showPortraitManager: false,
       showSectorMap: false,
       showCampaignStats: false,
+      showStrategicCommand: false,
       showMapEditor: false,
       campaignHeroCreation: false,
       activeMissionDef: null,
@@ -2562,7 +2601,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Close social phase and return to mission select.
    */
   closeSocialPhase: () => {
-    const { campaignState } = get()
     const { campaignState, activeSaveSlot } = get()
     set({
       showSocialPhase: false,
@@ -2674,6 +2712,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   closeCampaignStats: () => {
     set({
       showCampaignStats: false,
+      showMissionSelect: true,
+    })
+  },
+
+  // ---- Strategic Command ----
+
+  openStrategicCommand: () => {
+    set({
+      showMissionSelect: false,
+      showStrategicCommand: true,
+    })
+  },
+
+  closeStrategicCommand: () => {
+    set({
+      showStrategicCommand: false,
       showMissionSelect: true,
     })
   },
