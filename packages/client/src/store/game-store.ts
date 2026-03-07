@@ -103,6 +103,11 @@ import forceAdeptSpecData from '@data/specializations/force-adept.json'
 import tacticianSpecData from '@data/specializations/tactician.json'
 import assassinSpecData from '@data/specializations/assassin.json'
 
+// Dune mechanics data
+import contractsData from '@data/contracts.json'
+import researchTrackData from '@data/research-track.json'
+import mercenariesNpcData from '@data/npcs/mercenaries.json'
+
 // Campaign mission data - Act 1
 import mission1Data from '@data/missions/act1-mission1-arrival.json'
 import mission2Data from '@data/missions/act1-mission2-intel.json'
@@ -151,7 +156,7 @@ const BOARD_TEMPLATES: BoardTemplate[] = [
 function loadGameDataV2(): GameData {
   // NPC profiles (merge all faction files)
   const npcProfiles: Record<string, NPCProfile> = {}
-  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData]
+  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData, mercenariesNpcData]
   for (const npcFile of npcDataFiles) {
     const npcsRaw = (npcFile as any).npcs ?? npcFile
     for (const [id, npc] of Object.entries(npcsRaw)) {
@@ -458,6 +463,7 @@ export interface GameStore {
   showHeroProgression: boolean
   showPortraitManager: boolean
   showCampaignStats: boolean
+  showStrategicCommand: boolean
   showMapEditor: boolean
   campaignHeroCreation: boolean // true when creating heroes for a new campaign
   activeSaveSlot: number | null // which save slot this campaign is using
@@ -591,6 +597,10 @@ export interface GameStore {
   openCampaignStats: () => void
   closeCampaignStats: () => void
 
+  // Strategic command actions
+  openStrategicCommand: () => void
+  closeStrategicCommand: () => void
+
   // Map editor actions
   openMapEditor: () => void
   closeMapEditor: () => void
@@ -657,6 +667,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   showHeroProgression: false,
   showPortraitManager: false,
   showCampaignStats: false,
+  showStrategicCommand: false,
   showMapEditor: false,
   campaignHeroCreation: false,
   activeSaveSlot: null,
@@ -2402,6 +2413,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showHeroProgression: false,
       showPortraitManager: false,
       showCampaignStats: false,
+      showStrategicCommand: false,
       showMapEditor: false,
       // Clear stale combat state from previous campaign
       gameState: null,
@@ -2454,6 +2466,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showHeroProgression: false,
       showPortraitManager: false,
       showCampaignStats: false,
+      showStrategicCommand: false,
       showMapEditor: false,
       campaignHeroCreation: false,
       activeMissionDef: null,
@@ -2585,6 +2598,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   closeCampaignStats: () => {
     set({
       showCampaignStats: false,
+      showMissionSelect: true,
+    })
+  },
+
+  // ---- Strategic Command ----
+
+  openStrategicCommand: () => {
+    set({
+      showMissionSelect: false,
+      showStrategicCommand: true,
+    })
+  },
+
+  closeStrategicCommand: () => {
+    set({
+      showStrategicCommand: false,
       showMissionSelect: true,
     })
   },

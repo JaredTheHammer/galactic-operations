@@ -84,6 +84,31 @@ export {
   getExposureStatus,
   getActOutcomeTier,
   createActProgress,
+  // Dune-inspired mechanics types
+  ContractTier,
+  ContractConditionType,
+  ContractCondition,
+  ContractReward,
+  Contract,
+  ActiveContract,
+  IntelAssetType,
+  IntelAsset,
+  MissionIntel,
+  IntelRecallResult,
+  SpyNetworkState,
+  TacticCardMarketEntry,
+  CustomTacticDeck,
+  DeckBuildingState,
+  ResearchNode,
+  ResearchEffect,
+  ResearchEffectType,
+  ResearchTrackState,
+  MercenarySpecialization,
+  MercenaryProfile,
+  MercenaryPassiveEffect,
+  HiredMercenary,
+  MercenaryRosterState,
+  DuneMechanicsState,
 } from './types.js';
 
 // Re-export data loader functions
@@ -262,6 +287,88 @@ export type {
   NPCCombatStats,
   BalanceFlag,
 } from './power-ranking.js';
+
+// Re-export Dune-inspired mechanics
+
+// Contracts system
+export {
+  MAX_ACTIVE_CONTRACTS,
+  TIER_REWARD_MULTIPLIERS,
+  getAvailableContracts,
+  canAcceptContract,
+  acceptContract,
+  abandonContract,
+  updateContractProgress,
+  isContractComplete,
+  evaluateContracts,
+  collectContractRewards,
+  createDefaultDuneMechanics,
+} from './contracts.js';
+
+// Intelligence/Spy Network system
+export {
+  RECALL_CREDITS_PER_TURN,
+  RECALL_TACTIC_CARDS,
+  RECRUIT_ASSET_COST,
+  RECRUIT_COST_SCALING,
+  recruitAsset,
+  getRecruitCost,
+  deployAsset,
+  recallAsset,
+  dismissAsset,
+  advanceIntelNetwork,
+  getMissionIntel,
+  getReserveAssets,
+  getDeployedAssets,
+} from './intel-network.js';
+
+// Deck-building system
+export {
+  STARTER_DECK_SIZE,
+  MAX_DECK_SIZE,
+  MIN_DECK_SIZE,
+  TRASH_COST,
+  MARKET_DISPLAY_SIZE,
+  OPERATIVE_STARTER_CARDS,
+  IMPERIAL_STARTER_CARDS,
+  enableDeckBuilding,
+  disableDeckBuilding,
+  getMarketCards,
+  purchaseMarketCard,
+  trashCard,
+  buildCustomTacticDeck,
+  getDeckContents,
+  getDeckSize,
+  refreshMarket,
+} from './deck-building.js';
+
+// Research track system
+export {
+  DEFAULT_RESEARCH_TRACK,
+  getAvailableResearchNodes,
+  canUnlockNode,
+  unlockResearchNode,
+  getActiveResearchEffects,
+  getResearchBonus,
+  getCurrentResearchTier,
+  getUnlockedNodes,
+} from './research-track.js';
+
+// Mercenaries system
+export {
+  DEFAULT_MERCENARY_PROFILES,
+  getAvailableMercenaries,
+  canHireMercenary,
+  hireMercenary,
+  dismissMercenary,
+  payMercenaryUpkeep,
+  markMercenaryKIA,
+  updateMercenaryWounds,
+  healMercenary,
+  getActiveMercenaries,
+  getMercenaryProfile,
+  getTotalUpkeepCost,
+} from './mercenaries.js';
 
 export type {
   AIProfilesData,
