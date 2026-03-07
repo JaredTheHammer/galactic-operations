@@ -108,6 +108,16 @@ export type {
   TacticCardEffectType,
   TacticCardEffect,
   TacticCard,
+  TacticCardTag,
+  TacticCardTagSynergy,
+  // Faction Reputation
+  FactionDefinition,
+  FactionThreshold,
+  FactionReward,
+  FactionRewardType,
+  // Focus Tokens
+  FocusSpendType,
+  FocusSpendOption,
   TacticCardAltMode,
   TacticCardAltModeType,
   // Combat
@@ -406,6 +416,46 @@ export {
   runCombatBatch,
 } from './ai/index.js';
 
+// Re-export faction reputation system (Ark Nova-inspired)
+export {
+  getFactionReputation,
+  getAllFactionReputations,
+  getHighestClaimedThreshold,
+  modifyFactionReputation,
+  getUnclaimedThresholdRewards,
+  claimThresholdReward,
+  applyFactionRewards,
+  processAllFactionRewards,
+  getFactionTagSources,
+} from './faction-reputation.js';
+
+// Re-export focus token system (Ark Nova X-token inspired)
+export {
+  getFocusTokens,
+  getCampaignFocusTokens,
+  getAvailableFocusSpends,
+  calculateComboFocusTokens,
+  calculateCombatFocusTokens,
+  awardFocusTokens,
+  awardCampaignFocusTokens,
+  spendFocusTokens,
+  getFocusSpendEffect,
+  initializeFocusTokens,
+  saveFocusTokensToCampaign,
+} from './focus-tokens.js';
+export type { FocusSpendEffect } from './focus-tokens.js';
+
+// Re-export card tag synergy system (Ark Nova-inspired)
+export {
+  countTagSources,
+  getAllTagSources,
+  calculateTagSynergyEffects,
+  getEffectiveCardEffects,
+  getTagSynergySummary,
+  getCardsByTag,
+  getUniqueTags,
+} from './card-tags.js';
+export type { TagSource } from './card-tags.js';
 // Re-export secret objectives system (TI4-inspired)
 export {
   initializeSecretObjectives,

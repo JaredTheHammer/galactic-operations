@@ -685,6 +685,8 @@ export interface Figure {
   aimTokens: number;    // 0-2, each adds +1 Ability die to next attack. Persist across activations.
   dodgeTokens: number;  // 0-1, cancel 1 net success when hit. Cleared at next activation.
 
+  // Focus tokens (Ark Nova X-token inspired: earned from combos/objectives, spent to boost any action)
+  focusTokens: number;  // 0-5, persist across activations within a mission
   // Focus effect flags (set by SpendFocus action, consumed by resolution systems)
   /** +2 speed this activation (consumed after Move maneuver, cleared at activation end) */
   focusBonusMove?: boolean;
@@ -812,9 +814,15 @@ export type GameAction =
   | { type: 'AimManeuver';   figureId: string; payload: {} }
   | { type: 'StrainForManeuver'; figureId: string; payload: {} }
   | { type: 'UseConsumable'; figureId: string; payload: UseConsumablePayload }
+  | { type: 'SpendFocusToken'; figureId: string; payload: SpendFocusTokenPayload }
   | { type: 'RevealExploration'; figureId: string; payload: { tokenId: string } }
-  | { type: 'SpendCommandToken'; figureId: string; payload: SpendCommandTokenPayload };
+  | { type: 'SpendCommandToken'; figureId: string; payload: SpendCommandTokenPayload }
   | { type: 'SpendFocus';   figureId: string; payload: SpendFocusPayload };
+
+/** Payload for spending a focus token */
+export interface SpendFocusTokenPayload {
+  spendType: FocusSpendType;
+}
 
 export interface UseConsumablePayload {
   /** Consumable item ID */
@@ -892,6 +900,10 @@ export interface CombatResolution {
   tacticCardsPlayed?: string[];
   tacticSuppression?: number;
   tacticRecover?: number;
+
+  // Focus tokens (Ark Nova X-token inspired)
+  /** Focus tokens earned by attacker from combos and crits */
+  focusTokensAwarded?: number;
 
   // Outcome
   isHit: boolean;
@@ -1113,6 +1125,8 @@ export interface GameData {
   tacticCards?: Record<string, TacticCard>;
   /** Maps social companion IDs (e.g. 'drez-venn') to combat NPC profile IDs (e.g. 'companion-drez-venn') */
   companionProfiles?: Record<string, string>;
+  /** Faction definitions for reputation tracks (Ark Nova-inspired) */
+  factions?: Record<string, FactionDefinition>;
   /** Secret objective definitions (loaded from JSON) */
   secretObjectives?: Record<string, SecretObjectiveDefinition>;
   /** Exploration token definitions (loaded from JSON) */
@@ -1366,8 +1380,11 @@ export interface CampaignState {
   /** Social phase history */
   socialPhaseResults?: SocialPhaseResult[];
 
-  /** Faction reputation (accumulated from social outcomes) */
+  /** Faction reputation tracks (Ark Nova-inspired). Keys are faction IDs, values are rep scores. */
   factionReputation?: Record<string, number>;
+
+  /** Faction threshold rewards already claimed (prevents double-claiming) */
+  claimedFactionRewards?: Record<string, number[]>;
 
   /** Companion NPCs recruited through social encounters */
   companions?: string[];
@@ -1375,6 +1392,8 @@ export interface CampaignState {
   /** Active shop discounts (percentage, from social outcomes) */
   activeDiscounts?: Record<string, number>;
 
+  /** Focus tokens available per hero (Ark Nova X-token inspired). Earned from Yahtzee combos and objectives. */
+  focusTokens?: Record<string, number>;
   /** Faction readiness tracking (Political Track mechanic) */
   factionStatuses?: Record<string, FactionStatus>;
   /** Relic fragment inventory: fragment type -> count */
@@ -1522,6 +1541,103 @@ export interface CampaignSaveFile {
 }
 
 // ============================================================================
+// FACTION REPUTATION SYSTEM (Ark Nova-inspired)
+// ============================================================================
+
+/** A faction with reputation thresholds and rewards */
+export interface FactionDefinition {
+  id: string;
+  name: string;
+  description: string;
+  /** Reputation thresholds and their rewards, sorted ascending */
+  thresholds: FactionThreshold[];
+  /** Starting reputation (default 0) */
+  startingReputation?: number;
+  /** Minimum reputation (can go negative for hostile factions) */
+  minReputation?: number;
+  /** Maximum reputation cap */
+  maxReputation?: number;
+}
+
+/** A threshold milestone on a faction reputation track */
+export interface FactionThreshold {
+  /** Reputation value needed to unlock this tier */
+  reputation: number;
+  /** Rewards granted when crossing this threshold */
+  rewards: FactionReward[];
+}
+
+/** A reward granted at a faction reputation threshold */
+export interface FactionReward {
+  type: FactionRewardType;
+  /** For 'equipment': item ID to grant */
+  itemId?: string;
+  /** For 'credits': amount */
+  credits?: number;
+  /** For 'reinforcement': NPC profile ID available as ally */
+  npcProfileId?: string;
+  /** For 'tactic-card': card ID added to deck */
+  cardId?: string;
+  /** For 'discount': percentage off at faction shops */
+  discountPercent?: number;
+  /** For 'intel': mission ID revealed */
+  missionId?: string;
+  /** For 'tag-bonus': grants a tag source for synergy calculations */
+  tag?: TacticCardTag;
+  description: string;
+}
+
+export type FactionRewardType =
+  | 'equipment'
+  | 'credits'
+  | 'reinforcement'
+  | 'tactic-card'
+  | 'discount'
+  | 'intel'
+  | 'tag-bonus';
+
+// ============================================================================
+// FOCUS TOKEN SYSTEM (Ark Nova X-token inspired)
+// ============================================================================
+
+/** Ways to spend focus tokens */
+export type FocusSpendType =
+  | 'attack-boost'    // +1 ability die to next attack
+  | 'move-boost'      // +2 movement for this activation
+  | 'defense-boost'   // +1 difficulty die to enemy's next attack against you
+  | 'skill-boost'     // +1 ability die to a skill check (social or mission)
+  | 'recover-strain'; // recover 2 strain immediately
+
+/** Focus token spending option */
+export interface FocusSpendOption {
+  type: FocusSpendType;
+  cost: number;
+  description: string;
+}
+
+/** Default focus token costs */
+export const FOCUS_TOKEN_COSTS: Record<FocusSpendType, number> = {
+  'attack-boost': 1,
+  'move-boost': 1,
+  'defense-boost': 2,
+  'skill-boost': 1,
+  'recover-strain': 1,
+};
+
+/** Maximum focus tokens a hero can accumulate */
+export const MAX_FOCUS_TOKENS = 5;
+
+/** Focus token earn rates */
+export const FOCUS_TOKEN_EARN = {
+  /** Per Yahtzee combo scored in combat */
+  perCombo: 1,
+  /** Bonus for gilded combos (proficiency die participates) */
+  gildedBonus: 1,
+  /** Per secondary objective completed during mission */
+  perSecondaryObjective: 1,
+  /** Per critical hit landed */
+  perCritical: 1,
+};
 // SUPPLY NETWORK (Brass: Birmingham-inspired network/supply line building)
 // ============================================================================
 
@@ -1864,6 +1980,16 @@ export interface TacticCardEffect {
   condition?: string;
 }
 
+/** Tag categories for tactic card synergies (Ark Nova-inspired tag system) */
+export type TacticCardTag =
+  | 'Aggressive'
+  | 'Defensive'
+  | 'Tech'
+  | 'Force'
+  | 'Covert'
+  | 'Leadership'
+  | 'Medical'
+  | 'Explosive';
 /** Alternative mode for dual-use tactic cards (Brass: Birmingham-inspired) */
 export type TacticCardAltModeType =
   | 'movement'       // Bonus movement points
@@ -1888,6 +2014,20 @@ export interface TacticCard {
   effects: TacticCardEffect[];
   text: string;
   cost: number;
+  /** Tags for synergy bonuses (Ark Nova-inspired). Cards with matching tags gain bonus effects. */
+  tags?: TacticCardTag[];
+  /** Per-tag synergy bonuses: for each other source of this tag the hero has, gain this effect */
+  tagSynergy?: TacticCardTagSynergy;
+}
+
+/** Defines what bonus a tactic card gets per matching tag from other sources (equipment, talents, other cards) */
+export interface TacticCardTagSynergy {
+  /** Which tag triggers this synergy */
+  tag: TacticCardTag;
+  /** Effect to apply per matching tag source */
+  effectPerTag: TacticCardEffect;
+  /** Max number of times this synergy can stack */
+  maxStacks: number;
   /** Optional strategic (non-combat) effect -- dual-use card (WotR Event Card mechanic) */
   strategicEffect?: StrategicEffect;
   /** Dual-use: alternative non-combat mode (Brass: Birmingham-inspired card duality).
@@ -2129,6 +2269,8 @@ export interface CommandDicePool {
 export interface CommandDiceState {
   operative: CommandDicePool;
   imperial: CommandDicePool;
+}
+
 // TWILIGHT IMPERIUM-INSPIRED MECHANICS
 // Secret Objectives, Command Tokens, Exploration, Relic Fragments, Agenda Phase
 // ============================================================================
@@ -2441,6 +2583,8 @@ export interface AgendaVoteResult {
   heroInfluence: Record<string, number>;
   /** When this vote occurred */
   votedAt: string;
+}
+
 // PROJECT CARDS (Engine Building / Terraforming Mars-inspired)
 // ============================================================================
 

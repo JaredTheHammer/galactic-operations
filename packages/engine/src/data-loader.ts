@@ -17,6 +17,7 @@ import type {
   D6DieType,
   D6DieDefinition,
   BoardTemplate,
+  FactionDefinition,
   SecretObjectiveDefinition,
   ExplorationTokenType,
   RelicDefinition,
@@ -80,7 +81,8 @@ export function loadGameDataFromObjects(data: {
   operatives: any;
   tactics: any;
   equipment: any;
-}): Record<string, unknown> {
+  factions?: any;
+}): GameData {
   // Merge imperial and operative units into a single Record
   const units: Record<string, V1_UnitDefinition> = {
     ...data.imperials,
@@ -118,12 +120,22 @@ export function loadGameDataFromObjects(data: {
     Object.assign(equipment, data.equipment);
   }
 
+  // Build factions map (if provided)
+  const factions: Record<string, FactionDefinition> = {};
+  if (data.factions) {
+    const factionList = Array.isArray(data.factions) ? data.factions : Object.values(data.factions);
+    for (const faction of factionList as any[]) {
+      if (faction.id) factions[faction.id] = faction as FactionDefinition;
+    }
+  }
+
   return {
     dice,
     units,
     weapons: {}, // Weapons are derived from units for now
     tacticCards,
     equipment,
+    factions: Object.keys(factions).length > 0 ? factions : undefined,
   } as any;
 }
 
@@ -195,6 +207,21 @@ export async function loadGameDataV2(basePath: string): Promise<GameData> {
     }
   }
 
+  // Factions (single file, array of faction definitions)
+  const factions: Record<string, FactionDefinition> = {};
+  try {
+    const factionsRaw = JSON.parse(
+      await readFile(join(basePath, 'factions.json'), 'utf-8')
+    );
+    const factionList = Array.isArray(factionsRaw) ? factionsRaw : (factionsRaw.factions ?? []);
+    for (const faction of factionList) {
+      if (faction.id) {
+        factions[faction.id] = faction as FactionDefinition;
+      }
+    }
+  } catch {
+    // factions.json is optional; older data directories may not have it
+  }
   // TI4-inspired data files (optional -- gracefully handle missing files)
   let secretObjectives: Record<string, SecretObjectiveDefinition> | undefined;
   let explorationTokenTypes: Record<string, ExplorationTokenType> | undefined;
@@ -229,6 +256,7 @@ export async function loadGameDataV2(basePath: string): Promise<GameData> {
     weapons,
     armor,
     npcProfiles,
+    factions: Object.keys(factions).length > 0 ? factions : undefined,
     secretObjectives,
     explorationTokenTypes,
     relicDefinitions,

@@ -2710,10 +2710,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ? { ...campaignState, consumableInventory: { ...gameState.consumableInventory } }
       : campaignState
 
-    const previousAct = updatedCampaign.currentAct
     const gameData = loadGameDataV2()
-    const { campaign: newCampaign, result } = completeMission(
-      updatedCampaign,
+
     // On defeat, sever supply nodes at the mission's sector location
     let campaignForCompletion = updatedCampaign
     if (input.outcome === 'defeat' && updatedCampaign.supplyNetwork) {

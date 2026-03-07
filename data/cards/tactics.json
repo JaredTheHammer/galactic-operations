@@ -12,6 +12,7 @@
     ],
     "text": "Add 1 Hit to your attack roll.",
     "cost": 0,
+    "tags": ["Aggressive"]
     "altMode": {
       "type": "movement",
       "value": 1,
@@ -31,6 +32,7 @@
     ],
     "text": "Add 1 Block to your defense roll.",
     "cost": 0,
+    "tags": ["Defensive"]
     "altMode": {
       "type": "defense_stance",
       "value": 1,
@@ -49,7 +51,8 @@
       }
     ],
     "text": "Convert 1 Miss result to 1 Hit.",
-    "cost": 2
+    "cost": 2,
+    "tags": ["Covert"]
   },
   {
     "id": "dodge-roll",
@@ -64,6 +67,7 @@
     ],
     "text": "Reroll 1 of your defense dice.",
     "cost": 1,
+    "tags": ["Defensive", "Covert"]
     "altMode": {
       "type": "movement",
       "value": 2,
@@ -83,6 +87,7 @@
     ],
     "text": "The active figure recovers 2 health.",
     "cost": 2,
+    "tags": ["Medical"]
     "altMode": {
       "type": "action_point",
       "value": 1,
@@ -102,7 +107,8 @@
       }
     ],
     "text": "If you roll at least 1 Hit, the target gains the Suppressed status.",
-    "cost": 1
+    "cost": 1,
+    "tags": ["Aggressive", "Leadership"]
   },
   {
     "id": "counterstrike",
@@ -116,7 +122,8 @@
       }
     ],
     "text": "Cancel 1 Tactic Card played by your opponent this combat.",
-    "cost": 1
+    "cost": 1,
+    "tags": ["Defensive"]
   },
   {
     "id": "precision-strike",
@@ -130,7 +137,13 @@
       }
     ],
     "text": "Add Pierce 1 to your attack (ignores 1 Block).",
-    "cost": 1
+    "cost": 1,
+    "tags": ["Tech"],
+    "tagSynergy": {
+      "tag": "Tech",
+      "effectPerTag": { "type": "Pierce", "value": 1 },
+      "maxStacks": 2
+    }
   },
   {
     "id": "quick-reflexes",
@@ -144,7 +157,8 @@
       }
     ],
     "text": "Add 1 Evade to your defense roll.",
-    "cost": 0
+    "cost": 0,
+    "tags": ["Covert"]
   },
   {
     "id": "second-wind",
@@ -159,6 +173,7 @@
     ],
     "text": "The active figure gains 1 bonus action point this round.",
     "cost": 3,
+    "tags": ["Leadership"]
     "altMode": {
       "type": "strain_recovery",
       "value": 3,
@@ -177,7 +192,13 @@
       }
     ],
     "text": "Add 2 Hits to your attack roll.",
-    "cost": 2
+    "cost": 2,
+    "tags": ["Aggressive", "Leadership"],
+    "tagSynergy": {
+      "tag": "Leadership",
+      "effectPerTag": { "type": "AddHit", "value": 1 },
+      "maxStacks": 2
+    }
   },
   {
     "id": "inspiring-presence",
@@ -192,6 +213,7 @@
     ],
     "text": "Recover 1 Morale point for the Operative side.",
     "cost": 1,
+    "tags": ["Leadership"]
     "strategicEffect": {
       "type": "Rally",
       "value": 3,
@@ -215,6 +237,7 @@
     ],
     "text": "Ignore the target's cover bonus for this attack.",
     "cost": 2,
+    "tags": ["Covert", "Aggressive"]
     "strategicEffect": {
       "type": "Intel",
       "value": 1,
@@ -238,7 +261,8 @@
       }
     ],
     "text": "If the defender has 3 or fewer health remaining, add 3 Blocks to the defense roll.",
-    "cost": 0
+    "cost": 0,
+    "tags": ["Defensive"]
   },
   {
     "id": "rebel-ingenuity",
@@ -253,6 +277,7 @@
     ],
     "text": "Draw 2 additional Tactic Cards from the deck.",
     "cost": 1,
+    "tags": ["Tech"]
     "strategicEffect": {
       "type": "Resupply",
       "value": 2,
@@ -275,7 +300,8 @@
       }
     ],
     "text": "Add 2 Blocks to your defense roll.",
-    "cost": 2
+    "cost": 2,
+    "tags": ["Defensive", "Leadership"]
   },
   {
     "id": "overwhelming-numbers",
@@ -290,7 +316,8 @@
       }
     ],
     "text": "If you have 2 or more friendly figures adjacent to the target, add 2 Hits to your attack.",
-    "cost": 1
+    "cost": 1,
+    "tags": ["Aggressive"]
   },
   {
     "id": "fear-and-dead-men",
@@ -305,6 +332,7 @@
     ],
     "text": "The target must make a Morale check or become Panicked.",
     "cost": 2,
+    "tags": ["Aggressive", "Leadership"]
     "strategicEffect": {
       "type": "Rally",
       "value": 2,
@@ -324,6 +352,7 @@
     ],
     "text": "Move 1 friendly figure up to 2 spaces.",
     "cost": 1,
+    "tags": ["Defensive", "Covert"]
     "strategicEffect": {
       "type": "Reposition",
       "value": 4,
@@ -347,6 +376,7 @@
     ],
     "text": "Immediately deploy 1 Regular unit to an Imperial deployment zone.",
     "cost": 3,
+    "tags": ["Leadership"]
     "strategicEffect": {
       "type": "Reinforce",
       "value": 4,
@@ -365,7 +395,8 @@
       }
     ],
     "text": "Add Suppressed status to the target.",
-    "cost": 1
+    "cost": 1,
+    "tags": ["Aggressive"]
   },
   {
     "id": "armor-piercing",
@@ -379,7 +410,13 @@
       }
     ],
     "text": "Add Pierce 2 to your attack.",
-    "cost": 2
+    "cost": 2,
+    "tags": ["Tech", "Aggressive"],
+    "tagSynergy": {
+      "tag": "Aggressive",
+      "effectPerTag": { "type": "AddHit", "value": 1 },
+      "maxStacks": 1
+    }
   },
   {
     "id": "shield-wall",
@@ -393,7 +430,8 @@
       }
     ],
     "text": "Add 2 Blocks. Friendly figures adjacent to the defender also gain +1 Block.",
-    "cost": 2
+    "cost": 2,
+    "tags": ["Defensive", "Leadership"]
   },
   {
     "id": "flanking-maneuver",
@@ -408,7 +446,8 @@
       }
     ],
     "text": "If you have an ally adjacent to the target, add 1 Hit to your attack.",
-    "cost": 0
+    "cost": 0,
+    "tags": ["Covert"]
   },
   {
     "id": "combat-medic",
@@ -423,6 +462,11 @@
     ],
     "text": "Heal an adjacent friendly figure 3 health.",
     "cost": 2,
+    "tags": ["Medical"],
+    "tagSynergy": {
+      "tag": "Medical",
+      "effectPerTag": { "type": "Recover", "value": 1 },
+      "maxStacks": 2
     "altMode": {
       "type": "strain_recovery",
       "value": 4,
@@ -441,7 +485,8 @@
       }
     ],
     "text": "Deal 1 damage to all figures in a 2-space radius of the target.",
-    "cost": 3
+    "cost": 3,
+    "tags": ["Explosive", "Aggressive"]
   },
   {
     "id": "smoke-screen",
@@ -455,7 +500,8 @@
       }
     ],
     "text": "All attacks against friendly figures in an area gain -1 Hit this round.",
-    "cost": 2
+    "cost": 2,
+    "tags": ["Covert", "Defensive"]
   },
   {
     "id": "overcharge",
@@ -469,7 +515,8 @@
       }
     ],
     "text": "Add 1 Red die to your attack pool for this attack.",
-    "cost": 3
+    "cost": 3,
+    "tags": ["Tech"]
   },
   {
     "id": "evasive-maneuvers",
@@ -484,6 +531,7 @@
     ],
     "text": "Move the defender 1 space after combat resolves.",
     "cost": 0,
+    "tags": ["Covert"]
     "altMode": {
       "type": "defense_stance",
       "value": 2,
@@ -503,6 +551,91 @@
       }
     ],
     "text": "If the target is at range 1, add 2 Hits to your attack.",
-    "cost": 1
+    "cost": 1,
+    "tags": ["Aggressive"]
+  },
+  {
+    "id": "coordinated-assault",
+    "name": "Coordinated Assault",
+    "timing": "Attack",
+    "side": "Operative",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 1
+      }
+    ],
+    "text": "Coordinate with allies: +1 Hit per [Leadership] tag source.",
+    "cost": 1,
+    "tags": ["Leadership", "Aggressive"],
+    "tagSynergy": {
+      "tag": "Leadership",
+      "effectPerTag": { "type": "AddHit", "value": 1 },
+      "maxStacks": 3
+    }
+  },
+  {
+    "id": "dirty-trick",
+    "name": "Dirty Trick",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "ConvertMiss",
+        "value": 1
+      }
+    ],
+    "text": "Underhanded move: convert a miss and suppress per [Covert] source.",
+    "cost": 1,
+    "tags": ["Covert"],
+    "tagSynergy": {
+      "tag": "Covert",
+      "effectPerTag": { "type": "Suppress", "value": 1 },
+      "maxStacks": 2
+    }
+  },
+  {
+    "id": "local-knowledge",
+    "name": "Local Knowledge",
+    "timing": "Defense",
+    "side": "Operative",
+    "effects": [
+      {
+        "type": "AddBlock",
+        "value": 1
+      }
+    ],
+    "text": "Terrain expertise: +1 Block and recover health per [Medical] source.",
+    "cost": 0,
+    "tags": ["Defensive", "Medical"],
+    "tagSynergy": {
+      "tag": "Medical",
+      "effectPerTag": { "type": "Recover", "value": 1 },
+      "maxStacks": 2
+    }
+  },
+  {
+    "id": "mandalorian-resolve",
+    "name": "Mandalorian Resolve",
+    "timing": "Attack",
+    "side": "Universal",
+    "effects": [
+      {
+        "type": "AddHit",
+        "value": 1
+      },
+      {
+        "type": "Pierce",
+        "value": 1
+      }
+    ],
+    "text": "Warrior's fury: Hit + Pierce, with bonus Pierce per [Aggressive] source.",
+    "cost": 2,
+    "tags": ["Aggressive"],
+    "tagSynergy": {
+      "tag": "Aggressive",
+      "effectPerTag": { "type": "Pierce", "value": 1 },
+      "maxStacks": 2
+    }
   }
 ]

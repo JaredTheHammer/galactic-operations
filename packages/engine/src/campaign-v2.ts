@@ -23,12 +23,6 @@ import type {
   RelicFragmentType,
   GameData,
   MissionSecretObjectiveState,
-} from './types';
-
-import { DEFAULT_XP_AWARDS, THREAT_SCALING } from './types';
-import { addFragment } from './relic-fragments';
-import { decrementDirectiveDurations, getDirectiveXPBonus } from './agenda-phase';
-import { resolveSecretObjectives, applySecretObjectiveRewards } from './secret-objectives';
   BountyContract,
   CriticalInjuryDefinition,
   LegacyEventDefinition,
@@ -47,6 +41,9 @@ import {
   getExposureStatus,
   getActOutcomeTier,
 } from './types';
+import { addFragment } from './relic-fragments';
+import { decrementDirectiveDurations, getDirectiveXPBonus } from './agenda-phase';
+import { resolveSecretObjectives, applySecretObjectiveRewards } from './secret-objectives';
 import { processNaturalRecovery } from './critical-injuries';
 import { updateMomentum, applyMomentumCredits } from './momentum';
 import { processOverworldPostMission } from './campaign-overworld';
@@ -96,6 +93,12 @@ export function createCampaign(input: CampaignCreationInput): CampaignState {
     };
   }
 
+  // Initialize focus tokens for all heroes at 0
+  const focusTokens: Record<string, number> = {};
+  for (const hero of input.heroes) {
+    focusTokens[hero.id] = 0;
+  }
+
   return {
     id: `campaign-${Date.now()}`,
     name: input.name,
@@ -112,6 +115,8 @@ export function createCampaign(input: CampaignCreationInput): CampaignState {
     threatLevel: 0,
     threatMultiplier: scaling.baseMultiplier,
     missionsPlayed: 0,
+    factionReputation: {},
+    focusTokens,
     actProgress: createActProgress(1),
     actOutcomes: [],
   };
@@ -279,6 +284,8 @@ export interface MissionCompletionInput {
   heroesWounded?: string[];
   leaderKilled: boolean;
   narrativeBonus?: number;
+  /** Focus tokens per hero at mission end (from Figure.focusTokens). Persisted to campaign. */
+  heroFocusTokens?: Record<string, number>;
   /** Exploration rewards collected during the mission */
   explorationRewards?: ExplorationReward[];
   /** Secret objective state at mission end (for resolution) */
@@ -304,7 +311,6 @@ export function completeMission(
   input: MissionCompletionInput,
   allMissions: Record<string, MissionDefinition>,
   gameData?: GameData,
-): { campaign: CampaignState; result: MissionResult } {
 ): { campaign: CampaignState; result: MissionResult; bountyCompletions: BountyCompletionResult[] } {
   const { mission, outcome, roundsPlayed, completedObjectiveIds, heroKills, lootCollected, heroesIncapacitated, leaderKilled } = input;
   const heroesWounded = input.heroesWounded ?? [];
@@ -547,6 +553,14 @@ export function completeMission(
     }
   }
 
+  // Persist focus tokens from mission figures to campaign
+  const focusTokens = { ...(campaign.focusTokens ?? {}) };
+  if (input.heroFocusTokens) {
+    for (const [heroId, tokens] of Object.entries(input.heroFocusTokens)) {
+      focusTokens[heroId] = tokens;
+    }
+  }
+
   // --- Pandemic Legacy: Critical Injuries ---
   // Apply new critical injuries from this mission and process natural recovery
   const criticalInjuryDefs = input.criticalInjuryDefs ?? {};
@@ -636,6 +650,7 @@ export function completeMission(
     currentAct,
     threatLevel: campaign.threatLevel + scaling.perMission,
     missionsPlayed: campaign.missionsPlayed + 1,
+    focusTokens,
     // TI4-inspired systems
     relicFragments: campaignWithFragments.relicFragments,
     completedSecretObjectives,
