@@ -599,7 +599,8 @@ export type Condition =
   | 'SideStep'          // talent: upgrade ranged defense pool until next activation
   | 'TrueAim'           // talent: upgrade attack pool for next check this turn
   | 'HeroicFortitude'   // talent: ignore critical injury effects until end of encounter
-  | 'CripplingBlow';    // talent: next critical gets +20 but costs 1 more advantage
+  | 'CripplingBlow'     // talent: next critical gets +20 but costs 1 more advantage
+  | 'DefenseStance';    // tactic card alt mode: +N Block on next attack against this figure
   // Note: 'Suppressed' removed in favor of graduated suppressionTokens on Figure
 
 // ============================================================================

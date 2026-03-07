@@ -20,6 +20,9 @@ import {
   completeSocialPhase as finalizeSocialPhase,
 } from '../../../../../engine/src/social-phase'
 import { recoverHero, MEDICAL_RECOVERY_COST } from '../../../../../engine/src/campaign-v2'
+import { getNetworkAvailableGear } from '../../../../../engine/src/supply-network'
+import type { SectorMapDefinition, ShopItem } from '../../../../../engine/src/types'
+import sectorMapData from '../../../../../../data/sector-map.json'
 import act1HubData from '../../../../../../data/social/act1-hub.json'
 import act2HubData from '../../../../../../data/social/act2-hub.json'
 import act3HubData from '../../../../../../data/social/act3-hub.json'
@@ -197,9 +200,42 @@ export function SocialPhase() {
     closeSocialPhase()
   }, [closeSocialPhase])
 
-  const activeShop = session.activeShopId
+  // Network-unlocked gear: add items to any shop the player visits
+  const networkGearItems = useMemo(() => {
+    if (!campaignState.supplyNetwork) return []
+    const gearIds = getNetworkAvailableGear(campaignState.supplyNetwork, sectorMapData as SectorMapDefinition)
+    // Map gear IDs to ShopItem entries with known categories/prices
+    const gearCatalog: Record<string, ShopItem> = {
+      'mining-charge':       { itemId: 'mining-charge', category: 'consumable', basePrice: 75, stock: 3 },
+      'scanner-jammer':      { itemId: 'scanner-jammer', category: 'gear', basePrice: 200, stock: 1 },
+      'blast-vest':          { itemId: 'blast-vest', category: 'armor', basePrice: 250, stock: 2 },
+      'targeting-scope':     { itemId: 'targeting-scope', category: 'gear', basePrice: 150, stock: 2 },
+      'stim-pack':           { itemId: 'stim-pack', category: 'consumable', basePrice: 50, stock: 5 },
+      'disruptor-pistol':    { itemId: 'disruptor-pistol', category: 'weapon', basePrice: 1500, stock: 1 },
+      'thermal-detonator':   { itemId: 'thermal-detonator', category: 'consumable', basePrice: 2000, stock: 1 },
+      'stealth-field':       { itemId: 'stealth-field', category: 'gear', basePrice: 500, stock: 1 },
+      'trandoshan-blade':    { itemId: 'trandoshan-blade', category: 'weapon', basePrice: 800, stock: 1 },
+    }
+    return gearIds
+      .filter(id => gearCatalog[id])
+      .map(id => gearCatalog[id])
+  }, [campaignState.supplyNetwork])
+
+  const activeShopBase = session.activeShopId
     ? location.shops.find(s => s.id === session.activeShopId) ?? null
     : null
+
+  // Augment shop inventory with network-unlocked gear not already in the shop
+  const activeShop = useMemo(() => {
+    if (!activeShopBase || networkGearItems.length === 0) return activeShopBase
+    const existingIds = new Set(activeShopBase.inventory.map(i => i.itemId))
+    const newItems = networkGearItems.filter(i => !existingIds.has(i.itemId))
+    if (newItems.length === 0) return activeShopBase
+    return {
+      ...activeShopBase,
+      inventory: [...activeShopBase.inventory, ...newItems],
+    }
+  }, [activeShopBase, networkGearItems])
 
   return (
     <div style={getContainerStyle(isMobile)}>

@@ -326,6 +326,9 @@ export function useAITurn(): UseAITurnReturn {
                       if (altResult.result.strainRecovery > 0) {
                         updFig.strainCurrent = Math.max(0, (updFig.strainCurrent ?? 0) - altResult.result.strainRecovery)
                       }
+                      if (altResult.result.defenseBonus > 0 && !updFig.conditions.includes('DefenseStance')) {
+                        updFig.conditions = [...updFig.conditions, 'DefenseStance']
+                      }
                       figures[figIdx] = updFig
                     }
                     gs = { ...gs, tacticDeck: altResult.deck, figures }

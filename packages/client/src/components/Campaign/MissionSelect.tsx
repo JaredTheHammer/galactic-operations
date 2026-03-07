@@ -350,16 +350,21 @@ function MissionCard({
   isSelected,
   onClick,
   isNetworkUnlocked,
+  isNetworkLocked,
 }: {
   mission: MissionDefinition
   isSelected: boolean
   onClick: () => void
   isNetworkUnlocked?: boolean
+  isNetworkLocked?: boolean
 }) {
   const diffColor = difficultyColors[mission.difficulty] ?? '#888'
   return (
     <div
-      style={isSelected ? selectedCardStyle : cardStyle}
+      style={{
+        ...(isSelected ? selectedCardStyle : cardStyle),
+        ...(isNetworkLocked ? { opacity: 0.5 } : {}),
+      }}
       onClick={onClick}
       onMouseEnter={(e) => { if (!isSelected) (e.currentTarget.style.borderColor = '#3a3a5f') }}
       onMouseLeave={(e) => { if (!isSelected) (e.currentTarget.style.borderColor = '#2a2a3f') }}
@@ -367,7 +372,16 @@ function MissionCard({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{mission.name}</span>
-          {isNetworkUnlocked && (
+          {isNetworkLocked && (
+            <span style={{
+              fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase',
+              padding: '2px 6px', borderRadius: '3px',
+              backgroundColor: '#2a1a1a', color: '#ff4444', border: '1px solid #4a2a2a',
+            }}>
+              LOCKED
+            </span>
+          )}
+          {isNetworkUnlocked && !isNetworkLocked && (
             <span style={{
               fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase',
               padding: '2px 6px', borderRadius: '3px',
@@ -689,10 +703,21 @@ export default function MissionSelect() {
       : [],
   )
 
+  // Build set of all missions that require network connections to launch
+  const sectorMap = sectorMapData as SectorMapDefinition
+  const networkGatedMissionIds = new Set(
+    sectorMap.locations.flatMap(loc => loc.unlocksMissions ?? [])
+  )
+
   const selectedMission = selectedMissionId ? campaignMissions[selectedMissionId] : null
 
+  // A mission is locked if it's network-gated but not yet unlocked by the player's network
+  const isSelectedMissionLocked = selectedMissionId
+    ? networkGatedMissionIds.has(selectedMissionId) && !networkUnlockedIds.has(selectedMissionId)
+    : false
+
   const handleLaunchMission = () => {
-    if (!selectedMissionId) return
+    if (!selectedMissionId || isSelectedMissionLocked) return
     showMissionBriefingScreen(selectedMissionId)
   }
 
@@ -1011,6 +1036,7 @@ export default function MissionSelect() {
                     isSelected={selectedMissionId === mission.id}
                     onClick={() => setSelectedMissionId(mission.id)}
                     isNetworkUnlocked={networkUnlockedIds.has(mission.id)}
+                    isNetworkLocked={networkGatedMissionIds.has(mission.id) && !networkUnlockedIds.has(mission.id)}
                   />
                 ))}
               </div>
@@ -1195,16 +1221,18 @@ export default function MissionSelect() {
                     <button
                       style={{
                         ...buttonStyle,
-                        backgroundColor: '#4a9eff',
-                        color: '#fff',
+                        backgroundColor: isSelectedMissionLocked ? '#333' : '#4a9eff',
+                        color: isSelectedMissionLocked ? '#666' : '#fff',
+                        cursor: isSelectedMissionLocked ? 'not-allowed' : 'pointer',
                         width: '100%',
                         marginTop: '16px',
                         fontSize: '16px',
                         padding: '12px',
                       }}
                       onClick={handleLaunchMission}
+                      disabled={isSelectedMissionLocked}
                     >
-                      LAUNCH MISSION
+                      {isSelectedMissionLocked ? 'REQUIRES NETWORK CONNECTION' : 'LAUNCH MISSION'}
                     </button>
                   </div>
                 ) : (

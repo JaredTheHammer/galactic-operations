@@ -79,7 +79,7 @@ import {
   removeFromInventory,
 } from '@engine/campaign-v2.js'
 import type { MissionCompletionInput } from '@engine/campaign-v2.js'
-import { initializeNetwork, applyNetworkUpkeep, getNetworkThreatReduction, severNodesAtLocation } from '@engine/supply-network.js'
+import { initializeNetwork, applyNetworkUpkeep, getNetworkThreatReduction, getNetworkReinforcementBonus, severNodesAtLocation } from '@engine/supply-network.js'
 import type { SectorMapDefinition } from '@engine/types.js'
 import sectorMapData from '../../../../data/sector-map.json'
 import { combatAnimations } from '../canvas/animation-manager'
@@ -1479,6 +1479,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (result.result.strainRecovery > 0) {
           fig.strainCurrent = Math.max(0, (fig.strainCurrent ?? 0) - result.result.strainRecovery)
         }
+        if (result.result.defenseBonus > 0 && !fig.conditions.includes('DefenseStance')) {
+          fig.conditions = [...fig.conditions, 'DefenseStance']
+        }
         figures[figIdx] = fig
       }
     }
@@ -2124,12 +2127,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
       { id: 1, name: 'Player', role: 'Operative', isLocal: true, isAI: false },
     ]
 
-    // Apply supply network threat reduction
+    // Apply supply network threat reduction (safehouses) and reinforcement disruption (supply routes)
     const networkThreatReduction = updatedCampaignForMission.supplyNetwork
       ? getNetworkThreatReduction(updatedCampaignForMission.supplyNetwork)
       : 0
+    const networkReinforcementBonus = updatedCampaignForMission.supplyNetwork
+      ? getNetworkReinforcementBonus(updatedCampaignForMission.supplyNetwork)
+      : 0
     const effectiveThreat = Math.max(0, mission.imperialThreat - networkThreatReduction)
-    const effectiveThreatPerRound = Math.max(0, mission.threatPerRound - Math.floor(networkThreatReduction / 2))
+    const effectiveThreatPerRound = Math.max(0, mission.threatPerRound - Math.floor(networkThreatReduction / 2) - networkReinforcementBonus)
 
     // Build a mission object compatible with createInitialGameStateV2
     const gameMission = {
@@ -2221,6 +2227,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       combatLog: [
         `Mission started: ${mission.name}`,
         ...(networkThreatReduction > 0 ? [`Supply network reduces Imperial threat by ${networkThreatReduction}`] : []),
+        ...(networkReinforcementBonus > 0 ? [`Supply routes disrupt reinforcements: -${networkReinforcementBonus} threat/round`] : []),
       ],
       gameStateHistory: [],
     })
