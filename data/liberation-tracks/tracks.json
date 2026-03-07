@@ -1,0 +1,101 @@
+{
+  "rebel_influence": {
+    "id": "rebel_influence",
+    "name": "Rebel Influence",
+    "description": "Political and social progress of the Rebel Alliance in this sector. Advanced through diplomacy, social encounters, and completing mission objectives.",
+    "maxValue": 20,
+    "thresholds": [
+      {
+        "value": 3,
+        "reward": { "type": "stat_bonus", "effect": { "type": "xp_bonus", "value": 1 } },
+        "description": "Local sympathizers provide training tips (+1 XP per mission)"
+      },
+      {
+        "value": 6,
+        "reward": { "type": "narrative", "narrativeItemId": "rebel-sympathizer-network", "description": "A network of sympathizers across the sector offers safe passage." },
+        "description": "Sympathizer network established"
+      },
+      {
+        "value": 10,
+        "reward": { "type": "ally", "companionId": "rebel-diplomat", "description": "A seasoned Rebel diplomat joins your cause." },
+        "description": "Rebel Diplomat recruited"
+      },
+      {
+        "value": 14,
+        "reward": { "type": "stat_bonus", "effect": { "type": "shop_discount", "value": 15 } },
+        "description": "Widespread support means better prices everywhere (-15% shop prices)"
+      },
+      {
+        "value": 18,
+        "reward": { "type": "unlock_mission", "missionId": "liberation-finale" },
+        "description": "The sector is ready for liberation"
+      }
+    ]
+  },
+  "imperial_destabilization": {
+    "id": "imperial_destabilization",
+    "name": "Imperial Destabilization",
+    "description": "Military weakening of Imperial control in the sector. Advanced through combat victories, enemy eliminations, and destroying Imperial assets.",
+    "maxValue": 20,
+    "thresholds": [
+      {
+        "value": 3,
+        "reward": { "type": "stat_bonus", "effect": { "type": "threat_reduction", "value": 1 } },
+        "description": "Imperial garrison thinned (-1 threat per mission)"
+      },
+      {
+        "value": 6,
+        "reward": { "type": "unlock_equipment", "equipmentId": "imperial-officer-blaster" },
+        "description": "Captured Imperial officer's sidearm available in shops"
+      },
+      {
+        "value": 10,
+        "reward": { "type": "stat_bonus", "effect": { "type": "reinforcement_delay", "value": 1 } },
+        "description": "Imperial communications disrupted (reinforcements delayed 1 round)"
+      },
+      {
+        "value": 14,
+        "reward": { "type": "stat_bonus", "effect": { "type": "threat_reduction", "value": 2 } },
+        "description": "Imperial command structure fractured (-2 additional threat per mission)"
+      },
+      {
+        "value": 18,
+        "reward": { "type": "narrative", "narrativeItemId": "imperial-sector-collapse", "description": "The Imperial garrison is on the verge of collapse." },
+        "description": "Imperial sector command in disarray"
+      }
+    ]
+  },
+  "resource_control": {
+    "id": "resource_control",
+    "name": "Resource Control",
+    "description": "Economic and supply chain dominance in the sector. Advanced through collecting loot, investing credits, and purchasing projects.",
+    "maxValue": 20,
+    "thresholds": [
+      {
+        "value": 3,
+        "reward": { "type": "stat_bonus", "effect": { "type": "credit_income", "value": 3 } },
+        "description": "Trade routes secured (+3 credits per mission)"
+      },
+      {
+        "value": 6,
+        "reward": { "type": "unlock_equipment", "equipmentId": "heavy-blaster-rifle" },
+        "description": "Weapons shipment arrives: heavy blaster rifle available"
+      },
+      {
+        "value": 10,
+        "reward": { "type": "stat_bonus", "effect": { "type": "shop_discount", "value": 10 } },
+        "description": "Supply chain mastery (-10% shop prices)"
+      },
+      {
+        "value": 14,
+        "reward": { "type": "stat_bonus", "effect": { "type": "healing_discount", "value": 15 } },
+        "description": "Medical supply surplus (-15 credits for medical recovery)"
+      },
+      {
+        "value": 18,
+        "reward": { "type": "unlock_project", "projectId": "alliance-war-chest" },
+        "description": "Full Alliance funding unlocked"
+      }
+    ]
+  }
+}

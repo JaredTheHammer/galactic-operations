@@ -18,7 +18,7 @@
 --------------------------------------------------------
   Rounds played:       7.9
   Side A damage taken: 9.6
-  Side B damage taken: 2.9
+  Side B damage taken: 3.0
   Side A defeated:     2.4
   Side B defeated:     0.0
 
@@ -27,6 +27,6 @@
 --------------------------------------------------------
   Figure                 Side  Survival  AvgDmgTkn  AvgRounds
   Stormtrooper           A         20%        3.2        6.7
-  Korrga                 B        100%        2.3        7.9
+  Korrga                 B        100%        2.7        7.9
 
 ========================================================

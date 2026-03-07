@@ -1347,6 +1347,17 @@ export interface CampaignState {
   /** Active shop discounts (percentage, from social outcomes) */
   activeDiscounts?: Record<string, number>;
 
+  /** Project cards (engine building) state */
+  projectCardState?: ProjectCardState;
+
+  /** Liberation track progress */
+  liberationTracks?: LiberationTrackState;
+
+  /** Milestones & awards state */
+  milestoneAwardState?: MilestoneAwardState;
+
+  /** Intel cards drafted for the next mission */
+  pendingIntelCards?: string[];
   /** Rival NPC state (persists across social phases) */
   rivalState?: RivalState;
 
@@ -1911,6 +1922,232 @@ export interface SocialPhaseResult {
 }
 
 // ============================================================================
+// PROJECT CARDS (Engine Building / Terraforming Mars-inspired)
+// ============================================================================
+
+/** Category of project card for UI grouping */
+export type ProjectCardCategory =
+  | 'infrastructure'   // Supply lines, bases, facilities
+  | 'intelligence'     // Spy networks, slicing, recon
+  | 'military'         // Weapon caches, training, reinforcements
+  | 'diplomacy';       // Faction contacts, smuggler networks, allies
+
+/** A recurring effect that triggers each mission or each act */
+export interface ProjectCardEffect {
+  /** What the effect modifies */
+  type:
+    | 'credit_income'         // +N credits after each mission
+    | 'shop_discount'         // -N% on shop purchases
+    | 'consumable_slot'       // +N consumable slots per hero
+    | 'threat_reduction'      // -N to effective threat per mission
+    | 'xp_bonus'              // +N XP per mission
+    | 'starting_supply'       // Start each mission with a free consumable
+    | 'intel_reveal'          // Reveal enemy deployment at mission start
+    | 'healing_discount'      // -N credits for medical recovery
+    | 'reinforcement_delay'   // Delay reinforcement waves by N rounds
+    | 'tactic_card_draw';     // +N extra tactic cards at mission start
+  /** Magnitude of the effect */
+  value: number;
+  /** Optional: consumable ID for starting_supply */
+  consumableId?: string;
+}
+
+/** A project card definition (loaded from JSON) */
+export interface ProjectCard {
+  id: string;
+  name: string;
+  description: string;
+  category: ProjectCardCategory;
+  /** Credit cost to purchase */
+  cost: number;
+  /** Effects applied while this project is active */
+  effects: ProjectCardEffect[];
+  /** Prerequisites: other project IDs that must be purchased first */
+  prerequisites: string[];
+  /** Which act this project becomes available (1, 2, or 3) */
+  availableFromAct: number;
+  /** Flavor text */
+  flavorText: string;
+}
+
+/** Tracks purchased projects in campaign state */
+export interface ProjectCardState {
+  /** IDs of purchased project cards */
+  purchasedProjectIds: string[];
+  /** When each project was purchased (mission number) */
+  purchaseHistory: Array<{ projectId: string; purchasedAtMission: number }>;
+}
+
+// ============================================================================
+// LIBERATION TRACKS (Global Parameters / Terraforming Mars-inspired)
+// ============================================================================
+
+/** The three liberation track axes */
+export type LiberationTrackId =
+  | 'rebel_influence'        // Political/social progress
+  | 'imperial_destabilization'  // Military weakening of Imperial control
+  | 'resource_control';      // Economic/supply chain dominance
+
+/** A threshold milestone on a liberation track */
+export interface LiberationThreshold {
+  /** Track value required to unlock */
+  value: number;
+  /** What unlocks at this threshold */
+  reward:
+    | { type: 'unlock_mission'; missionId: string }
+    | { type: 'unlock_project'; projectId: string }
+    | { type: 'unlock_equipment'; equipmentId: string }
+    | { type: 'stat_bonus'; effect: ProjectCardEffect }
+    | { type: 'narrative'; narrativeItemId: string; description: string }
+    | { type: 'ally'; companionId: string; description: string };
+  /** Description shown to player */
+  description: string;
+}
+
+/** Definition of a single liberation track */
+export interface LiberationTrackDefinition {
+  id: LiberationTrackId;
+  name: string;
+  description: string;
+  /** Maximum value for this track */
+  maxValue: number;
+  /** Thresholds that unlock rewards */
+  thresholds: LiberationThreshold[];
+}
+
+/** How a mission or action affects liberation tracks */
+export interface LiberationTrackDelta {
+  trackId: LiberationTrackId;
+  /** Positive = advance, negative = setback */
+  delta: number;
+  /** Reason shown in UI */
+  reason: string;
+}
+
+/** Track progress stored in campaign state */
+export interface LiberationTrackState {
+  /** Current value for each track */
+  values: Record<LiberationTrackId, number>;
+  /** IDs of thresholds already claimed (prevents double-claiming) */
+  claimedThresholds: string[];
+}
+
+// ============================================================================
+// MILESTONES & AWARDS (Terraforming Mars-inspired)
+// ============================================================================
+
+/** A milestone that can be claimed when a condition is met */
+export interface CampaignMilestone {
+  id: string;
+  name: string;
+  description: string;
+  /** Stat to check */
+  condition:
+    | { type: 'hero_xp_threshold'; threshold: number }
+    | { type: 'total_kills'; threshold: number }
+    | { type: 'missions_without_incapacitation'; threshold: number }
+    | { type: 'credits_accumulated'; threshold: number }
+    | { type: 'projects_purchased'; threshold: number }
+    | { type: 'liberation_track'; trackId: LiberationTrackId; threshold: number }
+    | { type: 'companions_recruited'; threshold: number }
+    | { type: 'social_checks_passed'; threshold: number }
+    | { type: 'loot_collected'; threshold: number }
+    | { type: 'missions_completed'; threshold: number };
+  /** XP reward for claiming */
+  xpReward: number;
+  /** Credit reward for claiming */
+  creditReward: number;
+  /** Optional narrative item granted */
+  narrativeReward?: string;
+}
+
+/** End-of-act award that scores based on cumulative performance */
+export interface CampaignAward {
+  id: string;
+  name: string;
+  description: string;
+  /** What stat determines the winner */
+  scoringCriteria:
+    | { type: 'most_kills'; heroStat: 'kills' }
+    | { type: 'most_xp'; heroStat: 'xp' }
+    | { type: 'most_damage_dealt'; heroStat: 'damage' }
+    | { type: 'most_social_successes'; heroStat: 'socialSuccesses' }
+    | { type: 'most_objectives_completed'; heroStat: 'objectivesCompleted' }
+    | { type: 'fewest_incapacitations'; heroStat: 'incapacitations' };
+  /** XP reward for the winning hero */
+  xpReward: number;
+  /** Credit reward */
+  creditReward: number;
+  /** Which act this award is evaluated at the end of (0 = end of campaign) */
+  evaluateAfterAct: number;
+}
+
+/** Tracks milestone/award state in campaign */
+export interface MilestoneAwardState {
+  /** Milestone IDs that have been claimed, plus who claimed them */
+  claimedMilestones: Array<{ milestoneId: string; heroId: string; claimedAtMission: number }>;
+  /** Awards that have been evaluated, plus the winning hero */
+  evaluatedAwards: Array<{ awardId: string; winnerHeroId: string; score: number }>;
+  /** Per-hero cumulative stats for award scoring */
+  heroStats: Record<string, {
+    kills: number;
+    xpEarned: number;
+    damageDealt: number;
+    socialSuccesses: number;
+    objectivesCompleted: number;
+    incapacitations: number;
+    lootCollected: number;
+    missionsWithoutIncap: number;
+  }>;
+}
+
+// ============================================================================
+// INTEL DRAFT (Card Drafting / Pre-Mission Phase, Terraforming Mars-inspired)
+// ============================================================================
+
+/** Type of intel card effect */
+export type IntelCardEffectType =
+  | 'reveal_enemies'         // Know enemy AI profiles before mission
+  | 'bonus_equipment'        // Start with a temporary equipment upgrade
+  | 'place_cover'            // Place light cover tiles before deployment
+  | 'enemy_condition'        // One enemy group starts with a condition
+  | 'bonus_consumable'       // Gain a free consumable for this mission
+  | 'deployment_flexibility' // Expand operative deployment zone
+  | 'threat_reduction'       // Reduce mission threat by N
+  | 'bonus_tactic_cards'     // Draw extra tactic cards at mission start
+  | 'recon_objective'        // Reveal objective point locations
+  | 'ambush';                // Operatives get a free activation before round 1
+
+/** An intel card that provides a pre-mission advantage */
+export interface IntelCard {
+  id: string;
+  name: string;
+  description: string;
+  /** The effect applied at mission setup */
+  effect: {
+    type: IntelCardEffectType;
+    value: number;
+    /** Optional: equipment/consumable/condition ID */
+    targetId?: string;
+  };
+  /** Rarity affects how often it appears in draft pools */
+  rarity: 'common' | 'uncommon' | 'rare';
+  /** Flavor text */
+  flavorText: string;
+}
+
+/** State of an intel draft phase */
+export interface IntelDraftState {
+  /** Cards available to draft from */
+  availableCards: string[];
+  /** Cards already drafted by heroes (heroId -> cardId[]) */
+  draftedCards: Record<string, string[]>;
+  /** Maximum cards each hero can draft */
+  maxPerHero: number;
+  /** Total cards remaining to be drafted */
+  remainingPicks: number;
+}
+
 // SOCIAL PHASE EXPANSION: Time Slots, Rival, Threat Clock, Bounties
 // ============================================================================
 

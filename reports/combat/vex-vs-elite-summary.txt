@@ -9,14 +9,14 @@
 --------------------------------------------------------
   WIN RATES
 --------------------------------------------------------
-  Elite Trooper        21.0%  (21 wins)
-  Vex Dorin            79.0%  (79 wins)
+  Elite Trooper        20.0%  (20 wins)
+  Vex Dorin            80.0%  (80 wins)
   Draw                 0.0%  (0 draws)
 
 --------------------------------------------------------
   AVERAGES PER GAME
 --------------------------------------------------------
-  Rounds played:       7.3
+  Rounds played:       6.4
   Side A damage taken: 6.4
   Side B damage taken: 0.0
   Side A defeated:     0.8
@@ -26,7 +26,7 @@
   FIGURE PERFORMANCE
 --------------------------------------------------------
   Figure                 Side  Survival  AvgDmgTkn  AvgRounds
-  Stormtrooper Elite     A         21%        6.4        7.3
-  Vex Dorin              B        100%        0.0        7.3
+  Stormtrooper Elite     A         20%        6.4        6.4
+  Vex Dorin              B        100%        0.0        6.4
 
 ========================================================
