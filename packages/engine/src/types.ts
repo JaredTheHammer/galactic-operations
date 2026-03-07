@@ -2146,6 +2146,8 @@ export interface IntelDraftState {
   maxPerHero: number;
   /** Total cards remaining to be drafted */
   remainingPicks: number;
+}
+
 // SOCIAL PHASE EXPANSION: Time Slots, Rival, Threat Clock, Bounties
 // ============================================================================
 
