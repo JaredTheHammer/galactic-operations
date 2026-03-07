@@ -1071,9 +1071,24 @@ export function resetForActivation(
   gameState?: GameState,
   gameData?: GameData,
 ): Figure {
+  // --- Damage-over-time conditions (Gloomhaven-inspired) ---
+  let dotWounds = 0;
+
+  // Bleeding: suffer 1 wound at start of activation
+  if (figure.conditions.includes('Bleeding')) {
+    dotWounds += 1;
+  }
+
+  // Burning: suffer 1 wound at start of activation
+  if (figure.conditions.includes('Burning')) {
+    dotWounds += 1;
+  }
+
+  // Remove transient conditions that expire at activation start
   const newConditions = figure.conditions.filter(c =>
-    // Remove transient conditions that expire at activation start
-    c !== 'Disoriented'
+    c !== 'Disoriented' &&
+    c !== 'Stunned' &&    // Stunned: lose action then clears
+    c !== 'Staggered'     // Staggered: lose action then clears
   );
 
   // Graduated suppression rally step: roll 1d6 per suppression token.
@@ -1140,6 +1155,11 @@ export function resetForActivation(
     maneuversRemaining = 1;
   }
 
+  // Stunned / Staggered: lose Action for this activation (condition already cleared above)
+  if (figure.conditions.includes('Stunned') || figure.conditions.includes('Staggered')) {
+    actionsRemaining = 0;
+  }
+
   // Species regeneration (e.g., Trandoshan: recover 1 wound at activation start)
   let woundsCurrent = figure.woundsCurrent;
   if (gameState && gameData && figure.entityType === 'hero') {
@@ -1149,6 +1169,20 @@ export function resetForActivation(
       if (regenAmount > 0) {
         woundsCurrent = Math.max(0, woundsCurrent - regenAmount);
       }
+    }
+  }
+
+  // Apply DOT wounds (Bleeding/Burning) after regeneration
+  if (dotWounds > 0) {
+    woundsCurrent += dotWounds;
+  }
+
+  // Burning clears on successful rally (4+ on 1d6)
+  if (figure.conditions.includes('Burning')) {
+    const roll = rollFn ?? (() => Math.ceil(Math.random() * 6));
+    if (roll() >= 4) {
+      const burnIdx = newConditions.indexOf('Burning');
+      if (burnIdx >= 0) newConditions.splice(burnIdx, 1);
     }
   }
 
@@ -1298,6 +1332,10 @@ export function executeActionV2(
   switch (action.type) {
     // ---- MANEUVERS (consume maneuversRemaining) ----
     case 'Move': {
+      // Immobilized: cannot perform Move maneuvers
+      if (figure.conditions.includes('Immobilized')) {
+        break;
+      }
       const { path } = action.payload;
       newState = moveFigure(figure, path, newState);
       // Decrement maneuversRemaining and set move tracking flag

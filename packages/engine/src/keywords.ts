@@ -263,3 +263,65 @@ export function applyGuardianTransfer(
     guardianWounds,
   };
 }
+
+// ============================================================================
+// KEYWORD EFFECT: PIERCE X
+// ============================================================================
+
+/**
+ * Pierce X: Ignore X points of the target's Soak when dealing damage.
+ * Stacks with weapon Pierce quality and combo pierce.
+ * Applied in combat-v2.ts calculateDamage via the attackerKeywordPierceValue parameter.
+ *
+ * @param soak The target's total soak value
+ * @param pierceValue The Pierce X keyword value
+ * @returns Adjusted soak (minimum 0)
+ */
+export function applyPierceKeyword(
+  soak: number,
+  pierceValue: number,
+): number {
+  if (pierceValue <= 0) return soak;
+  return Math.max(0, soak - pierceValue);
+}
+
+// ============================================================================
+// KEYWORD EFFECT: SHIELD X
+// ============================================================================
+
+/**
+ * Shield X: Gain X automatic block results in defense.
+ * Reduces net successes after opposed roll resolution.
+ * Applied in combat-v2.ts resolveCombatV2 after Armor but before Dodge.
+ *
+ * @param netSuccesses Net successes from the opposed roll
+ * @param shieldValue The Shield X value
+ * @returns Adjusted net successes (minimum 0)
+ */
+export function applyShieldKeyword(
+  netSuccesses: number,
+  shieldValue: number,
+): number {
+  if (shieldValue <= 0) return netSuccesses;
+  return Math.max(0, netSuccesses - shieldValue);
+}
+
+// ============================================================================
+// KEYWORD EFFECT: STEADFAST
+// ============================================================================
+
+/**
+ * Steadfast: Immune to Stunned and Immobilized conditions.
+ * Boolean keyword (no value). Checked in combat-v2.ts applyCombatResult
+ * before applying conditions from combo effects.
+ *
+ * @param figure The figure to check
+ * @param gameState Current game state
+ * @returns true if figure has Steadfast keyword
+ */
+export function isSteadfast(
+  figure: Figure,
+  gameState: GameState,
+): boolean {
+  return hasKeyword(figure, 'Steadfast', gameState);
+}

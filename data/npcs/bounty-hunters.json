@@ -9,8 +9,14 @@
       "name": "Gamorrean Brute",
       "side": "imperial",
       "tier": "Minion",
-      "attackPool": { "ability": 2, "proficiency": 0 },
-      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 0
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
       "woundThreshold": 7,
       "strainThreshold": null,
       "soak": 4,
@@ -23,14 +29,29 @@
           "range": "Engaged",
           "critical": 3,
           "qualities": [
-            { "name": "Knockdown", "value": null },
-            { "name": "Vicious", "value": 1 }
+            {
+              "name": "Knockdown",
+              "value": null
+            },
+            {
+              "name": "Vicious",
+              "value": 1
+            }
           ]
         }
       ],
       "aiArchetype": "melee",
-      "keywords": ["Syndicate", "Brute", "Melee"],
-      "mechanicalKeywords": [{"name": "Retaliate", "value": 1}],
+      "keywords": [
+        "Syndicate",
+        "Brute",
+        "Melee"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Retaliate",
+          "value": 1
+        }
+      ],
       "abilities": [],
       "threatCost": 3
     },
@@ -39,8 +60,14 @@
       "name": "Nikto Gunner",
       "side": "imperial",
       "tier": "Minion",
-      "attackPool": { "ability": 2, "proficiency": 1 },
-      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
       "woundThreshold": 5,
       "strainThreshold": null,
       "soak": 3,
@@ -52,11 +79,19 @@
           "baseDamage": 7,
           "range": "Medium",
           "critical": 4,
-          "qualities": [{ "name": "Stun setting", "value": null }]
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
         }
       ],
       "aiArchetype": "trooper",
-      "keywords": ["Syndicate", "Gunner"],
+      "keywords": [
+        "Syndicate",
+        "Gunner"
+      ],
       "mechanicalKeywords": [],
       "abilities": [],
       "threatCost": 2
@@ -66,8 +101,14 @@
       "name": "Trandoshan Hunter",
       "side": "imperial",
       "tier": "Rival",
-      "attackPool": { "ability": 1, "proficiency": 2 },
-      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 2
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
       "woundThreshold": 10,
       "strainThreshold": 5,
       "soak": 4,
@@ -79,13 +120,29 @@
           "baseDamage": 9,
           "range": "Short",
           "critical": 3,
-          "qualities": [{ "name": "Blast", "value": 4 }]
+          "qualities": [
+            {
+              "name": "Blast",
+              "value": 4
+            }
+          ]
         }
       ],
       "aiArchetype": "elite",
-      "keywords": ["Syndicate", "Trandoshan", "Hunter"],
-      "mechanicalKeywords": [],
-      "abilities": ["Regeneration: At the start of this NPC's activation, recover 2 wounds."],
+      "keywords": [
+        "Syndicate",
+        "Trandoshan",
+        "Hunter"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Pierce",
+          "value": 1
+        }
+      ],
+      "abilities": [
+        "Regeneration: At the start of this NPC's activation, recover 2 wounds."
+      ],
       "threatCost": 4
     },
     "ig-assassin-droid": {
@@ -93,8 +150,14 @@
       "name": "IG Assassin Droid",
       "side": "imperial",
       "tier": "Rival",
-      "attackPool": { "ability": 2, "proficiency": 1 },
-      "defensePool": { "difficulty": 1, "challenge": 1 },
+      "attackPool": {
+        "ability": 2,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 1
+      },
       "woundThreshold": 7,
       "strainThreshold": 4,
       "soak": 4,
@@ -106,12 +169,30 @@
           "baseDamage": 7,
           "range": "Medium",
           "critical": 3,
-          "qualities": [{ "name": "Linked", "value": 1 }]
+          "qualities": [
+            {
+              "name": "Linked",
+              "value": 1
+            }
+          ]
         }
       ],
       "aiArchetype": "sniper",
-      "keywords": ["Syndicate", "Droid", "Assassin"],
-      "mechanicalKeywords": [{"name": "Armor", "value": 1}],
+      "keywords": [
+        "Syndicate",
+        "Droid",
+        "Assassin"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Armor",
+          "value": 1
+        },
+        {
+          "name": "Pierce",
+          "value": 1
+        }
+      ],
       "abilities": [],
       "threatCost": 4
     },
@@ -120,8 +201,14 @@
       "name": "Syndicate Lieutenant",
       "side": "imperial",
       "tier": "Rival",
-      "attackPool": { "ability": 1, "proficiency": 1 },
-      "defensePool": { "difficulty": 1, "challenge": 0 },
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 1
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 0
+      },
       "woundThreshold": 6,
       "strainThreshold": 8,
       "soak": 2,
@@ -133,12 +220,26 @@
           "baseDamage": 5,
           "range": "Short",
           "critical": 4,
-          "qualities": [{ "name": "Stun setting", "value": null }]
+          "qualities": [
+            {
+              "name": "Stun setting",
+              "value": null
+            }
+          ]
         }
       ],
       "aiArchetype": "elite",
-      "keywords": ["Syndicate", "Leader", "Officer"],
-      "mechanicalKeywords": [{"name": "Disciplined", "value": 1}],
+      "keywords": [
+        "Syndicate",
+        "Leader",
+        "Officer"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Disciplined",
+          "value": 1
+        }
+      ],
       "abilities": [
         "Bounty Call: Other Syndicate units within Short range add 1 Ability die to attacks.",
         "Slippery: Once per encounter, disengage as an incidental."
@@ -150,8 +251,14 @@
       "name": "The Broker",
       "side": "imperial",
       "tier": "Nemesis",
-      "attackPool": { "ability": 1, "proficiency": 3 },
-      "defensePool": { "difficulty": 1, "challenge": 2 },
+      "attackPool": {
+        "ability": 1,
+        "proficiency": 3
+      },
+      "defensePool": {
+        "difficulty": 1,
+        "challenge": 2
+      },
       "woundThreshold": 14,
       "strainThreshold": 16,
       "soak": 3,
@@ -163,12 +270,25 @@
           "baseDamage": 8,
           "range": "Medium",
           "critical": 2,
-          "qualities": [{ "name": "Vicious", "value": 3 }]
+          "qualities": [
+            {
+              "name": "Vicious",
+              "value": 3
+            }
+          ]
         }
       ],
       "aiArchetype": "hero",
-      "keywords": ["Syndicate", "Boss", "Underworld"],
-      "mechanicalKeywords": [{"name": "Dauntless"}],
+      "keywords": [
+        "Syndicate",
+        "Boss",
+        "Underworld"
+      ],
+      "mechanicalKeywords": [
+        {
+          "name": "Dauntless"
+        }
+      ],
       "courage": 4,
       "abilities": [
         "Adversary 2: Upgrade difficulty of all combat checks against this target by 2.",

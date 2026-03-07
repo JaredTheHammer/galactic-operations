@@ -35,14 +35,23 @@ import {
   getNPCKeywordValue,
   applyArmorKeyword,
   applyDisciplinedBonus,
+  applyPierceKeyword,
+  applyShieldKeyword,
+  applyRetaliateKeyword,
+  isSteadfast,
   findGuardians,
   applyGuardianTransfer,
 } from '../src/keywords';
 
 import {
+  calculateDamage,
+} from '../src/combat-v2';
+
+import {
   buildCombatPools,
   resolveCombatV2,
   applyCombatResult,
+  calculateDamage,
 } from '../src/combat-v2';
 
 import {
@@ -1297,5 +1306,254 @@ describe('Relentless Keyword', () => {
 
     const updated = newState.figures.find(f => f.id === 'npc-r')!;
     expect(updated.maneuversRemaining).toBe(0);
+  });
+});
+
+// ============================================================================
+// CONDITION ENFORCEMENT TESTS (Gloomhaven-inspired)
+// ============================================================================
+
+describe('Bleeding Condition (DOT)', () => {
+  it('Bleeding deals 1 wound at activation start', () => {
+    const fig = makeNPCFigure({
+      woundsCurrent: 2,
+      conditions: ['Bleeding'],
+    });
+    const result = resetForActivation(fig);
+    expect(result.woundsCurrent).toBe(3); // 2 + 1 DOT
+  });
+
+  it('Bleeding persists across activations (not auto-cleared)', () => {
+    const fig = makeNPCFigure({
+      woundsCurrent: 0,
+      conditions: ['Bleeding'],
+    });
+    const result = resetForActivation(fig);
+    expect(result.conditions).toContain('Bleeding');
+    expect(result.woundsCurrent).toBe(1);
+  });
+
+  it('no DOT without Bleeding', () => {
+    const fig = makeNPCFigure({
+      woundsCurrent: 2,
+      conditions: [],
+    });
+    const result = resetForActivation(fig);
+    expect(result.woundsCurrent).toBe(2); // unchanged
+  });
+});
+
+describe('Burning Condition (DOT + rally clear)', () => {
+  it('Burning deals 1 wound at activation start', () => {
+    const fig = makeNPCFigure({
+      woundsCurrent: 1,
+      conditions: ['Burning'],
+    });
+    const rollFn = () => 1; // fail rally, fail burn clear
+    const result = resetForActivation(fig, rollFn);
+    expect(result.woundsCurrent).toBe(2); // 1 + 1 DOT
+  });
+
+  it('Burning clears on successful rally roll (4+)', () => {
+    const fig = makeNPCFigure({
+      woundsCurrent: 0,
+      conditions: ['Burning'],
+    });
+    const rollFn = () => 6; // succeed at clearing burn
+    const result = resetForActivation(fig, rollFn);
+    expect(result.woundsCurrent).toBe(1); // DOT still applied this activation
+    expect(result.conditions).not.toContain('Burning'); // but cleared after
+  });
+
+  it('Burning persists on failed rally roll (1-3)', () => {
+    const fig = makeNPCFigure({
+      woundsCurrent: 0,
+      conditions: ['Burning'],
+    });
+    const rollFn = () => 2; // fail to clear
+    const result = resetForActivation(fig, rollFn);
+    expect(result.woundsCurrent).toBe(1);
+    expect(result.conditions).toContain('Burning');
+  });
+
+  it('Bleeding + Burning stack: 2 DOT', () => {
+    const fig = makeNPCFigure({
+      woundsCurrent: 0,
+      conditions: ['Bleeding', 'Burning'],
+    });
+    const rollFn = () => 1; // fail burn clear
+    const result = resetForActivation(fig, rollFn);
+    expect(result.woundsCurrent).toBe(2); // 1 from each
+  });
+});
+
+describe('Stunned Condition', () => {
+  it('Stunned causes loss of Action at activation', () => {
+    const fig = makeNPCFigure({
+      conditions: ['Stunned'],
+    });
+    const result = resetForActivation(fig);
+    expect(result.actionsRemaining).toBe(0);
+    expect(result.maneuversRemaining).toBe(1); // can still maneuver
+  });
+
+  it('Stunned clears after activation', () => {
+    const fig = makeNPCFigure({
+      conditions: ['Stunned'],
+    });
+    const result = resetForActivation(fig);
+    expect(result.conditions).not.toContain('Stunned');
+  });
+});
+
+describe('Staggered Condition', () => {
+  it('Staggered causes loss of Action at activation', () => {
+    const fig = makeNPCFigure({
+      conditions: ['Staggered'],
+    });
+    const result = resetForActivation(fig);
+    expect(result.actionsRemaining).toBe(0);
+    expect(result.maneuversRemaining).toBe(1);
+  });
+
+  it('Staggered clears after activation', () => {
+    const fig = makeNPCFigure({
+      conditions: ['Staggered'],
+    });
+    const result = resetForActivation(fig);
+    expect(result.conditions).not.toContain('Staggered');
+  });
+});
+
+describe('Immobilized Condition', () => {
+  it('Immobilized blocks Move action', () => {
+    const npc = makeNPCProfile();
+    const fig = makeNPCFigure({
+      id: 'npc-0',
+      entityId: npc.id,
+      position: { x: 0, y: 0 },
+      conditions: ['Immobilized'],
+      maneuversRemaining: 1,
+    });
+
+    const gs = makeGameState({
+      npcProfiles: { [npc.id]: npc },
+      figures: [fig],
+    });
+    const gd = makeGameData();
+
+    const newState = executeActionV2(gs, {
+      type: 'Move',
+      figureId: 'npc-0',
+      payload: { path: [{ x: 0, y: 0 }, { x: 1, y: 0 }] },
+    }, gd);
+
+    // Figure should NOT have moved
+    const updated = newState.figures.find(f => f.id === 'npc-0')!;
+    expect(updated.position.x).toBe(0);
+    expect(updated.position.y).toBe(0);
+    expect(updated.hasMovedThisActivation).toBe(false);
+  });
+});
+
+// ============================================================================
+// PIERCE KEYWORD TESTS
+// ============================================================================
+
+describe('Pierce Keyword', () => {
+  it('applyPierceKeyword reduces soak', () => {
+    expect(applyPierceKeyword(5, 2)).toBe(3);
+    expect(applyPierceKeyword(3, 3)).toBe(0);
+    expect(applyPierceKeyword(2, 5)).toBe(0); // can't go below 0
+  });
+
+  it('applyPierceKeyword with 0 pierce returns unchanged', () => {
+    expect(applyPierceKeyword(5, 0)).toBe(5);
+  });
+
+  it('Pierce keyword reduces soak in calculateDamage', () => {
+    const rollResult = {
+      isHit: true,
+      netSuccesses: 2,
+      netAdvantages: 0,
+      totalTriumphs: 0,
+      totalDespairs: 0,
+      combos: [],
+      triumph: 0,
+      despair: 0,
+    } as any;
+
+    const weapon = {
+      baseDamage: 5,
+      damageAddBrawn: false,
+      qualities: [],
+    } as any;
+
+    // Without pierce: 5 + 2 = 7 gross, 7 - 4 soak = 3 wounds
+    const noPierce = calculateDamage(rollResult, weapon, 4, 0, 0);
+    expect(noPierce.woundsDealt).toBe(3);
+
+    // With Pierce 2: 5 + 2 = 7 gross, 7 - (4-2) soak = 5 wounds
+    const withPierce = calculateDamage(rollResult, weapon, 4, 0, 2);
+    expect(withPierce.woundsDealt).toBe(5);
+  });
+});
+
+// ============================================================================
+// SHIELD KEYWORD TESTS
+// ============================================================================
+
+describe('Shield Keyword', () => {
+  it('applyShieldKeyword reduces net successes', () => {
+    expect(applyShieldKeyword(4, 2)).toBe(2);
+    expect(applyShieldKeyword(2, 3)).toBe(0);
+    expect(applyShieldKeyword(0, 1)).toBe(0);
+  });
+
+  it('applyShieldKeyword with 0 shield returns unchanged', () => {
+    expect(applyShieldKeyword(3, 0)).toBe(3);
+  });
+
+  it('Shield keyword integrated: reduces net successes in combat', () => {
+    const shieldNPC = makeNPCProfile({
+      id: 'shielded-droid',
+      mechanicalKeywords: [{ name: 'Shield', value: 2 }],
+      defensePool: { difficulty: 1, challenge: 0 },
+      soak: 3,
+    });
+    const fig = makeNPCFigure({ entityId: 'shielded-droid' });
+    const gs = makeGameState({
+      npcProfiles: { 'shielded-droid': shieldNPC },
+      figures: [fig],
+    });
+    expect(getKeywordValue(fig, 'Shield', gs)).toBe(2);
+  });
+});
+
+// ============================================================================
+// STEADFAST KEYWORD TESTS
+// ============================================================================
+
+describe('Steadfast Keyword', () => {
+  it('isSteadfast returns true for NPC with keyword', () => {
+    const npc = makeNPCProfile({
+      mechanicalKeywords: [{ name: 'Steadfast' }],
+    });
+    const fig = makeNPCFigure({ entityId: npc.id });
+    const gs = makeGameState({
+      npcProfiles: { [npc.id]: npc },
+      figures: [fig],
+    });
+    expect(isSteadfast(fig, gs)).toBe(true);
+  });
+
+  it('isSteadfast returns false without keyword', () => {
+    const npc = makeNPCProfile();
+    const fig = makeNPCFigure({ entityId: npc.id });
+    const gs = makeGameState({
+      npcProfiles: { [npc.id]: npc },
+      figures: [fig],
+    });
+    expect(isSteadfast(fig, gs)).toBe(false);
   });
 });

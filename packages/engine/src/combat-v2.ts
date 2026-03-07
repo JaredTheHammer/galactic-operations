@@ -468,6 +468,7 @@ export function calculateDamage(
   weapon: WeaponDefinition,
   soak: number,
   attackerBrawn: number = 0,
+  attackerKeywordPierceValue: number = 0,
 ): DamageResult {
   if (!rollResult.isHit) {
     return {
@@ -490,6 +491,9 @@ export function calculateDamage(
   // Weapon Pierce quality (stacks with combo pierce)
   const weaponPierce = getWeaponQualityValue(weapon, 'Pierce');
 
+  // Pierce keyword on attacker (stacks with weapon and combo pierce)
+  const keywordPierce = attackerKeywordPierceValue;
+
   // Brawn bonus for melee/brawl
   const brawnBonus = weapon.damageAddBrawn ? attackerBrawn : 0;
 
@@ -502,7 +506,7 @@ export function calculateDamage(
   if (pierceValue === 'all') {
     effectiveSoak = 0;
   } else {
-    const totalPierce = (pierceValue as number) + weaponPierce;
+    const totalPierce = (pierceValue as number) + weaponPierce + keywordPierce;
     effectiveSoak = Math.max(0, soak - totalPierce);
   }
 
@@ -760,6 +764,17 @@ export function resolveCombatV2(
     };
   }
 
+  // 3b2. Shield X keyword: cancel up to X net successes (automatic blocks)
+  const shieldValue = getKeywordValue(defender, 'Shield', gameState);
+  if (shieldValue > 0 && rollResult.isHit) {
+    const reduced = Math.max(0, rollResult.netSuccesses - shieldValue);
+    rollResult = {
+      ...rollResult,
+      netSuccesses: reduced,
+      isHit: reduced > 0,
+    };
+  }
+
   // 3c. Dodge token: defender spends 1 dodge token to cancel 1 net success
   if ((defender.dodgeTokens ?? 0) > 0 && rollResult.isHit) {
     const reduced = rollResult.netSuccesses - 1;
@@ -812,11 +827,13 @@ export function resolveCombatV2(
     : 0; // NPCs have brawn baked into baseDamage
 
   // 5. Calculate base damage
+  const attackerPierceKeyword = getKeywordValue(attacker, 'Pierce', gameState);
   const damageResult = calculateDamage(
     rollResult,
     poolCtx.weapon,
     poolCtx.soak - tacticPierce, // Apply tactic card pierce to soak reduction
     attackerBrawn,
+    attackerPierceKeyword,
   );
 
   // 5b. Talent passive damage modifiers (heroes only)
@@ -951,8 +968,11 @@ export function applyCombatResult(
         ? aggregateComboEffects(resolution.rollResult.combos)
         : null;
       const newConditions = [...fig.conditions];
+      // Steadfast keyword: immune to Stunned and Immobilized
+      const isSteadfast = hasKeyword(fig, 'Steadfast', gameState);
       if (comboEffects) {
         for (const cond of comboEffects.conditions) {
+          if (isSteadfast && (cond === 'Stunned' || cond === 'Immobilized')) continue;
           if (!newConditions.includes(cond as Condition)) {
             newConditions.push(cond as Condition);
           }

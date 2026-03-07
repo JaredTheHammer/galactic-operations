@@ -602,13 +602,33 @@ export function scoreTargets(
       guardianModifier += 4;
     }
 
+    // Shield keyword: defender with Shield X is harder to damage (reduce expected value)
+    const shieldValue = hasKeyword(enemy, 'Shield', gameState) ? getNPCKeywordValue(
+      gameState.npcProfiles[enemy.entityId] as any, 'Shield') : 0;
+    const shieldPenalty = shieldValue > 0 ? -shieldValue * 1.5 : 0;
+
+    // Steadfast keyword: target immune to Stunned/Immobilized (reduces combo value)
+    const steadfastPenalty = hasKeyword(enemy, 'Steadfast', gameState) ? -2 : 0;
+
+    // Condition-based scoring: prioritize targets already debuffed
+    let conditionBonus = 0;
+    if (enemy.conditions.includes('Bleeding') || enemy.conditions.includes('Burning')) {
+      conditionBonus += 1; // DOT targets are closer to defeat
+    }
+    if (enemy.conditions.includes('Immobilized')) {
+      conditionBonus += 1.5; // easier to hit (can't reposition)
+    }
+
     // Composite score (same heuristic structure as v1)
     const score =
       killProb * weights.killPotential * 10 +
       threat * weights.threatLevel +
       (1 / Math.max(1, remaining)) * weights.killPotential * 5 +
       suppressionBonus +
-      guardianModifier -
+      guardianModifier +
+      shieldPenalty +
+      steadfastPenalty +
+      conditionBonus -
       dist * 0.5;
 
     scored.push({

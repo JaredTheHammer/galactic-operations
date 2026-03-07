@@ -532,7 +532,10 @@ export type UnitKeywordName =
   | 'Disciplined'  // Remove X additional suppression tokens during rally step
   | 'Dauntless'    // May suffer 1 strain to remove 1 suppression token when activating
   | 'Guardian'     // When friendly within range is hit by ranged, absorb up to X wounds
-  | 'Retaliate';   // When hit by attack within Engaged range, attacker suffers X automatic wounds
+  | 'Retaliate'    // When hit by attack within Engaged range, attacker suffers X automatic wounds
+  | 'Pierce'       // Ignore X points of target's Soak when dealing damage
+  | 'Shield'       // Gain X automatic block results added to defense roll
+  | 'Steadfast';   // Immune to Stunned and Immobilized conditions
 
 export interface UnitKeyword {
   name: UnitKeywordName;
