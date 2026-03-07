@@ -74,9 +74,23 @@ export function getProfileForFigure(
   if (figure.entityType === 'npc') {
     // NPCs carry their archetype in the profile
     const npc = gameState.npcProfiles[figure.entityId];
-    archetypeId = npc?.aiArchetype
-      ?? profilesData.unitMapping[figure.entityId]
-      ?? profilesData.defaultArchetype;
+
+    // Boss phase transition: use the new archetype from the active phase
+    if (figure.bossPhase != null && figure.bossPhase > 0 && npc?.bossPhaseTransitions?.length) {
+      const sorted = [...npc.bossPhaseTransitions]
+        .sort((a, b) => a.disabledLocationsRequired - b.disabledLocationsRequired);
+      // Find the highest triggered transition (phase is 1-indexed, transitions are 0-indexed)
+      const activeTransition = sorted[Math.min(figure.bossPhase - 1, sorted.length - 1)];
+      if (activeTransition?.newAiArchetype && profilesData.archetypes[activeTransition.newAiArchetype]) {
+        archetypeId = activeTransition.newAiArchetype;
+      } else {
+        archetypeId = npc?.aiArchetype ?? profilesData.defaultArchetype;
+      }
+    } else {
+      archetypeId = npc?.aiArchetype
+        ?? profilesData.unitMapping[figure.entityId]
+        ?? profilesData.defaultArchetype;
+    }
   } else {
     // Heroes: check mapping, then fall back to 'hero' archetype (not default trooper)
     archetypeId = profilesData.unitMapping[figure.entityId]

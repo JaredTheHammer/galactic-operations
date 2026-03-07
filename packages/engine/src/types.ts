@@ -867,6 +867,8 @@ export interface CombatResolution {
   bossPhaseTransitioned?: boolean;
   /** New boss phase number after transition */
   newBossPhase?: number;
+  /** Narrative text for the phase transition */
+  bossPhaseNarrativeText?: string;
 }
 
 /** Active combat encounter */

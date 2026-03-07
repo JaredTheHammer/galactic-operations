@@ -998,6 +998,7 @@ export function applyCombatResult(
       locationsDisabledNames: string[];
       bossPhaseTransitioned: boolean;
       newBossPhase?: number;
+      narrativeText?: string;
     };
   }
 
@@ -1022,6 +1023,7 @@ export function applyCombatResult(
     let phaseTransitioned = false;
     let newBossPhase = defenderFig.bossPhase;
     let newBossPhaseStatBonuses = defenderFig.bossPhaseStatBonuses;
+    let phaseNarrativeText: string | undefined;
     if (routeResult.newlyDisabled.length > 0) {
       const npcProfile = gameState.npcProfiles[defenderFig.entityId];
       if (npcProfile) {
@@ -1032,6 +1034,7 @@ export function applyCombatResult(
           newBossPhase = transitioned.bossPhase;
           newBossPhaseStatBonuses = transitioned.bossPhaseStatBonuses;
           phaseTransitioned = true;
+          phaseNarrativeText = transition.narrativeText;
         }
       }
     }
@@ -1049,6 +1052,7 @@ export function applyCombatResult(
         locationsDisabledNames: disabledNames,
         bossPhaseTransitioned: phaseTransitioned,
         newBossPhase: phaseTransitioned ? newBossPhase : undefined,
+        narrativeText: phaseNarrativeText,
       },
     };
   }
@@ -1208,6 +1212,7 @@ export function applyCombatResult(
           ? hitLocationResult.feedback.locationsDisabledNames : undefined,
         bossPhaseTransitioned: hitLocationResult.feedback.bossPhaseTransitioned || undefined,
         newBossPhase: hitLocationResult.feedback.newBossPhase,
+        bossPhaseNarrativeText: hitLocationResult.feedback.narrativeText,
       }
     : resolution;
 

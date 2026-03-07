@@ -1220,6 +1220,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
         if (resolution.bossPhaseTransitioned) {
           addCombatLog(`  !! Boss enters Phase ${resolution.newBossPhase}!`)
+          if (resolution.bossPhaseNarrativeText) {
+            addCombatLog(`  "${resolution.bossPhaseNarrativeText}"`)
+          }
           const { addFloatingText: addFloat } = get()
           setTimeout(() => addFloat({
             gridX: defender.position.x, gridY: defender.position.y,

@@ -358,8 +358,8 @@ export const CombatPanel: React.FC<CombatPanelProps> = ({ combat, gameState }) =
               <div style={{ fontSize: '13px', color: '#ff8844', fontWeight: 'bold', letterSpacing: '1px' }}>
                 BOSS PHASE {combat.resolution.newBossPhase}
               </div>
-              <div style={{ fontSize: '10px', color: '#ffaa66', marginTop: '2px' }}>
-                The boss grows more dangerous!
+              <div style={{ fontSize: '10px', color: '#ffaa66', marginTop: '2px', fontStyle: 'italic' }}>
+                {combat.resolution.bossPhaseNarrativeText ?? 'The boss grows more dangerous!'}
               </div>
             </div>
           )}
