@@ -5,12 +5,8 @@
 
 import type {
   GameData,
-  DieColor,
-  DieDefinition,
-  UnitDefinition,
-  Weapon,
+  V1_UnitDefinition,
   TacticCard,
-  Equipment,
   NPCProfile,
   WeaponDefinition,
   ArmorDefinition,
@@ -22,7 +18,18 @@ import type {
   D6DieDefinition,
   BoardTemplate,
   FactionDefinition,
+  SecretObjectiveDefinition,
+  ExplorationTokenType,
+  RelicDefinition,
+  AgendaDirectiveDefinition,
+  V1_DieColor,
 } from './types.js';
+
+// Legacy type aliases for the v1 data loader
+type DieColor = V1_DieColor;
+type UnitDefinition = V1_UnitDefinition;
+type Equipment = Record<string, unknown>;
+type DieDefinition = Record<string, unknown>;
 
 /**
  * Load game data from the file system
@@ -32,7 +39,8 @@ import type {
  *
  * Note: This function is designed for Node.js file system access
  */
-export async function loadGameData(basePath: string): Promise<GameData> {
+/** @deprecated Use loadGameDataV2 instead */
+export async function loadGameData(basePath: string): Promise<Record<string, unknown>> {
   // Dynamic import of fs to support both Node.js and browser environments
   const { readFile } = await import('fs/promises');
   const { join } = await import('path');
@@ -66,6 +74,7 @@ export async function loadGameData(basePath: string): Promise<GameData> {
  * Load game data from pre-imported JSON objects
  * This version is useful for browser contexts where modules are pre-loaded
  */
+/** @deprecated Use loadGameDataV2 instead */
 export function loadGameDataFromObjects(data: {
   dice: any;
   imperials: any;
@@ -74,17 +83,18 @@ export function loadGameDataFromObjects(data: {
   equipment: any;
   factions?: any;
 }): GameData {
+}): Record<string, unknown> {
   // Merge imperial and operative units into a single Record
-  const units: Record<string, UnitDefinition> = {
+  const units: Record<string, V1_UnitDefinition> = {
     ...data.imperials,
     ...data.operatives,
   };
 
   // Build dice definitions map
-  const dice = {} as Record<DieColor, DieDefinition>;
+  const dice: Record<string, any> = {};
   if (Array.isArray(data.dice)) {
     for (const die of data.dice) {
-      dice[die.color as DieColor] = die;
+      dice[die.color] = die;
     }
   } else {
     // If dice is already a Record
@@ -102,7 +112,7 @@ export function loadGameDataFromObjects(data: {
   }
 
   // Build equipment map
-  const equipment: Record<string, Equipment> = {};
+  const equipment: Record<string, any> = {};
   if (Array.isArray(data.equipment)) {
     for (const item of data.equipment) {
       equipment[item.id] = item;
@@ -128,6 +138,7 @@ export function loadGameDataFromObjects(data: {
     equipment,
     factions: Object.keys(factions).length > 0 ? factions : undefined,
   };
+  } as any;
 }
 
 /**
@@ -213,6 +224,31 @@ export async function loadGameDataV2(basePath: string): Promise<GameData> {
   } catch {
     // factions.json is optional; older data directories may not have it
   }
+  // TI4-inspired data files (optional -- gracefully handle missing files)
+  let secretObjectives: Record<string, SecretObjectiveDefinition> | undefined;
+  let explorationTokenTypes: Record<string, ExplorationTokenType> | undefined;
+  let relicDefinitions: Record<string, RelicDefinition> | undefined;
+  let agendaDirectives: Record<string, AgendaDirectiveDefinition> | undefined;
+
+  try {
+    const raw = JSON.parse(await readFile(join(basePath, 'secret-objectives.json'), 'utf-8'));
+    secretObjectives = raw.secretObjectives ?? raw;
+  } catch { /* file not present */ }
+
+  try {
+    const raw = JSON.parse(await readFile(join(basePath, 'exploration-tokens.json'), 'utf-8'));
+    explorationTokenTypes = raw.explorationTokenTypes ?? raw;
+  } catch { /* file not present */ }
+
+  try {
+    const raw = JSON.parse(await readFile(join(basePath, 'relics.json'), 'utf-8'));
+    relicDefinitions = raw.relicDefinitions ?? raw;
+  } catch { /* file not present */ }
+
+  try {
+    const raw = JSON.parse(await readFile(join(basePath, 'agenda-directives.json'), 'utf-8'));
+    agendaDirectives = raw.agendaDirectives ?? raw;
+  } catch { /* file not present */ }
 
   return {
     dice,
@@ -223,6 +259,10 @@ export async function loadGameDataV2(basePath: string): Promise<GameData> {
     armor,
     npcProfiles,
     factions: Object.keys(factions).length > 0 ? factions : undefined,
+    secretObjectives,
+    explorationTokenTypes,
+    relicDefinitions,
+    agendaDirectives,
   };
 }
 

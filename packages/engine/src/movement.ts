@@ -74,7 +74,9 @@ export function getValidMoves(
   gameState: GameState
 ): GridCoordinate[] {
   const { map, figures } = gameState;
-  const speed = figure.actionsRemaining > 0 ? 4 : 0; // Assume 4 movement points per action
+  const baseSpeed = 4;
+  const focusBonus = figure.focusBonusMove ? 2 : 0;
+  const speed = figure.actionsRemaining > 0 ? baseSpeed + focusBonus : 0;
 
   if (speed <= 0) {
     return [];

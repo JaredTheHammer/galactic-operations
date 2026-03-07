@@ -33,6 +33,11 @@ import type {
   ObjectivePointTemplate,
   ConsumableItem,
   TacticCard,
+  CommandTokenUsage,
+  ExpandedSocialPhaseResult,
+  CriticalInjuryDefinition,
+  LegacyEventDefinition,
+  CampaignOverworldDefinition,
 } from '@engine/types.js'
 import { MAP_PRESETS, computeGameScale } from '@engine/types.js'
 import {
@@ -63,6 +68,19 @@ import { createHero, purchaseSkillRank, purchaseTalent, unlockSpecialization, eq
 import type { HeroCreationInput, EquipmentSlot } from '@engine/character-v2.js'
 import { getEquippedTalents, canActivateTalent } from '@engine/talent-v2.js'
 import { initializeTacticDeck, drawCardsForBothSides, playCard } from '@engine/tactic-cards.js'
+import { generateExplorationTokens } from '@engine/exploration-tokens.js'
+import { initializeCommandTokens } from '@engine/command-tokens.js'
+import { initializeSecretObjectives } from '@engine/secret-objectives.js'
+import {
+  getDirectiveThreatModifier,
+  getDirectiveReinforcementModifier,
+  getDirectiveStartingConsumables,
+  getDirectiveShopDiscount,
+  getDirectiveMoraleModifier,
+  getDirectiveExplorationBonus,
+  getDirectiveCommandTokenBonus,
+} from '@engine/agenda-phase.js'
+import { initializeTacticDeck, drawCardsForBothSides, playCard, playCardAltMode } from '@engine/tactic-cards.js'
 import {
   createCampaign,
   getAvailableMissions,
@@ -77,8 +95,17 @@ import {
   getInventory,
   addToInventory,
   removeFromInventory,
+  getFinaleExposureModifiers,
 } from '@engine/campaign-v2.js'
+import type { MissionCompletionInput, BountyCompletionResult } from '@engine/campaign-v2.js'
+import { getThreatClockEffects } from '@engine/social-phase.js'
 import type { MissionCompletionInput } from '@engine/campaign-v2.js'
+import { initializeCampaignOverworld, travelToSector as travelToSectorFn } from '@engine/campaign-overworld.js'
+import { initializeLegacyDeck, acknowledgePendingEvents } from '@engine/legacy-events.js'
+import { professionalTreatment } from '@engine/critical-injuries.js'
+import { initializeNetwork, applyNetworkUpkeep, getNetworkThreatReduction, getNetworkReinforcementBonus, severNodesAtLocation } from '@engine/supply-network.js'
+import type { SectorMapDefinition } from '@engine/types.js'
+import sectorMapData from '../../../../data/sector-map.json'
 import { combatAnimations } from '../canvas/animation-manager'
 import { saveToSlot, loadFromSlot, deleteSlot, AUTO_SAVE_SLOT, findEmptySlot, migrateLegacySave } from '../services/save-slots'
 
@@ -87,6 +114,7 @@ import diceD6Data from '@data/dice-d6.json'
 import imperialsNpcData from '@data/npcs/imperials.json'
 import bountyHuntersNpcData from '@data/npcs/bounty-hunters.json'
 import warlordForcesNpcData from '@data/npcs/warlord-forces.json'
+import bountyTargetsNpcData from '@data/npcs/bounty-targets.json'
 import weaponsV2Data from '@data/weapons-v2.json'
 import armorData from '@data/armor.json'
 import speciesData from '@data/species.json'
@@ -95,12 +123,36 @@ import aiProfilesRaw from '@data/ai-profiles.json'
 import consumablesData from '@data/consumables.json'
 import tacticsData from '@data/cards/tactics.json'
 import companionsNpcData from '@data/npcs/companions.json'
+
+// TI4-inspired data
+import secretObjectivesData from '@data/secret-objectives.json'
+import explorationTokensData from '@data/exploration-tokens.json'
+import relicsData from '@data/relics.json'
+import agendaDirectivesData from '@data/agenda-directives.json'
+
 import mercenarySpecData from '@data/specializations/mercenary.json'
+import bodyguardSpecData from '@data/specializations/bodyguard.json'
+import demolitionistSpecData from '@data/specializations/demolitionist.json'
 import smugglerSpecData from '@data/specializations/smuggler.json'
+import gunslingerSpecData from '@data/specializations/gunslinger.json'
+import charmerSpecData from '@data/specializations/charmer.json'
 import droidTechSpecData from '@data/specializations/droid-tech.json'
+import outlawTechSpecData from '@data/specializations/outlaw-tech.json'
+import slicerSpecData from '@data/specializations/slicer.json'
 import forceAdeptSpecData from '@data/specializations/force-adept.json'
+import healerSpecData from '@data/specializations/healer.json'
+import nimanDiscipleSpecData from '@data/specializations/niman-disciple.json'
 import tacticianSpecData from '@data/specializations/tactician.json'
+import figureheadSpecData from '@data/specializations/figurehead.json'
+import strategistSpecData from '@data/specializations/strategist.json'
 import assassinSpecData from '@data/specializations/assassin.json'
+import gadgeteerSpecData from '@data/specializations/gadgeteer.json'
+import survivalistSpecData from '@data/specializations/survivalist.json'
+
+// Dune mechanics data
+import contractsData from '@data/contracts.json'
+import researchTrackData from '@data/research-track.json'
+import mercenariesNpcData from '@data/npcs/mercenaries.json'
 
 // Campaign mission data - Act 1
 import mission1Data from '@data/missions/act1-mission1-arrival.json'
@@ -121,6 +173,9 @@ import act3Mission3aData from '@data/missions/act3-mission3a-stronghold.json'
 import act3Mission3bData from '@data/missions/act3-mission3b-betrayal.json'
 import act3Mission4Data from '@data/missions/act3-mission4-endgame.json'
 import campaignData from '@data/campaigns/tangrene-liberation.json'
+import overworldData from '@data/campaigns/tangrene-overworld.json'
+import criticalInjuryData from '@data/critical-injuries.json'
+import legacyEventData from '@data/legacy-events.json'
 
 // v1 data still used for board templates
 import openGround from '@data/boards/open-ground.json'
@@ -150,7 +205,7 @@ const BOARD_TEMPLATES: BoardTemplate[] = [
 function loadGameDataV2(): GameData {
   // NPC profiles (merge all faction files)
   const npcProfiles: Record<string, NPCProfile> = {}
-  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData]
+  const npcDataFiles = [imperialsNpcData, bountyHuntersNpcData, warlordForcesNpcData, companionsNpcData, bountyTargetsNpcData, mercenariesNpcData]
   for (const npcFile of npcDataFiles) {
     const npcsRaw = (npcFile as any).npcs ?? npcFile
     for (const [id, npc] of Object.entries(npcsRaw)) {
@@ -199,11 +254,23 @@ function loadGameDataV2(): GameData {
   const specializations: Record<string, SpecializationDefinition & { talents: TalentCard[] }> = {}
   const specDataFiles = [
     mercenarySpecData,
+    bodyguardSpecData,
+    demolitionistSpecData,
     smugglerSpecData,
+    gunslingerSpecData,
+    charmerSpecData,
     droidTechSpecData,
+    outlawTechSpecData,
+    slicerSpecData,
     forceAdeptSpecData,
+    healerSpecData,
+    nimanDiscipleSpecData,
     tacticianSpecData,
+    figureheadSpecData,
+    strategistSpecData,
     assassinSpecData,
+    gadgeteerSpecData,
+    survivalistSpecData,
   ]
   for (const specRaw of specDataFiles) {
     const raw = specRaw as any
@@ -244,6 +311,10 @@ function loadGameDataV2(): GameData {
     consumables,
     tacticCards,
     companionProfiles,
+    secretObjectives: (secretObjectivesData as any).secretObjectives ?? secretObjectivesData,
+    explorationTokenTypes: (explorationTokensData as any).explorationTokenTypes ?? explorationTokensData,
+    relicDefinitions: (relicsData as any).relicDefinitions ?? relicsData,
+    agendaDirectives: (agendaDirectivesData as any).agendaDirectives ?? agendaDirectivesData,
   }
 }
 
@@ -262,6 +333,42 @@ function loadCampaignMissions(): Record<string, MissionDefinition> {
     missions[m.id] = m
   }
   return missions
+}
+
+function loadCriticalInjuryDefs(): Record<string, CriticalInjuryDefinition> {
+  const defs: Record<string, CriticalInjuryDefinition> = {}
+  const injuries = (criticalInjuryData as any).injuries ?? criticalInjuryData
+  if (Array.isArray(injuries)) {
+    for (const inj of injuries) {
+      defs[inj.id] = inj as CriticalInjuryDefinition
+    }
+  } else {
+    for (const [id, inj] of Object.entries(injuries)) {
+      defs[id] = inj as CriticalInjuryDefinition
+    }
+  }
+  return defs
+}
+
+function loadLegacyEventDefs(): Record<string, LegacyEventDefinition> {
+  const defs: Record<string, LegacyEventDefinition> = {}
+  const events = (legacyEventData as any).events ?? legacyEventData
+  if (Array.isArray(events)) {
+    for (const evt of events) {
+      defs[evt.id] = evt as LegacyEventDefinition
+    }
+  } else {
+    for (const [id, evt] of Object.entries(events)) {
+      defs[id] = evt as LegacyEventDefinition
+    }
+  }
+  return defs
+}
+
+function loadOverworldDef(): CampaignOverworldDefinition | null {
+  const raw = (overworldData as any).overworld ?? overworldData
+  if (!raw || !raw.id) return null
+  return raw as CampaignOverworldDefinition
 }
 
 const CAMPAIGN_STORAGE_KEY = 'galactic-ops-campaign-save'
@@ -446,6 +553,7 @@ export interface GameStore {
   campaignState: CampaignState | null
   campaignMissions: Record<string, MissionDefinition>
   lastMissionResult: MissionResult | null
+  lastBountyCompletions: BountyCompletionResult[]
   showMissionSelect: boolean
   showMissionBriefing: boolean
   pendingMissionId: string | null
@@ -456,13 +564,22 @@ export interface GameStore {
   actTransitionData: { fromAct: number; toAct: number } | null
   showHeroProgression: boolean
   showPortraitManager: boolean
+  showSectorMap: boolean
   showCampaignStats: boolean
+  showStrategicCommand: boolean
   showMapEditor: boolean
   campaignHeroCreation: boolean // true when creating heroes for a new campaign
   activeSaveSlot: number | null // which save slot this campaign is using
   activeMissionDef: MissionDefinition | null // current mission definition for reinforcement waves
   triggeredWaveIds: string[] // mission reinforcement waves already deployed
   activeMission: Mission | null // lightweight mission object for victory checking (useAITurn reads this)
+
+  // Pandemic Legacy system state
+  showCampaignOverworld: boolean
+  showLegacyEvents: boolean
+  criticalInjuryDefs: Record<string, CriticalInjuryDefinition>
+  legacyEventDefs: Record<string, LegacyEventDefinition>
+  overworldDef: CampaignOverworldDefinition | null
 
   // AI visualization state
   aiMovePath: GridCoordinate[] | null
@@ -515,6 +632,11 @@ export interface GameStore {
   // Camera control: set to pan the tactical grid camera to a grid position
   cameraTarget: GridCoordinate | null
 
+  // Boss hit location targeting: pending attack awaiting location selection
+  pendingBossAttack: { targetId: string } | null
+  confirmBossAttack: (targetLocationId?: string) => void
+  cancelBossAttack: () => void
+
   // Actions
   initGame: (players: Player[], mapConfig?: MapConfig) => void
   startHeroCreation: (players: Player[], mapConfig?: MapConfig) => void
@@ -524,6 +646,7 @@ export interface GameStore {
   selectFigure: (figureId: string | null) => void
   moveFigure: (destination: GridCoordinate) => void
   startAttack: (targetId: string) => void
+  _executeAttack: (targetId: string, targetLocationId?: string) => void
   rallyFigure: () => void
   aimFigure: () => void
   dodgeFigure: () => void
@@ -534,8 +657,12 @@ export interface GameStore {
   guardedStance: () => void
   useTalent: (talentId: string) => void
   useConsumable: (itemId: string, targetId?: string) => void
+  spendFocus: (effect: import('@engine/types.js').FocusEffect) => void
   getAvailableConsumables: (figure: Figure) => Array<{ item: ConsumableItem; count: number }>
+  revealExploration: (tokenId: string) => void
+  spendCommandToken: (usage: CommandTokenUsage, coordinateTargetId?: string) => void
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => void
+  playTacticCardAltMode: (cardId: string) => void
   dismissCombat: () => void
   endActivation: () => void
   advancePhase: () => void
@@ -573,6 +700,13 @@ export interface GameStore {
   closeSocialPhase: () => void
   updateCampaignState: (cs: CampaignState) => void
 
+  // Pandemic Legacy actions
+  openCampaignOverworld: () => void
+  closeCampaignOverworld: () => void
+  travelToSector: (sectorId: string) => void
+  treatCriticalInjury: (heroId: string, injuryIndex: number) => void
+  acknowledgeLegacyEvents: () => void
+
   // Hero progression actions
   openHeroProgression: () => void
   closeHeroProgression: () => void
@@ -590,6 +724,10 @@ export interface GameStore {
   openCampaignStats: () => void
   closeCampaignStats: () => void
 
+  // Strategic command actions
+  openStrategicCommand: () => void
+  closeStrategicCommand: () => void
+
   // Map editor actions
   openMapEditor: () => void
   closeMapEditor: () => void
@@ -597,6 +735,10 @@ export interface GameStore {
   // Portrait manager actions
   openPortraitManager: () => void
   closePortraitManager: () => void
+
+  // Sector map actions
+  openSectorMap: () => void
+  closeSectorMap: () => void
   purchaseHeroTalent: (heroId: string, talentId: string, tier: 1 | 2 | 3 | 4 | 5, position: number) => void
   purchaseHeroSkillRank: (heroId: string, skillId: string) => void
   unlockHeroSpecialization: (heroId: string, specializationId: string) => void
@@ -645,6 +787,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   campaignState: null,
   campaignMissions: {},
   lastMissionResult: null,
+  lastBountyCompletions: [],
   showMissionSelect: false,
   showMissionBriefing: false,
   pendingMissionId: null,
@@ -655,13 +798,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   actTransitionData: null,
   showHeroProgression: false,
   showPortraitManager: false,
+  showSectorMap: false,
   showCampaignStats: false,
+  showStrategicCommand: false,
   showMapEditor: false,
   campaignHeroCreation: false,
   activeSaveSlot: null,
   activeMissionDef: null,
   triggeredWaveIds: [],
   activeMission: null,
+
+  // Pandemic Legacy system state
+  showCampaignOverworld: false,
+  showLegacyEvents: false,
+  criticalInjuryDefs: loadCriticalInjuryDefs(),
+  legacyEventDefs: loadLegacyEventDefs(),
+  overworldDef: loadOverworldDef(),
 
   // AI visualization state
   aiMovePath: null,
@@ -674,6 +826,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // Imperial AI state (campaign combat)
   imperialAIPhase: null,
+
+  // Boss hit location targeting
+  pendingBossAttack: null,
 
   // Camera control
   cameraTarget: null,
@@ -1081,7 +1236,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
+  confirmBossAttack: (targetLocationId?: string) => {
+    const { pendingBossAttack } = get()
+    if (!pendingBossAttack) return
+
+    const targetId = pendingBossAttack.targetId
+    set({ pendingBossAttack: null })
+
+    // Re-enter startAttack with the location selected (bypass boss check via internal helper)
+    const store = get()
+    store._executeAttack(targetId, targetLocationId)
+  },
+
+  cancelBossAttack: () => {
+    set({ pendingBossAttack: null })
+  },
+
   startAttack: (targetId: string) => {
+    const { gameState } = get()
+    if (!gameState) return
+
+    // Check if target is a boss with active hit locations
+    const defender = gameState.figures.find(f => f.id === targetId)
+    if (defender?.hitLocations?.some(loc => !loc.isDisabled)) {
+      // Show location picker instead of attacking immediately
+      set({ pendingBossAttack: { targetId } })
+      return
+    }
+
+    get()._executeAttack(targetId)
+  },
+
+  _executeAttack: (targetId: string, targetLocationId?: string) => {
     const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
     if (!gameState || !gameData || !selectedFigureId) return
 
@@ -1096,7 +1282,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const attackAction = {
         type: 'Attack' as const,
         figureId: selectedFigureId,
-        payload: { targetId, weaponId },
+        payload: { targetId, weaponId, ...(targetLocationId ? { targetLocationId } : {}) },
       }
       const newGameState = executeActionV2(gameState, attackAction, gameData)
       set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
@@ -1156,6 +1342,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
             .map(id => gameData.tacticCards?.[id]?.name ?? id)
             .join(', ')
           addCombatLog(`  Tactic cards: ${names}`)
+        }
+
+        // Boss hit location feedback
+        if (resolution.targetedLocationName) {
+          addCombatLog(`  Targeted: ${resolution.targetedLocationName} (+1 difficulty)`)
+        }
+        if (resolution.locationWoundsAbsorbed && resolution.locationWoundsAbsorbed > 0) {
+          addCombatLog(`  Location absorbed ${resolution.locationWoundsAbsorbed} wounds`)
+        }
+        if (resolution.locationsDisabledNames && resolution.locationsDisabledNames.length > 0) {
+          for (const name of resolution.locationsDisabledNames) {
+            addCombatLog(`  !! ${name} DISABLED!`)
+            const { addFloatingText: addFloat } = get()
+            addFloat({
+              gridX: defender.position.x, gridY: defender.position.y,
+              text: `${name} DISABLED`,
+              color: '#ff6600',
+              type: 'damage',
+            })
+          }
+        }
+        if (resolution.bossPhaseTransitioned) {
+          addCombatLog(`  !! Boss enters Phase ${resolution.newBossPhase}!`)
+          if (resolution.bossPhaseNarrativeText) {
+            addCombatLog(`  "${resolution.bossPhaseNarrativeText}"`)
+          }
+          const { addFloatingText: addFloat } = get()
+          setTimeout(() => addFloat({
+            gridX: defender.position.x, gridY: defender.position.y,
+            text: `PHASE ${resolution.newBossPhase}`,
+            color: '#ff8844',
+            type: 'critical',
+          }), 400)
         }
       } else {
         addCombatLog(`Combat: ${attacker.id} vs ${defender.id}`)
@@ -1411,6 +1630,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
+  spendFocus: (effect) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const figure = gameState.figures.find(f => f.id === selectedFigureId)
+    if (!figure) return
+
+    const focusAction = {
+      type: 'SpendFocus' as const,
+      figureId: selectedFigureId,
+      payload: { effect },
+    }
+    const newGameState = executeActionV2(gameState, focusAction, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+
+    addCombatLog(`${selectedFigureId} spent Focus: ${effect}`)
+
+    // Re-select to update valid moves (bonus_move changes movement range)
+    const updatedFigure = newGameState.figures.find(f => f.id === selectedFigureId)
+    if (updatedFigure && (updatedFigure.actionsRemaining > 0 || updatedFigure.maneuversRemaining > 0)) {
+      const moves = getValidMoves(updatedFigure, newGameState)
+      const targets = getValidTargetsV2(updatedFigure, updatedFigure.position, newGameState, gameData)
+      set({ validMoves: moves, validTargets: targets })
+    }
+  },
+
   getAvailableConsumables: (figure: Figure) => {
     const { gameState, gameData } = get()
     if (!gameState || !gameData?.consumables) return []
@@ -1426,6 +1671,41 @@ export const useGameStore = create<GameStore>((set, get) => ({
       results.push({ item: item as ConsumableItem, count })
     }
     return results
+  },
+
+  revealExploration: (tokenId: string) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const action = {
+      type: 'RevealExploration' as const,
+      figureId: selectedFigureId,
+      payload: { tokenId },
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+
+    const token = newGameState.explorationTokens?.find(t => t.id === tokenId)
+    if (token?.isRevealed && token.revealResult) {
+      const rewardText = token.revealResult.rewards.map(r => r.type).join(', ')
+      addCombatLog(`${selectedFigureId} explored: ${token.revealResult.tokenType} (${rewardText})`)
+    } else {
+      addCombatLog(`${selectedFigureId} revealed exploration token`)
+    }
+  },
+
+  spendCommandToken: (usage: CommandTokenUsage, coordinateTargetId?: string) => {
+    const { gameState, gameData, selectedFigureId, addCombatLog, gameStateHistory } = get()
+    if (!gameState || !gameData || !selectedFigureId) return
+
+    const action = {
+      type: 'SpendCommandToken' as const,
+      figureId: selectedFigureId,
+      payload: { usage, coordinateTargetId },
+    }
+    const newGameState = executeActionV2(gameState, action, gameData)
+    set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
+    addCombatLog(`${selectedFigureId} spent command token: ${usage.replace(/_/g, ' ')}`)
   },
 
   playTacticCard: (cardId: string, role: 'attacker' | 'defender') => {
@@ -1447,6 +1727,51 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
     })
     addCombatLog(`Played tactic card: ${cardId}`)
+  },
+
+  playTacticCardAltMode: (cardId: string) => {
+    const { gameState, gameData, addCombatLog } = get()
+    if (!gameState?.tacticDeck || !gameData) return
+
+    const result = playCardAltMode(gameState.tacticDeck, gameData, 'Operative', cardId)
+    if (!result) {
+      addCombatLog(`Cannot play ${cardId} in alt mode`)
+      return
+    }
+
+    // Apply alt mode effects to the current figure
+    const figures = [...gameState.figures]
+    const currentFigureId = gameState.activationOrder?.[gameState.currentActivationIndex]
+    if (currentFigureId) {
+      const figIdx = figures.findIndex(f => f.id === currentFigureId)
+      if (figIdx >= 0) {
+        const fig = { ...figures[figIdx] }
+        if (result.result.movementBonus > 0) {
+          fig.maneuversRemaining = Math.min(2, (fig.maneuversRemaining ?? 0) + 1) as 0 | 1 | 2
+        }
+        if (result.result.actionPointBonus > 0) {
+          fig.actionsRemaining = Math.min(2, (fig.actionsRemaining ?? 0) + 1) as 0 | 1
+        }
+        if (result.result.strainRecovery > 0) {
+          fig.strainCurrent = Math.max(0, (fig.strainCurrent ?? 0) - result.result.strainRecovery)
+        }
+        if (result.result.defenseBonus > 0 && !fig.conditions.includes('DefenseStance')) {
+          fig.conditions = [...fig.conditions, 'DefenseStance']
+        }
+        figures[figIdx] = fig
+      }
+    }
+
+    set({
+      gameState: {
+        ...gameState,
+        tacticDeck: result.deck,
+        figures,
+      },
+    })
+
+    const modeLabel = result.result.altMode.type.replace(/_/g, ' ')
+    addCombatLog(`Used ${result.result.cardName} alt mode: ${modeLabel} +${result.result.altMode.value}`)
   },
 
   dismissCombat: () => {
@@ -1559,6 +1884,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentActivationIndex: 0,
       figures: newFigures,
       ...(newTacticDeck ? { tacticDeck: newTacticDeck } : {}),
+    }
+
+    // Rebuild activation order each round (handles surprise rounds, reinforcements, casualties)
+    if (newPhase === 'Activation') {
+      newGameState.activationOrder = buildActivationOrderV2(newGameState)
     }
 
     // ===== REINFORCEMENT PHASE: spawn new Imperial units =====
@@ -1702,11 +2032,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
             .filter(f => f.entityType === 'hero' && f.isDefeated)
             .map(f => f.entityId)
 
+          // Collect defeated enemy NPC entity IDs for bounty completion
+          const defeatedNpcIds = newGameState.figures
+            .filter(f => f.entityType === 'npc' && f.isDefeated && f.playerId === imperialPlayer?.id)
+            .map(f => f.entityId)
+
           // Show the victory/defeat state on the tactical grid briefly before transitioning
           set({ gameState: newGameState, gameStateHistory: [...gameStateHistory.slice(-19), gameState] })
 
           // Delayed transition to PostMission (gives player time to see the result)
           setTimeout(() => {
+            // Collect exploration rewards from revealed tokens
+            const explorationRewards = (newGameState.explorationTokens ?? [])
+              .filter(t => t.isRevealed && t.revealResult?.rewards)
+              .flatMap(t => t.revealResult!.rewards)
             get().completeCampaignMission({
               mission,
               outcome: outcome as 'victory' | 'defeat',
@@ -1717,6 +2056,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
               heroesIncapacitated,
               leaderKilled,
               narrativeBonus: outcome === 'victory' ? 2 : 0,
+              explorationRewards,
+              secretObjectiveState: newGameState.secretObjectives,
+              defeatedNpcIds,
             })
           }, 3000)
           return
@@ -1988,13 +2330,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { createdHeroes, campaignState, campaignMissions } = get()
     if (!campaignState || createdHeroes.length === 0) return
 
-    const campaign = createCampaign({
+    let campaign = createCampaign({
       name: (campaignData as any).name ?? 'Campaign',
       difficulty: campaignState.difficulty,
       heroes: createdHeroes,
       startingMissionId: (campaignData as any).startingMissionId ?? 'act1-m1-arrival',
       startingCredits: (campaignData as any).startingCredits ?? 0,
     })
+
+    // Initialize pandemic legacy systems
+    const { overworldDef, legacyEventDefs } = get()
+    if (overworldDef) {
+      campaign = initializeCampaignOverworld(campaign, overworldDef, 'docking-district')
+    }
+    if (Object.keys(legacyEventDefs).length > 0) {
+      campaign = { ...campaign, legacyDeck: initializeLegacyDeck() }
+    }
+    // Initialize momentum at 0 (opt-in by setting the field)
+    campaign = { ...campaign, momentum: 0 }
+    // Initialize supply network with starting location
+    campaign.supplyNetwork = initializeNetwork(sectorMapData as SectorMapDefinition)
 
     // Find an empty slot for the new campaign
     const newSlot = findEmptySlot() ?? 1
@@ -2047,6 +2402,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const mission = campaignMissions[missionId]
     if (!mission) return
 
+    // Apply supply network upkeep (collect income, deduct costs, sever unpaid nodes)
+    let updatedCampaignForMission = campaignState
+    if (campaignState.supplyNetwork) {
+      updatedCampaignForMission = applyNetworkUpkeep(campaignState)
+      set({ campaignState: updatedCampaignForMission })
+    }
+
     const gameData = loadGameDataV2()
     const mapConfig: MapConfig = {
       preset: mission.mapPreset as any,
@@ -2055,8 +2417,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
     const generatedMap = generateMap(mapConfig, BOARD_TEMPLATES)
 
-    // Prepare heroes from campaign roster
-    const heroes = prepareHeroesForMission(campaignState)
+    // Prepare heroes from campaign roster (use updated campaign with upkeep applied)
+    const heroes = prepareHeroesForMission(updatedCampaignForMission)
     const heroesRegistry: Record<string, HeroCharacter> = {}
     for (const hero of heroes) {
       heroesRegistry[hero.id] = hero
@@ -2068,14 +2430,29 @@ export const useGameStore = create<GameStore>((set, get) => ({
       { id: 1, name: 'Player', role: 'Operative', isLocal: true, isAI: false },
     ]
 
+    // Apply supply network threat reduction (safehouses) and reinforcement disruption (supply routes)
+    const networkThreatReduction = updatedCampaignForMission.supplyNetwork
+      ? getNetworkThreatReduction(updatedCampaignForMission.supplyNetwork)
+      : 0
+    const networkReinforcementBonus = updatedCampaignForMission.supplyNetwork
+      ? getNetworkReinforcementBonus(updatedCampaignForMission.supplyNetwork)
+      : 0
+    const effectiveThreat = Math.max(0, mission.imperialThreat - networkThreatReduction)
+    const effectiveThreatPerRound = Math.max(0, mission.threatPerRound - Math.floor(networkThreatReduction / 2) - networkReinforcementBonus)
+    // Apply exposure modifiers for act finales (missionIndex 4)
+    const isActFinale = mission.missionIndex === 4
+    const exposureModifiers = isActFinale && campaignState.actProgress
+      ? getFinaleExposureModifiers(campaignState.actProgress.exposure)
+      : { threatBonus: 0, roundLimitModifier: 0, extraReinforcements: [] }
+
     // Build a mission object compatible with createInitialGameStateV2
     const gameMission = {
       id: mission.id,
       name: mission.name,
       description: mission.description,
       mapId: mission.mapId,
-      roundLimit: mission.roundLimit,
-      imperialThreat: mission.imperialThreat,
+      roundLimit: Math.max(4, mission.roundLimit + exposureModifiers.roundLimitModifier),
+      imperialThreat: mission.imperialThreat + exposureModifiers.threatBonus,
       imperialReinforcementPoints: mission.threatPerRound,
       victoryConditions: mission.victoryConditions.map(vc => ({
         side: vc.side,
@@ -2096,11 +2473,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
         objectivePointTemplates: mission.objectivePoints,
         lootTokens: mission.lootTokens,
         consumableInventory: { ...(campaignState.consumableInventory ?? {}) },
+        fogOfWar: mission.fogOfWar,
+        fogOfWarVisionRange: mission.fogOfWarVisionRange,
+        consumableInventory: { ...(updatedCampaignForMission.consumableInventory ?? {}) },
       },
     )
 
     // Store the active mission ID for victory condition checks
     gameState.activeMissionId = mission.id
+
+    // Apply threat clock effects from the last social phase
+    const lastSocialResult = campaignState.socialPhaseResults?.at(-1) as ExpandedSocialPhaseResult | undefined
+    if (lastSocialResult?.threatClockEffects) {
+      const effects = lastSocialResult.threatClockEffects
+      gameState.threatClockEffects = effects
+      // Add bonus reinforcement points from threat clock
+      if (effects.bonusReinforcements > 0) {
+        gameState.threatPool += effects.bonusReinforcements * 3 // each group = 3 threat
+      }
+    }
 
     // Override operative deploy zone with mission-specific positions if provided
     if (mission.operativeDeployZone && mission.operativeDeployZone.length > 0) {
@@ -2127,24 +2518,159 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
+    // Build imperial forces: mission enemies + bounty targets
+    const imperialForces = mission.initialEnemies.map(g => ({
+      npcId: g.npcProfileId,
+      count: g.count,
+    }))
+
+    // Inject accepted bounty targets as bonus enemy spawns
+    const activeBounties = campaignState.activeBounties ?? []
+    const bountyTargetLog: string[] = []
+    const weakenedTargetNpcIds = new Set<string>()
+    const bountyPrepResults = campaignState.bountyPrepResults ?? []
+    for (const bounty of activeBounties) {
+      if (gameData.npcProfiles[bounty.targetNpcId]) {
+        imperialForces.push({ npcId: bounty.targetNpcId, count: 1 })
+        bountyTargetLog.push(`Bounty target spotted: ${bounty.targetName} (${bounty.condition})`)
+        // Check if this target was weakened by bounty prep
+        const prep = bountyPrepResults.find(p => p.bountyId === bounty.id && p.targetWeakened)
+        if (prep) {
+          weakenedTargetNpcIds.add(bounty.targetNpcId)
+          bountyTargetLog.push(`  Intel advantage: ${bounty.targetName} starts wounded from prep`)
+        }
+      }
+    }
+
     const army: ArmyCompositionV2 = {
-      imperial: mission.initialEnemies.map(g => ({
-        npcId: g.npcProfileId,
-        count: g.count,
-      })),
+      imperial: imperialForces,
       operative: operativeUnits,
     }
     gameState = deployFiguresV2(gameState, army, gameData)
+
+    // Apply weakening to prepped bounty targets (start with partial wounds)
+    if (weakenedTargetNpcIds.size > 0) {
+      gameState = {
+        ...gameState,
+        figures: gameState.figures.map(f => {
+          if (f.entityType === 'npc' && weakenedTargetNpcIds.has(f.entityId)) {
+            const profile = gameData.npcProfiles[f.entityId]
+            if (profile) {
+              // Apply ~40% wound threshold as starting wounds
+              const startingWounds = Math.floor(profile.woundThreshold * 0.4)
+              return { ...f, woundsCurrent: startingWounds }
+            }
+          }
+          return f
+        }),
+      }
+    }
 
     // Initialize tactic card deck
     if (gameData.tacticCards && Object.keys(gameData.tacticCards).length > 0) {
       gameState.tacticDeck = initializeTacticDeck(gameData)
     }
 
+    // Apply agenda directive effects to mission parameters
+    const threatMod = getDirectiveThreatModifier(campaignState)
+    if (threatMod !== 0) {
+      gameState.reinforcementPoints = Math.max(0, (gameState.reinforcementPoints ?? 0) + threatMod)
+    }
+
+    const moraleMod_imp = getDirectiveMoraleModifier(campaignState, 'Imperial')
+    const moraleMod_op = getDirectiveMoraleModifier(campaignState, 'Operative')
+    if (moraleMod_imp !== 0 && gameState.imperialMorale) {
+      gameState.imperialMorale = {
+        ...gameState.imperialMorale,
+        value: Math.max(0, gameState.imperialMorale.value + moraleMod_imp),
+      }
+    }
+    if (moraleMod_op !== 0 && gameState.operativeMorale) {
+      gameState.operativeMorale = {
+        ...gameState.operativeMorale,
+        value: Math.max(0, gameState.operativeMorale.value + moraleMod_op),
+      }
+    }
+
+    // Add directive starting consumables to inventory
+    const directiveConsumables = getDirectiveStartingConsumables(campaignState)
+    if (directiveConsumables.length > 0 && gameState.consumableInventory) {
+      for (const { itemId, quantity } of directiveConsumables) {
+        gameState.consumableInventory[itemId] = (gameState.consumableInventory[itemId] ?? 0) + quantity
+      }
+    }
+
+    // Apply shop discount from directives to campaign (for social phase)
+    const shopDiscount = getDirectiveShopDiscount(campaignState)
+    if (shopDiscount > 0) {
+      const discounts = { ...(campaignState.activeDiscounts ?? {}), agenda_directive: shopDiscount }
+      set({ campaignState: { ...campaignState, activeDiscounts: discounts } })
+    }
+
+    // Initialize TI4-inspired systems
+    // Exploration tokens: place on valid map tiles with directive bonus
+    const explorationBonus = getDirectiveExplorationBonus(campaignState)
+    const defaultTokenCount = Math.max(3, Math.floor((gameState.map.width * gameState.map.height) / 50))
+    const explorationTokens = generateExplorationTokens(
+      gameState.map, gameData,
+      explorationBonus !== 0 ? defaultTokenCount + explorationBonus : undefined,
+    )
+    if (explorationTokens.length > 0) {
+      gameState.explorationTokens = explorationTokens
+    }
+
+    // Command tokens: per-mission resource with directive bonus
+    const commandTokens = initializeCommandTokens(
+      heroesRegistry,
+      campaignState.threatLevel,
+    )
+    const tokenBonus = getDirectiveCommandTokenBonus(campaignState)
+    if (tokenBonus > 0) {
+      commandTokens.operativeTokens += tokenBonus
+      commandTokens.operativeMaxPerRound += tokenBonus
+    }
+    gameState.commandTokens = commandTokens
+
+    // Secret objectives: draw one per hero from the available deck
+    const heroIds = Object.keys(heroesRegistry)
+    const previouslyCompleted = (campaignState.completedSecretObjectives ?? []).map(so => so.objectiveId)
+    const secretObjectives = initializeSecretObjectives(gameData, heroIds, previouslyCompleted)
+    if (secretObjectives.assignments.length > 0) {
+      gameState.secretObjectives = secretObjectives
+    }
+
     // Build activation order
     gameState.activationOrder = buildActivationOrderV2(gameState)
     gameState.currentActivationIndex = 0
     gameState.turnPhase = 'Activation'
+
+    // Build combat log with threat clock and bounty info
+    const startLog: string[] = [`Mission started: ${mission.name}`]
+    const effects = gameState.threatClockEffects
+    if (effects) {
+      if (effects.operativeSurpriseRound) {
+        startLog.push('** SURPRISE ROUND: Operatives act first -- enemies caught off guard! **')
+      } else if (effects.enemySurpriseRound) {
+        startLog.push('** AMBUSH: Enemies get a surprise round! **')
+      }
+      if (effects.bonusReinforcements > 0) {
+        startLog.push(`Threat clock: +${effects.bonusReinforcements * 3} bonus threat pool (${effects.level})`)
+      }
+      if (effects.enemiesStartInCover) {
+        startLog.push('Enemies deployed in fortified positions (cover)')
+      }
+    }
+    startLog.push(...bountyTargetLog)
+    // Merge exposure-driven extra reinforcements into the mission definition
+    const effectiveMissionDef = exposureModifiers.extraReinforcements.length > 0
+      ? {
+          ...mission,
+          reinforcements: [
+            ...mission.reinforcements,
+            ...exposureModifiers.extraReinforcements,
+          ],
+        }
+      : mission
 
     set({
       gameState,
@@ -2153,9 +2679,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showMissionSelect: false,
       showPostMission: false,
       isAIBattle: false,
-      activeMissionDef: mission,
+      activeMissionDef: effectiveMissionDef,
       triggeredWaveIds: [],
-      combatLog: [`Mission started: ${mission.name}`],
+      combatLog: startLog,
+      combatLog: isActFinale && exposureModifiers.threatBonus > 0
+        ? [
+            `Mission started: ${mission.name}`,
+            `** IMPERIAL ALERT: Exposure level has drawn additional forces! **`,
+          ]
+        : [`Mission started: ${mission.name}`],
+      combatLog: [
+        `Mission started: ${mission.name}`,
+        ...(isActFinale && exposureModifiers.threatBonus > 0 ? [`** IMPERIAL ALERT: Exposure level has drawn additional forces! **`] : []),
+        ...(networkThreatReduction > 0 ? [`Supply network reduces Imperial threat by ${networkThreatReduction}`] : []),
+        ...(networkReinforcementBonus > 0 ? [`Supply routes disrupt reinforcements: -${networkReinforcementBonus} threat/round`] : []),
+      ],
       gameStateHistory: [],
     })
   },
@@ -2173,16 +2711,40 @@ export const useGameStore = create<GameStore>((set, get) => ({
       : campaignState
 
     const previousAct = updatedCampaign.currentAct
+    const gameData = loadGameDataV2()
     const { campaign: newCampaign, result } = completeMission(
       updatedCampaign,
+    // On defeat, sever supply nodes at the mission's sector location
+    let campaignForCompletion = updatedCampaign
+    if (input.outcome === 'defeat' && updatedCampaign.supplyNetwork) {
+      const sectorMap = sectorMapData as SectorMapDefinition
+      const missionId = gameState?.activeMissionId ?? input.missionId
+      // Reverse-lookup: find which sector location unlocks this mission
+      const missionLocation = sectorMap.locations.find(
+        loc => loc.unlocksMissions?.includes(missionId)
+      )
+      if (missionLocation) {
+        campaignForCompletion = severNodesAtLocation(campaignForCompletion, missionLocation.id)
+      }
+    }
+
+    const previousAct = campaignForCompletion.currentAct
+    const { campaign: newCampaign, result, bountyCompletions } = completeMission(
+      campaignForCompletion,
       input,
       campaignMissions,
+      gameData,
     )
+
+    // Show legacy event reveal if there are pending events
+    const hasPendingEvents = (newCampaign.legacyDeck?.pendingEventIds?.length ?? 0) > 0
 
     set({
       campaignState: newCampaign,
       lastMissionResult: result,
+      lastBountyCompletions: bountyCompletions,
       showPostMission: true,
+      showLegacyEvents: hasPendingEvents,
       isInitialized: false,
       gameState: null,
       // Flag act transition if act advanced
@@ -2221,6 +2783,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         showPostMission: false,
         showActTransition: true,
         lastMissionResult: null,
+        lastBountyCompletions: [],
         activeMissionDef: null,
         activeMission: null,
         triggeredWaveIds: [],
@@ -2232,6 +2795,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         showPostMission: false,
         showMissionSelect: true,
         lastMissionResult: null,
+        lastBountyCompletions: [],
         activeMissionDef: null,
         activeMission: null,
         triggeredWaveIds: [],
@@ -2378,8 +2942,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
+      showSectorMap: false,
       showCampaignStats: false,
+      showStrategicCommand: false,
       showMapEditor: false,
+      showCampaignOverworld: false,
+      showLegacyEvents: false,
       // Clear stale combat state from previous campaign
       gameState: null,
       selectedFigureId: null,
@@ -2419,6 +2987,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       campaignState: null,
       campaignMissions: {},
       lastMissionResult: null,
+      lastBountyCompletions: [],
       activeSaveSlot: null,
       showMissionSelect: false,
       showMissionBriefing: false,
@@ -2430,13 +2999,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       actTransitionData: null,
       showHeroProgression: false,
       showPortraitManager: false,
+      showSectorMap: false,
       showCampaignStats: false,
+      showStrategicCommand: false,
       showMapEditor: false,
+      showCampaignOverworld: false,
+      showLegacyEvents: false,
       campaignHeroCreation: false,
       activeMissionDef: null,
       activeMission: null,
       triggeredWaveIds: [],
       imperialAIPhase: null,
+      pendingBossAttack: null,
       cameraTarget: null,
       showSetup: true,
       gameState: null,
@@ -2467,12 +3041,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Close social phase and return to mission select.
    */
   closeSocialPhase: () => {
-    const { campaignState } = get()
     const { campaignState, activeSaveSlot } = get()
     set({
       showSocialPhase: false,
       showMissionSelect: true,
       lastMissionResult: null,
+      lastBountyCompletions: [],
     })
 
     // Autosave after social phase completion
@@ -2503,6 +3077,64 @@ export const useGameStore = create<GameStore>((set, get) => ({
    */
   updateCampaignState: (cs: CampaignState) => {
     set({ campaignState: cs })
+    get().saveCampaignToStorage()
+  },
+
+  // ---- Pandemic Legacy Actions ----
+
+  openCampaignOverworld: () => {
+    set({
+      showMissionSelect: false,
+      showCampaignOverworld: true,
+    })
+  },
+
+  closeCampaignOverworld: () => {
+    set({
+      showCampaignOverworld: false,
+      showMissionSelect: true,
+    })
+  },
+
+  travelToSector: (sectorId: string) => {
+    const { campaignState } = get()
+    if (!campaignState?.overworld) return
+    try {
+      const updated = travelToSectorFn(campaignState, sectorId)
+      set({ campaignState: updated })
+      get().saveCampaignToStorage()
+    } catch (e) {
+      console.error('Failed to travel to sector:', e)
+    }
+  },
+
+  treatCriticalInjury: (heroId: string, injuryIndex: number) => {
+    const { campaignState, criticalInjuryDefs } = get()
+    if (!campaignState) return
+    const hero = campaignState.heroes[heroId]
+    if (!hero || !hero.criticalInjuries || injuryIndex >= hero.criticalInjuries.length) return
+
+    const injury = hero.criticalInjuries[injuryIndex]
+    const def = criticalInjuryDefs[injury.injuryId]
+    if (!def || campaignState.credits < def.treatmentCost) return
+
+    try {
+      const updatedCampaign = professionalTreatment(campaignState, heroId, injuryIndex, criticalInjuryDefs)
+      set({ campaignState: updatedCampaign })
+      get().saveCampaignToStorage()
+    } catch (e) {
+      console.error('Failed to treat injury:', e)
+    }
+  },
+
+  acknowledgeLegacyEvents: () => {
+    const { campaignState } = get()
+    if (!campaignState?.legacyDeck) return
+    const updated = acknowledgePendingEvents(campaignState)
+    set({
+      campaignState: updated,
+      showLegacyEvents: false,
+    })
     get().saveCampaignToStorage()
   },
 
@@ -2551,6 +3183,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })
   },
 
+  // ---- Sector Map ----
+
+  openSectorMap: () => {
+    set({
+      showMissionSelect: false,
+      showSectorMap: true,
+    })
+  },
+
+  closeSectorMap: () => {
+    set({
+      showSectorMap: false,
+      showMissionSelect: true,
+    })
+  },
+
   // ---- Campaign Stats ----
 
   openCampaignStats: () => {
@@ -2563,6 +3211,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   closeCampaignStats: () => {
     set({
       showCampaignStats: false,
+      showMissionSelect: true,
+    })
+  },
+
+  // ---- Strategic Command ----
+
+  openStrategicCommand: () => {
+    set({
+      showMissionSelect: false,
+      showStrategicCommand: true,
+    })
+  },
+
+  closeStrategicCommand: () => {
+    set({
+      showStrategicCommand: false,
       showMissionSelect: true,
     })
   },

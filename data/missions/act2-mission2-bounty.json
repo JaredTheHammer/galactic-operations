@@ -5,22 +5,40 @@
   "narrativeIntro": "The datapad recovered from the Crossroads shakedown led you here: a dingy relay station where the Shadow Syndicate posts bounties and coordinates jobs. If you can access the encrypted data terminals inside, you'll uncover the full scope of The Broker's network. Problem is, the station is crawling with guards, and an IG-series assassin droid is running security. You'll need to fight your way through and slice those terminals before they can purge the data.",
   "narrativeSuccess": "The last terminal flickers green as the data dump completes. Three locations light up on the holomap: a weapons warehouse packed with contraband, Trandoshan-run hunting grounds where prisoners are used as prey, and a heavily fortified penthouse at the top of Nexus Station's central spire. You have two leads to follow. The Broker's days are numbered.",
   "narrativeFailure": "Alarms blare as the terminals wipe their databanks. The Syndicate enforcers push you out of the relay station with nothing to show for the assault. Worse, the IG droid has recorded your biometrics. Every bounty hunter in the sector will have your faces by morning.",
-
   "mapId": "relay-station",
   "mapPreset": "skirmish",
   "boardsWide": 3,
   "boardsTall": 3,
-
   "difficulty": "moderate",
   "roundLimit": 10,
   "recommendedHeroCount": 2,
-
   "imperialThreat": 10,
   "threatPerRound": 2,
-
   "operativeDeployZone": [
-    {"x": 0, "y": 16}, {"x": 1, "y": 16}, {"x": 2, "y": 16},
-    {"x": 0, "y": 17}, {"x": 1, "y": 17}, {"x": 2, "y": 17}
+    {
+      "x": 0,
+      "y": 16
+    },
+    {
+      "x": 1,
+      "y": 16
+    },
+    {
+      "x": 2,
+      "y": 16
+    },
+    {
+      "x": 0,
+      "y": 17
+    },
+    {
+      "x": 1,
+      "y": 17
+    },
+    {
+      "x": 2,
+      "y": 17
+    }
   ],
   "initialEnemies": [
     {
@@ -28,7 +46,18 @@
       "count": 3,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 12, "y": 12}, {"x": 13, "y": 12}, {"x": 14, "y": 12}
+        {
+          "x": 12,
+          "y": 12
+        },
+        {
+          "x": 13,
+          "y": 12
+        },
+        {
+          "x": 14,
+          "y": 12
+        }
       ]
     },
     {
@@ -36,14 +65,26 @@
       "count": 2,
       "asMinGroup": true,
       "deployZone": [
-        {"x": 22, "y": 14}, {"x": 23, "y": 14}
+        {
+          "x": 22,
+          "y": 14
+        },
+        {
+          "x": 23,
+          "y": 14
+        }
       ]
     },
     {
       "npcProfileId": "ig-assassin-droid",
       "count": 1,
       "asMinGroup": false,
-      "deployZone": [{"x": 30, "y": 6}]
+      "deployZone": [
+        {
+          "x": 30,
+          "y": 6
+        }
+      ]
     }
   ],
   "reinforcements": [
@@ -55,14 +96,26 @@
           "npcProfileId": "syndicate-lieutenant",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 35, "y": 10}]
+          "deployZone": [
+            {
+              "x": 35,
+              "y": 10
+            }
+          ]
         },
         {
           "npcProfileId": "nikto-gunner",
           "count": 2,
           "asMinGroup": true,
           "deployZone": [
-            {"x": 34, "y": 0}, {"x": 35, "y": 0}
+            {
+              "x": 34,
+              "y": 0
+            },
+            {
+              "x": 35,
+              "y": 0
+            }
           ]
         }
       ],
@@ -77,14 +130,18 @@
           "npcProfileId": "trandoshan-hunter",
           "count": 1,
           "asMinGroup": false,
-          "deployZone": [{"x": 0, "y": 0}]
+          "deployZone": [
+            {
+              "x": 0,
+              "y": 0
+            }
+          ]
         }
       ],
       "threatCost": 4,
       "narrativeText": "A Trandoshan Hunter smashes through the back entrance, drawn by the sound of blasterfire."
     }
   ],
-
   "objectives": [
     {
       "id": "obj-terminals",
@@ -109,7 +166,9 @@
     {
       "side": "Operative",
       "description": "Access all 3 data terminals.",
-      "requiredObjectiveIds": ["obj-terminals"]
+      "requiredObjectiveIds": [
+        "obj-terminals"
+      ]
     },
     {
       "side": "Imperial",
@@ -117,11 +176,13 @@
       "requiredObjectiveIds": []
     }
   ],
-
   "objectivePoints": [
     {
       "id": "objpt-terminal-1",
-      "position": {"x": 10, "y": 8},
+      "position": {
+        "x": 10,
+        "y": 8
+      },
       "type": "terminal",
       "skillRequired": "computers",
       "alternateSkill": "skulduggery",
@@ -130,7 +191,10 @@
     },
     {
       "id": "objpt-terminal-2",
-      "position": {"x": 20, "y": 4},
+      "position": {
+        "x": 20,
+        "y": 4
+      },
       "type": "terminal",
       "skillRequired": "computers",
       "alternateSkill": "mechanics",
@@ -139,7 +203,10 @@
     },
     {
       "id": "objpt-terminal-3",
-      "position": {"x": 30, "y": 10},
+      "position": {
+        "x": 30,
+        "y": 10
+      },
       "type": "terminal",
       "skillRequired": "computers",
       "alternateSkill": "skulduggery",
@@ -147,33 +214,55 @@
       "description": "Central data core. Heavily encrypted. Contains location intelligence."
     }
   ],
-
   "lootTokens": [
     {
       "id": "loot-relay-1",
-      "position": {"x": 10, "y": 8},
-      "reward": {"type": "credits", "value": 100}
+      "position": {
+        "x": 10,
+        "y": 8
+      },
+      "reward": {
+        "type": "credits",
+        "value": 100
+      }
     },
     {
       "id": "loot-relay-2",
-      "position": {"x": 30, "y": 6},
-      "reward": {"type": "equipment", "itemId": "frag-grenade"}
+      "position": {
+        "x": 30,
+        "y": 6
+      },
+      "reward": {
+        "type": "equipment",
+        "itemId": "frag-grenade"
+      }
     },
     {
       "id": "loot-relay-3",
-      "position": {"x": 20, "y": 4},
-      "reward": {"type": "xp", "value": 3}
+      "position": {
+        "x": 20,
+        "y": 4
+      },
+      "reward": {
+        "type": "xp",
+        "value": 3
+      }
     }
   ],
-
   "campaignAct": 2,
   "missionIndex": 2,
-  "prerequisites": ["act2-m1-crossroads"],
-  "unlocksNext": ["act2-m3-warehouse", "act2-m3-hunting-grounds"],
-
+  "prerequisites": [
+    "act2-m1-crossroads"
+  ],
+  "unlocksNext": [
+    "act2-m3-warehouse",
+    "act2-m3-hunting-grounds"
+  ],
   "baseXP": 12,
   "bonusXPPerLoot": 2,
   "bonusXPPerKill": 1,
   "maxKillXP": 5,
-  "leaderKillXP": 0
+  "leaderKillXP": 0,
+  "fogOfWar": true,
+  "fogOfWarVisionRange": 7
 }

@@ -2,10 +2,16 @@
  * TutorialOverlay - Step-by-step tutorial tooltip overlay.
  * Renders on top of the game canvas with contextual instructions.
  * Watches game state to auto-advance tutorial steps.
+ *
+ * Features:
+ *   - Spotlight mask that dims everything except the highlighted area
+ *   - Step progress bar with filled/empty dots
+ *   - Pulsing highlight hints for interactive steps
+ *   - Auto-advance on game state changes (select, move, attack, etc.)
  */
 
 import React, { useEffect, useRef } from 'react'
-import { useTutorialStore } from '../../store/tutorial-store'
+import { useTutorialStore, TUTORIAL_STEPS } from '../../store/tutorial-store'
 import { useGameStore } from '../../store/game-store'
 
 // ============================================================================
@@ -31,7 +37,7 @@ function useTutorialWatcher() {
     // Figure selected
     if (selectedFigureId && selectedFigureId !== prevSelectedRef.current) {
       const fig = gameState.figures.find(f => f.id === selectedFigureId)
-      if (fig && fig.player === 1) { // Operative figure selected
+      if (fig && fig.playerId === 1) { // Operative figure selected
         notifyEvent('figure-selected')
       }
     }
@@ -39,7 +45,7 @@ function useTutorialWatcher() {
 
     // Figure moved (detect position changes for operative figures)
     const opPositions = gameState.figures
-      .filter(f => f.player === 1)
+      .filter(f => f.playerId === 1)
       .map(f => `${f.id}:${f.position.x},${f.position.y}`)
       .join('|')
     if (prevFigurePositionsRef.current && opPositions !== prevFigurePositionsRef.current) {
@@ -88,6 +94,92 @@ function useCombatLogWatcher() {
 }
 
 // ============================================================================
+// SPOTLIGHT MASK
+// ============================================================================
+
+/** Returns spotlight region config for each highlight type */
+function getSpotlightRegion(highlight?: string): {
+  x: string; y: string; width: string; height: string; borderRadius: string
+} | null {
+  if (!highlight) return null
+
+  switch (highlight) {
+    case 'figures':
+    case 'moves':
+    case 'targets':
+      // Canvas center area
+      return { x: '10%', y: '10%', width: '65%', height: '70%', borderRadius: '12px' }
+    case 'action-buttons':
+      // Bottom center action bar
+      return { x: '25%', y: 'calc(100% - 80px)', width: '50%', height: '70px', borderRadius: '8px' }
+    case 'info-panel':
+      // Right side info panel
+      return { x: 'calc(100% - 280px)', y: '60px', width: '270px', height: '50%', borderRadius: '8px' }
+    default:
+      return null
+  }
+}
+
+function SpotlightMask({ highlight }: { highlight?: string }) {
+  const region = getSpotlightRegion(highlight)
+
+  // No highlight = full dim overlay for manual steps, but with lower opacity
+  if (!region) {
+    return (
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        pointerEvents: 'none',
+        transition: 'opacity 0.5s ease',
+      }} />
+    )
+  }
+
+  // Use a div with massive box-shadow to create a spotlight cutout effect
+  return (
+    <div style={{
+      position: 'absolute',
+      left: region.x,
+      top: region.y,
+      width: region.width,
+      height: region.height,
+      borderRadius: region.borderRadius,
+      boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.55)',
+      border: '1px solid rgba(74, 158, 255, 0.3)',
+      pointerEvents: 'none',
+      transition: 'all 0.5s ease',
+      zIndex: 1,
+    }} />
+  )
+}
+
+// ============================================================================
+// PROGRESS DOTS
+// ============================================================================
+
+function ProgressDots({ current, total }: { current: number; total: number }) {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '4px',
+    }}>
+      {Array.from({ length: total }, (_, i) => (
+        <div key={i} style={{
+          width: i === current ? '16px' : '6px',
+          height: '6px',
+          borderRadius: '3px',
+          backgroundColor: i < current ? '#4a9eff' : i === current ? '#4a9eff' : '#2a2a3f',
+          transition: 'all 0.3s ease',
+          opacity: i <= current ? 1 : 0.5,
+        }} />
+      ))}
+    </div>
+  )
+}
+
+// ============================================================================
 // STYLES
 // ============================================================================
 
@@ -104,12 +196,13 @@ const overlayStyle: React.CSSProperties = {
 const tooltipBaseStyle: React.CSSProperties = {
   position: 'absolute',
   pointerEvents: 'auto',
-  backgroundColor: 'rgba(10, 10, 20, 0.95)',
+  backgroundColor: 'rgba(10, 10, 20, 0.97)',
   border: '2px solid #4a9eff',
-  borderRadius: '8px',
+  borderRadius: '10px',
   padding: '20px 24px',
   maxWidth: '420px',
   boxShadow: '0 4px 24px rgba(74, 158, 255, 0.3), 0 0 60px rgba(74, 158, 255, 0.1)',
+  zIndex: 2,
 }
 
 const titleStyle: React.CSSProperties = {
@@ -146,12 +239,6 @@ const navButtonStyle: React.CSSProperties = {
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
 }
 
-const progressStyle: React.CSSProperties = {
-  color: '#555',
-  fontSize: '11px',
-  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-}
-
 const skipButtonStyle: React.CSSProperties = {
   ...navButtonStyle,
   backgroundColor: 'transparent',
@@ -180,10 +267,14 @@ function getAnchorPosition(anchor: string): React.CSSProperties {
 // HIGHLIGHT PULSE
 // ============================================================================
 
-const pulseKeyframes = `
+const animationKeyframes = `
 @keyframes tutorial-pulse {
   0%, 100% { opacity: 0.15; }
   50% { opacity: 0.35; }
+}
+@keyframes tutorial-breathe {
+  0%, 100% { border-color: rgba(74, 158, 255, 0.3); }
+  50% { border-color: rgba(74, 158, 255, 0.6); }
 }
 `
 
@@ -233,6 +324,7 @@ function HighlightHint({ highlight }: { highlight?: string }) {
       borderRadius: '4px',
       animation: 'tutorial-pulse 2s ease-in-out infinite',
       fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      zIndex: 3,
     }}>
       {label}
     </div>
@@ -256,14 +348,35 @@ export function TutorialOverlay() {
   const isLast = currentStep.id === 'tutorial-complete'
   const isManual = currentStep.advanceOn === 'manual'
   const stepNum = currentStepIndex + 1
-  const totalSteps = 12 // TUTORIAL_STEPS.length
+  const totalSteps = TUTORIAL_STEPS.length
 
   return (
     <>
-      <style>{pulseKeyframes}</style>
+      <style>{animationKeyframes}</style>
       <div style={overlayStyle}>
+        {/* Spotlight mask / dim overlay */}
+        <SpotlightMask highlight={currentStep.highlight} />
+
         {/* Tooltip */}
         <div style={{ ...tooltipBaseStyle, ...getAnchorPosition(currentStep.anchor) }}>
+          {/* Step badge */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '12px',
+          }}>
+            <div style={{
+              fontSize: '9px',
+              letterSpacing: '2px',
+              color: '#555',
+              textTransform: 'uppercase',
+            }}>
+              Tutorial
+            </div>
+            <ProgressDots current={currentStepIndex} total={totalSteps} />
+          </div>
+
           <div style={titleStyle}>{currentStep.title}</div>
           <div style={textStyle}>{currentStep.text}</div>
 
@@ -296,7 +409,13 @@ export function TutorialOverlay() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={progressStyle}>{stepNum}/{totalSteps}</span>
+              <span style={{
+                color: '#555',
+                fontSize: '11px',
+                fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+              }}>
+                {stepNum}/{totalSteps}
+              </span>
               {!isLast && (
                 <button style={skipButtonStyle} onClick={endTutorial}>
                   SKIP TUTORIAL

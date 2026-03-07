@@ -1,0 +1,176 @@
+{
+  "id": "tangrene-sector",
+  "name": "Tangrene Sector",
+  "locations": [
+    {
+      "id": "outpost-dorn",
+      "name": "Outpost Dorn",
+      "description": "A remote mining outpost on the edge of the sector. The rebel cell's first foothold.",
+      "availableInAct": 1,
+      "connectedLocations": ["checkpoint-aurek", "xylo-pass"],
+      "bonuses": [
+        {
+          "type": "credit_income",
+          "value": 10,
+          "description": "Mining contacts provide a small but steady income."
+        }
+      ],
+      "unlocksMissions": [],
+      "unlocksGear": ["mining-charge"]
+    },
+    {
+      "id": "checkpoint-aurek",
+      "name": "Checkpoint Aurek",
+      "description": "An Imperial checkpoint controlling access to the inner sector. Intelligence flows through here.",
+      "availableInAct": 1,
+      "connectedLocations": ["outpost-dorn", "tangrene-city", "shadow-market"],
+      "bonuses": [
+        {
+          "type": "intel",
+          "value": "intel:imperial-patrols",
+          "description": "Informants reveal Imperial patrol schedules."
+        },
+        {
+          "type": "threat_reduction",
+          "value": 1,
+          "description": "Advanced warning of Imperial reinforcements."
+        }
+      ],
+      "unlocksMissions": [],
+      "unlocksGear": ["scanner-jammer"]
+    },
+    {
+      "id": "xylo-pass",
+      "name": "Xylo Pass",
+      "description": "A treacherous mountain pass connecting the outer and inner sectors. Strategic chokepoint.",
+      "availableInAct": 1,
+      "connectedLocations": ["outpost-dorn", "tangrene-city"],
+      "bonuses": [
+        {
+          "type": "reinforcement",
+          "value": 1,
+          "description": "Secure passage allows allied reinforcements during missions."
+        }
+      ],
+      "unlocksMissions": ["act1-m3-ambush"],
+      "unlocksGear": []
+    },
+    {
+      "id": "tangrene-city",
+      "name": "Tangrene City",
+      "description": "The sector capital. Dense urban sprawl with extensive Imperial presence and underground contacts.",
+      "availableInAct": 1,
+      "connectedLocations": ["checkpoint-aurek", "xylo-pass", "shadow-market", "drayens-reach"],
+      "bonuses": [
+        {
+          "type": "gear_access",
+          "value": "blast-vest",
+          "description": "Urban black market offers military-grade armor."
+        },
+        {
+          "type": "credit_income",
+          "value": 15,
+          "description": "City contacts generate significant income."
+        }
+      ],
+      "unlocksMissions": [],
+      "unlocksGear": ["blast-vest", "targeting-scope", "stim-pack"]
+    },
+    {
+      "id": "shadow-market",
+      "name": "The Shadow Market",
+      "description": "A hidden bazaar run by the criminal underworld. Rare goods at dangerous prices.",
+      "availableInAct": 2,
+      "connectedLocations": ["checkpoint-aurek", "tangrene-city", "brokers-palace"],
+      "bonuses": [
+        {
+          "type": "gear_access",
+          "value": "disruptor-pistol",
+          "description": "Access to illegal weapons through syndicate connections."
+        },
+        {
+          "type": "credit_income",
+          "value": 20,
+          "description": "Smuggling routes generate high income."
+        }
+      ],
+      "unlocksMissions": ["act2-m3-warehouse"],
+      "unlocksGear": ["disruptor-pistol", "thermal-detonator", "stealth-field"]
+    },
+    {
+      "id": "brokers-palace",
+      "name": "The Broker's Palace",
+      "description": "Headquarters of the Shadow Syndicate. Heavily fortified and full of secrets.",
+      "availableInAct": 2,
+      "connectedLocations": ["shadow-market", "hunting-grounds"],
+      "bonuses": [
+        {
+          "type": "intel",
+          "value": "intel:syndicate-operations",
+          "description": "Insider knowledge of syndicate defense layouts."
+        }
+      ],
+      "unlocksMissions": ["act2-m4-throne"],
+      "unlocksGear": []
+    },
+    {
+      "id": "hunting-grounds",
+      "name": "Trandoshan Hunting Grounds",
+      "description": "Wild frontier territory controlled by Trandoshan hunters. Dangerous but resourceful.",
+      "availableInAct": 2,
+      "connectedLocations": ["brokers-palace", "drayens-reach"],
+      "bonuses": [
+        {
+          "type": "reinforcement",
+          "value": 1,
+          "description": "Trandoshan mercenaries available as combat reinforcements."
+        },
+        {
+          "type": "threat_reduction",
+          "value": 1,
+          "description": "Hunters provide early warning of enemy movement."
+        }
+      ],
+      "unlocksMissions": ["act2-m3-hunting-grounds"],
+      "unlocksGear": ["trandoshan-blade"]
+    },
+    {
+      "id": "drayens-reach",
+      "name": "Drayen's Reach",
+      "description": "The warlord's forward staging area. Establishing a foothold here is critical for the final assault.",
+      "availableInAct": 3,
+      "connectedLocations": ["tangrene-city", "hunting-grounds", "fortress-drayen"],
+      "bonuses": [
+        {
+          "type": "intel",
+          "value": "intel:drayen-defenses",
+          "description": "Reconnaissance reveals Drayen's prototype war machine locations."
+        },
+        {
+          "type": "threat_reduction",
+          "value": 2,
+          "description": "Disrupting supply lines weakens Drayen's forces significantly."
+        }
+      ],
+      "unlocksMissions": ["act3-m3-stronghold"],
+      "unlocksGear": []
+    },
+    {
+      "id": "fortress-drayen",
+      "name": "Fortress Drayen",
+      "description": "The warlord's final stronghold. Only accessible with a fully established network.",
+      "availableInAct": 3,
+      "connectedLocations": ["drayens-reach"],
+      "bonuses": [
+        {
+          "type": "mission_unlock",
+          "value": "act3-m4-endgame",
+          "description": "Direct assault on the fortress becomes viable."
+        }
+      ],
+      "unlocksMissions": ["act3-m4-endgame"],
+      "unlocksGear": []
+    }
+  ],
+  "startingLocationId": "outpost-dorn"
+}

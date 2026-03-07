@@ -1250,3 +1250,110 @@ describe('edge cases', () => {
     expect(resolution.defenderRemainingWounds).toBeGreaterThanOrEqual(0);
   });
 });
+
+// ============================================================================
+// SPECIES COMBAT EFFECTS (silhouette_small, dark_vision, natural_weapon_damage)
+// ============================================================================
+
+describe('buildCombatPools species effects', () => {
+  const npc = makeNPC();
+  const npcFig = makeNPCFigure();
+
+  function makeSpeciesGameData(speciesId: string, abilities: any[]): GameData {
+    return {
+      ...makeGameData(),
+      species: {
+        [speciesId]: {
+          id: speciesId,
+          name: speciesId,
+          creatureType: 'organic',
+          characteristics: { brawn: 2, agility: 2, intellect: 2, cunning: 2, willpower: 2, presence: 2 },
+          woundBase: 10,
+          strainBase: 10,
+          speed: 4,
+          startingXP: 100,
+          specialAbility: null,
+          abilities,
+          description: 'Test species',
+        },
+      } as any,
+    };
+  }
+
+  it('silhouette_small adds +1 difficulty to ranged defense pool', () => {
+    const gd = makeSpeciesGameData('jawa', [{
+      id: 'small', name: 'Small', description: 'Small target',
+      type: 'passive', effect: { type: 'silhouette_small', value: 1 },
+    }]);
+    const jawaHero = makeHero({ species: 'jawa', id: 'hero-jawa' });
+    const jawaFig = makeFigure({ entityId: 'hero-jawa' });
+    const gs = makeGameState([jawaFig, npcFig], { 'hero-jawa': jawaHero }, { stormtrooper: npc });
+
+    // Ranged attack against Jawa: should get +1 difficulty
+    const ctx = buildCombatPools(npcFig, jawaFig, 'e11-blaster', gs, gd);
+    // Base defense: Agility 3, Coord 1 => 2 difficulty + 1 challenge
+    // + silhouette_small: +1 difficulty => 3 difficulty + 1 challenge
+    // (padded armor defense=0 so no change from armor)
+    expect(ctx.defensePool.difficulty).toBeGreaterThanOrEqual(3);
+  });
+
+  it('silhouette_small does NOT add difficulty for melee attacks', () => {
+    const gd = makeSpeciesGameData('jawa', [{
+      id: 'small', name: 'Small', description: 'Small target',
+      type: 'passive', effect: { type: 'silhouette_small', value: 1 },
+    }]);
+    // Add a melee weapon to game data
+    gd.weapons['vibro-knife'] = makeMeleeWeapon();
+    const jawaHero = makeHero({ species: 'jawa', id: 'hero-jawa' });
+    const jawaFig = makeFigure({ entityId: 'hero-jawa' });
+    const gs = makeGameState([jawaFig, npcFig], { 'hero-jawa': jawaHero }, { stormtrooper: npc });
+
+    const ctxMelee = buildCombatPools(npcFig, jawaFig, 'vibro-knife', gs, gd);
+    // Melee (Engaged): silhouette_small should NOT apply
+    // Base: 2 difficulty + 1 challenge
+    expect(ctxMelee.defensePool.difficulty).toBe(2);
+    expect(ctxMelee.defensePool.challenge).toBe(1);
+  });
+
+  it('darkness adds +1 difficulty die for non-dark-vision attacker', () => {
+    const gd = makeSpeciesGameData('human', []);
+    const humanHero = makeHero({ species: 'human', id: 'hero-human' });
+    const humanFig = makeFigure({ entityId: 'hero-human' });
+    const gs = makeGameState([humanFig, npcFig], { 'hero-human': humanHero }, { stormtrooper: npc });
+
+    const ctxDark = buildCombatPools(humanFig, npcFig, 'blaster-rifle', gs, gd, { darkness: true });
+    const ctxLight = buildCombatPools(humanFig, npcFig, 'blaster-rifle', gs, gd, { darkness: false });
+
+    // Darkness should add +1 difficulty
+    expect(ctxDark.defensePool.difficulty).toBe(ctxLight.defensePool.difficulty + 1);
+  });
+
+  it('dark_vision species ignores darkness penalty', () => {
+    const gd = makeSpeciesGameData('gand', [{
+      id: 'dv', name: 'Dark Vision', description: 'See in dark',
+      type: 'passive', effect: { type: 'dark_vision', value: 1 },
+    }]);
+    const gandHero = makeHero({ species: 'gand', id: 'hero-gand' });
+    const gandFig = makeFigure({ entityId: 'hero-gand' });
+    const gs = makeGameState([gandFig, npcFig], { 'hero-gand': gandHero }, { stormtrooper: npc });
+
+    const ctxDark = buildCombatPools(gandFig, npcFig, 'blaster-rifle', gs, gd, { darkness: true });
+    const ctxLight = buildCombatPools(gandFig, npcFig, 'blaster-rifle', gs, gd, { darkness: false });
+
+    // Gand with dark vision: no difference between dark and light
+    expect(ctxDark.defensePool.difficulty).toBe(ctxLight.defensePool.difficulty);
+  });
+
+  it('NPC attackers still get darkness penalty (no dark vision check for NPCs)', () => {
+    const gd = makeSpeciesGameData('human', []);
+    const humanHero = makeHero({ species: 'human', id: 'hero-human' });
+    const humanFig = makeFigure({ entityId: 'hero-human' });
+    const gs = makeGameState([humanFig, npcFig], { 'hero-human': humanHero }, { stormtrooper: npc });
+
+    const ctxDark = buildCombatPools(npcFig, humanFig, 'e11-blaster', gs, gd, { darkness: true });
+    const ctxLight = buildCombatPools(npcFig, humanFig, 'e11-blaster', gs, gd, { darkness: false });
+
+    // NPC attacker: darkness should still add +1 difficulty
+    expect(ctxDark.defensePool.difficulty).toBe(ctxLight.defensePool.difficulty + 1);
+  });
+});

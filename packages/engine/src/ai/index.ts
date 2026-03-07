@@ -44,6 +44,7 @@ export {
   calculateThreatLevel,
   evaluateCondition,
   getEnemies,
+  getVisibleEnemies,
   getAllies,
   getFigureSide,
   getValidTargetsV2,
@@ -71,6 +72,7 @@ export {
   buildAimAction,
   buildDodgeAction,
   buildActionsForAIAction,
+  chooseBossHitLocation,
 } from './actions-v2.js';
 
 // ============================================================================

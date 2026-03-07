@@ -1,0 +1,159 @@
+{
+  "milestones": [
+    {
+      "id": "ms-battle-hardened",
+      "name": "Battle Hardened",
+      "description": "A hero reaches 30 total XP.",
+      "condition": { "type": "hero_xp_threshold", "threshold": 30 },
+      "xpReward": 5,
+      "creditReward": 10
+    },
+    {
+      "id": "ms-sharpshooter",
+      "name": "Sharpshooter",
+      "description": "A hero accumulates 10 total enemy kills.",
+      "condition": { "type": "total_kills", "threshold": 10 },
+      "xpReward": 5,
+      "creditReward": 15
+    },
+    {
+      "id": "ms-untouchable",
+      "name": "Untouchable",
+      "description": "A hero completes 3 consecutive missions without being incapacitated.",
+      "condition": { "type": "missions_without_incapacitation", "threshold": 3 },
+      "xpReward": 5,
+      "creditReward": 10
+    },
+    {
+      "id": "ms-war-chest",
+      "name": "War Chest",
+      "description": "Accumulate 100 credits at once.",
+      "condition": { "type": "credits_accumulated", "threshold": 100 },
+      "xpReward": 3,
+      "creditReward": 20
+    },
+    {
+      "id": "ms-engineer",
+      "name": "Master Engineer",
+      "description": "Purchase 3 project cards.",
+      "condition": { "type": "projects_purchased", "threshold": 3 },
+      "xpReward": 5,
+      "creditReward": 15
+    },
+    {
+      "id": "ms-liberator",
+      "name": "Liberator",
+      "description": "Raise any liberation track to 10.",
+      "condition": { "type": "liberation_track", "trackId": "rebel_influence", "threshold": 10 },
+      "xpReward": 5,
+      "creditReward": 20,
+      "narrativeReward": "title-liberator"
+    },
+    {
+      "id": "ms-destabilizer",
+      "name": "Imperial Destabilizer",
+      "description": "Raise the Imperial Destabilization track to 10.",
+      "condition": { "type": "liberation_track", "trackId": "imperial_destabilization", "threshold": 10 },
+      "xpReward": 5,
+      "creditReward": 20,
+      "narrativeReward": "title-destabilizer"
+    },
+    {
+      "id": "ms-resource-baron",
+      "name": "Resource Baron",
+      "description": "Raise the Resource Control track to 10.",
+      "condition": { "type": "liberation_track", "trackId": "resource_control", "threshold": 10 },
+      "xpReward": 5,
+      "creditReward": 20,
+      "narrativeReward": "title-resource-baron"
+    },
+    {
+      "id": "ms-social-butterfly",
+      "name": "Silver Tongue",
+      "description": "Pass 5 social checks with a single hero.",
+      "condition": { "type": "social_checks_passed", "threshold": 5 },
+      "xpReward": 5,
+      "creditReward": 10
+    },
+    {
+      "id": "ms-treasure-hunter",
+      "name": "Treasure Hunter",
+      "description": "Collect 8 loot tokens with a single hero.",
+      "condition": { "type": "loot_collected", "threshold": 8 },
+      "xpReward": 3,
+      "creditReward": 20
+    },
+    {
+      "id": "ms-veteran",
+      "name": "Veteran Operative",
+      "description": "Complete 5 missions.",
+      "condition": { "type": "missions_completed", "threshold": 5 },
+      "xpReward": 5,
+      "creditReward": 15
+    },
+    {
+      "id": "ms-crew-builder",
+      "name": "Crew Builder",
+      "description": "Recruit 2 companion NPCs.",
+      "condition": { "type": "companions_recruited", "threshold": 2 },
+      "xpReward": 5,
+      "creditReward": 10
+    }
+  ],
+  "awards": [
+    {
+      "id": "aw-act1-deadliest",
+      "name": "Deadliest Operative",
+      "description": "The hero with the most enemy kills at the end of Act 1.",
+      "scoringCriteria": { "type": "most_kills", "heroStat": "kills" },
+      "xpReward": 5,
+      "creditReward": 15,
+      "evaluateAfterAct": 1
+    },
+    {
+      "id": "aw-act1-survivor",
+      "name": "Iron Will",
+      "description": "The hero with the fewest incapacitations at the end of Act 1.",
+      "scoringCriteria": { "type": "fewest_incapacitations", "heroStat": "incapacitations" },
+      "xpReward": 5,
+      "creditReward": 10,
+      "evaluateAfterAct": 1
+    },
+    {
+      "id": "aw-act2-damage",
+      "name": "Walking Arsenal",
+      "description": "The hero who dealt the most total damage at the end of Act 2.",
+      "scoringCriteria": { "type": "most_damage_dealt", "heroStat": "damage" },
+      "xpReward": 8,
+      "creditReward": 20,
+      "evaluateAfterAct": 2
+    },
+    {
+      "id": "aw-act2-diplomat",
+      "name": "Voice of the Rebellion",
+      "description": "The hero with the most successful social checks at the end of Act 2.",
+      "scoringCriteria": { "type": "most_social_successes", "heroStat": "socialSuccesses" },
+      "xpReward": 8,
+      "creditReward": 20,
+      "evaluateAfterAct": 2
+    },
+    {
+      "id": "aw-act3-mvp",
+      "name": "Most Valuable Operative",
+      "description": "The hero with the most total XP earned by the end of the campaign.",
+      "scoringCriteria": { "type": "most_xp", "heroStat": "xp" },
+      "xpReward": 10,
+      "creditReward": 30,
+      "evaluateAfterAct": 3
+    },
+    {
+      "id": "aw-act3-objectives",
+      "name": "Mission Specialist",
+      "description": "The hero who completed the most objectives by the end of the campaign.",
+      "scoringCriteria": { "type": "most_objectives_completed", "heroStat": "objectivesCompleted" },
+      "xpReward": 10,
+      "creditReward": 25,
+      "evaluateAfterAct": 3
+    }
+  ]
+}

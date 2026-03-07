@@ -13,6 +13,11 @@
     "text": "Add 1 Hit to your attack roll.",
     "cost": 0,
     "tags": ["Aggressive"]
+    "altMode": {
+      "type": "movement",
+      "value": 1,
+      "text": "Steady advance: gain +1 movement this activation."
+    }
   },
   {
     "id": "brace-for-impact",
@@ -28,6 +33,11 @@
     "text": "Add 1 Block to your defense roll.",
     "cost": 0,
     "tags": ["Defensive"]
+    "altMode": {
+      "type": "defense_stance",
+      "value": 1,
+      "text": "Hunker down: gain +1 Block on the next attack against this figure."
+    }
   },
   {
     "id": "lucky-break",
@@ -58,6 +68,11 @@
     "text": "Reroll 1 of your defense dice.",
     "cost": 1,
     "tags": ["Defensive", "Covert"]
+    "altMode": {
+      "type": "movement",
+      "value": 2,
+      "text": "Evasive sprint: gain +2 movement this activation."
+    }
   },
   {
     "id": "adrenaline-rush",
@@ -73,6 +88,11 @@
     "text": "The active figure recovers 2 health.",
     "cost": 2,
     "tags": ["Medical"]
+    "altMode": {
+      "type": "action_point",
+      "value": 1,
+      "text": "Burst of energy: gain +1 action this activation."
+    }
   },
   {
     "id": "suppressive-fire",
@@ -154,6 +174,11 @@
     "text": "The active figure gains 1 bonus action point this round.",
     "cost": 3,
     "tags": ["Leadership"]
+    "altMode": {
+      "type": "strain_recovery",
+      "value": 3,
+      "text": "Catch your breath: recover 3 strain."
+    }
   },
   {
     "id": "for-the-alliance",
@@ -189,6 +214,15 @@
     "text": "Recover 1 Morale point for the Operative side.",
     "cost": 1,
     "tags": ["Leadership"]
+    "strategicEffect": {
+      "type": "Rally",
+      "value": 3,
+      "description": "An inspiring speech rallies the troops. Recover 3 morale."
+    "altMode": {
+      "type": "strain_recovery",
+      "value": 2,
+      "text": "Rally the troops: recover 2 strain."
+    }
   },
   {
     "id": "guerrilla-tactics",
@@ -204,6 +238,15 @@
     "text": "Ignore the target's cover bonus for this attack.",
     "cost": 2,
     "tags": ["Covert", "Aggressive"]
+    "strategicEffect": {
+      "type": "Intel",
+      "value": 1,
+      "description": "Local informants reveal enemy positions. Gain intel on enemy deployment."
+    "altMode": {
+      "type": "movement",
+      "value": 3,
+      "text": "Hit and run: gain +3 movement this activation."
+    }
   },
   {
     "id": "last-stand",
@@ -235,6 +278,15 @@
     "text": "Draw 2 additional Tactic Cards from the deck.",
     "cost": 1,
     "tags": ["Tech"]
+    "strategicEffect": {
+      "type": "Resupply",
+      "value": 2,
+      "description": "Resourceful operatives scrounge supplies. Draw 2 extra tactic cards."
+    "altMode": {
+      "type": "draw_card",
+      "value": 2,
+      "text": "Resourceful: draw 2 tactic cards."
+    }
   },
   {
     "id": "imperial-discipline",
@@ -281,6 +333,11 @@
     "text": "The target must make a Morale check or become Panicked.",
     "cost": 2,
     "tags": ["Aggressive", "Leadership"]
+    "strategicEffect": {
+      "type": "Rally",
+      "value": 2,
+      "description": "Imperial propaganda bolsters troop morale. Recover 2 morale."
+    }
   },
   {
     "id": "tactical-withdrawal",
@@ -296,6 +353,15 @@
     "text": "Move 1 friendly figure up to 2 spaces.",
     "cost": 1,
     "tags": ["Defensive", "Covert"]
+    "strategicEffect": {
+      "type": "Reposition",
+      "value": 4,
+      "description": "Redeploy a unit to a better position. Move 1 friendly figure up to 4 tiles."
+    "altMode": {
+      "type": "movement",
+      "value": 2,
+      "text": "Orderly retreat: gain +2 movement this activation."
+    }
   },
   {
     "id": "reinforcement-order",
@@ -311,6 +377,11 @@
     "text": "Immediately deploy 1 Regular unit to an Imperial deployment zone.",
     "cost": 3,
     "tags": ["Leadership"]
+    "strategicEffect": {
+      "type": "Reinforce",
+      "value": 4,
+      "description": "Command orders fresh troops to the front. Gain 4 reinforcement points."
+    }
   },
   {
     "id": "pinning-fire",
@@ -396,6 +467,10 @@
       "tag": "Medical",
       "effectPerTag": { "type": "Recover", "value": 1 },
       "maxStacks": 2
+    "altMode": {
+      "type": "strain_recovery",
+      "value": 4,
+      "text": "Field triage: recover 4 strain."
     }
   },
   {
@@ -457,6 +532,11 @@
     "text": "Move the defender 1 space after combat resolves.",
     "cost": 0,
     "tags": ["Covert"]
+    "altMode": {
+      "type": "defense_stance",
+      "value": 2,
+      "text": "Defensive posture: gain +2 Block on the next attack against this figure."
+    }
   },
   {
     "id": "point-blank",

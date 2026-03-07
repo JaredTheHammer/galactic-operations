@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "2.2",
-    "description": "Playable species for hero creation. Each species defines starting Characteristics, wound/strain base thresholds, speed, and mechanical abilities. Total characteristic points = 12 for all species."
+    "version": "2.3",
+    "description": "Playable species for hero creation. Each species defines starting Characteristics, wound/strain base thresholds, speed, and mechanical abilities. Total characteristic points = 12 for all organic species."
   },
   "species": {
     "human": {
@@ -27,7 +27,10 @@
           "name": "Adaptable",
           "description": "Recover 1 additional strain during Rest actions. Humans are versatile and recover composure quickly.",
           "type": "passive",
-          "effect": { "type": "bonus_strain_recovery", "value": 1 }
+          "effect": {
+            "type": "bonus_strain_recovery",
+            "value": 1
+          }
         }
       ],
       "description": "Versatile and adaptable. Humans are the most common species in the galaxy."
@@ -55,7 +58,10 @@
           "name": "Beguiling",
           "description": "Upgrade attack pool once when making social skill checks. Natural charm and lekku body language give Twi'leks an edge in negotiations.",
           "type": "passive",
-          "effect": { "type": "social_skill_upgrade", "value": 1 }
+          "effect": {
+            "type": "social_skill_upgrade",
+            "value": 1
+          }
         }
       ],
       "description": "Charismatic and resilient. Twi'leks are natural leaders and negotiators."
@@ -83,14 +89,20 @@
           "name": "Wookiee Rage",
           "description": "+1 damage on melee/Brawl attacks when wounded. The legendary Wookiee berserker fury makes them more dangerous as they take damage.",
           "type": "passive",
-          "effect": { "type": "wounded_melee_bonus", "value": 1 }
+          "effect": {
+            "type": "wounded_melee_bonus",
+            "value": 1
+          }
         },
         {
           "id": "wookiee_intimidating",
           "name": "Intimidating",
           "description": "Immune to Fear condition. Wookiees do not break -- they break others.",
           "type": "passive",
-          "effect": { "type": "condition_immunity", "condition": "Fear" }
+          "effect": {
+            "type": "condition_immunity",
+            "condition": "Fear"
+          }
         }
       ],
       "description": "Powerful and loyal. Wookiees are fearsome warriors with an unbreakable honor code."
@@ -118,7 +130,10 @@
           "name": "Expert Tracker",
           "description": "+1 Ability die on the first attack each activation. Born hunters, Rodians have an innate sense for lining up the perfect shot.",
           "type": "passive",
-          "effect": { "type": "first_attack_bonus", "value": 1 }
+          "effect": {
+            "type": "first_attack_bonus",
+            "value": 1
+          }
         }
       ],
       "description": "Quick and perceptive. Rodians are born hunters with excellent reflexes."
@@ -146,7 +161,10 @@
           "name": "Regeneration",
           "description": "Recover 1 wound at the start of each activation (if wounded). Trandoshans can regrow lost limbs over time; in combat, minor wounds close rapidly.",
           "type": "passive",
-          "effect": { "type": "regeneration", "value": 1 }
+          "effect": {
+            "type": "regeneration",
+            "value": 1
+          }
         }
       ],
       "description": "Brutal and relentless. Trandoshans worship the Scorekeeper and live for the hunt."
@@ -174,7 +192,14 @@
           "name": "Convincing Demeanor",
           "description": "+1 Ability die on Deception and Streetwise checks. Many Bothans died to bring us this information -- but these ones are very good at not dying.",
           "type": "passive",
-          "effect": { "type": "skill_bonus", "skills": ["deception", "streetwise"], "value": 1 }
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "deception",
+              "streetwise"
+            ],
+            "value": 1
+          }
         }
       ],
       "description": "Shrewd and resourceful. Bothans are master spies and information brokers."
@@ -202,17 +227,2297 @@
           "name": "Inorganic",
           "description": "Immune to Poison and Fear conditions. Droids lack biological vulnerabilities but cannot benefit from stimpacks (use repair patches instead).",
           "type": "passive",
-          "effect": { "type": "condition_immunity", "condition": "Poison" }
+          "effect": {
+            "type": "condition_immunity",
+            "condition": "Poison"
+          }
         },
         {
           "id": "droid_endurance",
           "name": "Enduring Chassis",
           "description": "+1 soak from reinforced plating. Droids are built to take punishment.",
           "type": "passive",
-          "effect": { "type": "soak_bonus", "value": 1 }
+          "effect": {
+            "type": "soak_bonus",
+            "value": 1
+          }
         }
       ],
       "description": "Immune to Poison and Fear. Droids are built for purpose with reinforced chassis plating."
+    },
+    "gand": {
+      "id": "gand",
+      "name": "Gand",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 3,
+        "presence": 1
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "ammonia_breathers",
+      "abilities": [
+        {
+          "id": "ammonia_breathers",
+          "name": "Ammonia Breathers",
+          "description": "Immune to Poison condition. Gand breathe ammonia and are unaffected by toxins and gases designed for oxygen-breathing species.",
+          "type": "passive",
+          "effect": {
+            "type": "condition_immunity",
+            "condition": "Poison"
+          }
+        },
+        {
+          "id": "gand_dark_vision",
+          "name": "Ultraviolet Vision",
+          "description": "Can see in darkness without penalty. Gand compound eyes perceive ultraviolet light.",
+          "type": "passive",
+          "effect": {
+            "type": "dark_vision",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Mystical insectoid bounty hunters from the ammonia-shrouded world of Gand. Renowned as findsmen who track quarry across the galaxy."
+    },
+    "duros": {
+      "id": "duros",
+      "name": "Duros",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 3,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 11,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "intuitive_navigation",
+      "abilities": [
+        {
+          "id": "intuitive_navigation",
+          "name": "Intuitive Navigation",
+          "description": "+1 Ability die on Perception and Vigilance checks. Duros have an innate spatial awareness honed over millennia of spacefaring.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "perception",
+              "vigilance"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Natural spacefarers and explorers. Duros were among the first species to develop hyperspace travel and have an innate talent for navigation."
+    },
+    "gran": {
+      "id": "gran",
+      "name": "Gran",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "enhanced_vision",
+      "abilities": [
+        {
+          "id": "enhanced_vision",
+          "name": "Enhanced Vision",
+          "description": "+1 Ability die on the first attack each activation. Gran have three eyes providing exceptional depth perception and targeting ability.",
+          "type": "passive",
+          "effect": {
+            "type": "first_attack_bonus",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Communal three-eyed species from Kinyen. Gran form deep emotional bonds and have exceptional depth perception from their three stalked eyes."
+    },
+    "ithorian": {
+      "id": "ithorian",
+      "name": "Ithorian",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 1,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 3,
+        "presence": 2
+      },
+      "woundBase": 9,
+      "strainBase": 12,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "ithorian_bellow",
+      "abilities": [
+        {
+          "id": "ithorian_bellow",
+          "name": "Ithorian Bellow",
+          "description": "+1 damage on Brawl attacks. Ithorians can unleash devastating sonic bellows from their twin mouths, usable as a natural weapon in close quarters.",
+          "type": "passive",
+          "effect": {
+            "type": "natural_weapon_damage",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Peaceful herbivores known as Hammerheads. Ithorians revere nature and maintain ecological balance, but can unleash devastating sonic bellows when threatened."
+    },
+    "mon_calamari": {
+      "id": "mon_calamari",
+      "name": "Mon Calamari",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 3,
+        "cunning": 1,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "amphibious",
+      "abilities": [
+        {
+          "id": "amphibious",
+          "name": "Amphibious",
+          "description": "+1 Ability die on Perception checks. Mon Calamari have exceptional aquatic vision that translates to keen battlefield awareness.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "perception"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Aquatic tacticians and shipbuilders from Dac. Mon Calamari are natural leaders who provided the Rebel Alliance with its most powerful capital ships."
+    },
+    "sullustan": {
+      "id": "sullustan",
+      "name": "Sullustan",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 3,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "dark_vision",
+      "abilities": [
+        {
+          "id": "sullustan_dark_vision",
+          "name": "Dark Vision",
+          "description": "Can see in darkness without penalty. Sullustans evolved in underground caverns and can navigate in total darkness.",
+          "type": "passive",
+          "effect": {
+            "type": "dark_vision",
+            "value": 1
+          }
+        },
+        {
+          "id": "sullustan_direction",
+          "name": "Keen Direction Sense",
+          "description": "+1 Ability die on Survival checks. Sullustans possess an unerring sense of direction and never get lost.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "survival"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Underground-dwelling species with exceptional senses and an unerring sense of direction. Sullustans are natural pilots and navigators."
+    },
+    "chiss": {
+      "id": "chiss",
+      "name": "Chiss",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 3,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "infravision",
+      "abilities": [
+        {
+          "id": "infravision",
+          "name": "Infravision",
+          "description": "Can see in darkness without penalty. Chiss can perceive infrared radiation, allowing them to see heat signatures.",
+          "type": "passive",
+          "effect": {
+            "type": "dark_vision",
+            "value": 1
+          }
+        },
+        {
+          "id": "chiss_analytical",
+          "name": "Analytical Mind",
+          "description": "+1 Ability die on Computers and Vigilance checks. Chiss are renowned for their tactical and analytical brilliance.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "computers",
+              "vigilance"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Blue-skinned near-humans from the Unknown Regions. Chiss are brilliant strategists and disciplined warriors, exemplified by the legendary Grand Admiral Thrawn."
+    },
+    "devaronian": {
+      "id": "devaronian",
+      "name": "Devaronian",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 3,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 11,
+      "strainBase": 9,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "resilient_metabolism",
+      "abilities": [
+        {
+          "id": "resilient_metabolism",
+          "name": "Resilient Metabolism",
+          "description": "Immune to Poison condition. Devaronians have a hardy metabolism that neutralizes most toxins and poisons.",
+          "type": "passive",
+          "effect": {
+            "type": "condition_immunity",
+            "condition": "Poison"
+          }
+        }
+      ],
+      "description": "Devil-horned wanderers with a deep love of travel and exploration. Male Devaronians roam the galaxy while females tend to stay on Devaron to manage affairs."
+    },
+    "falleen": {
+      "id": "falleen",
+      "name": "Falleen",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 1,
+        "presence": 3
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "beguiling_pheromones",
+      "abilities": [
+        {
+          "id": "beguiling_pheromones",
+          "name": "Beguiling Pheromones",
+          "description": "Upgrade attack pool once when making social skill checks. Falleen exude powerful pheromones that make them nearly irresistible in social encounters.",
+          "type": "passive",
+          "effect": {
+            "type": "social_skill_upgrade",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Reptilian near-humans who exude powerful pheromones. Falleen are vain and regal, considering themselves the pinnacle of evolution in the galaxy."
+    },
+    "aqualish": {
+      "id": "aqualish",
+      "name": "Aqualish",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 1,
+        "presence": 2
+      },
+      "woundBase": 12,
+      "strainBase": 8,
+      "speed": 4,
+      "startingXP": 90,
+      "specialAbility": "aqualish_tenacity",
+      "abilities": [
+        {
+          "id": "aqualish_tenacity",
+          "name": "Tenacious",
+          "description": "+1 damage on melee/Brawl attacks when wounded. Aqualish become more aggressive and dangerous when injured.",
+          "type": "passive",
+          "effect": {
+            "type": "wounded_melee_bonus",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Tusked, walrus-faced brutes known for their belligerent temperament. Aqualish are often found working as mercenaries and enforcers across the Outer Rim."
+    },
+    "chadra_fan": {
+      "id": "chadra_fan",
+      "name": "Chadra-Fan",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 3,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 8,
+      "strainBase": 12,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "silhouette_0",
+      "abilities": [
+        {
+          "id": "silhouette_0",
+          "name": "Silhouette 0",
+          "description": "+1 ranged defense. Chadra-Fan are diminutive creatures, making them difficult targets for ranged attacks.",
+          "type": "passive",
+          "effect": {
+            "type": "silhouette_small",
+            "value": 1
+          }
+        },
+        {
+          "id": "chadra_fan_tinker",
+          "name": "Natural Tinkerer",
+          "description": "+1 Ability die on Mechanics checks. Chadra-Fan have an innate talent for understanding and modifying technology.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "mechanics"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Tiny bat-like tinkerers with an insatiable curiosity and a natural gift for technology. Chadra-Fan are gregarious and hate being alone."
+    },
+    "dug": {
+      "id": "dug",
+      "name": "Dug",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 3,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 9,
+      "strainBase": 11,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "dug_agility",
+      "abilities": [
+        {
+          "id": "dug_agility",
+          "name": "Acrobatic",
+          "description": "+1 Ability die on Athletics and Coordination checks. Dugs use their hands as feet and vice versa, giving them remarkable physical dexterity.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "athletics",
+              "coordination"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Aggressive species that walks on their arms and manipulates objects with their legs. Dugs are fierce competitors, as exemplified by the podracer Sebulba."
+    },
+    "ewok": {
+      "id": "ewok",
+      "name": "Ewok",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 3,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 8,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "silhouette_0_ewok",
+      "abilities": [
+        {
+          "id": "silhouette_0_ewok",
+          "name": "Silhouette 0",
+          "description": "+1 ranged defense. Ewoks are small and hard to target at range.",
+          "type": "passive",
+          "effect": {
+            "type": "silhouette_small",
+            "value": 1
+          }
+        },
+        {
+          "id": "ewok_primitive",
+          "name": "Primitive Resourcefulness",
+          "description": "+1 Ability die on Survival and Stealth checks. Ewoks are masters of guerrilla warfare and living off the land.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "survival",
+              "stealth"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Small but fierce forest dwellers from the moon of Endor. Ewoks are resourceful warriors who use primitive technology to devastating effect through guerrilla tactics."
+    },
+    "gungan": {
+      "id": "gungan",
+      "name": "Gungan",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 11,
+      "strainBase": 9,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "amphibious_gungan",
+      "abilities": [
+        {
+          "id": "amphibious_gungan",
+          "name": "Amphibious",
+          "description": "+1 Ability die on Athletics and Coordination checks. Gungans are amphibious beings equally at home on land and underwater.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "athletics",
+              "coordination"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Amphibious species from the swamps and underwater cities of Naboo. Gungans are athletic and agile, with a unique plasma-based technology and a proud warrior tradition."
+    },
+    "jawa": {
+      "id": "jawa",
+      "name": "Jawa",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 3,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 8,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "silhouette_0_jawa",
+      "abilities": [
+        {
+          "id": "silhouette_0_jawa",
+          "name": "Silhouette 0",
+          "description": "+1 ranged defense. Jawas are diminutive scavengers, difficult to hit at range.",
+          "type": "passive",
+          "effect": {
+            "type": "silhouette_small",
+            "value": 1
+          }
+        },
+        {
+          "id": "jawa_scavenger",
+          "name": "Natural Scavenger",
+          "description": "+1 Ability die on Mechanics and Skulduggery checks. Jawas have an innate talent for salvaging, repairing, and repurposing technology.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "mechanics",
+              "skulduggery"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Diminutive hooded scavengers from Tatooine. Jawas roam the desert in massive sandcrawlers, salvaging and trading technology with a keen eye for value."
+    },
+    "klatooinian": {
+      "id": "klatooinian",
+      "name": "Klatooinian",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 12,
+      "strainBase": 9,
+      "speed": 4,
+      "startingXP": 90,
+      "specialAbility": "klatooinian_loyalty",
+      "abilities": [
+        {
+          "id": "klatooinian_loyalty",
+          "name": "Ironfisted Loyalty",
+          "description": "Immune to Fear condition. Klatooinians have an unshakeable resolve born from generations of servitude and duty.",
+          "type": "passive",
+          "effect": {
+            "type": "condition_immunity",
+            "condition": "Fear"
+          }
+        }
+      ],
+      "description": "Tough, loyal warriors bound by an ancient pact of servitude to the Hutts. Klatooinians are disciplined fighters who take pride in their martial traditions."
+    },
+    "kyuzo": {
+      "id": "kyuzo",
+      "name": "Kyuzo",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 3,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "kyuzo_agility",
+      "abilities": [
+        {
+          "id": "kyuzo_agility",
+          "name": "War Shield Mastery",
+          "description": "+1 Ability die on Coordination checks. Kyuzo are supremely athletic, capable of incredible acrobatic feats in combat.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "coordination"
+            ],
+            "value": 1
+          }
+        },
+        {
+          "id": "kyuzo_reflexes",
+          "name": "Quick Reflexes",
+          "description": "+1 Ability die on the first attack each activation. Kyuzo have lightning-fast reflexes honed by their high-gravity homeworld.",
+          "type": "passive",
+          "effect": {
+            "type": "first_attack_bonus",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Athletic warriors from the high-gravity world of Phatrong. Kyuzo are known for their incredible agility and signature war shields that double as thrown weapons."
+    },
+    "nikto": {
+      "id": "nikto",
+      "name": "Nikto",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 11,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 95,
+      "specialAbility": "nikto_resilient",
+      "abilities": [
+        {
+          "id": "nikto_resilient",
+          "name": "Hardened Skin",
+          "description": "+1 soak from thick reptilian hide. Nikto have naturally tough skin that provides modest protection.",
+          "type": "passive",
+          "effect": {
+            "type": "soak_bonus",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Reptilian species from Kintan with five distinct subspecies adapted to different environments. Nikto are tough, hardy survivors often employed as mercenaries and enforcers."
+    },
+    "quarren": {
+      "id": "quarren",
+      "name": "Quarren",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 3,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "quarren_cunning",
+      "abilities": [
+        {
+          "id": "quarren_cunning",
+          "name": "Ink Spray",
+          "description": "+1 Ability die on Deception and Stealth checks. Quarren can spray ink as a distraction, and their tentacle-face gives nothing away.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "deception",
+              "stealth"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Tentacle-faced aquatic species from Mon Cala. Quarren are shrewd negotiators and pragmatic realists who share their homeworld with the Mon Calamari."
+    },
+    "toydarian": {
+      "id": "toydarian",
+      "name": "Toydarian",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 3,
+        "willpower": 3,
+        "presence": 1
+      },
+      "woundBase": 9,
+      "strainBase": 11,
+      "speed": 4,
+      "startingXP": 90,
+      "specialAbility": "toydarian_willpower",
+      "abilities": [
+        {
+          "id": "toydarian_resistance",
+          "name": "Force Resistance",
+          "description": "Immune to Fear condition. Toydarians have an unusual resistance to mental manipulation and Force-based influence.",
+          "type": "passive",
+          "effect": {
+            "type": "condition_immunity",
+            "condition": "Fear"
+          }
+        },
+        {
+          "id": "toydarian_haggler",
+          "name": "Natural Haggler",
+          "description": "+1 Ability die on Negotiation checks. Toydarians are born dealmakers and shrewd traders.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "negotiation"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Winged traders and dealmakers known for their resistance to Force-based mental tricks. Toydarians are shrewd negotiators who hover on rapidly beating wings."
+    },
+    "weequay": {
+      "id": "weequay",
+      "name": "Weequay",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 12,
+      "strainBase": 8,
+      "speed": 4,
+      "startingXP": 90,
+      "specialAbility": "weequay_tough",
+      "abilities": [
+        {
+          "id": "weequay_tough",
+          "name": "Leathery Hide",
+          "description": "+1 soak from thick, weather-beaten skin. Weequay are naturally tough and resistant to environmental hazards.",
+          "type": "passive",
+          "effect": {
+            "type": "soak_bonus",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Tough, leathery-skinned mercenaries from the arid world of Sriluur. Weequay are commonly found working as pirates, bounty hunters, and muscle for hire across the galaxy."
+    },
+    "arcona": {
+      "id": "arcona",
+      "name": "Arcona",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "arcona_senses",
+      "abilities": [
+        {
+          "id": "arcona_senses",
+          "name": "Keen Senses",
+          "description": "+1 Ability die on Perception checks. Arcona have a keen sense of smell through their sensitive nostrils and can detect trace chemicals in the environment.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "perception"
+            ],
+            "value": 1
+          }
+        },
+        {
+          "id": "arcona_dark_vision",
+          "name": "Thermal Vision",
+          "description": "Can see in darkness without penalty. Arcona perceive heat signatures through their bulbous eyes.",
+          "type": "passive",
+          "effect": {
+            "type": "dark_vision",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Serpentine-headed species with large, multifaceted eyes. Arcona are communal beings who form tight-knit family groups and possess keen thermal vision."
+    },
+    "clawdite": {
+      "id": "clawdite",
+      "name": "Clawdite",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 3,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "changeling",
+      "abilities": [
+        {
+          "id": "changeling",
+          "name": "Changeling",
+          "description": "Upgrade attack pool once when making social skill checks. Clawdites are shapeshifters who can alter their appearance to mimic other humanoid species.",
+          "type": "passive",
+          "effect": {
+            "type": "social_skill_upgrade",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Shape-shifting reptilian species capable of altering their appearance. Clawdites are often employed as spies, assassins, and infiltrators due to their natural disguise ability."
+    },
+    "cerean": {
+      "id": "cerean",
+      "name": "Cerean",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 1,
+        "intellect": 3,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 13,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "binary_processing",
+      "abilities": [
+        {
+          "id": "binary_processing",
+          "name": "Binary Processing",
+          "description": "Recover 1 additional strain during Rest actions. Cereans have a binary brain that processes information in parallel, allowing faster mental recovery.",
+          "type": "passive",
+          "effect": {
+            "type": "bonus_strain_recovery",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Tall beings with enlarged craniums housing binary brains. Cereans are renowned philosophers and thinkers who can process multiple trains of thought simultaneously."
+    },
+    "kel_dor": {
+      "id": "kel_dor",
+      "name": "Kel Dor",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 3,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "dark_vision_kd",
+      "abilities": [
+        {
+          "id": "dark_vision_kd",
+          "name": "Dark Vision",
+          "description": "Can see in darkness without penalty. Kel Dor perceive a wide spectrum of light through their specialized eye structures.",
+          "type": "passive",
+          "effect": {
+            "type": "dark_vision",
+            "value": 1
+          }
+        },
+        {
+          "id": "kel_dor_attuned",
+          "name": "Force Attuned",
+          "description": "+1 Ability die on Discipline checks. Kel Dor have a natural sensitivity to the Force and strong mental discipline.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "discipline"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Masked beings from Dorin who breathe a unique helium-based atmosphere. Kel Dor are known for their strong moral compass and many have served as Jedi, including Plo Koon."
+    },
+    "mirialan": {
+      "id": "mirialan",
+      "name": "Mirialan",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 1,
+        "willpower": 3,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 11,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "spiritual_focus",
+      "abilities": [
+        {
+          "id": "spiritual_focus",
+          "name": "Spiritual Focus",
+          "description": "+1 Ability die on Discipline and Cool checks. Mirialans practice deep spiritual traditions focused on self-mastery and fate.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "discipline",
+              "cool"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Disciplined near-humans with distinctive geometric tattoos marking their accomplishments. Mirialans believe strongly in fate and self-improvement, producing many notable Jedi."
+    },
+    "nautolan": {
+      "id": "nautolan",
+      "name": "Nautolan",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 11,
+      "strainBase": 11,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "pheromone_detection",
+      "abilities": [
+        {
+          "id": "pheromone_detection",
+          "name": "Pheromone Detection",
+          "description": "+1 Ability die on Perception and Charm checks. Nautolans sense emotions through pheromones via their head-tresses, giving them an empathic edge.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "perception",
+              "charm"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Amphibious species with distinctive head-tresses that detect pheromones and emotions. Nautolans are empathic beings, exemplified by Jedi Master Kit Fisto."
+    },
+    "togruta": {
+      "id": "togruta",
+      "name": "Togruta",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "pack_instincts",
+      "abilities": [
+        {
+          "id": "pack_instincts",
+          "name": "Pack Instincts",
+          "description": "+1 Ability die on Perception and Vigilance checks. Togruta montrals provide passive echolocation, enhancing spatial awareness in combat.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "perception",
+              "vigilance"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Colorful beings with distinctive montrals and head-tails that provide passive echolocation. Togruta are natural pack hunters, with Ahsoka Tano as their most famous representative."
+    },
+    "zabrak": {
+      "id": "zabrak",
+      "name": "Zabrak",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 3,
+        "presence": 1
+      },
+      "woundBase": 11,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "fearsome_countenance",
+      "abilities": [
+        {
+          "id": "fearsome_countenance",
+          "name": "Fearsome Countenance",
+          "description": "Immune to Fear condition. Zabrak have iron willpower and refuse to show weakness, often intimidating opponents with their horned visage.",
+          "type": "passive",
+          "effect": {
+            "type": "condition_immunity",
+            "condition": "Fear"
+          }
+        }
+      ],
+      "description": "Fierce horned warriors known for their iron determination and facial tattoos. Zabrak are independent-minded and refuse to be broken, with both Jedi and Sith among their ranks."
+    },
+    "iktotchi": {
+      "id": "iktotchi",
+      "name": "Iktotchi",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 3,
+        "presence": 1
+      },
+      "woundBase": 11,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "precognition",
+      "abilities": [
+        {
+          "id": "precognition",
+          "name": "Precognitive Instincts",
+          "description": "+1 Ability die on Vigilance checks. Iktotchi have a limited precognitive ability that gives them flashes of danger before it strikes.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "vigilance"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Horned species from the windswept moon of Iktotch. Iktotchi possess a natural precognitive sense that makes them exceptional pilots and difficult to surprise in combat."
+    },
+    "aleena": {
+      "id": "aleena",
+      "name": "Aleena",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 3,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 8,
+      "strainBase": 10,
+      "speed": 5,
+      "startingXP": 100,
+      "specialAbility": "silhouette_0_aleena",
+      "abilities": [
+        {
+          "id": "silhouette_0_aleena",
+          "name": "Silhouette 0",
+          "description": "+1 ranged defense. Aleena are small and extremely quick, making them difficult targets.",
+          "type": "passive",
+          "effect": {
+            "type": "silhouette_small",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Tiny, quick-moving reptilians with a cheerful disposition. Aleena are swift runners despite their small stature, often surprising larger opponents with their speed and agility."
+    },
+    "dowutin": {
+      "id": "dowutin",
+      "name": "Dowutin",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 1,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 14,
+      "strainBase": 8,
+      "speed": 3,
+      "startingXP": 90,
+      "specialAbility": "dowutin_massive",
+      "abilities": [
+        {
+          "id": "dowutin_massive",
+          "name": "Massive Frame",
+          "description": "+1 soak from thick hide and dense musculature. Dowutin are enormous beings whose sheer mass provides natural protection.",
+          "type": "passive",
+          "effect": {
+            "type": "soak_bonus",
+            "value": 1
+          }
+        },
+        {
+          "id": "dowutin_rage",
+          "name": "Unstoppable",
+          "description": "+1 damage on melee/Brawl attacks when wounded. Dowutin become increasingly ferocious when injured.",
+          "type": "passive",
+          "effect": {
+            "type": "wounded_melee_bonus",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Massive, thick-skinned brutes from a high-gravity world. Dowutin are among the largest playable species and rely on brute strength and natural toughness in combat."
+    },
+    "kaleesh": {
+      "id": "kaleesh",
+      "name": "Kaleesh",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 3,
+        "presence": 1
+      },
+      "woundBase": 11,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "kaleesh_warrior",
+      "abilities": [
+        {
+          "id": "kaleesh_warrior",
+          "name": "Warrior Culture",
+          "description": "+1 Ability die on the first attack each activation. Kaleesh are born warriors with an instinct for combat honed through generations of tribal warfare.",
+          "type": "passive",
+          "effect": {
+            "type": "first_attack_bonus",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Fierce masked warriors from Kalee with a proud martial tradition. Kaleesh are renowned throughout the galaxy for their combat prowess. General Grievous was a Kaleesh before his cybernetic transformation."
+    },
+    "mikkian": {
+      "id": "mikkian",
+      "name": "Mikkian",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 11,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "mikkian_senses",
+      "abilities": [
+        {
+          "id": "mikkian_senses",
+          "name": "Sensory Head-Tendrils",
+          "description": "+1 Ability die on Perception checks. Mikkian head-tendrils detect subtle vibrations and environmental changes, enhancing spatial awareness.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "perception"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Colorful near-humans with distinctive sensory head-tendrils. Mikkians have keen environmental awareness and have served in many roles across the galaxy, including as Jedi."
+    },
+    "cosian": {
+      "id": "cosian",
+      "name": "Cosian",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 3,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 9,
+      "strainBase": 12,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "cosian_wisdom",
+      "abilities": [
+        {
+          "id": "cosian_wisdom",
+          "name": "Ancient Wisdom",
+          "description": "+1 Ability die on Discipline and Medicine checks. Cosians are long-lived scholars with deep wells of knowledge and patience.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "discipline",
+              "medicine"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Long-lived reptilian scholars with tails and gentle dispositions. Cosians value knowledge and learning, often serving as teachers and historians. Jedi Master Tera Sinube was a Cosian."
+    },
+    "bardottan": {
+      "id": "bardottan",
+      "name": "Bardottan",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 3,
+        "presence": 2
+      },
+      "woundBase": 9,
+      "strainBase": 11,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "bardottan_mysticism",
+      "abilities": [
+        {
+          "id": "bardottan_mysticism",
+          "name": "Mystic Attunement",
+          "description": "+1 Ability die on Discipline and Cool checks. Bardottans have a deep spiritual tradition and natural sensitivity to the Living Force.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "discipline",
+              "cool"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Mystical reptilian species with a deep connection to the Living Force. Bardottans practice an ancient spiritual tradition and are known for their meditative calm and wisdom."
+    },
+    "pantoran": {
+      "id": "pantoran",
+      "name": "Pantoran",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 110,
+      "specialAbility": "pantoran_adaptable",
+      "abilities": [
+        {
+          "id": "pantoran_adaptable",
+          "name": "Cold Adaptation",
+          "description": "Recover 1 additional strain during Rest actions. Pantorans evolved in harsh cold environments, developing exceptional endurance and composure.",
+          "type": "passive",
+          "effect": {
+            "type": "bonus_strain_recovery",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Blue-skinned near-humans from the frigid moon of Pantora. Pantorans are skilled diplomats and politicians who have navigated complex galactic politics for centuries."
+    },
+    "lasat": {
+      "id": "lasat",
+      "name": "Lasat",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 1,
+        "presence": 2
+      },
+      "woundBase": 12,
+      "strainBase": 8,
+      "speed": 4,
+      "startingXP": 90,
+      "specialAbility": "lasat_honor_guard",
+      "abilities": [
+        {
+          "id": "lasat_honor_guard",
+          "name": "Bo-rifle Training",
+          "description": "+1 Ability die on the first attack each activation. Lasat are trained warriors with an instinct for the opening strike.",
+          "type": "passive",
+          "effect": {
+            "type": "first_attack_bonus",
+            "value": 1
+          }
+        },
+        {
+          "id": "lasat_natural_weapons",
+          "name": "Powerful Build",
+          "description": "+1 damage on Brawl attacks. Lasat are physically imposing with powerful limbs that deliver devastating strikes.",
+          "type": "passive",
+          "effect": {
+            "type": "natural_weapon_damage",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Large, powerful warriors from Lasan with a proud Honor Guard tradition. Lasat are known for their distinctive bo-rifles and physical prowess. Garazeb Orrelios is a famous Lasat rebel."
+    },
+    "besalisk": {
+      "id": "besalisk",
+      "name": "Besalisk",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 1,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 13,
+      "strainBase": 7,
+      "speed": 4,
+      "startingXP": 90,
+      "specialAbility": "besalisk_arms",
+      "abilities": [
+        {
+          "id": "besalisk_arms",
+          "name": "Four Arms",
+          "description": "+1 Ability die on Athletics and Brawl checks. Besalisks have four powerful arms, granting them remarkable versatility in physical tasks and close combat.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "athletics",
+              "brawl"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Massive four-armed beings from Ojom. Besalisks are strong and imposing, often working as laborers, fighters, or restaurateurs. Jedi Master Pong Krell was a Besalisk."
+    },
+    "gamorrean": {
+      "id": "gamorrean",
+      "name": "Gamorrean",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 1,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 13,
+      "strainBase": 7,
+      "speed": 4,
+      "startingXP": 90,
+      "specialAbility": "gamorrean_tusks",
+      "abilities": [
+        {
+          "id": "gamorrean_tusks",
+          "name": "Tusked Gore",
+          "description": "+1 damage on Brawl attacks. Gamorreans can use their prominent tusks as natural weapons in close combat.",
+          "type": "passive",
+          "effect": {
+            "type": "natural_weapon_damage",
+            "value": 1
+          }
+        },
+        {
+          "id": "gamorrean_tough",
+          "name": "Pig Iron",
+          "description": "+1 soak from thick hide and dense muscle. Gamorreans are remarkably tough and can absorb punishment that would fell other species.",
+          "type": "passive",
+          "effect": {
+            "type": "soak_bonus",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Porcine warriors from Gamorr with a culture built entirely around combat. Gamorreans are commonly employed as guards and enforcers throughout the galaxy."
+    },
+    "geonosian": {
+      "id": "geonosian",
+      "name": "Geonosian",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 5,
+      "startingXP": 100,
+      "specialAbility": "geonosian_hive",
+      "abilities": [
+        {
+          "id": "geonosian_wings",
+          "name": "Winged",
+          "description": "+1 Ability die on Coordination checks. Geonosians have wings that allow short bursts of flight, granting superior mobility and positioning.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "coordination"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Insectoid species from Geonosis with a rigid caste-based hive society. Geonosians are skilled engineers who designed the Death Star and can fly short distances on their chitinous wings."
+    },
+    "neimoidian": {
+      "id": "neimoidian",
+      "name": "Neimoidian",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 3,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 9,
+      "strainBase": 11,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "neimoidian_cunning",
+      "abilities": [
+        {
+          "id": "neimoidian_cunning",
+          "name": "Trade Federation Training",
+          "description": "+1 Ability die on Negotiation and Deception checks. Neimoidians are raised in cutthroat competition and become natural schemers and dealmakers.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "negotiation",
+              "deception"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Shrewd and cowardly reptilians who controlled the Trade Federation. Neimoidians are raised in a fiercely competitive environment that produces cunning negotiators and bureaucrats."
+    },
+    "pau_an": {
+      "id": "pau_an",
+      "name": "Pau'an",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 1,
+        "intellect": 3,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 11,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "pauan_longevity",
+      "abilities": [
+        {
+          "id": "pauan_longevity",
+          "name": "Long-Lived Wisdom",
+          "description": "+1 Ability die on Discipline and Leadership checks. Pau'ans live for centuries, accumulating vast experience and commanding natural authority.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "discipline",
+              "leadership"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Tall, gaunt beings from Utapau with lifespans of centuries. Pau'ans are natural administrators and leaders, known for their deep-set eyes, lined faces, and sharp teeth. The Grand Inquisitor was a Pau'an."
+    },
+    "umbaran": {
+      "id": "umbaran",
+      "name": "Umbaran",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 3,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "umbaran_shadow",
+      "abilities": [
+        {
+          "id": "umbaran_shadow",
+          "name": "Shadow Dweller",
+          "description": "Can see in darkness without penalty. Umbarans evolved on a world of perpetual shadow and can see clearly in near-total darkness.",
+          "type": "passive",
+          "effect": {
+            "type": "dark_vision",
+            "value": 1
+          }
+        },
+        {
+          "id": "umbaran_influence",
+          "name": "Subtle Influence",
+          "description": "+1 Ability die on Deception checks. Umbarans are natural manipulators who excel at misdirection and subtle control.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "deception"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Pale, ghostly beings from the shadowy world of Umbara. Umbarans are master manipulators and possess advanced technology. They can see in ultraviolet and are notoriously untrustworthy."
+    },
+    "selkath": {
+      "id": "selkath",
+      "name": "Selkath",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 1,
+        "willpower": 3,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "selkath_healer",
+      "abilities": [
+        {
+          "id": "selkath_healer",
+          "name": "Natural Healer",
+          "description": "+1 Ability die on Medicine checks. Selkath have an innate understanding of biology and healing, tied to their reverence for the kolto of their homeworld.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "medicine"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Aquatic species from Manaan, guardians of the galaxy's kolto supply. Selkath are natural healers and diplomats who fiercely protect the neutrality of their ocean homeworld."
+    },
+    "kalleran": {
+      "id": "kalleran",
+      "name": "Kalleran",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 5,
+      "startingXP": 100,
+      "specialAbility": "kalleran_reflexes",
+      "abilities": [
+        {
+          "id": "kalleran_reflexes",
+          "name": "Lightning Reflexes",
+          "description": "+1 Ability die on Coordination and Vigilance checks. Kallerans have exceptionally fast neural pathways, giving them remarkable reaction times.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "coordination",
+              "vigilance"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Quick-reflexed species known for their exceptional reaction times. Kallerans are athletic and perceptive, with some showing Force sensitivity. Depa Billaba's padawan Caleb Dume had close ties to Kalleran freedom fighters."
+    },
+    "gotal": {
+      "id": "gotal",
+      "name": "Gotal",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 3,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "gotal_horns",
+      "abilities": [
+        {
+          "id": "gotal_horns",
+          "name": "Electromagnetic Sensors",
+          "description": "+1 Ability die on Perception and Vigilance checks. Gotal head cones detect electromagnetic fields and emotions, making them nearly impossible to ambush.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "perception",
+              "vigilance"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Horned beings whose cranial cones detect electromagnetic radiation and emotions. Gotals are natural empaths who find droids extremely unsettling due to their dissonant electromagnetic signatures."
+    },
+    "shistavanen": {
+      "id": "shistavanen",
+      "name": "Shistavanen",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 3,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 11,
+      "strainBase": 9,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "shistavanen_hunter",
+      "abilities": [
+        {
+          "id": "shistavanen_hunter",
+          "name": "Predatory Instincts",
+          "description": "+1 Ability die on Perception and Survival checks. Shistavanen are apex predators with exceptional senses of smell and hearing.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "perception",
+              "survival"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Lupine predators from Uvena Prime with keen senses and natural hunting instincts. Shistavanen are solitary by nature and make exceptional scouts, trackers, and bounty hunters."
+    },
+    "talz": {
+      "id": "talz",
+      "name": "Talz",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 1,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 13,
+      "strainBase": 9,
+      "speed": 4,
+      "startingXP": 90,
+      "specialAbility": "talz_hardy",
+      "abilities": [
+        {
+          "id": "talz_hardy",
+          "name": "Arctic Adaptation",
+          "description": "Recover 1 additional strain during Rest actions. Talz are adapted to extreme cold environments, granting them remarkable endurance and hardiness.",
+          "type": "passive",
+          "effect": {
+            "type": "bonus_strain_recovery",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Large, gentle, four-eyed beings covered in thick white fur. Talz are peaceful by nature but formidable in combat due to their size and strength. They are adapted to extreme cold environments."
+    },
+    "xexto": {
+      "id": "xexto",
+      "name": "Xexto",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 3,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 8,
+      "strainBase": 12,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "xexto_limbs",
+      "abilities": [
+        {
+          "id": "xexto_limbs",
+          "name": "Extra Limbs",
+          "description": "+1 Ability die on Coordination checks. Xexto have six limbs that provide extraordinary dexterity and the ability to manipulate multiple objects simultaneously.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "coordination"
+            ],
+            "value": 1
+          }
+        },
+        {
+          "id": "xexto_small",
+          "name": "Silhouette 0",
+          "description": "+1 ranged defense. Xexto are small and extremely nimble, making them difficult targets.",
+          "type": "passive",
+          "effect": {
+            "type": "silhouette_small",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Six-limbed aliens from Troiken known for their incredible dexterity. Xexto can use all their limbs independently and are among the most agile species in the galaxy. The podracer Gasgano was a Xexto."
+    },
+    "gossam": {
+      "id": "gossam",
+      "name": "Gossam",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 3,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 9,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "gossam_business",
+      "abilities": [
+        {
+          "id": "gossam_business",
+          "name": "Corporate Efficiency",
+          "description": "+1 Ability die on Negotiation and Computers checks. Gossam are natural bureaucrats and administrators with keen analytical minds.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "negotiation",
+              "computers"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Small reptilian species who ran the Commerce Guild during the Clone Wars. Gossam are efficient administrators and shrewd businessbeings, though they tend toward cowardice when physically threatened."
+    },
+    "muun": {
+      "id": "muun",
+      "name": "Muun",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 3,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 9,
+      "strainBase": 12,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "muun_mathematical",
+      "abilities": [
+        {
+          "id": "muun_mathematical",
+          "name": "Mathematical Precision",
+          "description": "+1 Ability die on Computers and Mechanics checks. Muuns have an innate mathematical genius that makes them natural bankers and engineers.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "computers",
+              "mechanics"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Tall, thin-bodied bankers from Scipio who controlled the InterGalactic Banking Clan. Muuns are mathematical geniuses with an obsessive focus on profit. Darth Plagueis was a Muun."
+    },
+    "skakoan": {
+      "id": "skakoan",
+      "name": "Skakoan",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 1,
+        "intellect": 3,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 11,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "skakoan_pressure",
+      "abilities": [
+        {
+          "id": "skakoan_pressure",
+          "name": "Pressure Suit",
+          "description": "Immune to Poison condition. Skakoans wear pressure suits that protect them from most atmospheric contaminants and toxins.",
+          "type": "passive",
+          "effect": {
+            "type": "condition_immunity",
+            "condition": "Poison"
+          }
+        },
+        {
+          "id": "skakoan_tech",
+          "name": "Technological Aptitude",
+          "description": "+1 Ability die on Computers checks. Skakoans are brilliant technologists who led the Techno Union.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "computers"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Methane-breathing technologists who require pressure suits in standard atmospheres. Skakoans led the Techno Union and are brilliant engineers and scientists."
+    },
+    "lannik": {
+      "id": "lannik",
+      "name": "Lannik",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 3,
+        "presence": 1
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "lannik_brave",
+      "abilities": [
+        {
+          "id": "lannik_brave",
+          "name": "Indomitable Will",
+          "description": "Immune to Fear condition. Lannik are famously stubborn and courageous, refusing to back down regardless of odds.",
+          "type": "passive",
+          "effect": {
+            "type": "condition_immunity",
+            "condition": "Fear"
+          }
+        }
+      ],
+      "description": "Small but fierce warriors with large pointed ears. Lannik are renowned for their bravery and stubbornness far out of proportion to their diminutive stature. Jedi Master Even Piell was a Lannik."
+    },
+    "dressellian": {
+      "id": "dressellian",
+      "name": "Dressellian",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 11,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 110,
+      "specialAbility": "dressellian_guerrilla",
+      "abilities": [
+        {
+          "id": "dressellian_guerrilla",
+          "name": "Guerrilla Fighter",
+          "description": "+1 Ability die on Stealth and Survival checks. Dressellians waged a long guerrilla war against the Empire, honing their ability to strike from hiding.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "stealth",
+              "survival"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Wrinkle-faced freedom fighters who waged a long guerrilla campaign against the Empire. Dressellians are resourceful and determined, specializing in asymmetric warfare and ambush tactics."
+    },
+    "cathar": {
+      "id": "cathar",
+      "name": "Cathar",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 3,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 1,
+        "presence": 2
+      },
+      "woundBase": 10,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "cathar_claws",
+      "abilities": [
+        {
+          "id": "cathar_claws",
+          "name": "Retractable Claws",
+          "description": "+1 damage on Brawl attacks. Cathar have sharp retractable claws that serve as natural weapons in close combat.",
+          "type": "passive",
+          "effect": {
+            "type": "natural_weapon_damage",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Feline warriors from a world devastated by the Mandalorians. Cathar are proud, passionate, and fiercely loyal. Their retractable claws make them dangerous in close quarters combat."
+    },
+    "sathari": {
+      "id": "sathari",
+      "name": "Sathari",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 3
+      },
+      "woundBase": 9,
+      "strainBase": 11,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "sathari_grace",
+      "abilities": [
+        {
+          "id": "sathari_grace",
+          "name": "Graceful Presence",
+          "description": "Upgrade attack pool once when making social skill checks. Sathari are graceful beings with an almost ethereal beauty and natural diplomatic skill.",
+          "type": "passive",
+          "effect": {
+            "type": "social_skill_upgrade",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Avian species with vestigial wings and an elegant, graceful bearing. Sathari are natural diplomats and mediators, known for their calm demeanor and persuasive voices."
+    },
+    "kaminoan": {
+      "id": "kaminoan",
+      "name": "Kaminoan",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 3,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 9,
+      "strainBase": 12,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "kaminoan_science",
+      "abilities": [
+        {
+          "id": "kaminoan_science",
+          "name": "Master Geneticists",
+          "description": "+1 Ability die on Medicine checks. Kaminoans are brilliant biologists and geneticists who created the clone army of the Republic.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "medicine"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Tall, slender amphibians from the ocean world of Kamino. Kaminoans are reclusive scientists renowned for their mastery of cloning and genetic engineering, creators of the Grand Army of the Republic."
+    },
+    "drall": {
+      "id": "drall",
+      "name": "Drall",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 1,
+        "agility": 2,
+        "intellect": 3,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 8,
+      "strainBase": 12,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "drall_scholarly",
+      "abilities": [
+        {
+          "id": "drall_scholarly",
+          "name": "Scholarly Tradition",
+          "description": "+1 Ability die on Computers and Medicine checks. Drall are devoted scholars with a deep intellectual tradition spanning millennia.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "computers",
+              "medicine"
+            ],
+            "value": 1
+          }
+        },
+        {
+          "id": "drall_small",
+          "name": "Silhouette 0",
+          "description": "+1 ranged defense. Drall are small, stocky beings that are difficult to target at range.",
+          "type": "passive",
+          "effect": {
+            "type": "silhouette_small",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Small, furry scholars from the Corellian system. Drall are deeply intellectual beings with a scholarly tradition that rivals the great academic institutions of the Core Worlds."
+    },
+    "selonian": {
+      "id": "selonian",
+      "name": "Selonian",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 3,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 1
+      },
+      "woundBase": 11,
+      "strainBase": 9,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "selonian_tunneler",
+      "abilities": [
+        {
+          "id": "selonian_tunneler",
+          "name": "Natural Tunneler",
+          "description": "+1 Ability die on Athletics and Stealth checks. Selonians are burrowing creatures with powerful limbs and an innate sense for subterranean navigation.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "athletics",
+              "stealth"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Weasel-like tunnel dwellers from the Corellian system. Selonians are agile and communal, living in vast underground warrens. They are fiercely protective of their dens and highly loyal to their clans."
+    },
+    "anx": {
+      "id": "anx",
+      "name": "Anx",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 1,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 13,
+      "strainBase": 9,
+      "speed": 3,
+      "startingXP": 90,
+      "specialAbility": "anx_towering",
+      "abilities": [
+        {
+          "id": "anx_towering",
+          "name": "Towering Presence",
+          "description": "+1 Ability die on Leadership and Coercion checks. Anx tower over most other species, commanding attention and respect through sheer physical presence.",
+          "type": "passive",
+          "effect": {
+            "type": "skill_bonus",
+            "skills": [
+              "leadership",
+              "coercion"
+            ],
+            "value": 1
+          }
+        }
+      ],
+      "description": "Massive, crested saurian beings that tower over most other species. Anx are deliberate and thoughtful despite their imposing size, and they communicate partly through color changes in their crests."
+    },
+    "chevin": {
+      "id": "chevin",
+      "name": "Chevin",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 3,
+        "agility": 1,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 2,
+        "presence": 2
+      },
+      "woundBase": 13,
+      "strainBase": 8,
+      "speed": 3,
+      "startingXP": 90,
+      "specialAbility": "chevin_resilient",
+      "abilities": [
+        {
+          "id": "chevin_resilient",
+          "name": "Thick Hide",
+          "description": "+1 soak from thick, pachydermal skin. Chevin have remarkably tough hide that absorbs impacts.",
+          "type": "passive",
+          "effect": {
+            "type": "soak_bonus",
+            "value": 1
+          }
+        }
+      ],
+      "description": "Large, pachydermal beings with elongated snouts. Chevin are shrewd businessbeings and slavers known for their physical toughness and ruthless pragmatism in all dealings."
+    },
+    "dathomirian": {
+      "id": "dathomirian",
+      "name": "Dathomirian Zabrak",
+      "creatureType": "organic",
+      "characteristics": {
+        "brawn": 2,
+        "agility": 2,
+        "intellect": 2,
+        "cunning": 2,
+        "willpower": 3,
+        "presence": 1
+      },
+      "woundBase": 11,
+      "strainBase": 10,
+      "speed": 4,
+      "startingXP": 100,
+      "specialAbility": "dathomirian_rage",
+      "abilities": [
+        {
+          "id": "dathomirian_rage",
+          "name": "Dark Fury",
+          "description": "+1 damage on melee/Brawl attacks when wounded. Dathomirian Zabrak draw upon deep wells of pain and fury, becoming more lethal when injured.",
+          "type": "passive",
+          "effect": {
+            "type": "wounded_melee_bonus",
+            "value": 1
+          }
+        },
+        {
+          "id": "dathomirian_fearless",
+          "name": "Nightbrother Resolve",
+          "description": "Immune to Fear condition. Dathomirians are hardened by the brutal trials of their homeworld and know no fear.",
+          "type": "passive",
+          "effect": {
+            "type": "condition_immunity",
+            "condition": "Fear"
+          }
+        }
+      ],
+      "description": "Zabrak subspecies from Dathomir, shaped by dark side Force traditions. Dathomirian Zabrak are fierce warriors, with Darth Maul and Savage Opress as their most infamous representatives."
     }
   }
 }

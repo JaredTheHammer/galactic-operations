@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Relic definitions for the fragment forging system (TI4 PoK-inspired)"
+  },
+  "relicDefinitions": {
+    "mandalorian-war-horn": {
+      "id": "mandalorian-war-horn",
+      "name": "Mandalorian War Horn",
+      "description": "All allies gain +1 attack die for the entire mission.",
+      "fragmentType": "combat",
+      "effect": { "type": "attack_bonus", "dice": 1, "duration": "mission" },
+      "lore": "Forged in the fires of Mandalore's ancient wars, this horn's blast fills allies with righteous fury."
+    },
+    "beskar-shield-emitter": {
+      "id": "beskar-shield-emitter",
+      "name": "Beskar Shield Emitter",
+      "description": "The assigned hero gains +1 defense die permanently.",
+      "fragmentType": "combat",
+      "effect": { "type": "defense_bonus", "dice": 1, "duration": "permanent" },
+      "lore": "A personal shield generator reinforced with beskar alloy. Virtually indestructible."
+    },
+    "cortosis-weave-armor": {
+      "id": "cortosis-weave-armor",
+      "name": "Cortosis Weave Armor",
+      "description": "The assigned hero gains +2 soak permanently.",
+      "fragmentType": "combat",
+      "effect": { "type": "soak_bonus", "value": 2, "duration": "permanent" },
+      "lore": "Armor woven with cortosis fibers, capable of resisting even lightsaber strikes."
+    },
+    "bacta-infuser": {
+      "id": "bacta-infuser",
+      "name": "Bacta Infuser",
+      "description": "One-time use: heal all heroes for 5 wounds.",
+      "fragmentType": "tech",
+      "effect": { "type": "heal_all", "value": 5 },
+      "lore": "A compact but potent bacta delivery system, enough to stabilize an entire squad."
+    },
+    "tactical-uplink": {
+      "id": "tactical-uplink",
+      "name": "Tactical Uplink",
+      "description": "Gain +2 command tokens per round for one mission.",
+      "fragmentType": "tech",
+      "effect": { "type": "bonus_command_tokens", "value": 2 },
+      "lore": "Military-grade comm array providing real-time battlefield coordination across all units."
+    },
+    "imperial-jammer": {
+      "id": "imperial-jammer",
+      "name": "Imperial Signal Jammer",
+      "description": "Reduce Imperial threat per round by 2 for one mission.",
+      "fragmentType": "tech",
+      "effect": { "type": "threat_reduction", "value": 2 },
+      "lore": "Scrambles Imperial comm frequencies, delaying reinforcement coordination."
+    },
+    "kyber-focusing-lens": {
+      "id": "kyber-focusing-lens",
+      "name": "Kyber Focusing Lens",
+      "description": "Allows 3 free attack rerolls across the mission.",
+      "fragmentType": "force",
+      "effect": { "type": "free_reroll", "uses": 3 },
+      "lore": "A kyber crystal ground into a perfect lens, channeling the Force to guide one's aim."
+    },
+    "force-nexus-shard": {
+      "id": "force-nexus-shard",
+      "name": "Force Nexus Shard",
+      "description": "The assigned hero gains +1 attack die permanently.",
+      "fragmentType": "force",
+      "effect": { "type": "attack_bonus", "dice": 1, "duration": "permanent" },
+      "lore": "A shard from a Force vergence, pulsing with raw power that enhances all actions."
+    },
+    "holocron-of-strategy": {
+      "id": "holocron-of-strategy",
+      "name": "Holocron of Strategy",
+      "description": "Gain 1.5x XP from the next mission.",
+      "fragmentType": "intel",
+      "effect": { "type": "xp_multiplier", "multiplier": 1.5, "nextMissionOnly": true },
+      "lore": "A Jedi holocron containing tactical wisdom that accelerates learning."
+    },
+    "pathfinder-beacon": {
+      "id": "pathfinder-beacon",
+      "name": "Pathfinder Beacon",
+      "description": "Increases chance of finding relic fragments from exploration by 25%.",
+      "fragmentType": "intel",
+      "effect": { "type": "fragment_magnet", "extraFragmentChance": 0.25 },
+      "lore": "An ancient scanner tuned to detect artifacts of significance."
+    },
+    "intel-network-key": {
+      "id": "intel-network-key",
+      "name": "Intel Network Key",
+      "description": "The assigned hero gains +1 defense die permanently.",
+      "fragmentType": "intel",
+      "effect": { "type": "defense_bonus", "dice": 1, "duration": "permanent" },
+      "lore": "Access to a covert intelligence network that provides advance warning of threats."
+    },
+    "phrik-plating": {
+      "id": "phrik-plating",
+      "name": "Phrik Alloy Plating",
+      "description": "The assigned hero gains +1 soak permanently.",
+      "fragmentType": "combat",
+      "effect": { "type": "soak_bonus", "value": 1, "duration": "permanent" },
+      "lore": "Phrik alloy plating, lightsaber-resistant and nearly weightless."
+    }
+  }
+}

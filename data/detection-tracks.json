@@ -1,0 +1,75 @@
+{
+  "description": "Detection track presets for stealth missions. Inspired by War of the Ring Hunt mechanic.",
+  "presets": {
+    "standard": {
+      "max": 16,
+      "thresholds": [
+        {
+          "level": "Suspicious",
+          "threshold": 4,
+          "effect": { "type": "morale_penalty", "value": -2 }
+        },
+        {
+          "level": "Alerted",
+          "threshold": 8,
+          "effect": { "type": "reinforcement", "count": 2, "npcProfileId": "stormtrooper" }
+        },
+        {
+          "level": "Hunted",
+          "threshold": 12,
+          "effect": { "type": "alarm", "bonusDifficulty": 1 }
+        }
+      ]
+    },
+    "high-security": {
+      "max": 12,
+      "thresholds": [
+        {
+          "level": "Suspicious",
+          "threshold": 3,
+          "effect": { "type": "morale_penalty", "value": -1 }
+        },
+        {
+          "level": "Alerted",
+          "threshold": 6,
+          "effect": { "type": "reinforcement", "count": 3, "npcProfileId": "stormtrooper-elite" }
+        },
+        {
+          "level": "Hunted",
+          "threshold": 9,
+          "effect": { "type": "lockdown", "turnsRemaining": 3 }
+        }
+      ]
+    },
+    "lax": {
+      "max": 20,
+      "thresholds": [
+        {
+          "level": "Suspicious",
+          "threshold": 6,
+          "effect": { "type": "morale_penalty", "value": -1 }
+        },
+        {
+          "level": "Alerted",
+          "threshold": 12,
+          "effect": { "type": "reinforcement", "count": 2, "npcProfileId": "stormtrooper" }
+        },
+        {
+          "level": "Hunted",
+          "threshold": 16,
+          "effect": { "type": "alarm", "bonusDifficulty": 1 }
+        }
+      ]
+    }
+  },
+  "detectionCosts": {
+    "move_in_los": 1,
+    "ranged_attack": 2,
+    "melee_attack": 1,
+    "interact_objective": 1,
+    "collect_loot": 0,
+    "failed_skill_check": 2,
+    "ally_defeated": 3,
+    "despair": 2
+  }
+}

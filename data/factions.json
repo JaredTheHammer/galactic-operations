@@ -245,3 +245,79 @@
     ]
   }
 ]
+{
+  "factions": {
+    "rebel-alliance": {
+      "id": "rebel-alliance",
+      "name": "Rebel Alliance Cell",
+      "readiness": "Dormant",
+      "progress": 0,
+      "benefits": {
+        "reinforcementProfiles": ["rebel-trooper", "rebel-commando"],
+        "companionIds": ["companion-rebel-captain"],
+        "shopDiscount": 10,
+        "threatReduction": 2,
+        "bonusCardDraw": 1
+      },
+      "activationTriggers": [
+        { "type": "mission_complete", "missionId": "act1-mission1", "progressGain": 15 },
+        { "type": "mission_complete", "missionId": "act1-mission2", "progressGain": 20 },
+        { "type": "social_encounter", "encounterId": "rebel-contact", "progressGain": 10 },
+        { "type": "imperial_attack", "progressGain": 10 }
+      ],
+      "availableInActs": [1, 2, 3]
+    },
+    "smuggler-network": {
+      "id": "smuggler-network",
+      "name": "Smuggler Network",
+      "readiness": "Dormant",
+      "progress": 0,
+      "benefits": {
+        "companionIds": ["companion-smuggler-pilot"],
+        "shopDiscount": 15,
+        "bonusCardDraw": 1
+      },
+      "activationTriggers": [
+        { "type": "social_encounter", "encounterId": "smuggler-den", "progressGain": 20 },
+        { "type": "narrative_item", "itemId": "smuggler-favor", "progressGain": 25 },
+        { "type": "companion_visit", "companionId": "companion-smuggler-pilot", "progressGain": 15 }
+      ],
+      "availableInActs": [1, 2, 3]
+    },
+    "mandalorian-clan": {
+      "id": "mandalorian-clan",
+      "name": "Mandalorian Clan",
+      "readiness": "Dormant",
+      "progress": 0,
+      "benefits": {
+        "reinforcementProfiles": ["mandalorian-warrior", "mandalorian-heavy"],
+        "companionIds": ["companion-mandalorian"],
+        "shopDiscount": 5,
+        "threatReduction": 3
+      },
+      "activationTriggers": [
+        { "type": "mission_complete", "missionId": "act2-mission2", "progressGain": 25 },
+        { "type": "social_encounter", "encounterId": "mandalorian-enclave", "progressGain": 20 },
+        { "type": "imperial_attack", "progressGain": 15 }
+      ],
+      "availableInActs": [2, 3]
+    },
+    "local-militia": {
+      "id": "local-militia",
+      "name": "Local Militia",
+      "readiness": "Dormant",
+      "progress": 0,
+      "benefits": {
+        "reinforcementProfiles": ["militia-fighter"],
+        "shopDiscount": 5,
+        "threatReduction": 1
+      },
+      "activationTriggers": [
+        { "type": "imperial_attack", "progressGain": 20 },
+        { "type": "mission_complete", "missionId": "act1-mission3", "progressGain": 15 },
+        { "type": "social_encounter", "encounterId": "village-elder", "progressGain": 15 }
+      ],
+      "availableInActs": [1, 2]
+    }
+  }
+}
