@@ -70,6 +70,14 @@ export type {
   // Species Abilities
   SpeciesAbilityEffect,
   SpeciesAbility,
+  // Boss Hit Location Types
+  BossHitLocationDef,
+  BossHitLocationState,
+  BossPhaseTransition,
+  // Focus Resource Types
+  FocusConfig,
+  FocusEffect,
+  SpendFocusPayload,
 } from './types.js';
 
 // Re-export data loader functions
@@ -248,6 +256,38 @@ export type {
   NPCCombatStats,
   BalanceFlag,
 } from './power-ranking.js';
+
+// Re-export boss mechanics (Oathsworn-inspired hit location system)
+export {
+  initBossHitLocations,
+  routeWoundsToHitLocations,
+  getBossAttackPoolPenalty,
+  getBossDefensePoolPenalty,
+  getBossSoakPenalty,
+  getBossSpeedPenalty,
+  getDisabledBossWeapons,
+  getDisabledLocationConditions,
+  applyTargetedShotPenalty,
+  applyBossAttackPenalties,
+  applyBossDefensePenalties,
+  checkBossPhaseTransition,
+  applyBossPhaseTransition,
+  isBossWeaponAvailable,
+  getBossLocationSummary,
+} from './boss-mechanics.js';
+
+// Re-export Focus resource system (Oathsworn Animus-inspired)
+export {
+  getFocusConfigForHero,
+  initFocusResource,
+  recoverFocus,
+  canSpendFocus,
+  getAvailableFocusEffects,
+  spendFocus,
+  hasFocusResource,
+  getFocusPercent,
+  getFocusEffectLabel,
+} from './focus-resource.js';
 
 export type {
   AIProfilesData,

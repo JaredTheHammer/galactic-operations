@@ -922,6 +922,8 @@ export function spendAbilityPoints(
       available: ap.available - cost,
     },
   };
+}
+
 // EQUIPMENT MANAGEMENT
 // ============================================================================
 

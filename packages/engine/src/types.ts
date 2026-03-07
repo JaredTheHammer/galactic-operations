@@ -542,6 +542,14 @@ export interface NPCProfile {
 
   /** Physical base size. Defaults to 'standard' if unset. */
   baseSize?: BaseSize;
+
+  // Boss Hit Location System (Oathsworn-inspired)
+  /** If true, this NPC is a boss with targetable hit locations */
+  isBoss?: boolean;
+  /** Hit location definitions for boss NPCs */
+  bossHitLocations?: BossHitLocationDef[];
+  /** Phase transition rules triggered by disabled hit locations */
+  bossPhaseTransitions?: BossPhaseTransition[];
 }
 
 // ============================================================================
@@ -661,6 +669,19 @@ export interface Figure {
   // Graduated suppression (Legion-inspired)
   suppressionTokens: number;  // accumulated from ranged hits; rally removes
   courage: number;            // threshold before losing action; 2x = panic. Derived from NPC tier or hero Willpower.
+
+  // Boss Hit Location runtime state (only populated for boss NPCs)
+  hitLocations?: BossHitLocationState[];
+  /** Current boss AI phase (0-indexed, advances as hit locations are disabled) */
+  bossPhase?: number;
+
+  // Focus resource (Oathsworn Animus-inspired, heroes only)
+  /** Current Focus points available to spend */
+  focusCurrent?: number;
+  /** Maximum Focus capacity */
+  focusMax?: number;
+  /** Focus recovered per activation */
+  focusRecovery?: number;
 }
 
 // ============================================================================
@@ -692,6 +713,8 @@ export interface MovePayload {
 export interface AttackPayload {
   targetId: string;
   weaponId: string;
+  /** Target a specific boss hit location (omit for random/body shot) */
+  targetLocationId?: string;
 }
 
 export interface UseSkillPayload {
@@ -727,7 +750,8 @@ export type GameAction =
   | { type: 'InteractTerminal'; figureId: string; payload: { terminalId: string } }
   | { type: 'AimManeuver';   figureId: string; payload: {} }
   | { type: 'StrainForManeuver'; figureId: string; payload: {} }
-  | { type: 'UseConsumable'; figureId: string; payload: UseConsumablePayload };
+  | { type: 'UseConsumable'; figureId: string; payload: UseConsumablePayload }
+  | { type: 'SpendFocus';   figureId: string; payload: SpendFocusPayload };
 
 export interface UseConsumablePayload {
   /** Consumable item ID */
@@ -735,6 +759,33 @@ export interface UseConsumablePayload {
   /** Target figure ID (self if omitted) */
   targetId?: string;
 }
+
+/**
+ * Focus spending effects (Oathsworn Animus-inspired).
+ * Each effect costs a specific amount of Focus.
+ */
+export type FocusEffect =
+  | 'bonus_move'       // Cost 1: +2 speed this activation
+  | 'bonus_aim'        // Cost 1: +1 Ability die on next attack (stacks with aim tokens)
+  | 'bonus_damage'     // Cost 2: +3 damage on next attack this activation
+  | 'bonus_defense'    // Cost 2: +1 Challenge die to defense until next activation
+  | 'recover_strain'   // Cost 1: recover 2 strain immediately
+  | 'shake_condition'  // Cost 3: remove one non-Wounded condition immediately
+  ;
+
+export interface SpendFocusPayload {
+  effect: FocusEffect;
+}
+
+/** Focus cost table */
+export const FOCUS_COSTS: Record<FocusEffect, number> = {
+  bonus_move: 1,
+  bonus_aim: 1,
+  bonus_damage: 2,
+  bonus_defense: 2,
+  recover_strain: 1,
+  shake_condition: 3,
+};
 
 export interface ActionLog {
   action: GameAction;
@@ -1539,6 +1590,95 @@ export interface SocialPhaseResult {
   creditsSpentOnHealing: number;
   completedAt: string;
 }
+
+// ============================================================================
+// BOSS HIT LOCATION TYPES (Oathsworn-inspired targetable boss locations)
+// ============================================================================
+
+/**
+ * Definition of a hit location on a boss NPC (data-driven from NPC JSON).
+ * Each location has its own wound pool. When all wounds are dealt, the
+ * location is "disabled" and applies permanent penalties to the boss.
+ */
+export interface BossHitLocationDef {
+  id: string;
+  name: string;                 // e.g., "Chin Cannon", "Left Leg Actuator", "Force Core"
+  woundCapacity: number;        // wounds to disable this location
+  /** Penalties applied to the boss when this location is disabled */
+  disabledEffects: {
+    /** Reduce boss attack pool: negative = remove dice */
+    attackPoolModifier?: number;
+    /** Reduce boss defense pool: negative = remove dice */
+    defensePoolModifier?: number;
+    /** Reduce boss soak */
+    soakModifier?: number;
+    /** Reduce boss speed */
+    speedModifier?: number;
+    /** Condition inflicted on the boss permanently */
+    conditionInflicted?: Condition;
+    /** Weapon IDs disabled (boss can no longer use these weapons) */
+    disabledWeapons?: string[];
+  };
+}
+
+/**
+ * Runtime state of a hit location during combat (tracked on Figure).
+ * Extends BossHitLocationDef with mutable wound tracking.
+ */
+export interface BossHitLocationState {
+  id: string;
+  name: string;
+  woundCapacity: number;
+  woundsCurrent: number;        // wounds dealt to this location so far
+  isDisabled: boolean;
+  disabledEffects: BossHitLocationDef['disabledEffects'];
+}
+
+/**
+ * Boss phase definition: when a certain number of hit locations are disabled,
+ * the boss transitions to a new AI phase with different behavior.
+ */
+export interface BossPhaseTransition {
+  /** Number of hit locations that must be disabled to trigger this phase */
+  disabledLocationsRequired: number;
+  /** New AI archetype to use after transition (references ai-profiles.json) */
+  newAiArchetype: string;
+  /** Narrative text displayed on phase transition */
+  narrativeText?: string;
+}
+
+// ============================================================================
+// FOCUS RESOURCE TYPES (Oathsworn Animus-inspired regenerating resource)
+// ============================================================================
+
+/**
+ * Focus resource configuration for a hero.
+ * Focus regenerates each activation and is spent on powerful abilities.
+ * Heroes must choose between spending Focus on movement bonuses or abilities.
+ */
+export interface FocusConfig {
+  /** Maximum Focus a hero can hold */
+  max: number;
+  /** Focus recovered at the start of each activation */
+  recoveryPerActivation: number;
+}
+
+/**
+ * Default Focus values by career archetype.
+ * Combat careers get less Focus (they rely on raw dice pools).
+ * Support/cunning careers get more Focus for utility.
+ */
+export const DEFAULT_FOCUS_BY_CAREER: Record<string, FocusConfig> = {
+  soldier:     { max: 3, recoveryPerActivation: 1 },
+  bounty_hunter: { max: 4, recoveryPerActivation: 2 },
+  smuggler:    { max: 5, recoveryPerActivation: 2 },
+  technician:  { max: 5, recoveryPerActivation: 2 },
+  commander:   { max: 4, recoveryPerActivation: 2 },
+  force_sensitive: { max: 6, recoveryPerActivation: 3 },
+};
+
+/** Fallback Focus config when career is not mapped */
+export const DEFAULT_FOCUS_CONFIG: FocusConfig = { max: 4, recoveryPerActivation: 2 };
 
 // ============================================================================
 // v1 LEGACY TYPES (kept for backward compatibility during migration)

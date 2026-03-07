@@ -69,6 +69,17 @@ import {
   getSpeciesSoakBonus,
 } from './species-abilities';
 
+import {
+  routeWoundsToHitLocations,
+  checkBossPhaseTransition,
+  applyBossPhaseTransition,
+  applyBossAttackPenalties,
+  applyBossDefensePenalties,
+  getBossSoakPenalty,
+  applyTargetedShotPenalty,
+  isBossWeaponAvailable,
+} from './boss-mechanics.js';
+
 // ============================================================================
 // HELPER: RESOLVE ENTITY BACKING A FIGURE
 // ============================================================================
@@ -167,7 +178,9 @@ function computeSoak(
   gameData: GameData,
 ): number {
   if (isNPC(entity)) {
-    return entity.soak;
+    // Apply boss hit location soak penalties
+    const bossPenalty = getBossSoakPenalty(figure);
+    return Math.max(0, entity.soak + bossPenalty);
   }
 
   // Hero soak: Brawn + Resilience rank + armor bonus + talent bonus
@@ -313,6 +326,11 @@ export function buildCombatPools(
     ability: attackPool.ability + effectiveAim,
   };
 
+  // Boss hit location penalties: reduce attack pool if locations are disabled
+  if (attacker.hitLocations) {
+    attackPool = applyBossAttackPenalties(attackPool, attacker);
+  }
+
   // Graduated suppression: if suppression tokens >= courage, downgrade 1 yellow to green
   if (attacker.suppressionTokens >= attacker.courage && attacker.courage > 0) {
     if (attackPool.proficiency > 0) {
@@ -401,6 +419,11 @@ export function buildCombatPools(
   if (isHero(defenderEntity)) {
     const defMods = getPassiveDefensePoolModifiers(defenderEntity, gameData);
     defensePool = applyTalentDefensePoolModifiers(defensePool, defMods);
+  }
+
+  // Boss hit location penalties: reduce defense pool if locations are disabled
+  if (defender.hitLocations) {
+    defensePool = applyBossDefensePenalties(defensePool, defender);
   }
 
   // Minimum defense: always at least 1 difficulty die
@@ -928,7 +951,35 @@ export function applyCombatResult(
   const newFigures = gameState.figures.map((fig) => {
     // --- DEFENDER ---
     if (fig.id === scenario.defenderId) {
-      const newWounds = fig.woundsCurrent + defenderEffectiveWounds;
+      // Boss Hit Location routing: absorb wounds into hit locations first
+      let actualWoundsToBody = defenderEffectiveWounds;
+      let updatedHitLocations = fig.hitLocations;
+      let updatedBossPhase = fig.bossPhase;
+
+      if (fig.hitLocations && fig.hitLocations.length > 0 && defenderEffectiveWounds > 0) {
+        const targetLocId = (scenario as CombatScenario & { targetLocationId?: string }).targetLocationId;
+        const routeResult = routeWoundsToHitLocations(
+          fig.hitLocations,
+          defenderEffectiveWounds,
+          targetLocId,
+        );
+        updatedHitLocations = routeResult.updatedLocations;
+        actualWoundsToBody = routeResult.overflowWounds;
+
+        // Check phase transitions on newly disabled locations
+        if (routeResult.newlyDisabled.length > 0) {
+          const npcProfile = gameState.npcProfiles[fig.entityId];
+          if (npcProfile) {
+            const tempFig = { ...fig, hitLocations: updatedHitLocations, bossPhase: updatedBossPhase };
+            const transition = checkBossPhaseTransition(tempFig, npcProfile);
+            if (transition) {
+              updatedBossPhase = (updatedBossPhase ?? 0) + 1;
+            }
+          }
+        }
+      }
+
+      const newWounds = fig.woundsCurrent + actualWoundsToBody;
       const entity = getEntity(fig, gameState);
       const threshold = getWoundThreshold(fig, entity);
       const reachedThreshold = newWounds >= threshold && defenderEffectiveWounds > 0;
@@ -982,6 +1033,8 @@ export function applyCombatResult(
           conditions: newConditions,
           suppressionTokens: newSuppression,
           dodgeTokens: newDodgeTokens,
+          hitLocations: updatedHitLocations,
+          bossPhase: updatedBossPhase,
         };
       }
 
@@ -993,6 +1046,8 @@ export function applyCombatResult(
         conditions: newConditions,
         suppressionTokens: newSuppression,
         dodgeTokens: newDodgeTokens,
+        hitLocations: updatedHitLocations,
+        bossPhase: updatedBossPhase,
       };
     }
 

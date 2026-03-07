@@ -63,6 +63,8 @@ import {
   getSpeciesBonusStrainRecovery,
   isImmuneToCondition,
 } from './species-abilities.js';
+import { recoverFocus, initFocusResource, spendFocus } from './focus-resource.js';
+import { initBossHitLocations } from './boss-mechanics.js';
 
 // ============================================================================
 // OBJECTIVE POINT UTILITIES
@@ -333,7 +335,7 @@ function createNPCFigure(
   position: { x: number; y: number },
   npc: NPCProfile,
 ): Figure {
-  return {
+  let fig: Figure = {
     id,
     entityType: 'npc',
     entityId,
@@ -365,6 +367,13 @@ function createNPCFigure(
     suppressionTokens: 0,
     courage: getNPCCourage(npc),
   };
+
+  // Initialize boss hit locations if this is a boss NPC
+  if (npc.isBoss && npc.bossHitLocations?.length) {
+    fig = initBossHitLocations(fig, npc);
+  }
+
+  return fig;
 }
 
 function createHeroFigure(
@@ -374,7 +383,7 @@ function createHeroFigure(
   position: { x: number; y: number },
   hero: HeroCharacter,
 ): Figure {
-  return {
+  let fig: Figure = {
     id,
     entityType: 'hero',
     entityId,
@@ -405,6 +414,11 @@ function createHeroFigure(
     suppressionTokens: 0,
     courage: getHeroCourage(hero),
   };
+
+  // Initialize Focus resource for heroes
+  fig = initFocusResource(fig, hero);
+
+  return fig;
 }
 
 // ============================================================================
@@ -1135,6 +1149,12 @@ export function resetForActivation(
     }
   }
 
+  // Focus recovery (heroes only): recover Focus points at activation start
+  let focusCurrent = figure.focusCurrent;
+  if (figure.entityType === 'hero' && figure.focusMax !== undefined && focusCurrent !== undefined) {
+    focusCurrent = Math.min(figure.focusMax, focusCurrent + (figure.focusRecovery ?? 0));
+  }
+
   return {
     ...figure,
     actionsRemaining,
@@ -1150,6 +1170,7 @@ export function resetForActivation(
     suppressionTokens,
     strainCurrent,
     woundsCurrent,
+    focusCurrent,
   };
 }
 
@@ -1696,6 +1717,15 @@ export function executeActionV2(
         ...newState.figures[figIdx],
         actionsRemaining: Math.max(0, figure.actionsRemaining - 1),
       };
+      break;
+    }
+
+    // ---- FOCUS (free action, no action/maneuver cost) ----
+    case 'SpendFocus': {
+      const result = spendFocus(figure, action.payload.effect, newState);
+      if (result) {
+        newState.figures[figIdx] = result.figure;
+      }
       break;
     }
 
