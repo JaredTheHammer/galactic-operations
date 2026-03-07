@@ -1917,6 +1917,9 @@ export interface SpiritIslandState {
   threatCadence?: ThreatCadenceState;
   elementSynergy?: ElementTracker;
   collateralDamage?: CollateralDamageState;
+}
+
+// ============================================================================
 // DUNE-INSPIRED MECHANICS (5 systems from Dune: Imperium)
 // ============================================================================
 
