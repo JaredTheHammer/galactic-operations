@@ -266,6 +266,14 @@
                   "hintText": "Pixel pulls a warehouse manifest from the data stream. Guard schedules included.",
                   "description": "Bonus intel from the slicing session."
                 }
+              },
+              {
+                "cost": 3,
+                "outcome": {
+                  "type": "cover_tracks",
+                  "exposureDelta": -1,
+                  "description": "Pixel scrubs your digital footprint from Syndicate surveillance databases."
+                }
               }
             ],
             "triumphOutcomes": [

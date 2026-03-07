@@ -15,6 +15,7 @@ import type {
 } from '../../../../engine/src/types'
 
 type Tab = 'missions' | 'social'
+import type { MissionResult, MissionDefinition, ActOutcome } from '../../../../engine/src/types'
 
 export default function CampaignJournal() {
   const { campaignState, campaignMissions, closeCampaignJournal } = useGameStore()
@@ -27,6 +28,7 @@ export default function CampaignJournal() {
   const reversedMissions = [...missions].reverse()
   const socialResults = (campaignState.socialPhaseResults ?? []) as (SocialPhaseResult | ExpandedSocialPhaseResult)[]
   const reversedSocial = [...socialResults].reverse()
+  const actOutcomes = campaignState.actOutcomes ?? []
 
   const containerStyle: React.CSSProperties = {
     width: '100vw',
@@ -148,6 +150,35 @@ export default function CampaignJournal() {
               </div>
             )}
           </>
+        {missions.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '60px 20px',
+            color: '#555',
+            fontSize: '15px',
+          }}>
+            No missions completed yet. Your story awaits.
+          </div>
+        ) : (
+          <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '16px' }}>
+            {/* Act outcome badges at top for completed acts in current view */}
+            {actOutcomes.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '8px' : '12px' }}>
+                {[...actOutcomes].reverse().map(outcome => (
+                  <ActOutcomeBadge key={outcome.act} outcome={outcome} isMobile={isMobile} />
+                ))}
+              </div>
+            )}
+            {reversedMissions.map((result, i) => (
+              <JournalEntry
+                key={i}
+                result={result}
+                missionDef={campaignMissions[result.missionId]}
+                index={missions.length - i}
+                isMobile={isMobile}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>
@@ -463,6 +494,54 @@ function SocialPhaseEntry({
             -{result.creditsSpentOnHealing} healing
           </span>
         )}
+function ActOutcomeBadge({ outcome, isMobile }: { outcome: ActOutcome; isMobile: boolean }) {
+  const tierColors: Record<string, string> = {
+    dominant: '#44ff44', favorable: '#88ccff',
+    contested: '#ffaa00', unfavorable: '#ff8844', dire: '#ff4444',
+  }
+  const tierLabels: Record<string, string> = {
+    dominant: 'DOMINANT', favorable: 'FAVORABLE',
+    contested: 'CONTESTED', unfavorable: 'UNFAVORABLE', dire: 'DIRE',
+  }
+  const tc = tierColors[outcome.tier] ?? '#888'
+
+  return (
+    <div style={{
+      backgroundColor: '#0a0a12',
+      border: `1px solid ${tc}30`,
+      borderRadius: isMobile ? '6px' : '8px',
+      padding: isMobile ? '12px' : '16px',
+      textAlign: 'center',
+    }}>
+      <div style={{
+        fontSize: '10px',
+        color: '#666',
+        textTransform: 'uppercase',
+        letterSpacing: '2px',
+        marginBottom: '6px',
+      }}>
+        Act {outcome.act} Outcome
+      </div>
+      <div style={{
+        fontSize: isMobile ? '16px' : '20px',
+        fontWeight: 'bold',
+        color: tc,
+        letterSpacing: '4px',
+        marginBottom: '8px',
+      }}>
+        {tierLabels[outcome.tier]}
+      </div>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '16px',
+        fontSize: '11px',
+        color: '#777',
+      }}>
+        <span>Influence: {outcome.influence}</span>
+        <span>Control: {outcome.control}</span>
+        <span>Exposure: {outcome.exposure}</span>
+        <span>Delta: {outcome.delta > 0 ? '+' : ''}{outcome.delta}</span>
       </div>
     </div>
   )

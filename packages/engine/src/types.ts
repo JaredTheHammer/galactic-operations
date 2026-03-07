@@ -940,6 +940,8 @@ export interface GameState {
 
   // Threat clock effects from social phase (applied at mission start)
   threatClockEffects?: ThreatClockEffects;
+  // Active contracts being tracked this mission (Dune: contracts system)
+  activeContracts?: ActiveContract[];
 }
 
 // ============================================================================
@@ -1218,6 +1220,86 @@ export interface CampaignState {
 
   /** Bounty prep results for active bounties */
   bountyPrepResults?: BountyPrepResult[];
+  /** Per-act rebellion mechanics (Exposure + Influence/Control, reset each act) */
+  actProgress?: ActProgress;
+
+  /** Historical act outcomes (carry consequences forward between acts) */
+  actOutcomes?: ActOutcome[];
+}
+
+// ============================================================================
+// ACT PROGRESS & OUTCOME TYPES (Rebellion Mechanics)
+// ============================================================================
+
+/** Per-act tracker for Exposure and Influence/Control */
+export interface ActProgress {
+  /** Which act this progress belongs to (1, 2, or 3) */
+  act: number;
+  /** Exposure tracker (clamped 0-10). Higher = Empire is closing in. */
+  exposure: number;
+  /** Rebellion Influence (accumulated from successes) */
+  influence: number;
+  /** Imperial Control (accumulated from passive pressure + failures) */
+  control: number;
+  /** One-time exposure threshold bonuses already applied to Control */
+  exposureThresholdsTriggered: number[];
+  /** Whether intel exposure reduction has been used this act (max once per act) */
+  intelReductionUsed?: boolean;
+}
+
+/** Act outcome tier based on influence - control delta */
+export type ActOutcomeTier = 'dominant' | 'favorable' | 'contested' | 'unfavorable' | 'dire';
+
+/** Frozen outcome of a completed act */
+export interface ActOutcome {
+  act: number;
+  exposure: number;
+  influence: number;
+  control: number;
+  delta: number;
+  tier: ActOutcomeTier;
+}
+
+/** Exposure status derived from current exposure value */
+export type ExposureStatus = 'ghost' | 'detected' | 'hunted';
+
+/** Get exposure status from exposure value */
+export function getExposureStatus(exposure: number): ExposureStatus {
+  if (exposure >= 7) return 'hunted';
+  if (exposure >= 4) return 'detected';
+  return 'ghost';
+}
+
+/** Determine act outcome tier from influence - control delta */
+export function getActOutcomeTier(delta: number): ActOutcomeTier {
+  if (delta >= 5) return 'dominant';
+  if (delta >= 2) return 'favorable';
+  if (delta >= -1) return 'contested';
+  if (delta >= -4) return 'unfavorable';
+  return 'dire';
+}
+
+/** Create a fresh ActProgress for a given act */
+export function createActProgress(act: number): ActProgress {
+  return {
+    act,
+    exposure: 0,
+    influence: 0,
+    control: 0,
+    exposureThresholdsTriggered: [],
+  };
+}
+
+export type CampaignEpilogueTier = 'legendary' | 'heroic' | 'pyrrhic' | 'bittersweet' | 'fallen';
+
+export interface CampaignEpilogue {
+  tier: CampaignEpilogueTier;
+  title: string;
+  narrative: string;
+  actSummaries: { act: number; tier: ActOutcomeTier }[];
+  cumulativeScore: number;
+  /** Dune: Imperium inspired mechanics (contracts, intel, deck-building, research, mercenaries) */
+  duneMechanics?: DuneMechanicsState;
 }
 
 /** Campaign save file format (serializable to JSON) */
@@ -1309,7 +1391,8 @@ export type SocialOutcomeType =
   | 'discount'          // Apply shop discount percentage
   | 'xp'               // Gain XP
   | 'reputation'        // Modify faction reputation
-  | 'healing';          // Heal wounded hero for free
+  | 'healing'           // Heal wounded hero for free
+  | 'cover_tracks';     // Reduce exposure (rebellion mechanics)
 
 /** A single outcome applied from a social encounter result */
 export interface SocialOutcome {
@@ -1334,6 +1417,8 @@ export interface SocialOutcome {
   reputationDelta?: number;
   /** For healing: hero ID (or 'any' for player choice) */
   healTargetId?: string;
+  /** For cover_tracks: exposure reduction (negative value, e.g. -1) */
+  exposureDelta?: number;
   /** Narrative description of this outcome */
   description: string;
 }
@@ -1770,6 +1855,289 @@ export interface ExpandedSocialPhaseResult extends SocialPhaseResult {
   bountiesAccepted: string[];
   bountiesPrepped: BountyPrepResult[];
   bountiesClaimedByRival: string[];
+// DUNE-INSPIRED MECHANICS (5 systems from Dune: Imperium)
+// ============================================================================
+
+// --- 1. Contract/Bounty System ---
+
+/** Contract difficulty tiers affect reward scaling */
+export type ContractTier = 'bronze' | 'silver' | 'gold';
+
+/** Condition types that can trigger contract completion */
+export type ContractConditionType =
+  | 'eliminate_count'       // Kill N enemies
+  | 'eliminate_type'        // Kill a specific NPC tier/type
+  | 'no_wounds'             // Complete mission without hero taking wounds
+  | 'no_incapacitation'     // No hero incapacitated
+  | 'complete_in_rounds'    // Finish within N rounds
+  | 'collect_loot'          // Collect N loot tokens
+  | 'use_combo'             // Trigger a specific Yahtzee combo type
+  | 'interact_objectives'   // Interact with N objective points
+  | 'maintain_morale'       // Keep morale above threshold
+  | 'hero_kills';           // A single hero gets N kills
+
+/** A single condition that must be met for contract completion */
+export interface ContractCondition {
+  type: ContractConditionType;
+  /** For count-based conditions */
+  targetCount?: number;
+  /** For type-based conditions (e.g., NPC tier or combo type) */
+  targetValue?: string;
+  /** For threshold conditions (e.g., morale >= N, rounds <= N) */
+  threshold?: number;
+}
+
+/** Reward given upon contract completion */
+export interface ContractReward {
+  credits?: number;
+  xp?: number;
+  narrativeItemId?: string;
+  equipmentId?: string;
+  consumableId?: string;
+  consumableQty?: number;
+}
+
+/** A bounty/contract available at social hubs or mission start */
+export interface Contract {
+  id: string;
+  name: string;
+  description: string;
+  /** Who posted the bounty (NPC name for flavor) */
+  postedBy: string;
+  tier: ContractTier;
+  /** All conditions must be met (AND logic) */
+  conditions: ContractCondition[];
+  reward: ContractReward;
+  /** Which acts this contract is available in */
+  availableInActs: number[];
+  /** Can this contract be taken multiple times? */
+  repeatable: boolean;
+}
+
+/** Runtime tracking of an active contract during a mission */
+export interface ActiveContract {
+  contractId: string;
+  /** Per-condition progress tracking */
+  progress: Record<string, number>;
+  completed: boolean;
+}
+
+// --- 2. Intelligence/Spy Network System ---
+
+/** Intelligence asset types that can be deployed */
+export type IntelAssetType = 'informant' | 'slicer' | 'scout' | 'saboteur';
+
+/** An intelligence asset placed on the network */
+export interface IntelAsset {
+  id: string;
+  type: IntelAssetType;
+  /** Which mission this asset is deployed against (or 'reserve') */
+  deployedTo: string;
+  /** How many missions this asset has been deployed (affects reliability) */
+  turnsDeployed: number;
+}
+
+/** Intelligence gathered about an upcoming mission */
+export interface MissionIntel {
+  missionId: string;
+  /** Reveal enemy count range */
+  enemyCountRevealed: boolean;
+  /** Reveal specific NPC profiles in initial enemies */
+  revealedEnemyIds: string[];
+  /** Reveal reinforcement wave timing */
+  reinforcementTimingRevealed: boolean;
+  /** Reveal loot token positions */
+  lootPositionsRevealed: boolean;
+  /** Tactical advantage: bonus tactic cards at mission start */
+  bonusTacticCards: number;
+  /** Sabotage: reduce initial imperial threat */
+  threatReduction: number;
+}
+
+/** Result of recalling an intel asset */
+export interface IntelRecallResult {
+  assetId: string;
+  /** Cards drawn from tactic deck when recalled */
+  tacticCardsDrawn: number;
+  /** Bonus credits from intelligence sale */
+  creditsGained: number;
+}
+
+/** Persistent spy network state in campaign */
+export interface SpyNetworkState {
+  /** Available assets (undeployed) */
+  assets: IntelAsset[];
+  /** Maximum number of assets the network supports */
+  maxAssets: number;
+  /** Intel gathered per mission (keyed by mission ID) */
+  intelGathered: Record<string, MissionIntel>;
+  /** Network level (upgrades via research track) */
+  networkLevel: number;
+}
+
+// --- 3. Tactic Card Deck-Building System ---
+
+/** A card available for purchase in the tactic card market */
+export interface TacticCardMarketEntry {
+  cardId: string;
+  /** Cost in credits to add to your deck */
+  creditCost: number;
+  /** Minimum campaign act to be available */
+  minAct: number;
+  /** Whether this card has been purchased (for non-repeatable cards) */
+  purchased?: boolean;
+}
+
+/** Per-side custom tactic deck (replaces shared deck in deck-building mode) */
+export interface CustomTacticDeck {
+  /** Card IDs in this side's personal deck */
+  cardIds: string[];
+  /** Cards removed from the starter deck (thinning) */
+  removedCardIds: string[];
+}
+
+/** State for the deck-building meta-game */
+export interface DeckBuildingState {
+  /** Whether deck-building mode is enabled for this campaign */
+  enabled: boolean;
+  /** Operative side's custom deck */
+  operativeDeck: CustomTacticDeck;
+  /** Imperial side gets a curated deck per act (AI-managed) */
+  imperialDeck: CustomTacticDeck;
+  /** Cards available in the market this act */
+  marketPool: TacticCardMarketEntry[];
+  /** Cards removed permanently (cannot be re-purchased) */
+  trashedCardIds: string[];
+}
+
+// --- 4. Research/Tech Track System ---
+
+/** A single node on the research track */
+export interface ResearchNode {
+  id: string;
+  name: string;
+  description: string;
+  /** Mechanical effect applied when this node is unlocked */
+  effect: ResearchEffect;
+  /** Position on the track (tier 1-5, branch A or B) */
+  tier: number;
+  branch: 'A' | 'B';
+  /** Cost in AP to unlock */
+  apCost: number;
+  /** Prerequisite node IDs (must have unlocked at least one) */
+  prerequisites: string[];
+}
+
+/** Types of effects research nodes can grant */
+export type ResearchEffectType =
+  | 'max_intel_assets'       // +N intel asset slots
+  | 'bonus_credits'          // +N credits per mission
+  | 'bonus_xp'              // +N XP per mission
+  | 'heal_between_missions'  // Heal N wounds between missions for free
+  | 'bonus_tactic_cards'     // +N starting tactic cards per mission
+  | 'threat_reduction'       // Reduce imperial threat by N per mission
+  | 'shop_discount'          // N% discount at all shops
+  | 'companion_slot'         // +1 companion slot
+  | 'mercenary_slot'         // +1 mercenary slot
+  | 'bonus_contract_reward'  // +N% contract rewards
+  | 'starting_consumable'    // Start each mission with a free consumable
+  | 'morale_bonus';          // +N starting morale
+
+/** A research effect with its type and magnitude */
+export interface ResearchEffect {
+  type: ResearchEffectType;
+  value: number;
+  /** For starting_consumable: which consumable to grant */
+  consumableId?: string;
+}
+
+/** Persistent research track state in campaign */
+export interface ResearchTrackState {
+  /** IDs of unlocked research nodes */
+  unlockedNodes: string[];
+  /** Total AP spent on research */
+  totalAPSpent: number;
+}
+
+// --- 5. Elite Mercenary Hire System ---
+
+/** Mercenary specialization determines their combat role */
+export type MercenarySpecialization =
+  | 'demolitions'   // Ignores cover, bonus vs structures
+  | 'medic'         // Heals adjacent allies each round
+  | 'slicer'        // Disables turrets/objectives at range
+  | 'sharpshooter'  // Extended range, bonus aim
+  | 'enforcer';     // High soak, Guardian keyword
+
+/** A mercenary available for hire */
+export interface MercenaryProfile {
+  id: string;
+  name: string;
+  description: string;
+  specialization: MercenarySpecialization;
+  /** NPC profile ID to use in combat (reuses NPC stat block system) */
+  npcProfileId: string;
+  /** Credit cost to hire */
+  hireCost: number;
+  /** Credit cost per mission to retain (upkeep) */
+  upkeepCost: number;
+  /** Which acts this mercenary is available in */
+  availableInActs: number[];
+  /** Which social hub location offers this mercenary */
+  hubLocationId: string;
+  /** Special passive ability description */
+  passiveAbility: string;
+  /** Mechanical effect of the passive */
+  passiveEffect: MercenaryPassiveEffect;
+  /** Whether this mercenary has been permanently lost */
+  isKIA?: boolean;
+}
+
+/** Passive effects mercenaries provide */
+export interface MercenaryPassiveEffect {
+  type: 'heal_adjacent' | 'ignore_cover' | 'disable_at_range' | 'bonus_aim' | 'guardian';
+  value: number;
+}
+
+/** A hired mercenary in the campaign */
+export interface HiredMercenary {
+  mercenaryId: string;
+  /** Missions deployed (for tracking) */
+  missionsDeployed: number;
+  /** Accumulated wounds that persist between missions */
+  woundsCurrent: number;
+  /** Whether incapacitated (permanently lost) */
+  isKIA: boolean;
+}
+
+/** Persistent mercenary state in campaign */
+export interface MercenaryRosterState {
+  /** Currently hired mercenaries */
+  hired: HiredMercenary[];
+  /** Maximum active mercenaries (default 2, upgradeable via research) */
+  maxActive: number;
+  /** Mercenary IDs that are permanently dead */
+  killedInAction: string[];
+}
+
+// --- Extended CampaignState fields (Dune mechanics) ---
+// These are added as optional fields to CampaignState above via module augmentation.
+// Implementation adds them directly to campaign creation/loading.
+
+/** All five Dune-inspired systems bundled for CampaignState */
+export interface DuneMechanicsState {
+  /** Active contracts for current/next mission */
+  activeContracts: ActiveContract[];
+  /** Completed contract IDs (for tracking repeatable status) */
+  completedContractIds: string[];
+  /** Spy network state */
+  spyNetwork: SpyNetworkState;
+  /** Deck-building meta-game state */
+  deckBuilding: DeckBuildingState;
+  /** Research track progression */
+  researchTrack: ResearchTrackState;
+  /** Mercenary roster */
+  mercenaryRoster: MercenaryRosterState;
 }
 
 // ============================================================================

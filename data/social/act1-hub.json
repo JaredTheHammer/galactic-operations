@@ -111,6 +111,14 @@
                   "discountPercent": 10,
                   "description": "Kell puts in a good word with the local vendors."
                 }
+              },
+              {
+                "cost": 3,
+                "outcome": {
+                  "type": "cover_tracks",
+                  "exposureDelta": -1,
+                  "description": "Kell plants false intel with his contacts, throwing the Imperials off your trail."
+                }
               }
             ],
             "threatConsequence": [

@@ -2,21 +2,72 @@
  * MissionBriefing - Full-screen briefing card shown before combat begins.
  * Displays narrativeIntro, objectives summary, and a DEPLOY button.
  * Styled as a mission dossier with dark panel and amber accent.
+ *
+ * Enhanced with:
+ *   - Phased entrance animation (badge -> title -> narrative -> content -> buttons)
+ *   - Typewriter effect on narrative text
+ *   - Scanline aesthetic on the panel
  */
 
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { getThreatClockEffects } from '../../../../engine/src/social-phase'
 import type { ExpandedSocialPhaseResult } from '../../../../engine/src/types'
 
 // ============================================================================
+// TYPEWRITER HOOK
+// ============================================================================
+
+function useTypewriter(text: string, speed: number, startDelay: number, active: boolean): string {
+  const [displayed, setDisplayed] = useState('')
+  const indexRef = useRef(0)
+
+  useEffect(() => {
+    if (!active) return
+    setDisplayed('')
+    indexRef.current = 0
+
+    const delayTimer = setTimeout(() => {
+      const interval = setInterval(() => {
+        indexRef.current++
+        if (indexRef.current >= text.length) {
+          setDisplayed(text)
+          clearInterval(interval)
+        } else {
+          setDisplayed(text.slice(0, indexRef.current))
+        }
+      }, speed)
+      return () => clearInterval(interval)
+    }, startDelay)
+
+    return () => clearTimeout(delayTimer)
+  }, [text, speed, startDelay, active])
+
+  return active ? displayed : ''
+}
+
+// ============================================================================
 // Component
 // ============================================================================
+
+type BriefingPhase = 'init' | 'header' | 'narrative' | 'content' | 'ready'
 
 export default function MissionBriefing() {
   const { activeMissionDef, campaignState, deployFromBriefing, closeMissionBriefing } = useGameStore()
   const { isMobile } = useIsMobile()
+  const [phase, setPhase] = useState<BriefingPhase>('init')
+
+  // Phase progression
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setPhase('header'), 300),
+      setTimeout(() => setPhase('narrative'), 1000),
+      setTimeout(() => setPhase('content'), 2200),
+      setTimeout(() => setPhase('ready'), 3000),
+    ]
+    return () => timers.forEach(clearTimeout)
+  }, [])
 
   if (!activeMissionDef || !campaignState) return null
 
@@ -31,6 +82,15 @@ export default function MissionBriefing() {
 
   // Active bounty targets for this mission
   const activeBounties = campaignState.activeBounties ?? []
+  const showHeader = phase !== 'init'
+  const showNarrative = phase === 'narrative' || phase === 'content' || phase === 'ready'
+  const showContent = phase === 'content' || phase === 'ready'
+  const showButtons = phase === 'ready'
+
+  // Skip to ready on click during animations
+  const handleSkip = () => {
+    if (phase !== 'ready') setPhase('ready')
+  }
 
   const containerStyle: React.CSSProperties = {
     width: '100vw',
@@ -51,6 +111,11 @@ export default function MissionBriefing() {
     maxWidth: '720px',
     width: '100%',
     boxShadow: '0 0 40px rgba(204, 136, 0, 0.15), inset 0 0 80px rgba(0, 0, 0, 0.3)',
+    opacity: showHeader ? 1 : 0,
+    transform: showHeader ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.98)',
+    transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+    position: 'relative' as const,
+    overflow: 'hidden',
   }
 
   const headerStyle: React.CSSProperties = {
@@ -69,6 +134,8 @@ export default function MissionBriefing() {
     padding: '4px 12px',
     border: '1px solid #cc8800',
     borderRadius: '3px',
+    opacity: showHeader ? 1 : 0,
+    transition: 'opacity 0.5s ease 0.2s',
   }
 
   const titleStyle: React.CSSProperties = {
@@ -77,27 +144,23 @@ export default function MissionBriefing() {
     fontWeight: 'bold',
     margin: '8px 0 4px 0',
     textShadow: '0 0 20px rgba(255, 217, 102, 0.3)',
+    opacity: showHeader ? 1 : 0,
+    transform: showHeader ? 'translateY(0)' : 'translateY(8px)',
+    transition: 'all 0.6s ease 0.4s',
   }
 
   const subtitleStyle: React.CSSProperties = {
     color: '#888',
     fontSize: '13px',
     margin: 0,
+    opacity: showHeader ? 1 : 0,
+    transition: 'opacity 0.5s ease 0.6s',
   }
 
   const dividerStyle: React.CSSProperties = {
     height: '1px',
     background: 'linear-gradient(90deg, transparent, #cc880060, transparent)',
     margin: '20px 0',
-  }
-
-  const narrativeStyle: React.CSSProperties = {
-    color: '#ccbb88',
-    fontSize: isMobile ? '14px' : '15px',
-    lineHeight: '1.7',
-    fontStyle: 'italic',
-    textAlign: 'left',
-    marginBottom: '20px',
   }
 
   const sectionTitleStyle: React.CSSProperties = {
@@ -144,8 +207,17 @@ export default function MissionBriefing() {
   }
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} onClick={handleSkip}>
       <div style={panelStyle}>
+        {/* Scanline overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
+          borderRadius: 'inherit',
+        }} />
+
         {/* Header */}
         <div style={headerStyle}>
           <div style={actBadgeStyle}>Act {mission.campaignAct} -- Mission Briefing</div>
@@ -155,32 +227,50 @@ export default function MissionBriefing() {
 
         <div style={dividerStyle} />
 
-        {/* Narrative intro */}
-        <p style={narrativeStyle}>{mission.narrativeIntro}</p>
+        {/* Narrative intro with typewriter effect */}
+        <div style={{
+          minHeight: isMobile ? '60px' : '80px',
+          opacity: showNarrative ? 1 : 0,
+          transition: 'opacity 0.5s ease',
+        }}>
+          {showNarrative && (
+            <NarrativeText
+              text={mission.narrativeIntro}
+              active={showNarrative}
+              instant={phase === 'ready' || phase === 'content'}
+              isMobile={isMobile}
+            />
+          )}
+        </div>
 
         <div style={dividerStyle} />
 
         {/* Mission parameters */}
-        <div style={infoRowStyle}>
-          <div style={infoCardStyle}>
-            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Difficulty</div>
-            <div style={{ fontSize: '14px', color: '#ffd966', fontWeight: 'bold', textTransform: 'capitalize' }}>
-              {mission.difficulty}
+        <div style={{
+          opacity: showContent ? 1 : 0,
+          transform: showContent ? 'translateY(0)' : 'translateY(10px)',
+          transition: 'all 0.5s ease',
+        }}>
+          <div style={infoRowStyle}>
+            <div style={infoCardStyle}>
+              <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Difficulty</div>
+              <div style={{ fontSize: '14px', color: '#ffd966', fontWeight: 'bold', textTransform: 'capitalize' }}>
+                {mission.difficulty}
+              </div>
+            </div>
+            <div style={infoCardStyle}>
+              <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Round Limit</div>
+              <div style={{ fontSize: '14px', color: '#ffd966', fontWeight: 'bold' }}>{mission.roundLimit}</div>
+            </div>
+            <div style={infoCardStyle}>
+              <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Squad</div>
+              <div style={{ fontSize: '14px', color: '#ffd966', fontWeight: 'bold' }}>{heroes.length} heroes</div>
+            </div>
+            <div style={infoCardStyle}>
+              <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Threat</div>
+              <div style={{ fontSize: '14px', color: '#ff6644', fontWeight: 'bold' }}>{mission.imperialThreat}</div>
             </div>
           </div>
-          <div style={infoCardStyle}>
-            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Round Limit</div>
-            <div style={{ fontSize: '14px', color: '#ffd966', fontWeight: 'bold' }}>{mission.roundLimit}</div>
-          </div>
-          <div style={infoCardStyle}>
-            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Squad</div>
-            <div style={{ fontSize: '14px', color: '#ffd966', fontWeight: 'bold' }}>{heroes.length} heroes</div>
-          </div>
-          <div style={infoCardStyle}>
-            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Threat</div>
-            <div style={{ fontSize: '14px', color: '#ff6644', fontWeight: 'bold' }}>{mission.imperialThreat}</div>
-          </div>
-        </div>
 
         {/* Threat Clock Effects */}
         {clockEffects && clockEffects.level !== 'normal' && (
@@ -241,23 +331,43 @@ export default function MissionBriefing() {
             ))}
           </div>
         )}
+          {/* Objectives */}
+          {primaryObjectives.length > 0 && (
+            <div style={{ marginBottom: '16px' }}>
+              <div style={sectionTitleStyle}>Primary Objectives</div>
+              {primaryObjectives.map(obj => (
+                <div key={obj.id} style={objectiveStyle(true)}>
+                  <div style={markerStyle(true)} />
+                  <span>{obj.description}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
-        {secondaryObjectives.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
-            <div style={sectionTitleStyle}>Secondary Objectives</div>
-            {secondaryObjectives.map(obj => (
-              <div key={obj.id} style={objectiveStyle(false)}>
-                <div style={markerStyle(false)} />
-                <span>{obj.description} (+{obj.xpReward} XP)</span>
-              </div>
-            ))}
-          </div>
-        )}
+          {secondaryObjectives.length > 0 && (
+            <div style={{ marginBottom: '16px' }}>
+              <div style={sectionTitleStyle}>Secondary Objectives</div>
+              {secondaryObjectives.map(obj => (
+                <div key={obj.id} style={objectiveStyle(false)}>
+                  <div style={markerStyle(false)} />
+                  <span>{obj.description} (+{obj.xpReward} XP)</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div style={dividerStyle} />
 
         {/* Action buttons */}
-        <div style={{ display: 'flex', gap: '12px', flexDirection: isMobile ? 'column' : 'row' }}>
+        <div style={{
+          display: 'flex',
+          gap: '12px',
+          flexDirection: isMobile ? 'column' : 'row',
+          opacity: showButtons ? 1 : 0,
+          transform: showButtons ? 'translateY(0)' : 'translateY(10px)',
+          transition: 'all 0.5s ease',
+        }}>
           <button
             style={{
               flex: 1,
@@ -272,7 +382,7 @@ export default function MissionBriefing() {
               textTransform: 'uppercase',
               letterSpacing: '1px',
             }}
-            onClick={closeMissionBriefing}
+            onClick={(e) => { e.stopPropagation(); closeMissionBriefing() }}
           >
             Abort
           </button>
@@ -292,13 +402,68 @@ export default function MissionBriefing() {
               textShadow: '0 1px 0 rgba(255, 255, 255, 0.2)',
               boxShadow: '0 0 20px rgba(204, 136, 0, 0.3)',
             }}
-            onClick={deployFromBriefing}
+            onClick={(e) => { e.stopPropagation(); deployFromBriefing() }}
           >
             Deploy Squad
           </button>
         </div>
+
+        {/* Skip hint */}
+        {phase !== 'ready' && (
+          <div style={{
+            textAlign: 'center',
+            marginTop: '12px',
+            color: '#444',
+            fontSize: '10px',
+            letterSpacing: '1px',
+          }}>
+            Click to skip animation
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
+// ============================================================================
+// NARRATIVE TEXT WITH TYPEWRITER
+// ============================================================================
+
+function NarrativeText({ text, active, instant, isMobile }: {
+  text: string; active: boolean; instant: boolean; isMobile: boolean
+}) {
+  const displayed = useTypewriter(text, 18, 200, active && !instant)
+  const showText = instant ? text : displayed
+  const showCursor = !instant && displayed.length < text.length
+
+  return (
+    <p style={{
+      color: '#ccbb88',
+      fontSize: isMobile ? '14px' : '15px',
+      lineHeight: '1.7',
+      fontStyle: 'italic',
+      textAlign: 'left',
+      marginBottom: '20px',
+      margin: 0,
+    }}>
+      {showText}
+      {showCursor && (
+        <span style={{
+          display: 'inline-block',
+          width: '2px',
+          height: '14px',
+          backgroundColor: '#cc8800',
+          marginLeft: '2px',
+          verticalAlign: 'text-bottom',
+          animation: 'mb-blink 0.6s step-end infinite',
+        }} />
+      )}
+      <style>{`
+        @keyframes mb-blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+      `}</style>
+    </p>
+  )
+}

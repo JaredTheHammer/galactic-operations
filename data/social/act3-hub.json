@@ -296,6 +296,11 @@
                 "type": "xp",
                 "xpAmount": 2,
                 "description": "Tactical terrain knowledge gained."
+              },
+              {
+                "type": "cover_tracks",
+                "exposureDelta": -1,
+                "description": "Fenwick laid false trails during his recon, leading Drayen's scouts away from your position."
               }
             ],
             "failureOutcomes": [

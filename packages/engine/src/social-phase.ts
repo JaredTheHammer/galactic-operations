@@ -47,6 +47,10 @@ import {
   ACTIVITY_CLOCK_TICKS,
   SLOTS_PER_ACT,
 } from './types';
+  ActProgress,
+} from './types';
+
+import { DISPOSITION_DIFFICULTY, SOCIAL_SKILLS, createActProgress } from './types';
 
 import {
   resolveSkillCheck,
@@ -405,10 +409,83 @@ export function applySocialOutcomes(
         }
         break;
       }
+
+      case 'cover_tracks': {
+        // Reduce exposure via act progress
+        if (outcome.exposureDelta && state.actProgress) {
+          const newExposure = Math.max(0, state.actProgress.exposure + outcome.exposureDelta);
+          state = {
+            ...state,
+            actProgress: {
+              ...state.actProgress,
+              exposure: newExposure,
+            },
+          };
+        }
+        break;
+      }
     }
   }
 
   return state;
+}
+
+/**
+ * Update campaign act progress based on a social check result.
+ * - Success: influence +1
+ * - Triumph: influence +2 (instead of +1)
+ * - Failed coercion/deception: exposure +1
+ * - Despair: exposure +2
+ * - Reputation gain outcomes: influence +1
+ * - Companion recruited outcomes: influence +2
+ */
+export function updateActProgressFromSocialCheck(
+  campaign: CampaignState,
+  checkResult: SocialCheckResult,
+): CampaignState {
+  let actProgress = campaign.actProgress ?? createActProgress(campaign.currentAct);
+
+  let exposureDelta = 0;
+  let influenceDelta = 0;
+
+  if (checkResult.isSuccess) {
+    // Triumph gives +2, regular success gives +1
+    influenceDelta += checkResult.triumphs > 0 ? 2 : 1;
+  } else {
+    // Failed coercion/deception: +1 exposure
+    if (checkResult.skillUsed === 'coercion' || checkResult.skillUsed === 'deception') {
+      exposureDelta += 1;
+    }
+  }
+
+  // Despair: +2 exposure
+  if (checkResult.despairs > 0) {
+    exposureDelta += checkResult.despairs * 2;
+  }
+
+  // Check outcomes for reputation and companion gains
+  for (const outcome of checkResult.outcomesApplied) {
+    if (outcome.type === 'reputation' && outcome.reputationDelta && outcome.reputationDelta > 0) {
+      influenceDelta += 1;
+    }
+    if (outcome.type === 'companion') {
+      influenceDelta += 2;
+    }
+  }
+
+  if (exposureDelta === 0 && influenceDelta === 0) return campaign;
+
+  const newExposure = Math.max(0, Math.min(10, actProgress.exposure + exposureDelta));
+  const newInfluence = actProgress.influence + influenceDelta;
+
+  return {
+    ...campaign,
+    actProgress: {
+      ...actProgress,
+      exposure: newExposure,
+      influence: newInfluence,
+    },
+  };
 }
 
 // ============================================================================
@@ -565,7 +642,7 @@ export function executeSocialEncounter(
   const { checkResult, outcomes, narrativeText } = resolveSocialCheck(hero, option, npc, rollFn);
 
   // Apply outcomes
-  const updatedCampaign = applySocialOutcomes(campaign, outcomes, heroId);
+  let updatedCampaign = applySocialOutcomes(campaign, outcomes, heroId);
 
   const result: SocialCheckResult = {
     encounterId: encounter.id,
@@ -580,6 +657,9 @@ export function executeSocialEncounter(
     outcomesApplied: outcomes,
     narrativeText,
   };
+
+  // Update act progress (exposure/influence) based on check result
+  updatedCampaign = updateActProgressFromSocialCheck(updatedCampaign, result);
 
   return { campaign: updatedCampaign, result };
 }
