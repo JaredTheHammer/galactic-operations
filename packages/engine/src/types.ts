@@ -418,6 +418,12 @@ export interface HeroCharacter {
    * At 1+ missions rested, a wounded hero recovers automatically.
    */
   missionsRested?: number;
+
+  /**
+   * Active critical injuries sustained across campaign missions.
+   * Stacking injuries compound penalties without permadeath.
+   */
+  criticalInjuries?: ActiveCriticalInjury[];
 }
 
 // ============================================================================
@@ -1203,6 +1209,20 @@ export interface CampaignState {
 
   /** Active shop discounts (percentage, from social outcomes) */
   activeDiscounts?: Record<string, number>;
+
+  // --- Pandemic Legacy Systems ---
+
+  /** Active critical injuries on heroes (keyed by hero ID) */
+  criticalInjuries?: Record<string, ActiveCriticalInjury[]>;
+
+  /** Campaign overworld state (sector control, mutations, party position) */
+  overworld?: CampaignOverworldState;
+
+  /** Legacy event deck state (triggered events, pending reveals, rule changes) */
+  legacyDeck?: LegacyDeckState;
+
+  /** Campaign momentum (-3 to +3): negative = losing streak, positive = winning streak */
+  momentum?: number;
 }
 
 /** Campaign save file format (serializable to JSON) */
@@ -1538,6 +1558,270 @@ export interface SocialPhaseResult {
   itemsSold: Array<{ itemId: string; revenue: number }>;
   creditsSpentOnHealing: number;
   completedAt: string;
+}
+
+// ============================================================================
+// CRITICAL INJURY SYSTEM (Pandemic Legacy-inspired persistent consequences)
+// ============================================================================
+
+/** Severity tiers for critical injuries */
+export type CriticalInjurySeverity = 'minor' | 'moderate' | 'severe';
+
+/** Categories of mechanical effects a critical injury can impose */
+export type CriticalInjuryEffectType =
+  | 'reduce_characteristic'    // -1 to a specific characteristic
+  | 'reduce_wound_threshold'   // Lower max wounds
+  | 'reduce_strain_threshold'  // Lower max strain
+  | 'reduce_speed'             // -1 movement
+  | 'reduce_soak'              // -1 soak
+  | 'skill_penalty'            // -1 to specific skill checks
+  | 'upgrade_difficulty'       // Upgrade 1 difficulty die on specific action types
+  | 'lose_free_maneuver'       // Must spend strain to get first maneuver on some turns
+  | 'condition_vulnerability'  // Easier to apply specific condition
+  | 'limit_actions';           // Cannot perform a specific action type
+
+/** A single mechanical effect from a critical injury */
+export interface CriticalInjuryEffect {
+  type: CriticalInjuryEffectType;
+  /** Numeric magnitude of the effect (e.g., -1 for characteristic reduction) */
+  value: number;
+  /** Target of the effect (characteristic name, skill id, action type, condition, etc.) */
+  target?: string;
+  /** Optional description of the mechanical impact */
+  description?: string;
+}
+
+/** Definition of a critical injury (loaded from JSON data) */
+export interface CriticalInjuryDefinition {
+  id: string;
+  name: string;
+  description: string;
+  severity: CriticalInjurySeverity;
+  /** d66 roll range: [min, max] inclusive (e.g., [1, 10] for minor injuries) */
+  rollRange: [number, number];
+  /** Mechanical effects applied while this injury is active */
+  effects: CriticalInjuryEffect[];
+  /** Whether this injury can be recovered from (all can, but some are harder) */
+  recoverable: boolean;
+  /** Difficulty (purple dice) for the Medicine/Mechanics check to treat */
+  treatmentDifficulty: number;
+  /** Challenge dice (red) added to the treatment check */
+  treatmentChallengeDice?: number;
+  /** Skill used for treatment (medicine for organic, mechanics for droid) */
+  treatmentSkill: 'medicine' | 'mechanics';
+  /** Credit cost for professional medical treatment (bypasses skill check) */
+  treatmentCost: number;
+  /** Number of rest missions required for natural recovery (0 = never heals naturally) */
+  naturalRecoveryMissions: number;
+}
+
+/** An active critical injury on a hero */
+export interface ActiveCriticalInjury {
+  /** Reference to the CriticalInjuryDefinition.id */
+  injuryId: string;
+  /** When this injury was sustained (mission ID) */
+  sustainedInMission: string;
+  /** Number of missions rested since sustaining this injury */
+  missionsRested: number;
+  /** Whether treatment has been attempted (to prevent repeated free attempts) */
+  treatmentAttempted: boolean;
+}
+
+// ============================================================================
+// SECTOR CONTROL SYSTEM (Pandemic Legacy-inspired escalating threat)
+// ============================================================================
+
+/** Control level of a sector (higher = more Imperial control) */
+export type SectorControlLevel = 0 | 1 | 2 | 3 | 4 | 5;
+
+/** Labels for sector control levels */
+export const SECTOR_CONTROL_LABELS: Record<SectorControlLevel, string> = {
+  0: 'Liberated',
+  1: 'Contested',
+  2: 'Occupied',
+  3: 'Fortified',
+  4: 'Lockdown',
+  5: 'Crushed',
+};
+
+/** Effects applied at each sector control level */
+export const SECTOR_CONTROL_EFFECTS: Record<SectorControlLevel, {
+  threatBonus: number;
+  reinforcementBonus: number;
+  shopPriceMultiplier: number;
+  socialDifficultyMod: number;
+  description: string;
+}> = {
+  0: { threatBonus: -2, reinforcementBonus: 0, shopPriceMultiplier: 0.8, socialDifficultyMod: -1, description: 'Rebel-friendly zone. Reduced threat, cheaper supplies.' },
+  1: { threatBonus: 0, reinforcementBonus: 0, shopPriceMultiplier: 1.0, socialDifficultyMod: 0, description: 'Active resistance. Standard conditions.' },
+  2: { threatBonus: 1, reinforcementBonus: 0, shopPriceMultiplier: 1.1, socialDifficultyMod: 0, description: 'Imperial presence increasing. Slightly elevated threat.' },
+  3: { threatBonus: 2, reinforcementBonus: 1, shopPriceMultiplier: 1.25, socialDifficultyMod: 1, description: 'Heavy garrison. Extra reinforcements, social checks harder.' },
+  4: { threatBonus: 3, reinforcementBonus: 2, shopPriceMultiplier: 1.5, socialDifficultyMod: 1, description: 'Martial law. Significant reinforcements, supply shortages.' },
+  5: { threatBonus: 5, reinforcementBonus: 3, shopPriceMultiplier: 2.0, socialDifficultyMod: 2, description: 'Total Imperial domination. Maximum threat and restrictions.' },
+};
+
+/** A sector on the campaign overworld */
+export interface CampaignSector {
+  id: string;
+  name: string;
+  description: string;
+  /** Current Imperial control level (0-5) */
+  controlLevel: SectorControlLevel;
+  /** Mission IDs that take place in this sector */
+  missionIds: string[];
+  /** Social hub ID for this sector (if any) */
+  socialHubId?: string;
+  /** Adjacent sector IDs (for spread mechanics) */
+  adjacentSectorIds: string[];
+  /** Whether this sector has been visited */
+  visited: boolean;
+  /** Persistent map mutations applied to this sector */
+  mutations: SectorMutation[];
+}
+
+/** A persistent mutation to a sector's map/state */
+export interface SectorMutation {
+  id: string;
+  type: 'destroyed' | 'fortified' | 'secured' | 'contaminated' | 'reinforced';
+  /** Description of what changed */
+  description: string;
+  /** Position on the campaign map (for visual rendering) */
+  position?: GridCoordinate;
+  /** Mission that caused this mutation */
+  causedByMission: string;
+  /** Mechanical effect on missions in this sector */
+  effect?: {
+    /** Additional initial enemies */
+    bonusEnemies?: NPCSpawnGroup[];
+    /** Terrain modifications */
+    terrainOverrides?: Array<{ position: GridCoordinate; terrain: TerrainType }>;
+    /** Deploy zone restrictions */
+    deployZoneRestrictions?: GridCoordinate[];
+  };
+}
+
+// ============================================================================
+// LEGACY EVENT DECK (Pandemic Legacy-inspired triggered narrative events)
+// ============================================================================
+
+/** Trigger conditions for legacy events */
+export type LegacyEventTrigger =
+  | { type: 'mission_complete'; missionId: string; outcome?: 'victory' | 'defeat' }
+  | { type: 'act_start'; act: number }
+  | { type: 'act_end'; act: number }
+  | { type: 'hero_wounded'; heroCount?: number }
+  | { type: 'hero_critical_injury'; severity?: CriticalInjurySeverity }
+  | { type: 'sector_control'; sectorId: string; minLevel: SectorControlLevel }
+  | { type: 'narrative_item'; itemId: string }
+  | { type: 'momentum_threshold'; minMomentum?: number; maxMomentum?: number }
+  | { type: 'missions_played'; count: number }
+  | { type: 'companion_recruited'; companionId: string };
+
+/** Effects that a legacy event can apply */
+export type LegacyEventEffect =
+  | { type: 'unlock_mission'; missionId: string }
+  | { type: 'add_narrative_item'; itemId: string }
+  | { type: 'remove_narrative_item'; itemId: string }
+  | { type: 'modify_sector_control'; sectorId: string; delta: number }
+  | { type: 'award_credits'; amount: number }
+  | { type: 'award_xp'; amount: number }
+  | { type: 'add_critical_injury'; heroSelector: 'random' | 'most_wounded' | 'all'; injuryId: string }
+  | { type: 'heal_critical_injury'; heroSelector: 'random' | 'most_injured' | 'all'; injuryId?: string }
+  | { type: 'modify_momentum'; delta: number }
+  | { type: 'add_sector_mutation'; sectorId: string; mutation: SectorMutation }
+  | { type: 'unlock_shop_item'; shopId: string; itemId: string }
+  | { type: 'modify_threat_multiplier'; delta: number }
+  | { type: 'add_companion'; companionId: string }
+  | { type: 'remove_companion'; companionId: string }
+  | { type: 'add_rule_change'; ruleId: string };
+
+/** A single legacy event definition */
+export interface LegacyEventDefinition {
+  id: string;
+  name: string;
+  /** Narrative text shown to the player when the event triggers */
+  narrativeText: string;
+  /** Conditions that must ALL be met for this event to trigger */
+  triggers: LegacyEventTrigger[];
+  /** Effects applied when the event fires */
+  effects: LegacyEventEffect[];
+  /** Whether this event can only fire once per campaign */
+  oneShot: boolean;
+  /** Priority for ordering when multiple events trigger simultaneously */
+  priority: number;
+  /** Campaign act this event belongs to (for deck ordering) */
+  act: number;
+  /** If true, event is revealed to player before effects apply (dossier-style) */
+  isRevealed: boolean;
+}
+
+/** State of the legacy event deck in a campaign */
+export interface LegacyDeckState {
+  /** Events that have been triggered and resolved */
+  resolvedEventIds: string[];
+  /** Active rule changes from legacy events */
+  activeRuleChanges: string[];
+  /** Events waiting to be revealed (triggered but not yet shown to player) */
+  pendingEventIds: string[];
+}
+
+// ============================================================================
+// MOMENTUM SYSTEM (Pandemic Legacy-inspired win/loss rubber-banding)
+// ============================================================================
+
+/** Momentum level thresholds and their effects */
+export const MOMENTUM_EFFECTS: Record<number, {
+  label: string;
+  bonusTacticCards: number;
+  bonusCredits: number;
+  bonusDeployPoints: number;
+  threatReduction: number;
+  description: string;
+}> = {
+  [-3]: { label: 'Desperate', bonusTacticCards: 3, bonusCredits: 150, bonusDeployPoints: 2, threatReduction: 3, description: 'Rebel forces receive significant reinforcements and supply drops.' },
+  [-2]: { label: 'Struggling', bonusTacticCards: 2, bonusCredits: 100, bonusDeployPoints: 1, threatReduction: 2, description: 'Allied networks provide extra support.' },
+  [-1]: { label: 'Disadvantaged', bonusTacticCards: 1, bonusCredits: 50, bonusDeployPoints: 0, threatReduction: 1, description: 'Sympathizers offer modest assistance.' },
+  [0]: { label: 'Balanced', bonusTacticCards: 0, bonusCredits: 0, bonusDeployPoints: 0, threatReduction: 0, description: 'Standard operations. No adjustment.' },
+  [1]: { label: 'Advantaged', bonusTacticCards: 0, bonusCredits: -25, bonusDeployPoints: 0, threatReduction: -1, description: 'Imperial forces respond to rebel successes with increased patrols.' },
+  [2]: { label: 'Dominant', bonusTacticCards: 0, bonusCredits: -50, bonusDeployPoints: 0, threatReduction: -2, description: 'Empire redirects resources to counter rebel momentum.' },
+  [3]: { label: 'Overwhelming', bonusTacticCards: -1, bonusCredits: -75, bonusDeployPoints: 0, threatReduction: -3, description: 'Full Imperial counterstrike. Prepare for heavy resistance.' },
+};
+
+/** Clamp range for momentum value */
+export const MOMENTUM_MIN = -3;
+export const MOMENTUM_MAX = 3;
+
+// ============================================================================
+// CAMPAIGN OVERWORLD MAP (Pandemic Legacy-inspired persistent world)
+// ============================================================================
+
+/** Campaign overworld map definition (loaded from JSON) */
+export interface CampaignOverworldDefinition {
+  id: string;
+  name: string;
+  description: string;
+  /** Sectors that make up the overworld */
+  sectors: CampaignSector[];
+  /** Visual layout data for rendering the overworld map */
+  sectorPositions: Record<string, { x: number; y: number }>;
+  /** Connections between sectors (for adjacency rendering) */
+  connections: Array<{ from: string; to: string }>;
+}
+
+/** Runtime overworld state stored in CampaignState */
+export interface CampaignOverworldState {
+  /** Current sector states (keyed by sector ID) */
+  sectors: Record<string, CampaignSector>;
+  /** ID of the sector the party is currently in */
+  currentSectorId: string;
+  /** History of sector control changes */
+  controlHistory: Array<{
+    sectorId: string;
+    previousLevel: SectorControlLevel;
+    newLevel: SectorControlLevel;
+    causedByMission: string;
+    timestamp: string;
+  }>;
 }
 
 // ============================================================================

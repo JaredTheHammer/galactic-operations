@@ -19,9 +19,16 @@ import type {
   Side,
   Figure,
   GameState,
+  CriticalInjuryDefinition,
+  LegacyEventDefinition,
 } from './types';
 
 import { DEFAULT_XP_AWARDS, THREAT_SCALING } from './types';
+import { processNaturalRecovery } from './critical-injuries';
+import { updateMomentum, applyMomentumCredits } from './momentum';
+import { processOverworldPostMission } from './campaign-overworld';
+import { processLegacyEvents } from './legacy-events';
+import type { LegacyEventContext } from './legacy-events';
 
 // ============================================================================
 // CAMPAIGN CREATION
@@ -233,6 +240,14 @@ export interface MissionCompletionInput {
   heroesWounded?: string[];
   leaderKilled: boolean;
   narrativeBonus?: number;
+  /** New critical injuries sustained during this mission: heroId -> injuryId[] */
+  newCriticalInjuries?: Record<string, string[]>;
+  /** Critical injury definitions for natural recovery processing */
+  criticalInjuryDefs?: Record<string, CriticalInjuryDefinition>;
+  /** Legacy event definitions for post-mission event checking */
+  legacyEventDefs?: Record<string, LegacyEventDefinition>;
+  /** Whether an act just ended (triggers escalation) */
+  actJustEnded?: boolean;
 }
 
 /**
@@ -409,7 +424,40 @@ export function completeMission(
     }
   }
 
-  const newCampaign: CampaignState = {
+  // --- Pandemic Legacy: Critical Injuries ---
+  // Apply new critical injuries from this mission and process natural recovery
+  const criticalInjuryDefs = input.criticalInjuryDefs ?? {};
+  const newCriticalInjuries = input.newCriticalInjuries ?? {};
+  for (const [heroId, heroRef] of Object.entries(newHeroes)) {
+    // Add new critical injuries sustained this mission
+    const injuryIds = newCriticalInjuries[heroId] ?? [];
+    let updatedHero = heroRef;
+    for (const injuryId of injuryIds) {
+      const existing = updatedHero.criticalInjuries ?? [];
+      updatedHero = {
+        ...updatedHero,
+        criticalInjuries: [
+          ...existing,
+          {
+            injuryId,
+            sustainedInMission: mission.id,
+            missionsRested: 0,
+            treatmentAttempted: false,
+          },
+        ],
+      };
+    }
+
+    // Process natural recovery for existing injuries
+    const wasDeployed = deployedHeroIds.has(heroId);
+    if (Object.keys(criticalInjuryDefs).length > 0) {
+      updatedHero = processNaturalRecovery(updatedHero, wasDeployed, criticalInjuryDefs);
+    }
+
+    newHeroes[heroId] = updatedHero;
+  }
+
+  let newCampaign: CampaignState = {
     ...campaign,
     lastPlayedAt: new Date().toISOString(),
     heroes: newHeroes,
@@ -422,6 +470,51 @@ export function completeMission(
     threatLevel: campaign.threatLevel + scaling.perMission,
     missionsPlayed: campaign.missionsPlayed + 1,
   };
+
+  // --- Pandemic Legacy: Momentum System ---
+  // Only active when the campaign has momentum initialized (opted in)
+  const allObjectivesCompleted = completedObjectiveIds.length >= mission.objectives.length;
+  const noHeroesWounded = heroesWounded.length === 0 && heroesIncapacitated.length === 0;
+  const allHeroesIncap = Object.keys(campaign.heroes).length > 0 &&
+    heroesIncapacitated.length >= Object.keys(campaign.heroes).length;
+  if (campaign.momentum !== undefined) {
+    newCampaign = updateMomentum(
+      newCampaign, outcome, allObjectivesCompleted, noHeroesWounded, allHeroesIncap,
+    );
+    newCampaign = applyMomentumCredits(newCampaign);
+  }
+
+  // --- Pandemic Legacy: Campaign Overworld ---
+  if (newCampaign.overworld) {
+    newCampaign = processOverworldPostMission(
+      newCampaign, mission.id, outcome,
+      allObjectivesCompleted, noHeroesWounded, allHeroesIncap,
+      input.actJustEnded ?? false,
+    );
+  }
+
+  // --- Pandemic Legacy: Legacy Event Deck ---
+  if (input.legacyEventDefs && Object.keys(input.legacyEventDefs).length > 0) {
+    const eventContext: LegacyEventContext = {
+      campaign: newCampaign,
+      completedMissionId: mission.id,
+      missionOutcome: outcome,
+      actStarted: currentAct > campaign.currentAct ? currentAct : undefined,
+      actEnded: input.actJustEnded ? campaign.currentAct : undefined,
+      heroesWounded,
+      newCriticalInjuries: Object.entries(newCriticalInjuries).flatMap(([heroId, ids]) =>
+        ids.map(id => {
+          const def = criticalInjuryDefs[id];
+          return { heroId, severity: def?.severity ?? 'minor' as const };
+        })
+      ),
+    };
+
+    const { campaign: postEventCampaign } = processLegacyEvents(
+      newCampaign, input.legacyEventDefs, eventContext,
+    );
+    newCampaign = postEventCampaign;
+  }
 
   return { campaign: newCampaign, result };
 }
