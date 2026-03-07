@@ -19,9 +19,19 @@ import type {
   Side,
   Figure,
   GameState,
+  ActProgress,
+  ActOutcome,
+  ActOutcomeTier,
+  ExposureStatus,
 } from './types';
 
-import { DEFAULT_XP_AWARDS, THREAT_SCALING } from './types';
+import {
+  DEFAULT_XP_AWARDS,
+  THREAT_SCALING,
+  createActProgress,
+  getExposureStatus,
+  getActOutcomeTier,
+} from './types';
 
 // ============================================================================
 // CAMPAIGN CREATION
@@ -68,6 +78,8 @@ export function createCampaign(input: CampaignCreationInput): CampaignState {
     threatLevel: 0,
     threatMultiplier: scaling.baseMultiplier,
     missionsPlayed: 0,
+    actProgress: createActProgress(1),
+    actOutcomes: [],
   };
 }
 
@@ -409,7 +421,46 @@ export function completeMission(
     }
   }
 
-  const newCampaign: CampaignState = {
+  // --- Rebellion Mechanics: Exposure & Influence/Control ---
+  let actProgress = campaign.actProgress ?? createActProgress(campaign.currentAct);
+
+  // Ensure actProgress matches current act (backward compat)
+  if (actProgress.act !== campaign.currentAct) {
+    actProgress = createActProgress(campaign.currentAct);
+  }
+
+  const exposureDelta = calculateMissionExposure(
+    mission, outcome, heroesIncapacitated, completedObjectiveIds,
+    totalKills, roundsPlayed,
+  );
+  const influenceDelta = calculateMissionInfluence(outcome, completedObjectiveIds);
+  const controlDelta = calculateMissionControl(outcome, heroesIncapacitated);
+
+  // Check if intel was gathered this mission (reduces exposure, max once per act)
+  const newIntelItems = lootCollected.filter(id => {
+    const token = mission.lootTokens.find(l => l.id === id);
+    return token?.reward.type === 'narrative';
+  });
+  const intelReduction = newIntelItems.length > 0 ? -1 : 0;
+
+  actProgress = updateActProgress(
+    actProgress,
+    exposureDelta + intelReduction,
+    influenceDelta,
+    controlDelta,
+  );
+
+  // Handle act finale: freeze outcome and apply consequences
+  let actOutcomes = [...(campaign.actOutcomes ?? [])];
+  let actOutcomeForResult: ActOutcome | undefined;
+
+  if (isActFinale) {
+    const frozenOutcome = freezeActOutcome(actProgress);
+    actOutcomes = [...actOutcomes, frozenOutcome];
+    actOutcomeForResult = frozenOutcome;
+  }
+
+  let newCampaign: CampaignState = {
     ...campaign,
     lastPlayedAt: new Date().toISOString(),
     heroes: newHeroes,
@@ -421,9 +472,298 @@ export function completeMission(
     currentAct,
     threatLevel: campaign.threatLevel + scaling.perMission,
     missionsPlayed: campaign.missionsPlayed + 1,
+    actProgress,
+    actOutcomes,
   };
 
+  // If act advanced, apply consequences from the completed act and reset progress
+  if (currentAct > campaign.currentAct && actOutcomeForResult) {
+    newCampaign = applyActOutcomeConsequences(newCampaign, actOutcomeForResult);
+    newCampaign.actProgress = createActProgress(currentAct);
+  }
+
   return { campaign: newCampaign, result };
+}
+
+// ============================================================================
+// REBELLION MECHANICS: EXPOSURE & INFLUENCE/CONTROL
+// ============================================================================
+
+/** High body count threshold that triggers +1 exposure */
+const HIGH_KILL_THRESHOLD = 8;
+
+/** Exposure thresholds that grant one-time Control bonuses */
+const EXPOSURE_CONTROL_THRESHOLDS: Array<{ threshold: number; controlBonus: number }> = [
+  { threshold: 4, controlBonus: 1 },  // Detected
+  { threshold: 7, controlBonus: 2 },  // Hunted
+];
+
+/**
+ * Calculate exposure changes from a completed mission.
+ */
+export function calculateMissionExposure(
+  mission: MissionDefinition,
+  outcome: 'victory' | 'defeat' | 'draw',
+  heroesIncapacitated: string[],
+  completedObjectiveIds: string[],
+  totalKills: number,
+  roundsPlayed: number,
+): number {
+  let delta = 0;
+
+  // Mission defeat: +2
+  if (outcome === 'defeat') delta += 2;
+
+  // Hero incapacitated: +1 each
+  delta += heroesIncapacitated.length;
+
+  // Missed objectives: +1 per incomplete objective
+  const incompleteObjectives = mission.objectives.filter(
+    obj => !completedObjectiveIds.includes(obj.id),
+  );
+  delta += incompleteObjectives.length;
+
+  // High body count: +1
+  if (totalKills > HIGH_KILL_THRESHOLD) delta += 1;
+
+  // Round limit reached: +1
+  if (roundsPlayed >= mission.roundLimit) delta += 1;
+
+  // Perfect mission: -1 (all objectives, no incapacitated)
+  if (
+    outcome === 'victory' &&
+    incompleteObjectives.length === 0 &&
+    heroesIncapacitated.length === 0
+  ) {
+    delta -= 1;
+  }
+
+  return delta;
+}
+
+/**
+ * Calculate influence changes from a completed mission.
+ */
+export function calculateMissionInfluence(
+  outcome: 'victory' | 'defeat' | 'draw',
+  completedObjectiveIds: string[],
+): number {
+  let delta = 0;
+
+  // Mission victory: +2
+  if (outcome === 'victory') delta += 2;
+
+  // Each completed objective: +1
+  delta += completedObjectiveIds.length;
+
+  return delta;
+}
+
+/**
+ * Calculate control changes from a completed mission.
+ */
+export function calculateMissionControl(
+  outcome: 'victory' | 'defeat' | 'draw',
+  heroesIncapacitated: string[],
+): number {
+  let delta = 0;
+
+  // Passive per mission: +1
+  delta += 1;
+
+  // Mission defeat: +3
+  if (outcome === 'defeat') delta += 3;
+
+  // Mission draw: +1
+  if (outcome === 'draw') delta += 1;
+
+  // Hero incapacitated: +1 each
+  delta += heroesIncapacitated.length;
+
+  return delta;
+}
+
+/**
+ * Update act progress with mission results.
+ * Handles exposure threshold crossing bonuses to control.
+ */
+export function updateActProgress(
+  progress: ActProgress,
+  exposureDelta: number,
+  influenceDelta: number,
+  controlDelta: number,
+): ActProgress {
+  const newExposure = Math.max(0, Math.min(10, progress.exposure + exposureDelta));
+  let extraControl = 0;
+  const newThresholds = [...progress.exposureThresholdsTriggered];
+
+  // Check exposure threshold crossings for one-time control bonuses
+  for (const { threshold, controlBonus } of EXPOSURE_CONTROL_THRESHOLDS) {
+    if (newExposure >= threshold && !progress.exposureThresholdsTriggered.includes(threshold)) {
+      extraControl += controlBonus;
+      newThresholds.push(threshold);
+    }
+  }
+
+  return {
+    act: progress.act,
+    exposure: newExposure,
+    influence: progress.influence + influenceDelta,
+    control: progress.control + controlDelta + extraControl,
+    exposureThresholdsTriggered: newThresholds,
+  };
+}
+
+/**
+ * Freeze current act progress into an ActOutcome.
+ */
+export function freezeActOutcome(progress: ActProgress): ActOutcome {
+  const delta = progress.influence - progress.control;
+  return {
+    act: progress.act,
+    exposure: progress.exposure,
+    influence: progress.influence,
+    control: progress.control,
+    delta,
+    tier: getActOutcomeTier(delta),
+  };
+}
+
+/** Act outcome carry-forward consequences */
+export interface ActOutcomeConsequences {
+  creditsDelta: number;
+  threatModifier: number;
+  reputationChanges: Array<{ factionId: string; delta: number }>;
+  loseCompanion: boolean;
+}
+
+/**
+ * Determine the consequences of an act outcome tier for the next act.
+ */
+export function getActOutcomeConsequences(tier: ActOutcomeTier): ActOutcomeConsequences {
+  switch (tier) {
+    case 'dominant':
+      return { creditsDelta: 100, threatModifier: -2, reputationChanges: [], loseCompanion: false };
+    case 'favorable':
+      return { creditsDelta: 50, threatModifier: -1, reputationChanges: [], loseCompanion: false };
+    case 'contested':
+      return { creditsDelta: 0, threatModifier: 0, reputationChanges: [], loseCompanion: false };
+    case 'unfavorable':
+      return { creditsDelta: -25, threatModifier: 1, reputationChanges: [], loseCompanion: false };
+    case 'dire':
+      return { creditsDelta: -50, threatModifier: 2, reputationChanges: [], loseCompanion: true };
+  }
+}
+
+/**
+ * Apply act outcome consequences to campaign state.
+ * Called when transitioning from one act to the next.
+ */
+export function applyActOutcomeConsequences(
+  campaign: CampaignState,
+  outcome: ActOutcome,
+): CampaignState {
+  const consequences = getActOutcomeConsequences(outcome.tier);
+  let state = { ...campaign };
+
+  // Credits (floor at 0)
+  state.credits = Math.max(0, state.credits + consequences.creditsDelta);
+
+  // Threat modifier applied to the campaign threat level
+  state.threatLevel = state.threatLevel + consequences.threatModifier;
+
+  // Reputation changes for unfavorable/dire (applied generically)
+  if (outcome.tier === 'unfavorable') {
+    const reputation = { ...(state.factionReputation ?? {}) };
+    // Apply -1 to the faction with highest reputation (most to lose)
+    const factions = Object.entries(reputation);
+    if (factions.length > 0) {
+      const [topFaction] = factions.sort((a, b) => b[1] - a[1]);
+      reputation[topFaction[0]] = topFaction[1] - 1;
+      state.factionReputation = reputation;
+    }
+  } else if (outcome.tier === 'dire') {
+    const reputation = { ...(state.factionReputation ?? {}) };
+    // Apply -1 to top two factions
+    const factions = Object.entries(reputation).sort((a, b) => b[1] - a[1]);
+    for (let i = 0; i < Math.min(2, factions.length); i++) {
+      reputation[factions[i][0]] = factions[i][1] - 1;
+    }
+    state.factionReputation = reputation;
+
+    // Lose a companion (remove the last recruited one)
+    if (consequences.loseCompanion && state.companions && state.companions.length > 0) {
+      state.companions = state.companions.slice(0, -1);
+    }
+  }
+
+  // Dominant/favorable: free reputation boost to highest faction
+  if (outcome.tier === 'dominant' || outcome.tier === 'favorable') {
+    const reputation = { ...(state.factionReputation ?? {}) };
+    const factions = Object.entries(reputation);
+    const boost = outcome.tier === 'dominant' ? 2 : 1;
+    if (factions.length > 0) {
+      const [topFaction] = factions.sort((a, b) => b[1] - a[1]);
+      reputation[topFaction[0]] = topFaction[1] + boost;
+      state.factionReputation = reputation;
+    }
+  }
+
+  return state;
+}
+
+/**
+ * Get the finale modifiers based on current exposure status.
+ * These are applied when starting an act finale (missionIndex === 4).
+ */
+export function getFinaleExposureModifiers(exposure: number): {
+  threatBonus: number;
+  roundLimitModifier: number;
+  extraReinforcements: Array<{
+    id: string;
+    triggerRound: number;
+    groups: Array<{ npcProfileId: string; count: number; asMinGroup: boolean }>;
+    threatCost: number;
+  }>;
+} {
+  const status = getExposureStatus(exposure);
+
+  switch (status) {
+    case 'ghost':
+      return { threatBonus: 0, roundLimitModifier: 0, extraReinforcements: [] };
+    case 'detected':
+      return {
+        threatBonus: 3,
+        roundLimitModifier: -1,
+        extraReinforcements: [
+          {
+            id: 'exposure-wave-1',
+            triggerRound: 3,
+            groups: [{ npcProfileId: 'stormtrooper', count: 3, asMinGroup: true }],
+            threatCost: 0, // Free, exposure-driven
+          },
+        ],
+      };
+    case 'hunted':
+      return {
+        threatBonus: 5,
+        roundLimitModifier: -2,
+        extraReinforcements: [
+          {
+            id: 'exposure-wave-1',
+            triggerRound: 2,
+            groups: [{ npcProfileId: 'stormtrooper', count: 3, asMinGroup: true }],
+            threatCost: 0,
+          },
+          {
+            id: 'exposure-wave-2',
+            triggerRound: 4,
+            groups: [{ npcProfileId: 'stormtrooper-sergeant', count: 2, asMinGroup: true }],
+            threatCost: 0,
+          },
+        ],
+      };
+  }
 }
 
 // ============================================================================

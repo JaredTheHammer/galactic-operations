@@ -70,6 +70,18 @@ export type {
   // Species Abilities
   SpeciesAbilityEffect,
   SpeciesAbility,
+  // Rebellion Mechanics
+  ActProgress,
+  ActOutcome,
+  ActOutcomeTier,
+  ExposureStatus,
+} from './types.js';
+
+// Re-export rebellion mechanics helpers from types
+export {
+  getExposureStatus,
+  getActOutcomeTier,
+  createActProgress,
 } from './types.js';
 
 // Re-export data loader functions

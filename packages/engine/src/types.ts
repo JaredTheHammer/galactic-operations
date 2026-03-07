@@ -1203,6 +1203,73 @@ export interface CampaignState {
 
   /** Active shop discounts (percentage, from social outcomes) */
   activeDiscounts?: Record<string, number>;
+
+  /** Per-act rebellion mechanics (Exposure + Influence/Control, reset each act) */
+  actProgress?: ActProgress;
+
+  /** Historical act outcomes (carry consequences forward between acts) */
+  actOutcomes?: ActOutcome[];
+}
+
+// ============================================================================
+// ACT PROGRESS & OUTCOME TYPES (Rebellion Mechanics)
+// ============================================================================
+
+/** Per-act tracker for Exposure and Influence/Control */
+export interface ActProgress {
+  /** Which act this progress belongs to (1, 2, or 3) */
+  act: number;
+  /** Exposure tracker (clamped 0-10). Higher = Empire is closing in. */
+  exposure: number;
+  /** Rebellion Influence (accumulated from successes) */
+  influence: number;
+  /** Imperial Control (accumulated from passive pressure + failures) */
+  control: number;
+  /** One-time exposure threshold bonuses already applied to Control */
+  exposureThresholdsTriggered: number[];
+}
+
+/** Act outcome tier based on influence - control delta */
+export type ActOutcomeTier = 'dominant' | 'favorable' | 'contested' | 'unfavorable' | 'dire';
+
+/** Frozen outcome of a completed act */
+export interface ActOutcome {
+  act: number;
+  exposure: number;
+  influence: number;
+  control: number;
+  delta: number;
+  tier: ActOutcomeTier;
+}
+
+/** Exposure status derived from current exposure value */
+export type ExposureStatus = 'ghost' | 'detected' | 'hunted';
+
+/** Get exposure status from exposure value */
+export function getExposureStatus(exposure: number): ExposureStatus {
+  if (exposure >= 7) return 'hunted';
+  if (exposure >= 4) return 'detected';
+  return 'ghost';
+}
+
+/** Determine act outcome tier from influence - control delta */
+export function getActOutcomeTier(delta: number): ActOutcomeTier {
+  if (delta >= 5) return 'dominant';
+  if (delta >= 2) return 'favorable';
+  if (delta >= -1) return 'contested';
+  if (delta >= -4) return 'unfavorable';
+  return 'dire';
+}
+
+/** Create a fresh ActProgress for a given act */
+export function createActProgress(act: number): ActProgress {
+  return {
+    act,
+    exposure: 0,
+    influence: 0,
+    control: 0,
+    exposureThresholdsTriggered: [],
+  };
 }
 
 /** Campaign save file format (serializable to JSON) */
@@ -1294,7 +1361,8 @@ export type SocialOutcomeType =
   | 'discount'          // Apply shop discount percentage
   | 'xp'               // Gain XP
   | 'reputation'        // Modify faction reputation
-  | 'healing';          // Heal wounded hero for free
+  | 'healing'           // Heal wounded hero for free
+  | 'cover_tracks';     // Reduce exposure (rebellion mechanics)
 
 /** A single outcome applied from a social encounter result */
 export interface SocialOutcome {
@@ -1319,6 +1387,8 @@ export interface SocialOutcome {
   reputationDelta?: number;
   /** For healing: hero ID (or 'any' for player choice) */
   healTargetId?: string;
+  /** For cover_tracks: exposure reduction (negative value, e.g. -1) */
+  exposureDelta?: number;
   /** Narrative description of this outcome */
   description: string;
 }
