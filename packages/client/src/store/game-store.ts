@@ -77,6 +77,7 @@ import {
   getInventory,
   addToInventory,
   removeFromInventory,
+  getFinaleExposureModifiers,
 } from '@engine/campaign-v2.js'
 import type { MissionCompletionInput } from '@engine/campaign-v2.js'
 import { combatAnimations } from '../canvas/animation-manager'
@@ -2079,14 +2080,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
       { id: 1, name: 'Player', role: 'Operative', isLocal: true, isAI: false },
     ]
 
+    // Apply exposure modifiers for act finales (missionIndex 4)
+    const isActFinale = mission.missionIndex === 4
+    const exposureModifiers = isActFinale && campaignState.actProgress
+      ? getFinaleExposureModifiers(campaignState.actProgress.exposure)
+      : { threatBonus: 0, roundLimitModifier: 0, extraReinforcements: [] }
+
     // Build a mission object compatible with createInitialGameStateV2
     const gameMission = {
       id: mission.id,
       name: mission.name,
       description: mission.description,
       mapId: mission.mapId,
-      roundLimit: mission.roundLimit,
-      imperialThreat: mission.imperialThreat,
+      roundLimit: Math.max(4, mission.roundLimit + exposureModifiers.roundLimitModifier),
+      imperialThreat: mission.imperialThreat + exposureModifiers.threatBonus,
       imperialReinforcementPoints: mission.threatPerRound,
       victoryConditions: mission.victoryConditions.map(vc => ({
         side: vc.side,
@@ -2157,6 +2164,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     gameState.currentActivationIndex = 0
     gameState.turnPhase = 'Activation'
 
+    // Merge exposure-driven extra reinforcements into the mission definition
+    const effectiveMissionDef = exposureModifiers.extraReinforcements.length > 0
+      ? {
+          ...mission,
+          reinforcements: [
+            ...mission.reinforcements,
+            ...exposureModifiers.extraReinforcements,
+          ],
+        }
+      : mission
+
     set({
       gameState,
       gameData,
@@ -2164,9 +2182,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showMissionSelect: false,
       showPostMission: false,
       isAIBattle: false,
-      activeMissionDef: mission,
+      activeMissionDef: effectiveMissionDef,
       triggeredWaveIds: [],
-      combatLog: [`Mission started: ${mission.name}`],
+      combatLog: isActFinale && exposureModifiers.threatBonus > 0
+        ? [
+            `Mission started: ${mission.name}`,
+            `** IMPERIAL ALERT: Exposure level has drawn additional forces! **`,
+          ]
+        : [`Mission started: ${mission.name}`],
       gameStateHistory: [],
     })
   },

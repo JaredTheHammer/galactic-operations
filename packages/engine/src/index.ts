@@ -70,6 +70,20 @@ export type {
   // Species Abilities
   SpeciesAbilityEffect,
   SpeciesAbility,
+  // Rebellion Mechanics
+  ActProgress,
+  ActOutcome,
+  ActOutcomeTier,
+  ExposureStatus,
+  CampaignEpilogue,
+  CampaignEpilogueTier,
+} from './types.js';
+
+// Re-export rebellion mechanics helpers from types
+export {
+  getExposureStatus,
+  getActOutcomeTier,
+  createActProgress,
   // Dune-inspired mechanics types
   ContractTier,
   ContractConditionType,
