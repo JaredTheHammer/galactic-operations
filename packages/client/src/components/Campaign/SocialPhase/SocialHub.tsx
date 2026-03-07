@@ -3,7 +3,7 @@
  * bounty board, NPC encounters, shops, and hero status.
  */
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useIsMobile } from '../../../hooks/useIsMobile'
 import type {
   CampaignState,
@@ -80,7 +80,12 @@ export function SocialHub({
   const availableEncounters = getAvailableEncounters(location, campaign, session.completedEncounterIds)
   const allEncounters = location.encounters
   const heroes = Object.values(campaign.heroes) as HeroCharacter[]
-  const firstHeroId = heroes[0]?.id ?? ''
+
+  // Hero picker state for actions that need hero selection
+  const [heroPicker, setHeroPicker] = useState<{
+    action: 'scout' | 'bounty_prep' | 'confront'
+    bountyId?: string
+  } | null>(null)
 
   const clockLevel = getThreatClockLevel(phaseState.threatClock)
   const clockColor = clockLevelColors[clockLevel]
@@ -227,7 +232,13 @@ export function SocialHub({
               {/* Confront rival button */}
               {!noSlotsLeft && phaseState.rivalSlotsRemaining > 0 && (
                 <button
-                  onClick={() => onConfrontRival(firstHeroId)}
+                  onClick={() => {
+                    if (heroes.length === 1) {
+                      onConfrontRival(heroes[0].id)
+                    } else {
+                      setHeroPicker({ action: 'confront' })
+                    }
+                  }}
                   style={{
                     marginTop: '8px', width: '100%', padding: '8px',
                     borderRadius: '4px', border: '1px solid #ff6644',
@@ -245,7 +256,13 @@ export function SocialHub({
           {!noSlotsLeft && (
             <div style={{ marginBottom: '16px' }}>
               <button
-                onClick={() => onScoutMission(firstHeroId)}
+                onClick={() => {
+                  if (heroes.length === 1) {
+                    onScoutMission(heroes[0].id)
+                  } else {
+                    setHeroPicker({ action: 'scout' })
+                  }
+                }}
                 style={{
                   width: '100%', padding: '8px',
                   borderRadius: '4px', border: '1px solid #9966ff',
@@ -345,7 +362,13 @@ export function SocialHub({
                       noSlots={noSlotsLeft}
                       canAccept={phaseState.acceptedBounties.length < 2}
                       onAccept={() => onAcceptBounty(bounty.id)}
-                      onPrep={() => onPrepBounty(bounty.id, firstHeroId)}
+                      onPrep={() => {
+                        if (heroes.length === 1) {
+                          onPrepBounty(bounty.id, heroes[0].id)
+                        } else {
+                          setHeroPicker({ action: 'bounty_prep', bountyId: bounty.id })
+                        }
+                      }}
                     />
                   )
                 })}
@@ -420,6 +443,91 @@ export function SocialHub({
           </div>
         </div>
       </div>
+
+      {/* Hero Picker Overlay */}
+      {heroPicker && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setHeroPicker(null)}
+        >
+          <div
+            style={{
+              backgroundColor: '#0a0a1a', border: '1px solid #2a2a3f',
+              borderRadius: '12px', padding: '24px', maxWidth: '360px', width: '90%',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{
+              fontSize: '14px', color: '#888', textTransform: 'uppercase',
+              marginBottom: '16px', textAlign: 'center',
+            }}>
+              {heroPicker.action === 'scout' && 'Select Hero for Scouting'}
+              {heroPicker.action === 'bounty_prep' && 'Select Hero for Bounty Prep'}
+              {heroPicker.action === 'confront' && 'Select Hero for Confrontation'}
+            </div>
+            {heroes.map(hero => {
+              const skillLabel = heroPicker.action === 'scout' ? 'streetwise'
+                : heroPicker.action === 'bounty_prep' ? 'streetwise'
+                : 'coercion'
+              const rank = hero.skills[skillLabel] ?? 0
+              return (
+                <div
+                  key={hero.id}
+                  onClick={() => {
+                    if (heroPicker.action === 'scout') {
+                      onScoutMission(hero.id)
+                    } else if (heroPicker.action === 'bounty_prep' && heroPicker.bountyId) {
+                      onPrepBounty(heroPicker.bountyId, hero.id)
+                    } else if (heroPicker.action === 'confront') {
+                      onConfrontRival(hero.id)
+                    }
+                    setHeroPicker(null)
+                  }}
+                  style={{
+                    backgroundColor: '#12121f', border: '1px solid #2a2a3f',
+                    borderRadius: '8px', padding: '12px', marginBottom: '8px',
+                    cursor: 'pointer', transition: 'border-color 0.2s',
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#4a9eff' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a3f' }}
+                >
+                  <HeroPortrait portraitId={hero.portraitId} name={hero.name} size={36} accentColor="#4a9eff" />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ color: '#4a9eff', fontWeight: 'bold', fontSize: '13px' }}>{hero.name}</div>
+                    <div style={{ fontSize: '11px', color: '#666' }}>{hero.species} {hero.career}</div>
+                  </div>
+                  <div style={{
+                    fontSize: '10px', padding: '2px 6px', borderRadius: '4px',
+                    backgroundColor: rank > 0 ? '#4a9eff20' : '#33333340',
+                    color: rank > 0 ? '#4a9eff' : '#555',
+                  }}>
+                    {skillLabel} {rank}
+                  </div>
+                  {hero.isWounded && (
+                    <div style={{ fontSize: '10px', color: '#ff4444' }}>WOUNDED</div>
+                  )}
+                </div>
+              )
+            })}
+            <button
+              onClick={() => setHeroPicker(null)}
+              style={{
+                marginTop: '8px', width: '100%', padding: '8px',
+                borderRadius: '6px', border: '1px solid #555',
+                fontSize: '12px', cursor: 'pointer',
+                backgroundColor: 'transparent', color: '#888',
+              }}
+            >
+              CANCEL
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

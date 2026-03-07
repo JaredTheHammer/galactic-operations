@@ -257,11 +257,30 @@ export function SocialPhase() {
   const onPrepBounty = useCallback((bountyId: string, heroId: string) => {
     const hero = campaignState.heroes[heroId]
     if (!hero) return
+    const bounty = phaseState.availableBounties.find(b => b.id === bountyId)
+    let prepSuccess = false
+    let prepIntel: string | undefined
+    let prepWeakened = false
     setPhaseState(prev => {
-      const { state } = enginePrepBounty(prev, bountyId, hero, rival, location, npcs)
+      const { state, prepResult } = enginePrepBounty(prev, bountyId, hero, rival, location, npcs)
+      prepSuccess = prepResult.success
+      prepIntel = prepResult.intelRevealed
+      prepWeakened = prepResult.targetWeakened ?? false
       return state
     })
-  }, [campaignState, rival, location, npcs])
+    setSession(prev => ({
+      ...prev,
+      lastActionResult: {
+        actionType: 'scout_mission', // reuse scout_mission styling (purple)
+        title: `Bounty Prep: ${bounty?.targetName ?? 'Target'}`,
+        success: prepSuccess,
+        narrativeText: prepSuccess
+          ? (prepIntel ?? 'You gathered intel on the target.') + (prepWeakened ? ' Your preparation was so thorough that the target will be weakened when you encounter them.' : '')
+          : `Your attempts to gather intelligence on ${bounty?.targetName ?? 'the target'} came up empty. The underworld contacts you approached had nothing useful to share.`,
+      },
+    }))
+    setView('action-result')
+  }, [campaignState, phaseState, rival, location, npcs])
 
   // Scout mission (spends a slot, shows result)
   const onScoutMission = useCallback((heroId: string) => {
