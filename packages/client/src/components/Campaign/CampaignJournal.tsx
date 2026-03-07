@@ -112,6 +112,14 @@ export default function CampaignJournal() {
               </div>
             ) : (
               <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '16px' }}>
+                {/* Act outcome badges at top for completed acts in current view */}
+                {actOutcomes.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '8px' : '12px' }}>
+                    {[...actOutcomes].reverse().map(outcome => (
+                      <ActOutcomeBadge key={outcome.act} outcome={outcome} isMobile={isMobile} />
+                    ))}
+                  </div>
+                )}
                 {reversedMissions.map((result, i) => (
                   <JournalEntry
                     key={i}
@@ -150,35 +158,6 @@ export default function CampaignJournal() {
               </div>
             )}
           </>
-        {missions.length === 0 ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '60px 20px',
-            color: '#555',
-            fontSize: '15px',
-          }}>
-            No missions completed yet. Your story awaits.
-          </div>
-        ) : (
-          <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '16px' }}>
-            {/* Act outcome badges at top for completed acts in current view */}
-            {actOutcomes.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '8px' : '12px' }}>
-                {[...actOutcomes].reverse().map(outcome => (
-                  <ActOutcomeBadge key={outcome.act} outcome={outcome} isMobile={isMobile} />
-                ))}
-              </div>
-            )}
-            {reversedMissions.map((result, i) => (
-              <JournalEntry
-                key={i}
-                result={result}
-                missionDef={campaignMissions[result.missionId]}
-                index={missions.length - i}
-                isMobile={isMobile}
-              />
-            ))}
-          </div>
         )}
       </div>
     </div>
@@ -494,6 +473,11 @@ function SocialPhaseEntry({
             -{result.creditsSpentOnHealing} healing
           </span>
         )}
+      </div>
+    </div>
+  )
+}
+
 function ActOutcomeBadge({ outcome, isMobile }: { outcome: ActOutcome; isMobile: boolean }) {
   const tierColors: Record<string, string> = {
     dominant: '#44ff44', favorable: '#88ccff',

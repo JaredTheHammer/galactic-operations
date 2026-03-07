@@ -80,7 +80,6 @@ export function SocialHub({
   onSelectEncounter, onSelectShop, onHealHero, onComplete, onSkip,
   onAcceptBounty, onPrepBounty, onScoutMission, onConfrontRival, onDeployEarly,
 }: Props) {
-export function SocialHub({ location, npcs, campaign, session, onSelectEncounter, onSelectShop, onHealHero, onComplete, onSkip, onUpdateCampaign }: Props) {
   const { isMobile } = useIsMobile()
   const [showNetwork, setShowNetwork] = useState(false)
   const availableEncounters = getAvailableEncounters(location, campaign, session.completedEncounterIds)
@@ -407,6 +406,7 @@ export function SocialHub({ location, npcs, campaign, session, onSelectEncounter
                 })}
               </div>
             </>
+          )}
           {/* Supply Network Panel (expanded) */}
           {showNetwork && (
             <div style={{ marginBottom: '24px' }}>

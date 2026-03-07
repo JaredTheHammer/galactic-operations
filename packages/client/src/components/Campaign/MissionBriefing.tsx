@@ -350,7 +350,6 @@ export default function MissionBriefing() {
               ))}
             </div>
           )}
-        </div>
 
         <div style={dividerStyle} />
 
