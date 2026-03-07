@@ -7,7 +7,8 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react'
 import { useGameStore } from '../../store/game-store'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult } from '../../../../engine/src/types'
+import type { MissionDefinition, CampaignState, HeroCharacter, MissionResult, ActProgress } from '../../../../engine/src/types'
+import { getExposureStatus } from '../../../../engine/src/types'
 import { getCampaignStats } from '../../../../engine/src/campaign-v2'
 import { HeroPortrait } from '../Portrait/HeroPortrait'
 import { downloadCampaignBundle, importCampaignFromFile } from '../../services/campaign-export'
@@ -158,6 +159,112 @@ function CampaignStatsPanel({ campaign }: { campaign: CampaignState }) {
         <div>Credits: <span style={{ color: '#ffd700' }}>{campaign.credits}</span></div>
         <div>Threat Level: {campaign.threatLevel}</div>
         <div>Difficulty: {campaign.difficulty}</div>
+      </div>
+    </div>
+  )
+}
+
+function RebellionStatusPanel({ actProgress }: { actProgress: ActProgress }) {
+  const exposureStatus = getExposureStatus(actProgress.exposure)
+  const exposurePct = (actProgress.exposure / 10) * 100
+  const delta = actProgress.influence - actProgress.control
+
+  const statusConfig = {
+    ghost: { label: 'GHOST', color: '#44ff44', icon: '\u{1F47B}' },
+    detected: { label: 'DETECTED', color: '#ffaa00', icon: '\u26A0' },
+    hunted: { label: 'HUNTED', color: '#ff4444', icon: '\u{1F6A8}' },
+  }
+  const status = statusConfig[exposureStatus]
+
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <h3 style={{ color: '#4a9eff', margin: '0 0 8px 0', fontSize: '14px' }}>Rebellion Status</h3>
+
+      {/* Exposure tracker */}
+      <div style={{
+        padding: '8px',
+        marginBottom: '6px',
+        backgroundColor: '#0a0a1a',
+        borderRadius: '4px',
+        fontSize: '12px',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+          <span style={{ color: '#888' }}>Exposure</span>
+          <span style={{ color: status.color, fontWeight: 'bold', fontSize: '11px' }}>
+            {status.icon} {status.label}
+          </span>
+        </div>
+        <div style={{
+          width: '100%',
+          height: '6px',
+          backgroundColor: '#1a1a2e',
+          borderRadius: '3px',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            width: `${exposurePct}%`,
+            height: '100%',
+            backgroundColor: status.color,
+            borderRadius: '3px',
+            transition: 'width 0.3s, background-color 0.3s',
+            boxShadow: `0 0 6px ${status.color}40`,
+          }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2px', fontSize: '10px', color: '#555' }}>
+          <span>0</span>
+          <span>{actProgress.exposure}/10</span>
+        </div>
+      </div>
+
+      {/* Influence vs Control */}
+      <div style={{
+        padding: '8px',
+        backgroundColor: '#0a0a1a',
+        borderRadius: '4px',
+        fontSize: '12px',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+          <span style={{ color: '#4a9eff' }}>Influence: {actProgress.influence}</span>
+          <span style={{ color: '#ff6666' }}>Control: {actProgress.control}</span>
+        </div>
+        {/* Tug-of-war bar */}
+        <div style={{
+          width: '100%',
+          height: '8px',
+          backgroundColor: '#1a1a2e',
+          borderRadius: '4px',
+          overflow: 'hidden',
+          display: 'flex',
+        }}>
+          {(() => {
+            const total = actProgress.influence + actProgress.control
+            const influencePct = total > 0 ? (actProgress.influence / total) * 100 : 50
+            return (
+              <>
+                <div style={{
+                  width: `${influencePct}%`,
+                  height: '100%',
+                  backgroundColor: '#4a9eff',
+                  transition: 'width 0.3s',
+                }} />
+                <div style={{
+                  flex: 1,
+                  height: '100%',
+                  backgroundColor: '#ff444480',
+                }} />
+              </>
+            )
+          })()}
+        </div>
+        <div style={{
+          textAlign: 'center',
+          marginTop: '4px',
+          fontSize: '11px',
+          color: delta > 0 ? '#4a9eff' : delta < 0 ? '#ff6666' : '#888',
+          fontWeight: 'bold',
+        }}>
+          {delta > 0 ? `+${delta} Rebellion` : delta < 0 ? `${delta} Imperial` : 'Contested'}
+        </div>
       </div>
     </div>
   )
@@ -920,6 +1027,10 @@ export default function MissionSelect() {
         {/* Left sidebar: hero roster + stats + history */}
         <div style={sidebarResponsive}>
           <CampaignStatsPanel campaign={campaignState} />
+
+          {campaignState.actProgress && (
+            <RebellionStatusPanel actProgress={campaignState.actProgress} />
+          )}
 
           {campaignState.factionReputation && Object.keys(campaignState.factionReputation).length > 0 && (
             <FactionReputationPanel reputation={campaignState.factionReputation} />
