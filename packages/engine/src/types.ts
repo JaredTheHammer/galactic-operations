@@ -937,6 +937,14 @@ export interface GameState {
 
   // Tactic card deck state (hands, draw pile, discard)
   tacticDeck?: TacticDeckState;
+
+  // --- War of the Ring inspired mechanics ---
+
+  /** Detection track for stealth missions (Hunt mechanic analog) */
+  detectionTrack?: DetectionTrack;
+
+  /** Command dice state (Action Dice mechanic) */
+  commandDice?: CommandDiceState;
 }
 
 // ============================================================================
@@ -1203,6 +1211,9 @@ export interface CampaignState {
 
   /** Active shop discounts (percentage, from social outcomes) */
   activeDiscounts?: Record<string, number>;
+
+  /** Faction readiness tracking (Political Track mechanic) */
+  factionStatuses?: Record<string, FactionStatus>;
 }
 
 /** Campaign save file format (serializable to JSON) */
@@ -1488,6 +1499,8 @@ export interface TacticCard {
   effects: TacticCardEffect[];
   text: string;
   cost: number;
+  /** Optional strategic (non-combat) effect -- dual-use card (WotR Event Card mechanic) */
+  strategicEffect?: StrategicEffect;
 }
 
 /** State of a tactic card deck during a mission */
@@ -1538,6 +1551,170 @@ export interface SocialPhaseResult {
   itemsSold: Array<{ itemId: string; revenue: number }>;
   creditsSpentOnHealing: number;
   completedAt: string;
+}
+
+// ============================================================================
+// WAR OF THE RING INSPIRED MECHANICS
+// ============================================================================
+
+// --- Mechanic #4: Leadership Re-rolls ---
+
+/**
+ * Leadership aura: a figure with Leadership provides re-roll opportunities
+ * to nearby allies. Inspired by War of the Ring's Leader re-roll mechanic.
+ *
+ * In WotR, Leaders allow re-rolling missed combat dice equal to Leadership value.
+ * Here, leaders allow allies within Short range to re-roll blanks on positive dice
+ * equal to the leader's Presence or leadership skill rank.
+ */
+export interface LeadershipAura {
+  /** Figure ID of the leader providing the aura */
+  leaderId: string;
+  /** Number of dice that can be re-rolled (derived from Presence or leadership skill) */
+  rerollCount: number;
+  /** Range in tiles within which allies benefit (default: Short = 4 tiles) */
+  range: number;
+}
+
+// --- Mechanic #5: Dual-Use Tactic Cards ---
+
+/**
+ * Strategic effect for tactic cards (War of the Ring Event Card dual-use).
+ * Each tactic card can now be played EITHER for its combat (tactical) effect
+ * OR for a strategic effect -- never both.
+ */
+export type StrategicEffectType =
+  | 'Reinforce'        // Add reinforcement points
+  | 'Reposition'       // Move a friendly figure up to speed without spending activation
+  | 'Intel'            // Reveal hidden information or grant bonus objective progress
+  | 'Rally'            // Recover morale for your side
+  | 'Resupply';        // Draw additional tactic cards
+
+export interface StrategicEffect {
+  type: StrategicEffectType;
+  value: number;
+  /** Flavor text describing the strategic effect */
+  description: string;
+}
+
+// --- Mechanic #3: Detection Track (Hunt/Corruption analog) ---
+
+/**
+ * Detection track for stealth missions (War of the Ring Hunt mechanic analog).
+ * Operatives have a Detection level that increases as they act within enemy awareness.
+ * Crossing thresholds triggers escalating consequences.
+ */
+export type DetectionLevel = 'Undetected' | 'Suspicious' | 'Alerted' | 'Hunted';
+
+export interface DetectionThreshold {
+  level: DetectionLevel;
+  /** Detection value at which this level activates */
+  threshold: number;
+  /** Effect triggered when this level is reached */
+  effect: DetectionThresholdEffect;
+}
+
+export type DetectionThresholdEffect =
+  | { type: 'reinforcement'; count: number; npcProfileId: string }
+  | { type: 'lockdown'; turnsRemaining: number }
+  | { type: 'morale_penalty'; value: number }
+  | { type: 'alarm'; bonusDifficulty: number };
+
+export interface DetectionTrack {
+  /** Current detection value (0 = fully hidden) */
+  current: number;
+  /** Maximum detection before mission auto-fails */
+  max: number;
+  /** Current detection level (derived from thresholds) */
+  level: DetectionLevel;
+  /** Thresholds that trigger escalation effects */
+  thresholds: DetectionThreshold[];
+  /** Whether the operatives are currently "laying low" (WotR resting analog) */
+  isLayingLow: boolean;
+  /** Accumulated "laying low" rounds (each round laying low reduces detection by 1) */
+  layLowReduction: number;
+}
+
+// --- Mechanic #2: Faction Readiness (Political Track analog) ---
+
+/**
+ * Faction readiness system inspired by War of the Ring's Political Track.
+ * Each faction starts at a readiness level and must be "activated" before
+ * they'll provide reinforcements, companions, or special abilities.
+ */
+export type FactionReadiness = 'Dormant' | 'Sympathetic' | 'Active' | 'Mobilized';
+
+export interface FactionStatus {
+  id: string;
+  name: string;
+  /** Current readiness level on the political track */
+  readiness: FactionReadiness;
+  /** Numeric progress toward next readiness level (0-100) */
+  progress: number;
+  /** What this faction provides at each readiness level */
+  benefits: FactionBenefits;
+  /** How this faction can be activated */
+  activationTriggers: FactionActivationTrigger[];
+  /** Which campaign acts this faction is relevant in */
+  availableInActs: number[];
+}
+
+export interface FactionBenefits {
+  /** NPCs available as reinforcements when Mobilized */
+  reinforcementProfiles?: string[];
+  /** Companion NPC IDs available when Active */
+  companionIds?: string[];
+  /** Credit discount percentage when Sympathetic+ */
+  shopDiscount?: number;
+  /** Bonus threat reduction per round when Mobilized */
+  threatReduction?: number;
+  /** Extra tactic cards drawn per round when Active+ */
+  bonusCardDraw?: number;
+}
+
+export type FactionActivationTrigger =
+  | { type: 'mission_complete'; missionId: string; progressGain: number }
+  | { type: 'social_encounter'; encounterId: string; progressGain: number }
+  | { type: 'companion_visit'; companionId: string; progressGain: number }
+  | { type: 'imperial_attack'; progressGain: number }
+  | { type: 'narrative_item'; itemId: string; progressGain: number };
+
+// --- Mechanic #1: Action Dice Allocation (Command Dice) ---
+
+/**
+ * Command dice system inspired by War of the Ring's Action Dice.
+ * Each round, sides roll command dice. The faces determine what actions
+ * are available that round, forcing adaptation and strategic allocation.
+ */
+export type CommandDieFace =
+  | 'Assault'       // Activate a figure to attack
+  | 'Maneuver'      // Activate a figure to move/reposition
+  | 'Muster'        // Spend reinforcement points to deploy units
+  | 'Scheme'        // Play a tactic card for its strategic effect
+  | 'Command'       // Activate a leader figure (any action)
+  | 'Wild';          // Any of the above (Free Peoples advantage)
+
+export interface CommandDie {
+  /** Which faces appear on this die (6 faces per d6) */
+  faces: CommandDieFace[];
+  /** Which side this die belongs to */
+  side: Side;
+}
+
+export interface CommandDicePool {
+  /** Total dice available this round (before allocation) */
+  totalDice: number;
+  /** Dice that have been rolled (face results for this round) */
+  rolledFaces: CommandDieFace[];
+  /** Which dice have been used this round (index into rolledFaces) */
+  usedIndices: number[];
+  /** Dice committed to the "hunt" (detection track pursuit) -- Imperial only */
+  huntAllocation: number;
+}
+
+export interface CommandDiceState {
+  operative: CommandDicePool;
+  imperial: CommandDicePool;
 }
 
 // ============================================================================

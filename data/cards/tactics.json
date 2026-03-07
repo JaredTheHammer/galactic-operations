@@ -166,7 +166,12 @@
       }
     ],
     "text": "Recover 1 Morale point for the Operative side.",
-    "cost": 1
+    "cost": 1,
+    "strategicEffect": {
+      "type": "Rally",
+      "value": 3,
+      "description": "An inspiring speech rallies the troops. Recover 3 morale."
+    }
   },
   {
     "id": "guerrilla-tactics",
@@ -180,7 +185,12 @@
       }
     ],
     "text": "Ignore the target's cover bonus for this attack.",
-    "cost": 2
+    "cost": 2,
+    "strategicEffect": {
+      "type": "Intel",
+      "value": 1,
+      "description": "Local informants reveal enemy positions. Gain intel on enemy deployment."
+    }
   },
   {
     "id": "last-stand",
@@ -209,7 +219,12 @@
       }
     ],
     "text": "Draw 2 additional Tactic Cards from the deck.",
-    "cost": 1
+    "cost": 1,
+    "strategicEffect": {
+      "type": "Resupply",
+      "value": 2,
+      "description": "Resourceful operatives scrounge supplies. Draw 2 extra tactic cards."
+    }
   },
   {
     "id": "imperial-discipline",
@@ -252,7 +267,12 @@
       }
     ],
     "text": "The target must make a Morale check or become Panicked.",
-    "cost": 2
+    "cost": 2,
+    "strategicEffect": {
+      "type": "Rally",
+      "value": 2,
+      "description": "Imperial propaganda bolsters troop morale. Recover 2 morale."
+    }
   },
   {
     "id": "tactical-withdrawal",
@@ -266,7 +286,12 @@
       }
     ],
     "text": "Move 1 friendly figure up to 2 spaces.",
-    "cost": 1
+    "cost": 1,
+    "strategicEffect": {
+      "type": "Reposition",
+      "value": 4,
+      "description": "Redeploy a unit to a better position. Move 1 friendly figure up to 4 tiles."
+    }
   },
   {
     "id": "reinforcement-order",
@@ -280,7 +305,12 @@
       }
     ],
     "text": "Immediately deploy 1 Regular unit to an Imperial deployment zone.",
-    "cost": 3
+    "cost": 3,
+    "strategicEffect": {
+      "type": "Reinforce",
+      "value": 4,
+      "description": "Command orders fresh troops to the front. Gain 4 reinforcement points."
+    }
   },
   {
     "id": "pinning-fire",

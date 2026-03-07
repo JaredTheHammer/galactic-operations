@@ -249,6 +249,95 @@ export type {
   BalanceFlag,
 } from './power-ranking.js';
 
+// Re-export War of the Ring inspired mechanics
+export type {
+  LeadershipAura,
+  StrategicEffectType,
+  StrategicEffect,
+  DetectionLevel,
+  DetectionThreshold,
+  DetectionThresholdEffect,
+  DetectionTrack,
+  FactionReadiness,
+  FactionStatus,
+  FactionBenefits,
+  FactionActivationTrigger,
+  CommandDieFace,
+  CommandDie,
+  CommandDicePool,
+  CommandDiceState,
+} from './types.js';
+
+// Re-export leadership system
+export {
+  getLeadershipValue,
+  findLeadershipAura,
+  applyLeadershipRerolls,
+} from './leadership.js';
+
+// Re-export detection track system
+export {
+  createDetectionTrack,
+  resolveDetectionLevel,
+  getNewlyCrossedThresholds,
+  increaseDetection,
+  applyLayLow,
+  resolveHuntDice,
+  isFullyDetected,
+  getDetectionCostForAction,
+  DETECTION_COSTS,
+  DEFAULT_DETECTION_THRESHOLDS,
+} from './detection-track.js';
+
+// Re-export faction readiness system
+export {
+  resolveReadinessLevel,
+  meetsReadiness,
+  createFactionStatus,
+  advanceFaction,
+  processTrigger,
+  getTotalShopDiscount,
+  getAvailableCompanions,
+  getAvailableReinforcements,
+  getBonusCardDraw,
+  getThreatReduction,
+} from './faction-readiness.js';
+
+// Re-export command dice system
+export {
+  IMPERIAL_DIE_FACES,
+  OPERATIVE_DIE_FACES,
+  createCommandDicePool,
+  createCommandDiceState,
+  allocateHuntDice,
+  rollCommandDice,
+  rollAllCommandDice,
+  canUseDieForAction,
+  getRequiredFaceForAction,
+  findAvailableDice,
+  useCommandDie,
+  getRemainingDice,
+  countAvailableFaces,
+  hasRemainingDice,
+  resetCommandDiceForRound,
+  addBonusDice,
+  removeDice,
+  aiDecideHuntAllocation,
+  aiSelectDie,
+} from './command-dice.js';
+
+// Re-export strategic card play
+export {
+  hasStrategicEffect,
+  getStrategicCards,
+  playStrategicCard,
+  aiShouldPlayStrategic,
+} from './tactic-cards.js';
+
+export type {
+  StrategicCardResult,
+} from './tactic-cards.js';
+
 export type {
   AIProfilesData,
   AIArchetypeProfile,
