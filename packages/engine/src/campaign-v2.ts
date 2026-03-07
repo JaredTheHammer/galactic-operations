@@ -1212,11 +1212,10 @@ function validateCampaignBounds(c: CampaignState): void {
       if (!hero || typeof hero !== 'object') {
         throw new Error(`Invalid campaign data: hero '${heroId}' is not an object`);
       }
-      const h = hero as Record<string, unknown>;
-      if (typeof h.woundsCurrent === 'number' && h.woundsCurrent < 0) {
+      if (hero.wounds && typeof hero.wounds.current === 'number' && hero.wounds.current < 0) {
         throw new Error(`Invalid campaign data: hero '${heroId}' has negative wounds`);
       }
-      if (typeof h.strainCurrent === 'number' && h.strainCurrent < 0) {
+      if (hero.strain && typeof hero.strain.current === 'number' && hero.strain.current < 0) {
         throw new Error(`Invalid campaign data: hero '${heroId}' has negative strain`);
       }
     }

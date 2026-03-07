@@ -25,8 +25,8 @@ import type {
   LeadershipAura,
   D6RollResult,
   AttackPool,
-  RollFn,
 } from './types.js';
+import type { RollFn } from './dice-v2.js';
 
 import { getDistance } from './movement.js';
 import { RANGE_BAND_TILES } from './types.js';

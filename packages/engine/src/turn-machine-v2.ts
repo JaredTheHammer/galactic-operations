@@ -399,6 +399,7 @@ function createNPCFigure(
     standbyWeaponId: null,
     aimTokens: 0,
     dodgeTokens: 0,
+    focusTokens: 0,
     isActivated: false,
     isDefeated: false,
     isWounded: false,
@@ -447,6 +448,7 @@ function createHeroFigure(
     standbyWeaponId: null,
     aimTokens: 0,
     dodgeTokens: 0,
+    focusTokens: 0,
     isActivated: false,
     isDefeated: false,
     // Carry persistent wounded status from campaign (hero starts mission wounded)

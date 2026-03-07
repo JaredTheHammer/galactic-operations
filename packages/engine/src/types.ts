@@ -2018,6 +2018,10 @@ export interface TacticCard {
   tags?: TacticCardTag[];
   /** Per-tag synergy bonuses: for each other source of this tag the hero has, gain this effect */
   tagSynergy?: TacticCardTagSynergy;
+  /** Optional strategic (non-combat) effect -- dual-use card (WotR Event Card mechanic) */
+  strategicEffect?: StrategicEffect;
+  /** Dual-use: alternative non-combat mode (Brass: Birmingham-inspired card duality) */
+  altMode?: TacticCardAltMode;
 }
 
 /** Defines what bonus a tactic card gets per matching tag from other sources (equipment, talents, other cards) */
@@ -2149,6 +2153,12 @@ export interface StrategicEffect {
   value: number;
   /** Flavor text describing the strategic effect */
   description: string;
+}
+
+/** A temporary status effect applied to a figure (e.g., from intel cards) */
+export interface StatusEffect {
+  name: string;
+  duration: number;
 }
 
 // --- Mechanic #3: Detection Track (Hunt/Corruption analog) ---

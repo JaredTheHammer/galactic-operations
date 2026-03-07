@@ -40,7 +40,7 @@ type DieDefinition = Record<string, unknown>;
  * Note: This function is designed for Node.js file system access
  */
 /** @deprecated Use loadGameDataV2 instead */
-export async function loadGameData(basePath: string): Promise<Record<string, unknown>> {
+export async function loadGameData(basePath: string): Promise<GameData> {
   // Dynamic import of fs to support both Node.js and browser environments
   const { readFile } = await import('fs/promises');
   const { join } = await import('path');
