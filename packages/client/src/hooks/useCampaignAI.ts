@@ -33,9 +33,19 @@ import { getMoraleChangeForEvent, applyMoraleChange } from '@engine/morale.js'
 import aiProfilesRaw from '@data/ai-profiles.json'
 
 // Delays for visual pacing of AI actions (ms)
-const AI_THINK_DELAY = 400
-const AI_ACTION_DELAY = 350
-const AI_POST_ACTIVATION_DELAY = 200
+const BASE_DELAYS = {
+  thinkMs: 400,
+  actionMs: 350,
+  combatResultMs: 1200,
+  postActivationMs: 200,
+}
+
+function getDelays(): typeof BASE_DELAYS {
+  const speed = useGameStore.getState().combatSpeed
+  if (speed === 'instant') return { thinkMs: 0, actionMs: 0, combatResultMs: 50, postActivationMs: 0 }
+  if (speed === 'fast') return { thinkMs: 150, actionMs: 100, combatResultMs: 400, postActivationMs: 50 }
+  return BASE_DELAYS
+}
 
 export type CampaignAIPhase = 'idle' | 'thinking' | 'executing' | 'advancing'
 
@@ -83,6 +93,9 @@ export function useCampaignAI() {
     if (isAIBattle) return
     if (!gameState || !gameData || !profilesRef.current) return
     if (processingRef.current) return
+
+    // Don't process if game is already over (winner set by victory check)
+    if (gameState.winner) return
 
     // Handle activation phase
     if (gameState.turnPhase === 'Activation') {
@@ -207,7 +220,11 @@ export function useCampaignAI() {
       reasoning: `${profile.name} evaluating...`,
     })
 
-    await delay(AI_THINK_DELAY)
+    // Pan camera to activating figure and set UI indicator
+    useGameStore.getState().setCameraTarget(fig.position)
+    useGameStore.setState({ imperialAIPhase: 'thinking' })
+
+    await delay(getDelays().thinkMs)
     if (cancelRef.current) return
 
     // Ensure figure is reset for activation
@@ -216,6 +233,7 @@ export function useCampaignAI() {
 
     const activeFig = currentGs.figures.find(f => f.id === fig.id)
     if (!activeFig || activeFig.isDefeated) {
+      useGameStore.setState({ imperialAIPhase: null })
       useGameStore.getState().endActivation()
       setAIState({ phase: 'idle', activeFigureName: '', reasoning: '' })
       return
@@ -244,6 +262,7 @@ export function useCampaignAI() {
     } catch (err) {
       console.error(`Campaign AI decision error for ${fig.id}:`, err)
       addCombatLog(`AI [${figureName}]: Decision error - ending turn`)
+      useGameStore.setState({ imperialAIPhase: null })
       useGameStore.getState().endActivation()
       setAIState({ phase: 'idle', activeFigureName: '', reasoning: '' })
       return
@@ -254,6 +273,7 @@ export function useCampaignAI() {
       activeFigureName: figureName,
       reasoning: decision.reasoning,
     })
+    useGameStore.setState({ imperialAIPhase: 'executing' })
     addCombatLog(`AI [${figureName}]: ${decision.reasoning}`)
 
     // --- Execute actions ---
@@ -278,7 +298,7 @@ export function useCampaignAI() {
         }
       }
 
-      await delay(AI_ACTION_DELAY)
+      await delay(getDelays().actionMs)
       if (cancelRef.current) return
 
       // Clear visual indicators
@@ -287,20 +307,66 @@ export function useCampaignAI() {
       // Execute the action
       try {
         const newGs = executeActionV2(currentGs, action, gameData)
-        // Clear activeCombat immediately for AI turns - no need to show dice modal
-        const gsToStore = newGs.activeCombat ? { ...newGs, activeCombat: null } : newGs
-        useGameStore.setState({ gameState: gsToStore })
-        currentGs = gsToStore
+
+        // Floating combat text for attacks
+        if (action.type === 'Attack') {
+          const resolution = newGs.activeCombat?.resolution
+          const target = newGs.figures.find(tf => tf.id === action.payload.targetId)
+          if (resolution && target) {
+            const addFCT = useGameStore.getState().addFloatingText
+            if (resolution.isHit && resolution.woundsDealt > 0) {
+              addFCT({
+                gridX: target.position.x, gridY: target.position.y,
+                text: `-${resolution.woundsDealt}`,
+                color: '#ff4444',
+                type: resolution.criticalTriggered ? 'critical' : 'damage',
+              })
+            } else if (!resolution.isHit) {
+              addFCT({
+                gridX: target.position.x, gridY: target.position.y,
+                text: 'MISS',
+                color: '#888888',
+                type: 'miss',
+              })
+            }
+          }
+        }
+
+        // Show combat results briefly for attacks, then clear
+        if (newGs.activeCombat && action.type === 'Attack') {
+          useGameStore.setState({ gameState: newGs })
+          await delay(getDelays().combatResultMs)
+          if (cancelRef.current) return
+          currentGs = { ...useGameStore.getState().gameState!, activeCombat: null }
+          useGameStore.setState({ gameState: currentGs })
+        } else {
+          const gsToStore = newGs.activeCombat ? { ...newGs, activeCombat: null } : newGs
+          useGameStore.setState({ gameState: gsToStore })
+          currentGs = gsToStore
+        }
 
         const actionLabel = describeAction(action, newGs)
         addCombatLog(`  -> ${actionLabel}`)
 
-        // Check for defeats and update morale
+        // Check for wounds and defeats, update morale
         for (const f of newGs.figures) {
+          // Detect newly wounded heroes
+          const prevFig = currentGs.figures.find(pf => pf.id === f.id)
+          if (f.isWounded && prevFig && !prevFig.isWounded) {
+            const victimName = getFigureName(f, newGs)
+            addCombatLog(`  !! ${victimName} is WOUNDED!`)
+          }
+
           if (f.isDefeated && !defeatedBefore.has(f.id)) {
             defeatedBefore.add(f.id)
             const victimName = getFigureName(f, newGs)
             addCombatLog(`  !! ${victimName} defeated!`)
+            useGameStore.getState().addFloatingText({
+              gridX: f.position.x, gridY: f.position.y,
+              text: 'DEFEATED',
+              color: '#ff2222',
+              type: 'defeat',
+            })
 
             const victimSide = newGs.players.find(p => p.id === f.playerId)?.role
             const npcProfile = newGs.npcProfiles[f.entityId]
@@ -328,7 +394,8 @@ export function useCampaignAI() {
     }
 
     // --- End activation ---
-    await delay(AI_POST_ACTIVATION_DELAY)
+    await delay(getDelays().postActivationMs)
+    useGameStore.setState({ imperialAIPhase: null })
     useGameStore.getState().endActivation()
 
     setAIState({ phase: 'idle', activeFigureName: '', reasoning: '' })

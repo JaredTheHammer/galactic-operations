@@ -296,9 +296,14 @@ function loadGameDataV2(): GameData {
 
   // Consumables
   const consumables: Record<string, any> = {}
-  const consumablesRaw = Array.isArray(consumablesData) ? consumablesData : (consumablesData as any).consumables ?? []
+  const consumablesSection = Array.isArray(consumablesData) ? consumablesData : (consumablesData as any).consumables
+  const consumablesRaw = Array.isArray(consumablesSection)
+    ? consumablesSection
+    : (consumablesSection && typeof consumablesSection === 'object')
+      ? Object.values(consumablesSection)
+      : []
   for (const item of consumablesRaw) {
-    consumables[item.id] = item
+    consumables[(item as any).id] = item
   }
 
   // Tactic cards
@@ -1855,6 +1860,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { gameState, gameData, campaignState, campaignMissions, activeMissionDef, activeMission, triggeredWaveIds, addCombatLog, gameStateHistory } = get()
     if (!gameState) return
 
+    // Don't advance phases if the game is already over (prevents race condition
+    // where auto-advance keeps running after victory detection queues a delayed
+    // completeCampaignMission call)
+    if (gameState.winner) return
+
     const phases: Array<typeof gameState.turnPhase> = [
       'Setup',
       'Initiative',
@@ -1984,8 +1994,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
           newGameState.interactedTerminals,
         )
 
-        // Round limit defeat: if we've exceeded the mission's round limit, Imperial wins
-        const roundLimitWinner = !winningSide && activeMission?.roundLimit && newRound > activeMission.roundLimit
+        // Round limit defeat: if we've reached the mission's round limit, Imperial wins
+        // Use >= because roundNumber hasn't incremented yet at Status phase (increments at Setup)
+        const roundLimitWinner = !winningSide && activeMission?.roundLimit && newRound >= activeMission.roundLimit
           ? 'Imperial' as const
           : winningSide
 
@@ -2385,10 +2396,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   showMissionBriefingScreen: (missionId: string) => {
+    const { campaignMissions } = get()
+    const mission = campaignMissions[missionId]
     set({
       showMissionSelect: false,
       showMissionBriefing: true,
       pendingMissionId: missionId,
+      activeMissionDef: mission ?? null,
     })
   },
 
@@ -2687,17 +2701,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       showMissionSelect: false,
       showPostMission: false,
       isAIBattle: false,
+      activeMission: gameMission as Mission,
       activeMissionDef: effectiveMissionDef,
       triggeredWaveIds: [],
-      combatLog: startLog,
-      combatLog: isActFinale && exposureModifiers.threatBonus > 0
-        ? [
-            `Mission started: ${mission.name}`,
-            `** IMPERIAL ALERT: Exposure level has drawn additional forces! **`,
-          ]
-        : [`Mission started: ${mission.name}`],
       combatLog: [
-        `Mission started: ${mission.name}`,
+        ...startLog,
         ...(isActFinale && exposureModifiers.threatBonus > 0 ? [`** IMPERIAL ALERT: Exposure level has drawn additional forces! **`] : []),
         ...(networkThreatReduction > 0 ? [`Supply network reduces Imperial threat by ${networkThreatReduction}`] : []),
         ...(networkReinforcementBonus > 0 ? [`Supply routes disrupt reinforcements: -${networkReinforcementBonus} threat/round`] : []),
@@ -2712,6 +2720,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
   completeCampaignMission: (input: MissionCompletionInput) => {
     const { campaignState, campaignMissions, gameState, activeSaveSlot } = get()
     if (!campaignState) return
+
+    // Guard against duplicate calls (race condition: victory detection can
+    // queue multiple delayed completeCampaignMission calls if auto-advance
+    // keeps running). Check if this mission was already recorded.
+    const alreadyCompleted = campaignState.completedMissions.some(
+      m => m.missionId === input.mission.id &&
+        Math.abs(new Date(m.completedAt).getTime() - Date.now()) < 10000,
+    )
+    if (alreadyCompleted) {
+      console.warn(`[completeCampaignMission] Duplicate call for ${input.mission.id} -- ignoring`)
+      return
+    }
 
     // Sync depleted consumable inventory from mission back to campaign
     const updatedCampaign = gameState?.consumableInventory
@@ -3060,16 +3080,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       lastBountyCompletions: [],
     })
 
-    // Autosave after social phase completion
-    if (campaignState) {
-      try {
-        const json = campaignToJSON(campaignState)
-        localStorage.setItem(CAMPAIGN_STORAGE_KEY, json)
-      } catch (e) {
-        console.error('Autosave after social phase failed:', e)
-        get().addNotification({ type: 'error', title: 'Save Failed', message: 'Post-social-phase save failed. Try manual save.', duration: 0 })
-      }
-    }
     // Auto-save after social phase
     if (campaignState) {
       try {
@@ -3218,6 +3228,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   openCampaignStats: () => {
     set({
       showMissionSelect: false,
+      showCampaignJournal: false,
       showCampaignStats: true,
     })
   },
@@ -3353,13 +3364,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   deployFromBriefing: () => {
-    const { activeMissionDef } = get()
-    if (!activeMissionDef) return
-    set({
-      showMissionBriefing: false,
-      isInitialized: true,
-      combatLog: [`Mission started: ${activeMissionDef.name}`],
-    })
+    const { pendingMissionId, activeMissionDef } = get()
+    const missionId = pendingMissionId || activeMissionDef?.id
+    if (!missionId) return
+    // startCampaignMission creates full game state (map, heroes, deploy, tactic cards)
+    get().startCampaignMission(missionId)
+    // Ensure briefing is hidden (startCampaignMission calls openMissionBriefing internally)
+    set({ showMissionBriefing: false, pendingMissionId: null })
   },
 
   // ---- Campaign Journal ----
@@ -3367,6 +3378,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   openCampaignJournal: () => {
     set({
       showMissionSelect: false,
+      showCampaignStats: false,
       showCampaignJournal: true,
     })
   },

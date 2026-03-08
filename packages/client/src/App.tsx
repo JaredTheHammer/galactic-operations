@@ -43,8 +43,6 @@ import { CombatArena } from './components/CombatArena/CombatArena'
 import { useCampaignAI } from './hooks/useCampaignAI'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useCombatKeys } from './hooks/useCombatKeys'
-import { useImperialAI } from './hooks/useImperialAI'
-import { useAutoPhase } from './hooks/useAutoPhase'
 import { useAutosave } from './hooks/useAutosave'
 import { AutosaveToast } from './components/HUD/AutosaveToast'
 import { ShortcutHelp } from './components/HUD/ShortcutHelp'
@@ -141,11 +139,15 @@ function App() {
     && !showPortraitManager && !showCombatArena && !showMissionBriefing && !showActTransition && !showStrategicCommand
   useCombatKeys(inTacticalCombat && !isMobile)
 
-  // Auto-execute Imperial AI turns in campaign combat (not AI Battle mode)
-  const { isImperialTurn } = useImperialAI(inTacticalCombat && !isAIBattle)
-
-  // Auto-advance non-interactive phases + auto-skip defeated player figures
-  useAutoPhase(inTacticalCombat && !isAIBattle)
+  // Derive whether current figure belongs to an AI player (hides action buttons)
+  const isImperialTurn = (() => {
+    if (!gameState || gameState.turnPhase !== 'Activation') return false
+    const figId = gameState.activationOrder[gameState.currentActivationIndex]
+    const fig = gameState.figures.find(f => f.id === figId)
+    if (!fig) return false
+    const player = gameState.players.find(p => p.id === fig.playerId)
+    return !!player?.isAI
+  })()
 
   // Periodic campaign autosave (every 60s when campaign is active)
   useAutosave()

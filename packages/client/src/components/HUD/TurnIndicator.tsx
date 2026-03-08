@@ -24,9 +24,13 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ gameState, hideCon
 
   if (!gameState) return null
 
-  const currentPlayer = gameState.players[gameState.currentPlayerIndex]
   const currentFigureId = gameState.activationOrder[gameState.currentActivationIndex]
   const currentFigure = gameState.figures.find(f => f.id === currentFigureId)
+  // During Activation, derive the "current player" from the activating figure's owner
+  // (not currentPlayerIndex, which tracks initiative winner and doesn't update per-figure)
+  const currentPlayer = (gameState.turnPhase === 'Activation' && currentFigure)
+    ? gameState.players.find(p => p.id === currentFigure.playerId) ?? gameState.players[gameState.currentPlayerIndex]
+    : gameState.players[gameState.currentPlayerIndex]
   const isAITurn = currentFigure && gameState.players.find(p => p.id === currentFigure.playerId)?.isAI
   const figureName = currentFigure ? getFigureName(currentFigure, gameState) : currentFigure?.id
 
