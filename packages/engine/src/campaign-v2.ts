@@ -1436,15 +1436,20 @@ export function getCampaignStats(campaign: CampaignState): {
     (sum, r) => sum + Object.values(r.heroKills).reduce((s, k) => s + k, 0), 0,
   );
 
+  // Use completedMissions.length as source of truth instead of the
+  // missionsPlayed counter, which can drift from duplicate calls or
+  // missions started but not completed.
+  const played = campaign.completedMissions.length;
+
   return {
-    missionsPlayed: campaign.missionsPlayed,
+    missionsPlayed: played,
     victories,
     defeats,
     totalXPEarned,
     totalKills,
     totalCredits: campaign.credits,
     heroCount: Object.keys(campaign.heroes).length,
-    averageMissionXP: campaign.missionsPlayed > 0 ? Math.round(totalXPEarned / campaign.missionsPlayed) : 0,
+    averageMissionXP: played > 0 ? Math.round(totalXPEarned / played) : 0,
   };
 }
 

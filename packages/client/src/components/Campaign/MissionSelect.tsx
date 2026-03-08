@@ -164,7 +164,7 @@ function CampaignStatsPanel({ campaign }: { campaign: CampaignState }) {
     <div style={{ marginBottom: '16px' }}>
       <h3 style={{ color: '#4a9eff', margin: '0 0 8px 0', fontSize: '14px' }}>Campaign Stats</h3>
       <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
-        <div>Missions: {campaign.missionsPlayed} ({victories}W / {defeats}L)</div>
+        <div>Missions: {campaign.completedMissions.length} ({victories}W / {defeats}L)</div>
         <div>Credits: <span style={{ color: '#ffd700' }}>{campaign.credits}</span></div>
         <div>Threat Level: {campaign.threatLevel}</div>
         <div>Difficulty: {campaign.difficulty}</div>
@@ -1245,9 +1245,9 @@ export default function MissionSelect() {
                       fontWeight: 'bold',
                       marginBottom: '12px',
                     }}>
-                      {selectedMission.difficulty.toUpperCase()} \u2022 Round Limit: {selectedMission.roundLimit}
+                      {selectedMission.difficulty.toUpperCase()} {'\u2022'} Round Limit: {selectedMission.roundLimit}
                       {selectedMission.fogOfWar && (
-                        <span style={{ color: '#6699cc', marginLeft: '8px' }}>\u2022 FOG OF WAR</span>
+                        <span style={{ color: '#6699cc', marginLeft: '8px' }}>{'\u2022'} FOG OF WAR</span>
                       )}
                     </div>
 
